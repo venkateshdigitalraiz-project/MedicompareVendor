@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -13,7 +14,7 @@ class _SalesViewallState extends State<SalesViewall> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.white),
         backgroundColor: const Color(0xff8046f1),
         elevation: 0,
         title: Text(
@@ -21,7 +22,7 @@ class _SalesViewallState extends State<SalesViewall> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -140,9 +141,9 @@ class _SalesViewallState extends State<SalesViewall> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         children: [
@@ -162,7 +163,7 @@ class _SalesViewallState extends State<SalesViewall> {
                   subtitle,
                   style: GoogleFonts.inter(
                     fontSize: 11,
-                    color: const Color(0xff6B7280),
+                    color:AppColors.grey600,
                   ),
                 ),
               ],

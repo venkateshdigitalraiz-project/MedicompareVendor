@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -83,8 +84,8 @@ class _LoginFormState extends State<LoginForm> {
                     onChanged: (value) {
                       setState(() => rememberMe = value!);
                     },
-                    activeColor: const Color(0xFF8B5CF6),
-                    checkColor: Colors.white,
+                    activeColor: AppColors.primary,
+                    checkColor: AppColors.white,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -116,7 +117,7 @@ class _LoginFormState extends State<LoginForm> {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C4DFF),
+                  backgroundColor: AppColors.primaryAccent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -130,7 +131,7 @@ class _LoginFormState extends State<LoginForm> {
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -154,7 +155,7 @@ class _LoginFormState extends State<LoginForm> {
                     "Register Here",
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: const Color(0xFF8B5CF6),
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -178,7 +179,7 @@ class _LoginFormState extends State<LoginForm> {
           hintText: hint,
           hintStyle: const TextStyle(
             fontSize: 13,
-            color: Color(0xFF9CA3AF),
+            color: AppColors.textSecondary,
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
@@ -189,11 +190,11 @@ class _LoginFormState extends State<LoginForm> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),
@@ -211,15 +212,13 @@ class _LoginFormState extends State<LoginForm> {
           hintText: "Enter Your Password",
           hintStyle: const TextStyle(
             fontSize: 13,
-            color: Color(0xFF9CA3AF),
+            color: AppColors.textSecondary,
           ),
           suffixIcon: IconButton(
             icon: Icon(
-              isPasswordVisible
-                  ? Icons.visibility
-                  : Icons.visibility_off,
+              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
               size: 18,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
             onPressed: () {
               setState(() {
@@ -236,11 +235,11 @@ class _LoginFormState extends State<LoginForm> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),

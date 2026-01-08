@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,7 +34,7 @@ class _ReportPageState extends State<ReportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.white),
         backgroundColor: const Color(0xff8046f1),
         elevation: 0,
         title: Text(
@@ -41,7 +42,7 @@ class _ReportPageState extends State<ReportPage> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -101,16 +102,16 @@ class _ReportPageState extends State<ReportPage> {
                       break;
                     default:
                       icon = Icons.info;
-                      iconColor = Colors.grey;
-                      iconBgColor = Colors.grey.withOpacity(0.15);
+                      iconColor = AppColors.grey;
+                      iconBgColor = AppColors.grey.withOpacity(0.15);
                   }
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: const Color(0xFFE5E7EB),
+                        color: AppColors.borderLight,
                         width: 1,
                       ),
                     ),
@@ -144,10 +145,9 @@ class _ReportPageState extends State<ReportPage> {
                           Text(
                             item["title"]!,
                             style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: const Color(0xff6B7280),
-                            ),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.grey600),
                           ),
                         ],
                       ),
@@ -202,9 +202,9 @@ class _ReportPageState extends State<ReportPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,9 +246,9 @@ class _ReportPageState extends State<ReportPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +273,7 @@ class _ReportPageState extends State<ReportPage> {
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xff7C3AED),
+                              color: AppColors.primaryDark,
                             ),
                           ),
                         ),
@@ -326,9 +326,9 @@ class _ReportPageState extends State<ReportPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,7 +344,7 @@ class _ReportPageState extends State<ReportPage> {
                     _topMedicineRow(
                       rank: "1",
                       rankBg: const Color(0xffEDE9FE),
-                      rankColor: const Color(0xff7C3AED),
+                      rankColor: AppColors.primaryDark,
                       title: "Paracetamol 500mg",
                       subtitle: "156 units sold",
                       amount: "\$2,340",
@@ -392,9 +392,9 @@ class _ReportPageState extends State<ReportPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         children: [
@@ -412,10 +412,8 @@ class _ReportPageState extends State<ReportPage> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: const Color(0xff6B7280),
-                  ),
+                  style:
+                      GoogleFonts.inter(fontSize: 11, color: AppColors.grey600),
                 ),
               ],
             ),
@@ -497,7 +495,7 @@ class _ReportPageState extends State<ReportPage> {
           child: LinearProgressIndicator(
             value: value,
             minHeight: 6,
-            backgroundColor: const Color(0xFFE5E7EB),
+            backgroundColor: AppColors.borderLight,
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
@@ -547,10 +545,8 @@ class _ReportPageState extends State<ReportPage> {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: const Color(0xff6B7280),
-                ),
+                style:
+                    GoogleFonts.inter(fontSize: 11, color: AppColors.grey600),
               ),
             ],
           ),
@@ -571,11 +567,11 @@ class _SalesAreaChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xff8B5CF6)
+      ..color = AppColors.primary
       ..style = PaintingStyle.fill;
 
     final strokePaint = Paint()
-      ..color = const Color(0xff7C3AED)
+      ..color = AppColors.primaryDark
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 

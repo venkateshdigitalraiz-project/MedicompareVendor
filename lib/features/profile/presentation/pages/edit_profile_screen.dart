@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -11,7 +12,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
- Country selectedCountry = Country(
+  Country selectedCountry = Country(
     phoneCode: "91",
     countryCode: "IN",
     e164Sc: 0,
@@ -28,10 +29,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -41,7 +42,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
         centerTitle: true,
@@ -89,7 +90,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C4DFF),
+                    backgroundColor: AppColors.primaryAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -100,7 +101,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -126,11 +127,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),
@@ -144,7 +145,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppColors.grey300),
       ),
       child: Row(
         children: [
@@ -171,7 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const Icon(
                   Icons.keyboard_arrow_down,
                   size: 20,
-                  color: Colors.black54,
+                  color: AppColors.black,
                 ),
               ],
             ),
@@ -192,7 +193,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Container(
             width: 1,
             height: 22,
-            color: Colors.grey.shade300,
+            color: AppColors.grey300,
           ),
 
           const SizedBox(width: 10),

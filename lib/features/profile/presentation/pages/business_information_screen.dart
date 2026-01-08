@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:MediCompare/core/constants/app_colors.dart';
 class BusinessInformationScreen extends StatefulWidget {
   const BusinessInformationScreen({super.key});
 
   @override
-  State<BusinessInformationScreen> createState() => _BusinessInformationScreenState();
+  State<BusinessInformationScreen> createState() =>
+      _BusinessInformationScreenState();
 }
 
 class _BusinessInformationScreenState extends State<BusinessInformationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: AppColors.white),
         backgroundColor: const Color(0xff8046f1),
         elevation: 0,
         leading: IconButton(
@@ -27,7 +28,9 @@ class _BusinessInformationScreenState extends State<BusinessInformationScreen> {
         title: Text(
           "Business Information",
           style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: AppColors.white),
         ),
       ),
       body: ListView(
@@ -66,7 +69,7 @@ class _BusinessInformationScreenState extends State<BusinessInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.email),
               title: Text("Business Email",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("apollo@gmail.com",
                   style: GoogleFonts.poppins(
@@ -82,10 +85,10 @@ class _BusinessInformationScreenState extends State<BusinessInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.phone),
               title: Text("Business Contact",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("+91 8973582789",
-                 style: GoogleFonts.poppins(
+                  style: GoogleFonts.poppins(
                       fontSize: 12, fontWeight: FontWeight.w400)),
             ),
           ),
@@ -98,7 +101,7 @@ class _BusinessInformationScreenState extends State<BusinessInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.location_on),
               title: Text("Address",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("Manjeera Majesty, Lulu mall beside, Hyderabad",
                   style: GoogleFonts.poppins(
@@ -114,7 +117,7 @@ class _BusinessInformationScreenState extends State<BusinessInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.category),
               title: Text("Category",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("Medicine",
                   style: GoogleFonts.poppins(

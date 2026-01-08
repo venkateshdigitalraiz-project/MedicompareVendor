@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -85,9 +86,9 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF9FAFB),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.white),
         backgroundColor: Color(0xff8046F1),
         elevation: 0,
         title: Text(
@@ -105,9 +106,9 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xffE5E7EB)),
+                border: Border.all(color: AppColors.borderLight),
               ),
               child: TextField(
                 onChanged: (value) {
@@ -149,7 +150,7 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
                   ? Center(
                       child: Text(
                         "No tickets found",
-                        style: GoogleFonts.inter(color: Colors.grey),
+                        style: GoogleFonts.inter(color: AppColors.grey),
                       ),
                     )
                   : ListView.builder(
@@ -173,15 +174,15 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
                 },
                 icon: const Icon(
                   Icons.add,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
                 label: Text(
                   "Generate New Ticket",
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600, color: Colors.white),
+                      fontWeight: FontWeight.w600, color: AppColors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff7C3AED),
+                  backgroundColor: AppColors.primaryDark,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -200,9 +201,9 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xffE5E7EB)),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,15 +232,15 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xff7C3AED) : Colors.white,
+          color: isSelected ? AppColors.primaryDark : AppColors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xffE5E7EB)),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Text(
           text,
           style: GoogleFonts.inter(
             fontSize: 12,
-            color: isSelected ? Colors.white : Colors.black,
+            color: isSelected ? AppColors.white : AppColors.black,
           ),
         ),
       ),
@@ -268,9 +269,9 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xffE5E7EB)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         children: [
@@ -284,7 +285,7 @@ class _SupportTicketScreenState extends State<SupportTicketScreen> {
                 const SizedBox(height: 4),
                 Text(
                   "$id • $date",
-                  style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
+                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.grey),
                 ),
               ],
             ),

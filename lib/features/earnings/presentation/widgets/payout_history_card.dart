@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 enum PayoutStatus { completed, pending, failed }
@@ -32,11 +33,11 @@ class PayoutHistoryCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -88,8 +89,7 @@ class PayoutHistoryCard extends StatelessWidget {
           _infoRow('Bank Account', bank),
           _infoRow('Settlement Cycle', cycle),
 
-          if (creditedOn != null)
-            _infoRow('Credited On', creditedOn!),
+          if (creditedOn != null) _infoRow('Credited On', creditedOn!),
 
           if (expectedOn != null)
             _infoRow(
@@ -111,10 +111,7 @@ class PayoutHistoryCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF6B7280),
-            ),
+            style: const TextStyle(fontSize: 13, color: AppColors.grey600),
           ),
           Text(
             value,

@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class OrderEarningCard extends StatelessWidget {
@@ -28,11 +29,11 @@ class OrderEarningCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withOpacity(0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -81,10 +82,7 @@ class OrderEarningCard extends StatelessWidget {
           /// Date & Time
           Text(
             dateTime,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF6B7280),
-            ),
+            style: const TextStyle(fontSize: 13, color: AppColors.grey600),
           ),
 
           const SizedBox(height: 14),
@@ -95,7 +93,7 @@ class OrderEarningCard extends StatelessWidget {
               const Icon(
                 Icons.medication_outlined,
                 size: 18,
-                color: Color(0xFF9CA3AF),
+                color: AppColors.textSecondary,
               ),
               const SizedBox(width: 6),
               Text(
@@ -109,10 +107,9 @@ class OrderEarningCard extends StatelessWidget {
               Text(
                 paymentMode,
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF6B7280),
-                ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.grey600),
               ),
             ],
           ),
@@ -149,10 +146,9 @@ class OrderEarningCard extends StatelessWidget {
               Text(
                 'Your Earnings $earnings',
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF7B4EE4),
-                ),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary),
               ),
             ],
           ),

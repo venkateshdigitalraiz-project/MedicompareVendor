@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/payout_filter_tabs.dart';
 import '../widgets/payout_history_card.dart';
@@ -67,18 +68,16 @@ class _PayoutHistoryPageState extends State<PayoutHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final thisMonth =
-        _filteredPayouts.where((e) => e.month == 'this').toList();
-    final lastMonth =
-        _filteredPayouts.where((e) => e.month == 'last').toList();
+    final thisMonth = _filteredPayouts.where((e) => e.month == 'this').toList();
+    final lastMonth = _filteredPayouts.where((e) => e.month == 'last').toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8FF),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7B4EE4),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         title: const Text('Payout History'),
-        leading: const BackButton(color: Colors.white),
+        leading: const BackButton(color: AppColors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

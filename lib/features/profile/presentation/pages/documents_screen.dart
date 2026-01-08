@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 
 class DocumentsScreen extends StatefulWidget {
   const DocumentsScreen({super.key});
@@ -37,9 +38,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xff7C4DFF),
+        backgroundColor: AppColors.primaryAccent,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -47,7 +48,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         title: Text(
           "Documents Screen",
           style: GoogleFonts.inter(
-            color: Colors.white,
+            color: AppColors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -67,7 +68,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-        
               ...uploadedFiles.keys.map(
                 (title) => documentItem(
                   title: title,
@@ -113,21 +113,20 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   child: Container(
                     height: 60,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade400),
+                      border: Border.all(color: AppColors.grey300),
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey.shade100,
+                      color: AppColors.grey300,
                     ),
                     child: Center(
                       child: file == null
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.upload_file,
-                                    color: Colors.grey),
+                                Icon(Icons.upload_file, color: AppColors.grey),
                                 SizedBox(width: 6),
                                 Text(
                                   "Upload Document",
-                                  style: TextStyle(color: Colors.grey),
+                                  style: TextStyle(color: AppColors.grey),
                                 ),
                               ],
                             )

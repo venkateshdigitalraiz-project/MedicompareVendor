@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/order_earning_card.dart';
@@ -8,12 +9,12 @@ class RecentEarningsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8FF),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7B4EE4),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         title: const Text('Recent Earnings'),
-        leading: const BackButton(color: Colors.white),
+        leading: const BackButton(color: AppColors.white),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -39,15 +40,12 @@ class RecentEarningsPage extends StatelessWidget {
                     SizedBox(height: 6),
                     Text(
                       'Medicine orders',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF6B7280),
-                      ),
+                      style: TextStyle(fontSize: 15, color: AppColors.grey600),
                     ),
                   ],
                 ),
                 const Spacer(),
-            
+
                 /// Filter icon
                 IconButton(
                   onPressed: () {
@@ -56,7 +54,7 @@ class RecentEarningsPage extends StatelessWidget {
                   icon: const Icon(
                     Icons.tune,
                     size: 22,
-                    color: Colors.black,
+                    color: AppColors.black,
                   ),
                 ),
               ],

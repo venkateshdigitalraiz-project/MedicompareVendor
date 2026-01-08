@@ -1,8 +1,8 @@
-import 'dart:math';
+import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:file_picker/file_picker.dart';
 
 class BulkUploadPage extends StatefulWidget {
   const BulkUploadPage({super.key});
@@ -46,7 +46,7 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xff8046f1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -56,7 +56,7 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 20,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -93,7 +93,7 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
                 decoration: BoxDecoration(
                   color: const Color(0xff8046F1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Row(
                   children: [
@@ -104,16 +104,18 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
                     const Icon(
                       Icons.file_download_outlined,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 24,
                     ),
-                    SizedBox(width: 20.75,)
+                    SizedBox(
+                      width: 20.75,
+                    )
                   ],
                 ),
               ),
@@ -167,7 +169,7 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
                           onPressed: _uploadCSV,
                           icon: const Icon(
                             Icons.file_upload_outlined,
-                            color: Colors.white,
+                            color: AppColors.white,
                             size: 32,
                           ),
                           label: Text(
@@ -175,7 +177,7 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -208,7 +210,7 @@ class DottedBorderPainter extends CustomPainter {
 
   DottedBorderPainter({
     this.radius = 16,
-    this.color = const Color(0xffE5E7EB),
+    this.color = AppColors.borderLight,
     this.strokeWidth = 2,
     this.dashLength = 10,
     this.gapLength = 6,

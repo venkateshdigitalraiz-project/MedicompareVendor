@@ -1,7 +1,7 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -55,7 +55,6 @@ class _OrdersPageState extends State<OrdersPage> {
       "time": "4:15 PM",
       "tags": ["Antibiotics", "Pain Relief", "Bandages"],
     },
-
     {
       "orderId": "#622318248726487",
       "name": "Suresh Gupta",
@@ -84,26 +83,26 @@ class _OrdersPageState extends State<OrdersPage> {
   Color _statusBgColor(String status) {
     switch (status) {
       case "Confirmed":
-        return const Color(0xFFDBEAFE); // light blue
+        return AppColors.infoBg; // light blue
       case "Pending":
-        return const Color(0xFFFFEDD5); // light orange
+        return AppColors.orangeBg; // light orange
       case "Completed":
-        return const Color(0xFFDCFCE7); // light green
+        return AppColors.successBg; // light green
       default:
-        return const Color(0xFFF3F4F6); // grey
+        return AppColors.neutralBg; // grey
     }
   }
 
   Color _statusTextColor(String status) {
     switch (status) {
       case "Confirmed":
-        return const Color(0xFF2563EB); // blue
+        return AppColors.info; // blue
       case "Pending":
-        return const Color(0xFFEA580C); // orange
+        return AppColors.orange; // orange
       case "Completed":
-        return const Color(0xFF16A34A); // green
+        return AppColors.successDark; // green
       default:
-        return const Color(0xFF374151);
+        return AppColors.textPrimarySoft;
     }
   }
 
@@ -114,13 +113,11 @@ class _OrdersPageState extends State<OrdersPage> {
 
     // STATUS FILTER
     if (selectedStatus == "Active") {
-      filtered = filtered
-          .where((order) => order["status"] == "Confirmed")
-          .toList();
+      filtered =
+          filtered.where((order) => order["status"] == "Confirmed").toList();
     } else if (selectedStatus != "All") {
-      filtered = filtered
-          .where((order) => order["status"] == selectedStatus)
-          .toList();
+      filtered =
+          filtered.where((order) => order["status"] == selectedStatus).toList();
     }
 
     // SEARCH FILTER
@@ -140,10 +137,10 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -153,11 +150,10 @@ class _OrdersPageState extends State<OrdersPage> {
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
@@ -198,8 +194,8 @@ class _OrdersPageState extends State<OrdersPage> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF000000)
-                              : const Color(0xFFF3F4F6),
+                              ? AppColors.black
+                              : AppColors.neutralBg,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -207,7 +203,8 @@ class _OrdersPageState extends State<OrdersPage> {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: isSelected ? Colors.white : Colors.black,
+                            color:
+                                isSelected ? AppColors.white : AppColors.black,
                           ),
                         ),
                       ),
@@ -223,7 +220,6 @@ class _OrdersPageState extends State<OrdersPage> {
             Expanded(
               child: ListView.builder(
                 itemCount: _filteredOrders.length,
-
                 itemBuilder: (context, index) {
                   final order = _filteredOrders[index];
 
@@ -231,21 +227,20 @@ class _OrdersPageState extends State<OrdersPage> {
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: const Color(0xFFE5E7EB), // light grey border
+                        color: AppColors.borderLight, // light grey border
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: AppColors.black.withOpacity(0.03),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -315,10 +310,9 @@ class _OrdersPageState extends State<OrdersPage> {
                         Text(
                           order["email"],
                           style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff6B7280),
-                          ),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.grey600),
                         ),
 
                         const SizedBox(height: 4),
@@ -327,10 +321,9 @@ class _OrdersPageState extends State<OrdersPage> {
                         Text(
                           "${order["phone"]} • ${order["city"]}",
                           style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff6B7280),
-                          ),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.grey600),
                         ),
 
                         const SizedBox(height: 10),
@@ -353,7 +346,7 @@ class _OrdersPageState extends State<OrdersPage> {
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF7C3AED),
+                                  color: AppColors.primaryDark,
                                 ),
                               ),
                             );
@@ -368,16 +361,15 @@ class _OrdersPageState extends State<OrdersPage> {
                             const Icon(
                               Icons.calendar_today,
                               size: 14,
-                              color: Colors.grey,
+                              color: AppColors.grey,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               "${order["date"]} • ${order["time"]}",
                               style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff6B7280),
-                              ),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.grey600),
                             ),
                           ],
                         ),
@@ -390,9 +382,6 @@ class _OrdersPageState extends State<OrdersPage> {
                 },
               ),
             ),
-            
-            
-           
           ],
         ),
       ),
@@ -413,9 +402,10 @@ class _OrdersPageState extends State<OrdersPage> {
         keyboardType: keyboardType,
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, size: 20, color: const Color(0xFF9CA3AF)),
+          prefixIcon: Icon(icon, size: 20, color: AppColors.textSecondary),
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          hintStyle:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 14,
@@ -423,11 +413,11 @@ class _OrdersPageState extends State<OrdersPage> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),

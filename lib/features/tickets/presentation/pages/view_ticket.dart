@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,10 +20,10 @@ class _ViewTicketState extends State<ViewTicket> {
     return Scaffold(
       backgroundColor: Color(0xffFFFFFF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -32,7 +33,7 @@ class _ViewTicketState extends State<ViewTicket> {
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -88,12 +89,12 @@ class _ViewTicketState extends State<ViewTicket> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                  border: Border.all(color: AppColors.borderLight, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: AppColors.black.withOpacity(0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -141,7 +142,7 @@ class _ViewTicketState extends State<ViewTicket> {
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF7C3AED),
+              color: AppColors.primaryDark,
             ),
           ),
         ),

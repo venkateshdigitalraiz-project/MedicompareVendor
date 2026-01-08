@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,10 +48,10 @@ class _TicketPageState extends State<TicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -60,7 +61,7 @@ class _TicketPageState extends State<TicketPage> {
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -93,7 +94,7 @@ class _TicketPageState extends State<TicketPage> {
                   context.push('/generate-ticket');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
+                  backgroundColor: AppColors.primaryDark,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -103,7 +104,7 @@ class _TicketPageState extends State<TicketPage> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -145,12 +146,12 @@ class _TicketPageState extends State<TicketPage> {
       height: 95,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: AppColors.black.withOpacity(0.03),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -181,7 +182,7 @@ class _TicketPageState extends State<TicketPage> {
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w300,
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.grey600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -202,7 +203,7 @@ class _TicketPageState extends State<TicketPage> {
                   style: GoogleFonts.inter(
                     fontSize: 9,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF9CA3AF),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],

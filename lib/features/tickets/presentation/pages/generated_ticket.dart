@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,12 +14,12 @@ class _GeneratedTicketState extends State<GeneratedTicket> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor:  AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -28,7 +29,7 @@ class _GeneratedTicketState extends State<GeneratedTicket> {
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -51,8 +52,7 @@ class _GeneratedTicketState extends State<GeneratedTicket> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 41),
-                    Image.asset("assets/viewticket.png",
-                        height: 69, width: 69),
+                    Image.asset("assets/viewticket.png", height: 69, width: 69),
                     const SizedBox(height: 26),
                     Text(
                       "Your Ticket Has been\nGenerated!",
@@ -91,7 +91,7 @@ class _GeneratedTicketState extends State<GeneratedTicket> {
                   context.push('/view-ticket');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
+                  backgroundColor:  AppColors.primaryDark,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -101,7 +101,7 @@ class _GeneratedTicketState extends State<GeneratedTicket> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),

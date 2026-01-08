@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -10,12 +11,11 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
- bool isPasswordVisible = false;
+  bool isPasswordVisible = false;
 
   final TextEditingController currentPasswordController =
       TextEditingController();
-  final TextEditingController newPasswordController =
-      TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
 
   bool isButtonEnabled = false;
 
@@ -28,8 +28,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   void _validateFields() {
     setState(() {
-      isButtonEnabled =
-          currentPasswordController.text.isNotEmpty &&
+      isButtonEnabled = currentPasswordController.text.isNotEmpty &&
           newPasswordController.text.isNotEmpty;
     });
   }
@@ -45,10 +44,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -58,7 +57,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
         centerTitle: true,
@@ -69,7 +68,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 33),
-
             Text(
               "Enter first enter the current password and then your new password.",
               style: GoogleFonts.poppins(
@@ -77,23 +75,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-
             const SizedBox(height: 20),
-
             _passwordField(
               hint: "Current Password",
               controller: currentPasswordController,
             ),
-
             const SizedBox(height: 6),
-
             _passwordField(
               hint: "New Password",
               controller: newPasswordController,
             ),
-
             const Spacer(),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(
@@ -102,8 +94,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isButtonEnabled
-                        ? const Color(0xFF7C4DFF)
-                        : Colors.grey.shade400,
+                        ? AppColors.primaryAccent
+                        : AppColors.grey300,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -118,13 +110,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
               ),
             ),
-
             const SizedBox(height: 30),
           ],
         ),
@@ -146,11 +137,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           hintText: hint,
           suffixIcon: IconButton(
             icon: Icon(
-              isPasswordVisible
-                  ? Icons.visibility
-                  : Icons.visibility_off,
+              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
               size: 18,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
             onPressed: () {
               setState(() {
@@ -163,10 +152,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: BorderSide(color: AppColors.primary),
           ),
         ),
       ),

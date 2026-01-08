@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 enum PayoutFilter { all, completed, pending, failed }
@@ -17,7 +18,7 @@ class PayoutFilterTabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
@@ -47,10 +48,9 @@ class PayoutFilterTabs extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : const Color(0xFF6B7280),
-            ),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.white : AppColors.grey600),
           ),
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class EarningsStatCard extends StatelessWidget {
@@ -23,11 +24,11 @@ class EarningsStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -82,7 +83,7 @@ class EarningsStatCard extends StatelessWidget {
             subtitle,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF9CA3AF),
+              color: AppColors.textSecondary,
               height: 1.4,
             ),
           ),

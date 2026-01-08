@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-
+import 'package:MediCompare/core/constants/app_colors.dart';
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
 
@@ -14,14 +13,14 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
 
       /// APP BAR
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor:  AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -31,7 +30,7 @@ class _NotificationPageState extends State<NotificationPage> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
         centerTitle: true,
@@ -43,14 +42,13 @@ class _NotificationPageState extends State<NotificationPage> {
         children: const [
           NotificationTile(
             iconBg: Color(0xFFEDE9FE),
-            iconColor: Color(0xFF7C3AED),
+            iconColor: AppColors.primaryDark,
             icon: Icons.inventory_2_outlined,
             title: "New Delivery Assigned!",
             subtitle: "Order #MC2345 assigned to you...",
             date: "24 Mar 2025",
             time: "12:00PM",
           ),
-
           NotificationTile(
             iconBg: Color(0xFFFEF3C7),
             iconColor: Color(0xFFF59E0B),
@@ -60,7 +58,6 @@ class _NotificationPageState extends State<NotificationPage> {
             date: "24 Mar 2025",
             time: "12:00PM",
           ),
-
           NotificationTile(
             iconBg: Color(0xFFDBEAFE),
             iconColor: Color(0xFF3B82F6),
@@ -70,7 +67,6 @@ class _NotificationPageState extends State<NotificationPage> {
             date: "24 Mar 2025",
             time: "12:00PM",
           ),
-
           NotificationTile(
             iconBg: Color(0xFFE0F2FE),
             iconColor: Color(0xFF0284C7),
@@ -142,10 +138,9 @@ class NotificationTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Color(0xff000000),
-                    fontWeight: FontWeight.w400
-                  ),
+                      fontSize: 14,
+                      color: Color(0xff000000),
+                      fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -157,18 +152,14 @@ class NotificationTile extends StatelessWidget {
             children: [
               Text(
                 date,
-                style: GoogleFonts.poppins(
-                  fontSize: 8,
-                  color: Color(0xff969AA4)
-                ),
+                style:
+                    GoogleFonts.poppins(fontSize: 8, color: Color(0xff969AA4)),
               ),
               const SizedBox(height: 2),
               Text(
                 time,
-                 style: GoogleFonts.poppins(
-                  fontSize: 8,
-                  color: Color(0xff969AA4)
-                ),
+                style:
+                    GoogleFonts.poppins(fontSize: 8, color: Color(0xff969AA4)),
               ),
             ],
           ),

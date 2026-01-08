@@ -143,41 +143,40 @@ class _RegisterationPageState extends State<RegistrationPage> {
                           agreeToTerms = value!;
                         });
                       },
-                      activeColor: const Color(0xFF8B5CF6),
-                      checkColor: Colors.white,
+                      activeColor: AppColors.primary,
+                      checkColor: AppColors.white,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-  child: RichText(
-    text: TextSpan(
-      style: GoogleFonts.poppins(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: Colors.black, // default text color
-      ),
-      children: [
-        const TextSpan(text: "I Agree to the "),
-        TextSpan(
-          text: "Terms & Conditions",
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const TextSpan(text: " and "),
-        TextSpan(
-          text: "Privacy Policy",
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    ),
-  ),
-),
-
+                    child: RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.black, // default text color
+                        ),
+                        children: [
+                          const TextSpan(text: "I Agree to the "),
+                          TextSpan(
+                            text: "Terms & Conditions",
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const TextSpan(text: " and "),
+                          TextSpan(
+                            text: "Privacy Policy",
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 22),
@@ -186,7 +185,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C4DFF),
+                    backgroundColor: AppColors.primaryAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -199,7 +198,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -214,13 +213,13 @@ class _RegisterationPageState extends State<RegistrationPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                     context.pop();// ✅ Go back to Login page
+                      context.pop(); // ✅ Go back to Login page
                     },
                     child: Text(
                       "Log In",
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: const Color(0xFF8B5CF6),
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -246,9 +245,10 @@ class _RegisterationPageState extends State<RegistrationPage> {
       child: TextField(
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, size: 20, color: const Color(0xFF9CA3AF)),
+          prefixIcon: Icon(icon, size: 20, color: AppColors.textSecondary),
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          hintStyle:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 14,
@@ -256,11 +256,11 @@ class _RegisterationPageState extends State<RegistrationPage> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),
@@ -279,12 +279,13 @@ class _RegisterationPageState extends State<RegistrationPage> {
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          hintStyle:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           suffixIcon: IconButton(
             icon: Icon(
               isPasswordVisible ? Icons.visibility : Icons.visibility_off,
               size: 18,
-              color: Colors.grey,
+              color: AppColors.grey300,
             ),
             onPressed: () {
               setState(() {
@@ -299,11 +300,11 @@ class _RegisterationPageState extends State<RegistrationPage> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),
@@ -322,14 +323,15 @@ class _RegisterationPageState extends State<RegistrationPage> {
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          hintStyle:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           suffixIcon: IconButton(
             icon: Icon(
               isconfirmPasswordVisible
                   ? Icons.visibility
                   : Icons.visibility_off,
               size: 18,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
             onPressed: () {
               setState(() {
@@ -344,11 +346,11 @@ class _RegisterationPageState extends State<RegistrationPage> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),

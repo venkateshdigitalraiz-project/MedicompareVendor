@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -49,9 +50,9 @@ class _LowStockPageState extends State<LowStockPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-      iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: AppColors.white),
         backgroundColor: const Color(0xff8046f1),
         elevation: 0,
         title: Text(
@@ -59,7 +60,7 @@ class _LowStockPageState extends State<LowStockPage> {
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 20,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
         // Inside AppBar actions
@@ -124,12 +125,12 @@ class _LowStockPageState extends State<LowStockPage> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: AppColors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.tune,
-                  color: Colors.white,
+                  color: AppColors.white,
                   size: 22,
                 ),
               ),
@@ -248,11 +249,11 @@ class _LowStockPageState extends State<LowStockPage> {
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: AppColors.black.withOpacity(0.08),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -284,10 +285,9 @@ class _LowStockPageState extends State<LowStockPage> {
                                 Text(
                                   medicine['type']!,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: const Color(0xff6B7280),
-                                  ),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.grey600),
                                 ),
                               ],
                             ),
@@ -334,7 +334,7 @@ class _LowStockPageState extends State<LowStockPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xffF9FAFB),
+                            color: AppColors.backgroundLight,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Column(
@@ -404,7 +404,7 @@ class _LowStockPageState extends State<LowStockPage> {
                               backgroundColor: isCritical
                                   ? Colors.red
                                   : const Color(0xffF59E0B),
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -429,7 +429,6 @@ class _LowStockPageState extends State<LowStockPage> {
         Overlay.of(context).context.findRenderObject() as RenderBox;
 
     showMenu(
-      
       context: context,
       position: RelativeRect.fromRect(
         Rect.fromLTWH(offset.dx, offset.dy, 0, 0), // position of the menu

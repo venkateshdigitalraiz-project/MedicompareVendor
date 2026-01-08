@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,14 +14,14 @@ class _DocumentsUploadState extends State<DocumentsUpload> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF9FAFB),
+      backgroundColor: AppColors.backgroundLight,
 
       // AppBar
       appBar: AppBar(
-        backgroundColor: const Color(0xff7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -28,7 +29,7 @@ class _DocumentsUploadState extends State<DocumentsUpload> {
         title: Text(
           "Documents",
           style: GoogleFonts.inter(
-            color: Colors.white,
+            color: AppColors.white,
             fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
@@ -81,7 +82,7 @@ class _DocumentsUploadState extends State<DocumentsUpload> {
                   context.go('/bank-info-upload');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff7C3AED),
+                  backgroundColor: AppColors.primaryDark,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -92,7 +93,7 @@ class _DocumentsUploadState extends State<DocumentsUpload> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -130,9 +131,9 @@ Widget documentUploadTile({required String title}) {
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xffE5E7EB)),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Row(
           children: [
@@ -140,13 +141,13 @@ Widget documentUploadTile({required String title}) {
               "Upload File",
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: const Color(0xff9CA3AF),
+                color: AppColors.textSecondary,
               ),
             ),
             const Spacer(),
             const Icon(
               Icons.upload_file,
-              color: Color(0xff7C3AED),
+              color: AppColors.primaryDark,
               size: 20,
             ),
           ],

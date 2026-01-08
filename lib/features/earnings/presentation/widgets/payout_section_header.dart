@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class PayoutSectionHeader extends StatelessWidget {
@@ -24,10 +25,7 @@ class PayoutSectionHeader extends StatelessWidget {
         ),
         Text(
           amount,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF6B7280),
-          ),
+          style: const TextStyle(fontSize: 13, color: AppColors.grey600),
         ),
       ],
     );

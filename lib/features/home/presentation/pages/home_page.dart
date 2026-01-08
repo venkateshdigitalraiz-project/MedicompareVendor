@@ -56,9 +56,9 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Hi, Arun",
-                  style: AppText.title.copyWith(color: Colors.white)),
+                  style: AppText.title.copyWith(color: AppColors.white)),
               Text(currentDate,
-                  style: AppText.small.copyWith(color: Colors.white70)),
+                  style: AppText.small.copyWith(color: AppColors.white)),
             ],
           ),
         ),
@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               IconButton(
                 icon: const Icon(Icons.support_agent), // or settings
-                color: Colors.white,
+                color: AppColors.white,
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
 
@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
               ),
               IconButton(
                 icon: const Icon(Icons.notifications),
-                color: Colors.white,
+                color: AppColors.white,
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
                 onPressed: () {

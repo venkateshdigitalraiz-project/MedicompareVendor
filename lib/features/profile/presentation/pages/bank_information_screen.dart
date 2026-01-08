@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:MediCompare/core/constants/app_colors.dart';
 class BankInformationScreen extends StatefulWidget {
   const BankInformationScreen({super.key});
 
@@ -10,12 +10,12 @@ class BankInformationScreen extends StatefulWidget {
 }
 
 class _BankInformationScreenState extends State<BankInformationScreen> {
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: AppColors.white),
         backgroundColor: const Color(0xff8046f1),
         elevation: 0,
         leading: IconButton(
@@ -27,7 +27,9 @@ class _BankInformationScreenState extends State<BankInformationScreen> {
         title: Text(
           "Banking Information",
           style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: AppColors.white),
         ),
       ),
       body: ListView(
@@ -62,7 +64,7 @@ class _BankInformationScreenState extends State<BankInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.card_giftcard),
               title: Text("Account Number",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("××××××××× 4769",
                   style: GoogleFonts.poppins(
@@ -76,10 +78,10 @@ class _BankInformationScreenState extends State<BankInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.code),
               title: Text("IFSC Code",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("HDFC100243C",
-                 style: GoogleFonts.poppins(
+                  style: GoogleFonts.poppins(
                       fontSize: 12, fontWeight: FontWeight.w400)),
             ),
           ),
@@ -90,7 +92,7 @@ class _BankInformationScreenState extends State<BankInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.account_balance),
               title: Text("Bank Name",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("HDFC Bank",
                   style: GoogleFonts.poppins(
@@ -104,7 +106,7 @@ class _BankInformationScreenState extends State<BankInformationScreen> {
             child: ListTile(
               leading: const Icon(Icons.location_city_rounded),
               title: Text("Branch",
-                 style: GoogleFonts.inter(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w400)),
               subtitle: Text("HDFC Bank, Kukatpally, Hyderabad",
                   style: GoogleFonts.poppins(

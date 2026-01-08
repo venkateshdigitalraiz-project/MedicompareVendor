@@ -1,7 +1,8 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:file_picker/file_picker.dart';
 
 class VendorOnboardingScreen extends StatefulWidget {
   const VendorOnboardingScreen({super.key});
@@ -147,7 +148,7 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C4DFF),
+                    backgroundColor: AppColors.primaryAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -160,7 +161,7 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -180,7 +181,8 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          hintStyle:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 14,
@@ -188,11 +190,11 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),
@@ -206,7 +208,7 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           alignment: Alignment.centerLeft,
-          side: BorderSide(color: Colors.grey.shade300),
+          side: BorderSide(color: AppColors.grey),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -227,8 +229,8 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: uploadedFileName == null
-                      ? const Color(0xFF9CA3AF)
-                      : Colors.black,
+                      ? AppColors.textSecondary
+                      : AppColors.black,
                 ),
               ),
             ),

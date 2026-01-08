@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,11 +24,11 @@ class PayoutDetailsCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.black.withOpacity(0.05),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -45,10 +46,8 @@ class PayoutDetailsCard extends StatelessWidget {
                       color: const Color(0xFFF1EBFF),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.account_balance,
-                      color: Color(0xFF7B4EE4),
-                    ),
+                    child: const Icon(Icons.account_balance,
+                        color: AppColors.primary),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -64,10 +63,8 @@ class PayoutDetailsCard extends StatelessWidget {
                       SizedBox(height: 4),
                       Text(
                         'Account: ••••••6789',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
-                        ),
+                        style:
+                            TextStyle(fontSize: 13, color: AppColors.grey600),
                       ),
                     ],
                   ),
@@ -82,10 +79,7 @@ class PayoutDetailsCard extends StatelessWidget {
                 children: const [
                   Text(
                     'Settlement Cycle',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 14, color: AppColors.grey600),
                   ),
                   Text(
                     'T+2 Days',
@@ -105,10 +99,7 @@ class PayoutDetailsCard extends StatelessWidget {
                 children: const [
                   Text(
                     'Next Payout Date',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 14, color: AppColors.grey600),
                   ),
                   Text(
                     'Jan 08, 2026',
@@ -128,7 +119,7 @@ class PayoutDetailsCard extends StatelessWidget {
                 height: 48,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B4EE4),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -142,7 +133,7 @@ class PayoutDetailsCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                 ),

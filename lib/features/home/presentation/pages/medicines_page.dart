@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
@@ -47,7 +48,6 @@ class _MedicinesPageState extends State<MedicinesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xffFFFFFF),
-
       appBar: AppBar(
         backgroundColor: const Color(0xff8046f1),
         foregroundColor: Color(0xffFFFFFF),
@@ -56,7 +56,7 @@ class _MedicinesPageState extends State<MedicinesPage> {
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 20,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -94,9 +94,9 @@ class _MedicinesPageState extends State<MedicinesPage> {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    border: Border.all(color: AppColors.borderLight),
                   ),
                   child: Row(
                     children: [

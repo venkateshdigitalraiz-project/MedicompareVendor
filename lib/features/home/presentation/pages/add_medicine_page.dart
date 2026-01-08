@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -75,7 +76,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
       appBar: AppBar(
         backgroundColor: const Color(0xff8046f1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -85,11 +86,10 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 20,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SingleChildScrollView(
@@ -108,7 +108,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
               const SizedBox(height: 5),
               Text(
                 "Please provide accurate information for the medicine",
-                style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                style: GoogleFonts.inter(fontSize: 12, color: AppColors.grey),
               ),
 
               const SizedBox(height: 29),
@@ -125,13 +125,12 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                   hintText: "Ex: Ibuprofen, paracetamol",
                   hintStyle: GoogleFonts.inter(
                     fontSize: 14,
-                    color: Colors.grey,
+                    color: AppColors.grey,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 16,
                   ),
-
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -141,7 +140,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                           child: const Icon(
                             Icons.close,
                             size: 18,
-                            color: Colors.grey,
+                            color: AppColors.grey,
                           ),
                         ),
                       const SizedBox(width: 8),
@@ -150,13 +149,12 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                         child: const Icon(
                           Icons.keyboard_arrow_down,
                           size: 24,
-                          color: Colors.grey,
+                          color: AppColors.grey,
                         ),
                       ),
                       const SizedBox(width: 8),
                     ],
                   ),
-
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(color: Color(0xffE5E7EB)),
@@ -199,7 +197,6 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        
                         Text(
                           "Variant Name",
                           style: GoogleFonts.inter(
@@ -265,7 +262,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                               border: Border.all(
                                 color: isInStock
                                     ? const Color(0xFF095D28)
-                                    : const Color(0xFFE5E7EB),
+                                    : AppColors.borderLight,
                               ),
                             ),
                             child: Row(
@@ -281,7 +278,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                                   child: const Icon(
                                     Icons.check,
                                     size: 12,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -289,7 +286,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                                   "In stock",
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -320,7 +317,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                               border: Border.all(
                                 color: !isInStock
                                     ? const Color(0xFFF7B2B2)
-                                    : const Color(0xFFE5E7EB),
+                                    : AppColors.borderLight,
                               ),
                             ),
                             child: Row(
@@ -332,13 +329,13 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                                   decoration: BoxDecoration(
                                     color: !isInStock
                                         ? const Color(0xFFEF4444)
-                                        : const Color(0xFFE5E7EB),
+                                        : AppColors.borderLight,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
                                     Icons.close,
                                     size: 12,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -378,7 +375,6 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                       
                         Text(
                           "Variant Name",
                           style: GoogleFonts.inter(
@@ -444,7 +440,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                               border: Border.all(
                                 color: isInStock
                                     ? const Color(0xFF095D28)
-                                    : const Color(0xFFE5E7EB),
+                                    : AppColors.borderLight,
                               ),
                             ),
                             child: Row(
@@ -460,7 +456,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                                   child: const Icon(
                                     Icons.check,
                                     size: 12,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -468,7 +464,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                                   "In stock",
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -499,7 +495,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                               border: Border.all(
                                 color: !isInStock
                                     ? const Color(0xFFF7B2B2)
-                                    : const Color(0xFFE5E7EB),
+                                    : AppColors.borderLight,
                               ),
                             ),
                             child: Row(
@@ -511,13 +507,13 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                                   decoration: BoxDecoration(
                                     color: !isInStock
                                         ? const Color(0xFFEF4444)
-                                        : const Color(0xFFE5E7EB),
+                                        : AppColors.borderLight,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
                                     Icons.close,
                                     size: 12,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -547,15 +543,15 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7C3AED), // Purple
+                      color: AppColors.primaryDark, // Purple
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                      icon: const Icon(Icons.add,
+                          color: AppColors.white, size: 20),
                       onPressed: () {
                         // Add variant action
-                        
                       },
                     ),
                   ),
@@ -592,8 +588,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                   /// ADD MEDICINE
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                      },
+                      onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xff8046f1),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -604,7 +599,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                       child: Text(
                         "Add Medicine",
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -627,7 +622,8 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+          hintStyle:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 14,
@@ -635,11 +631,11 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),

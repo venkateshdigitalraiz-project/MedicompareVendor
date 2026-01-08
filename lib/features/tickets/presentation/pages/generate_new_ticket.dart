@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 
 class GenerateNewTicket extends StatefulWidget {
   const GenerateNewTicket({super.key});
@@ -13,14 +14,14 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
 
       /// APP BAR
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -30,7 +31,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -43,8 +44,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
           children: [
             const SizedBox(height: 29),
 
-            Image.asset("assets/generateticketicon.png",
-                height: 84, width: 84),
+            Image.asset("assets/generateticketicon.png", height: 84, width: 84),
 
             const SizedBox(height: 31),
 
@@ -63,7 +63,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xff8A8A8F),
+                color: AppColors.grey500,
               ),
               textAlign: TextAlign.center,
             ),
@@ -98,7 +98,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
                   context.push('/generated-ticket');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
+                  backgroundColor: AppColors.primaryDark,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -109,7 +109,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -133,7 +133,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
           hintStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF9CA3AF),
+            color: AppColors.textSecondary,
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
@@ -142,11 +142,11 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),
@@ -168,7 +168,7 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
           hintStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF9CA3AF),
+            color: AppColors.textSecondary,
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
@@ -177,11 +177,11 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
         ),
       ),

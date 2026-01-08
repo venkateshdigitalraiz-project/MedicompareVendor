@@ -1,10 +1,11 @@
-import 'package:MediCompare/features/earnings/presentation/pages/recent_earnings_page.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/payout_details_card.dart';
+
 import '../widgets/earnings_chart.dart';
 import '../widgets/earnings_stat_card.dart';
 import '../widgets/order_earning_card.dart';
+import '../widgets/payout_details_card.dart';
 
 class EarningsPage extends StatelessWidget {
   const EarningsPage({super.key});
@@ -12,12 +13,12 @@ class EarningsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8FF),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7B4EE4),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         title: const Text('Earnings'),
-        leading: const BackButton(color: Colors.white),
+        leading: const BackButton(color: AppColors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -57,13 +58,12 @@ class EarningsPage extends StatelessWidget {
                   iconColor: Color(0xFFD97706),
                 ),
                 EarningsStatCard(
-                  title: 'Settled Amount',
-                  amount: '₹20,760',
-                  subtitle: 'Transferred to bank',
-                  color: Color(0xFFF1EBFF),
-                  icon: Icons.check_circle_rounded,
-                  iconColor: Color(0xFF7B4EE4),
-                ),
+                    title: 'Settled Amount',
+                    amount: '₹20,760',
+                    subtitle: 'Transferred to bank',
+                    color: Color(0xFFF1EBFF),
+                    icon: Icons.check_circle_rounded,
+                    iconColor: AppColors.primary),
               ],
             ),
             const SizedBox(height: 24),
@@ -105,7 +105,7 @@ class EarningsPage extends StatelessWidget {
                   child: const Text(
                     'View All',
                     style: TextStyle(
-                      color: Color(0xFF7B4EE4),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

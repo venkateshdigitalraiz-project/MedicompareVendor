@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../constants/app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -29,7 +30,7 @@ class PrimaryButton extends StatelessWidget {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),

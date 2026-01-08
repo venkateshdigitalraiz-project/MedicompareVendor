@@ -1,3 +1,4 @@
+import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,14 +14,14 @@ class _BankInformationUploadState extends State<BankInformationUpload> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF9FAFB),
+      backgroundColor: AppColors.backgroundLight,
 
       // AppBar
       appBar: AppBar(
-        backgroundColor: const Color(0xff7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -28,7 +29,7 @@ class _BankInformationUploadState extends State<BankInformationUpload> {
         title: Text(
           "Banking Information",
           style: GoogleFonts.inter(
-            color: Colors.white,
+            color: AppColors.white,
             fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
@@ -93,7 +94,7 @@ class _BankInformationUploadState extends State<BankInformationUpload> {
                   context.go('/bottom-nav');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff7C3AED),
+                  backgroundColor: AppColors.primaryDark,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -104,7 +105,7 @@ class _BankInformationUploadState extends State<BankInformationUpload> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -125,9 +126,9 @@ Widget bankingInputField({
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.white,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: const Color(0xffE5E7EB)),
+      border: Border.all(color: AppColors.borderLight),
     ),
     child: TextField(
       keyboardType: keyboardType,
@@ -136,12 +137,12 @@ Widget bankingInputField({
         icon: Icon(
           icon,
           size: 18,
-          color: const Color(0xff9CA3AF),
+          color: AppColors.textSecondary,
         ),
         hintText: hint,
         hintStyle: GoogleFonts.inter(
           fontSize: 13,
-          color: const Color(0xff9CA3AF),
+          color: AppColors.textSecondary,
         ),
         border: InputBorder.none,
       ),

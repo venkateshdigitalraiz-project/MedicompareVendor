@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 
 class MainprofileScreen extends StatefulWidget {
   const MainprofileScreen({super.key});
@@ -63,12 +64,12 @@ class _ProfilePageState extends State<MainprofileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () {
             context.pop();
           },
@@ -78,7 +79,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),
@@ -99,7 +100,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 42,
-                        backgroundColor: const Color(0xFF7C3AED),
+                        backgroundColor: AppColors.primaryDark,
                         child: CircleAvatar(
                           radius: 39,
                           backgroundImage: _profileImage != null
@@ -112,7 +113,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                         onTap: _showImagePicker,
                         child: const CircleAvatar(
                           radius: 14,
-                          backgroundColor: Colors.white,
+                          backgroundColor: AppColors.white,
                           child: Icon(Icons.camera_alt, size: 16),
                         ),
                       ),
@@ -177,11 +178,11 @@ class _ProfilePageState extends State<MainprofileScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                icon: const Icon(Icons.logout, color: Colors.white),
+                icon: const Icon(Icons.logout, color: AppColors.white),
                 label: Text(
                   "Log Out",
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -209,17 +210,17 @@ class _ProfilePageState extends State<MainprofileScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xFF7C3AED)),
+              Icon(icon, color: AppColors.primaryDark),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(title, style: GoogleFonts.inter(fontSize: 14)),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF7C3AED)),
+              const Icon(Icons.chevron_right, color: AppColors.primaryDark),
             ],
           ),
         ),
@@ -233,7 +234,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF7C3AED)),
+          Icon(icon, size: 14, color: AppColors.primaryDark),
           const SizedBox(width: 6),
           Text(text, style: GoogleFonts.inter(fontSize: 12)),
         ],
