@@ -21,7 +21,9 @@ class _GenerateNewTicketState extends State<GenerateNewTicket> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            context.pop();
+          },
         ),
         title: Text(
           "Generate Ticket",

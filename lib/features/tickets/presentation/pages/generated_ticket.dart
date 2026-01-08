@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:MediCompare/features/tickets/presentation/pages/view_ticket.dart';
 
 class GeneratedTicket extends StatefulWidget {
   const GeneratedTicket({super.key});
@@ -20,7 +19,9 @@ class _GeneratedTicketState extends State<GeneratedTicket> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            context.pop();
+          },
         ),
         title: Text(
           "Ticket",

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -46,7 +47,9 @@ class _BulkUploadPageState extends State<BulkUploadPage> {
         backgroundColor: const Color(0xff8046f1),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            context.pop();
+          },
         ),
         title: Text(
           "Upload Medicines",

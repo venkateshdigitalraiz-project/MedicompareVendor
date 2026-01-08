@@ -1,5 +1,6 @@
 import 'package:MediCompare/features/earnings/presentation/pages/recent_earnings_page.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/payout_details_card.dart';
 import '../widgets/earnings_chart.dart';
 import '../widgets/earnings_stat_card.dart';
@@ -99,12 +100,7 @@ class EarningsPage extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const RecentEarningsPage(),
-                      ),
-                    );
+                    context.push('/recent-earnings');
                   },
                   child: const Text(
                     'View All',

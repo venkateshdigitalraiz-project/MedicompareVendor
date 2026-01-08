@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
@@ -80,7 +81,7 @@ class _ForgetPasswordState extends State<ForgetPasswordPage> {
             SizedBox(height: 17),
             TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // ✅ Go back to Login page
+                      context.pop();// ✅ Go back to Login page
                     },
                     child: Center(
                       child: Text(

@@ -1,5 +1,5 @@
-import 'package:MediCompare/features/earnings/presentation/pages/payout_history_page.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PayoutDetailsCard extends StatelessWidget {
   const PayoutDetailsCard({super.key});
@@ -135,12 +135,7 @@ class PayoutDetailsCard extends StatelessWidget {
                     elevation: 0,
                   ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PayoutHistoryPage(),
-                      ),
-                    );
+                    context.push('/payout-history');
                   },
                   child: const Text(
                     'View Payout History',

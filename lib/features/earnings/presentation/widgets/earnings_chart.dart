@@ -14,31 +14,6 @@ class EarningsChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Header: Title + Filter icon
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     const Text(
-          //       'Earnings\nOverview',
-          //       style: TextStyle(
-          //         fontSize: 18,
-          //         fontWeight: FontWeight.w700,
-          //         height: 1.3,
-          //       ),
-          //     ),
-          //     IconButton(
-          //       onPressed: () {
-          //         // filter action later
-          //       },
-          //       icon: const Icon(
-          //         Icons.tune,
-          //         color: Colors.black,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-
-          const SizedBox(height: 12),
 
           /// Chart Image
           ClipRRect(

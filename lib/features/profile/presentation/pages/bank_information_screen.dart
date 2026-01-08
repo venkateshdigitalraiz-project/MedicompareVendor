@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class BankInformationScreen extends StatefulWidget {
@@ -19,7 +20,9 @@ class _BankInformationScreenState extends State<BankInformationScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            context.pop();
+          },
         ),
         title: Text(
           "Banking Information",

@@ -22,7 +22,7 @@ class _DocumentsUploadState extends State<DocumentsUpload> {
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            context.pop();
           },
         ),
         title: Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AddMedicinePage extends StatefulWidget {
@@ -75,7 +76,9 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
         backgroundColor: const Color(0xff8046f1),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            context.pop();
+          },
         ),
         title: Text(
           "Add New Medicine",
@@ -590,12 +593,6 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => OrdersPage(),
-                        //   ),
-                        // );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xff8046f1),

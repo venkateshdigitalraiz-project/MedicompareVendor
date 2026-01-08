@@ -5,6 +5,8 @@ import 'package:MediCompare/features/auth/presentation/pages/forget_password_pag
 import 'package:MediCompare/features/auth/presentation/pages/login_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/registration_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/vendor_onboarding_screen.dart';
+import 'package:MediCompare/features/earnings/presentation/pages/payout_history_page.dart';
+import 'package:MediCompare/features/earnings/presentation/pages/recent_earnings_page.dart';
 import 'package:MediCompare/features/home/presentation/pages/add_medicine_page.dart';
 import 'package:MediCompare/features/home/presentation/pages/bulk_upload_page.dart';
 import 'package:MediCompare/features/home/presentation/pages/home_page.dart';
@@ -19,6 +21,7 @@ import 'package:MediCompare/features/profile/presentation/pages/business_informa
 import 'package:MediCompare/features/profile/presentation/pages/change_password_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/documents_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
+import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/support_ticket_screen.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/generate_new_ticket.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/generated_ticket.dart';
@@ -97,6 +100,10 @@ final GoRouter appRouter = GoRouter(
       path: '/sales-viewall',
       builder: (_, __) => const SalesViewall(),
     ),
+     GoRoute(
+      path: '/profile-screen',
+      builder: (_, __) => const MainprofileScreen(),
+    ),
     GoRoute(
       path: '/edit-profile',
       builder: (_, __) => const EditProfileScreen(),
@@ -132,6 +139,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/view-ticket',
       builder: (_, __) => const ViewTicket(),
+    ),
+     GoRoute(
+      path: '/recent-earnings',
+      builder: (_, __) => const RecentEarningsPage(),
+    ),
+     GoRoute(
+      path: '/payout-history',
+      builder: (_, __) => const PayoutHistoryPage(),
     ),
   ],
 );

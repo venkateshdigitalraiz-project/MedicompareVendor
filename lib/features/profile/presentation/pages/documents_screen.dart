@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -39,7 +40,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         backgroundColor: const Color(0xff7C4DFF),
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            context.pop();
+          },
         ),
         title: Text(
           "Documents Screen",

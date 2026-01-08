@@ -1,5 +1,4 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
-import 'package:MediCompare/features/auth/presentation/pages/vendor_onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -215,7 +214,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // ✅ Go back to Login page
+                     context.pop();// ✅ Go back to Login page
                     },
                     child: Text(
                       "Log In",
