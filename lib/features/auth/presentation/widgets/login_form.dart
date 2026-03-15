@@ -1,7 +1,10 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/features/auth/auth_injection.dart';
+import 'package:MediCompare/features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -13,6 +16,67 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   bool rememberMe = false;
   bool isPasswordVisible = false;
+  bool isLoading = false;
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  final _loginUseCase = AuthInjection.provideLoginUseCase();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleLogin() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter email and password')),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final vendor = await _loginUseCase.call(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      if (mounted) {
+        // Sync vendor to VendorProfileProvider
+        Provider.of<VendorProfileProvider>(context, listen: false).setVendor(vendor);
+
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful!')),
+        );
+        
+        // Check if profile is completed, if not go to step 1
+        if (!vendor.isProfileCompleted) {
+          context.go('/step1-personal-details');
+        } else {
+          context.go('/bottom-nav');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +120,10 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             const SizedBox(height: 6),
-            _inputField(hint: "Enter Your email"),
+            _inputField(
+              hint: "Enter Your email",
+              controller: emailController,
+            ),
 
             const SizedBox(height: 16),
 
@@ -69,7 +136,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             const SizedBox(height: 6),
-            _passwordField(),
+            _passwordField(controller: passwordController),
 
             const SizedBox(height: 10),
 
@@ -122,18 +189,24 @@ class _LoginFormState extends State<LoginForm> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () {
-                  /// ✅ go_router navigation
-                  context.go('/bottom-nav');
-                },
-                child: Text(
-                  "Log In",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.white,
-                  ),
-                ),
+                onPressed: isLoading ? null : _handleLogin,
+                child: isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "Log In",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                        ),
+                      ),
               ),
             ),
 
@@ -170,10 +243,14 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   /// EMAIL FIELD
-  static Widget _inputField({required String hint}) {
+  static Widget _inputField({
+    required String hint,
+    required TextEditingController controller,
+  }) {
     return SizedBox(
       height: 48,
       child: TextField(
+        controller: controller,
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
@@ -202,10 +279,11 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   /// PASSWORD FIELD
-  Widget _passwordField() {
+  Widget _passwordField({required TextEditingController controller}) {
     return SizedBox(
       height: 48,
       child: TextField(
+        controller: controller,
         obscureText: !isPasswordVisible,
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(

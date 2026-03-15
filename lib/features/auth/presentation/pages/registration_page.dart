@@ -1,7 +1,10 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/features/auth/auth_injection.dart';
+import 'package:MediCompare/features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -14,10 +17,91 @@ class _RegisterationPageState extends State<RegistrationPage> {
   bool agreeToTerms = false;
   bool isPasswordVisible = false;
   bool isconfirmPasswordVisible = false;
+  bool isLoading = false;
 
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+
+  final _registerUseCase = AuthInjection.provideRegisterUseCase();
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _handleRegister() async {
+    if (!agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please agree to the Terms & Conditions')),
+      );
+      return;
+    }
+
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
+    if (firstNameController.text.isEmpty ||
+        lastNameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        phoneController.text.isEmpty ||
+        passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final vendor = await _registerUseCase.call(
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        email: emailController.text.trim(),
+        mobile: phoneController.text.trim(),
+        password: passwordController.text,
+      );
+
+      if (mounted) {
+        // Sync vendor to VendorProfileProvider
+        Provider.of<VendorProfileProvider>(context, listen: false).setVendor(vendor);
+
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+        context.push('/step1-personal-details');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +145,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
               _inputField(
                 hint: "Enter your first name",
                 icon: Icons.person_outline,
+                controller: firstNameController,
               ),
               SizedBox(height: 9),
               Text(
@@ -74,6 +159,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
               _inputField(
                 hint: "Enter your Last name",
                 icon: Icons.person_outline,
+                controller: lastNameController,
               ),
               SizedBox(height: 5),
               Text(
@@ -88,6 +174,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
                 hint: "email@gmail.com",
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                controller: emailController,
               ),
               SizedBox(height: 5),
               Text(
@@ -102,6 +189,7 @@ class _RegisterationPageState extends State<RegistrationPage> {
                 hint: "Enter your mobile number",
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
+                controller: phoneController,
               ),
               SizedBox(height: 5),
               Text(
@@ -190,17 +278,24 @@ class _RegisterationPageState extends State<RegistrationPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () {
-                    context.push('/vendor-onboarding');
-                  },
-                  child: Text(
-                    "Create Account",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
-                    ),
-                  ),
+                  onPressed: isLoading ? null : _handleRegister,
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "Create Account",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.white,
+                          ),
+                        ),
                 ),
               ),
               SizedBox(height: 8),
@@ -234,15 +329,17 @@ class _RegisterationPageState extends State<RegistrationPage> {
     );
   }
 
-  /// 🔐 EMAIL FIELD
+  /// 🔐 INPUT FIELD
   static Widget _inputField({
     required String hint,
     required IconData icon,
+    required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return SizedBox(
       height: 48,
       child: TextField(
+        controller: controller,
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Icon(icon, size: 20, color: AppColors.textSecondary),

@@ -187,10 +187,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   ),
                 ),
                 onPressed: () {
-                  //     Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (_) => const LoginPage()),
-                  // );
+                  _showLogoutDialog();
                 },
               ),
             ),
@@ -199,6 +196,56 @@ class _ProfilePageState extends State<MainprofileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// 🚪 LOGOUT CONFIRMATION DIALOG
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            "Logout",
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            ),
+          ),
+          content: Text(
+            "Are you sure you want to log out of your account?",
+            style: GoogleFonts.inter(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.inter(
+                  color: AppColors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                context.go('/login'); // Navigate to login
+              },
+              child: Text(
+                "Logout",
+                style: GoogleFonts.inter(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

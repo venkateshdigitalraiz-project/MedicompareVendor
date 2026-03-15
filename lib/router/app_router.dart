@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:MediCompare/features/auth/presentation/pages/bank_information_upload.dart';
 import 'package:MediCompare/features/auth/presentation/pages/business_information_upload.dart';
 import 'package:MediCompare/features/auth/presentation/pages/documents_upload.dart';
@@ -26,6 +27,8 @@ import 'package:MediCompare/features/profile/presentation/pages/support_ticket_s
 import 'package:MediCompare/features/tickets/presentation/pages/generate_new_ticket.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/generated_ticket.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/view_ticket.dart';
+import 'package:MediCompare/features/vendor_profile/presentation/pages/step1_personal_details_screen.dart';
+import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_business_details_screen.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -47,6 +50,18 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/vendor-onboarding',
       builder: (_, __) => const VendorOnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/step1-personal-details',
+      builder: (_, __) => const Step1PersonalDetailsScreen(),
+    ),
+    GoRoute(
+      path: '/step2-business-details',
+      builder: (_, __) => const Step2BusinessDetailsScreen(),
+    ),
+    GoRoute(
+      path: '/step3-banking-info',
+      builder: (_, __) => const Scaffold(body: Center(child: Text("Step 3: Banking Information"))),
     ),
     GoRoute(
       path: '/business-info-upload',
