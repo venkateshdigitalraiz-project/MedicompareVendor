@@ -10,6 +10,8 @@ import 'features/dashboard/dashboard_injection.dart';
 import 'features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'features/slots/slots_injection.dart';
 import 'features/slots/presentation/bloc/slots_event.dart';
+import 'features/pincodes/pincodes_injection.dart';
+import 'features/pincodes/presentation/bloc/pincodes_event.dart';
 import 'features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
 import 'features/vendor_profile/vendor_profile_injection.dart';
 import 'router/app_router.dart';
@@ -64,6 +66,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => SlotsInjection.provideSlotsBloc()..add(GetSlotTimingsEvent()),
+        ),
+        BlocProvider(
+          create: (_) => PincodesInjection.providePincodesBloc()..add(GetPincodesEvent()),
         ),
       ],
       child: MaterialApp.router(

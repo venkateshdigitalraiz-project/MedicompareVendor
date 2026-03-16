@@ -12,4 +12,5 @@ class ApiEndpoints {
   static String get stepTwoUpdate => '$baseUrl/vendor/profile/step_two';
   static String get dashboard => '$baseUrl/vendor/dashboard';
   static String get slotTimings => '$baseUrl/vendor/vendor-timings/list';
+  static String get pincodeList => '$baseUrl/vendor/pincode/list';
 }

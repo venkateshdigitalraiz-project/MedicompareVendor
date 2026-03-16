@@ -121,61 +121,59 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                const Icon(Icons.dark_mode_outlined,
-                    size: 20, color: Colors.grey),
-                const SizedBox(width: 12),
+
                 const Stack(
                   children: [
                     Icon(Icons.notifications_none_outlined,
                         size: 24, color: Colors.grey),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child:
-                          CircleAvatar(radius: 4, backgroundColor: Colors.red),
-                    ),
+                    // Positioned(
+                    //   right: 0,
+                    //   top: 0,
+                    //   child:
+                    //       CircleAvatar(radius: 4, backgroundColor: Colors.red),
+                    // ),
                   ],
                 ),
-                const SizedBox(width: 12),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundImage: dashboard.user.profileImageUrl != null
-                          ? NetworkImage(dashboard.user.profileImageUrl!)
-                          : const AssetImage('assets/profile.png')
-                              as ImageProvider,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      dashboard.user.firstName,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+                // const SizedBox(width: 12),
+                // Row(
+                //   children: [
+                //     CircleAvatar(
+                //       radius: 16,
+                //       backgroundImage: dashboard.user.profileImageUrl != null
+                //           ? NetworkImage(dashboard.user.profileImageUrl!)
+                //           : const AssetImage('assets/profile.png')
+                //               as ImageProvider,
+                //     ),
+                //     const SizedBox(width: 8),
+                //     Text(
+                //       dashboard.user.firstName,
+                //       style: GoogleFonts.inter(
+                //         fontSize: 14,
+                //         fontWeight: FontWeight.w600,
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
             const SizedBox(height: 24),
 
-            Text(
-              "Dashboard",
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            Text(
-              "Welcome back! Here's what's happening with your inventory.",
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 24),
+            // Text(
+            //   "Dashboard",
+            //   style: GoogleFonts.inter(
+            //     fontSize: 24,
+            //     fontWeight: FontWeight.bold,
+            //     color: Colors.black,
+            //   ),
+            // ),
+            // Text(
+            //   "Welcome back! Here's what's happening with your inventory.",
+            //   style: GoogleFonts.inter(
+            //     fontSize: 14,
+            //     color: Colors.grey[600],
+            //   ),
+            // ),
+            // const SizedBox(height: 24),
 
             /// TOTAL STATS
             GridView.count(

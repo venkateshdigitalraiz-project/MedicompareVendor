@@ -121,7 +121,7 @@ class SlotTimingsPage extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.85, // Taller cards to prevent vertical overflow
+                childAspectRatio: 0.98, // Taller cards to prevent vertical overflow
               ),
               itemCount: availability.length,
               itemBuilder: (context, index) {
@@ -156,12 +156,12 @@ class SlotTimingsPage extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.access_time_filled, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(Icons.access_time_filled, color: AppColors.primary, size: 16),
+                  const SizedBox(width: 4),
                   Text(
                     item.day,
                     style: GoogleFonts.inter(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -185,7 +185,7 @@ class SlotTimingsPage extends StatelessWidget {
               Text(
                 item.isOpen ? "OPEN" : "CLOSED",
                 style: GoogleFonts.inter(
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: item.isOpen ? Colors.green : Colors.red,
                 ),
@@ -201,15 +201,15 @@ class SlotTimingsPage extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(Icons.access_time, color: AppColors.primary, size: 16),
-                ),
-                const SizedBox(width: 12),
+                // Container(
+                //   padding: const EdgeInsets.all(6),
+                //   decoration: BoxDecoration(
+                //     color: Colors.white,
+                //     borderRadius: BorderRadius.circular(8),
+                //   ),
+                //   // child: Icon(Icons.access_time, color: AppColors.primary, size: 16),
+                // ),
+                // const SizedBox(width: 2),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +227,7 @@ class SlotTimingsPage extends StatelessWidget {
                       Text(
                         "${item.startTime} - ${item.endTime}",
                         style: GoogleFonts.inter(
-                          fontSize: 13,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
