@@ -118,7 +118,7 @@ class TopProductModel extends TopProductEntity {
     required super.totalSales,
     required super.orderCount,
     required super.name,
-    required super.category,
+    required super.categoryName,
     super.imageUrl,
   });
 
@@ -126,16 +126,17 @@ class TopProductModel extends TopProductEntity {
     final tabletDetails = json['tabletDetails'] ?? {};
     final files = (tabletDetails['files'] as List?) ?? [];
     
+    // Prioritize main category name (Medicine, Nursing Care, etc.) as per user request
+    final categoryDetails = tabletDetails['categoryDetails'] ?? {};
+    
+    String catName = categoryDetails['name']?.toString() ?? 'Medicine';
+    
     return TopProductModel(
       id: json['_id'] ?? '',
       totalSales: json['totalSales'] ?? 0,
       orderCount: json['orderCount'] ?? 0,
       name: tabletDetails['name'] ?? 'Unknown',
-      category: tabletDetails['subcategories'] != null 
-          ? tabletDetails['subcategories']['name'] 
-          : (tabletDetails['categoryDetails'] != null 
-              ? tabletDetails['categoryDetails']['name'] 
-              : 'Unknown'),
+      categoryName: catName,
       imageUrl: files.isNotEmpty ? files.first : null,
     );
   }

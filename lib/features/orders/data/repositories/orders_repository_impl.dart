@@ -1,0 +1,24 @@
+import '../datasources/orders_remote_data_source.dart';
+import '../../domain/entities/order_entity.dart';
+import '../../domain/repositories/orders_repository.dart';
+
+class OrdersRepositoryImpl implements OrdersRepository {
+  final OrdersRemoteDataSource remoteDataSource;
+
+  OrdersRepositoryImpl({required this.remoteDataSource});
+
+  @override
+  Future<OrdersListEntity> getOrders({
+    int page = 1,
+    int limit = 10,
+    String status = '',
+    String search = '',
+  }) async {
+    return await remoteDataSource.getOrders(
+      page: page,
+      limit: limit,
+      status: status,
+      search: search,
+    );
+  }
+}

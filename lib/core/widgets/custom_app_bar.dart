@@ -27,6 +27,7 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
       elevation: 0,
       toolbarHeight: 80,
       centerTitle: false,

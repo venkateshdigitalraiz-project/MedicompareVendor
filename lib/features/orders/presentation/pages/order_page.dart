@@ -1,7 +1,14 @@
-import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
+import '../../domain/entities/order_entity.dart';
+import '../bloc/orders_bloc.dart';
+import '../bloc/orders_event.dart';
+import '../bloc/orders_state.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -11,376 +18,322 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = "";
+  String _searchQuery = '';
+  String _selectedStatus = '';
+  String _selectedDuration = 'No delivery Time';
+  int _currentPage = 1;
 
-  int _selectedIndex = 0;
-
-  final List<String> _statusList = ["All", "Active", "Pending", "Completed"];
-
-  final List<Map<String, dynamic>> ordersList = [
-    {
-      "orderId": "#622318248726487",
-      "name": "Priya Sharma",
-      "email": "priya.sharma@email.com",
-      "phone": "+91 98765 43210",
-      "city": "Mumbai",
-      "amount": "₹2,500.00",
-      "status": "Confirmed",
-      "date": "Dec 15, 2024 ",
-      "time": "2:30 PM",
-      "tags": ["Paracetamol", "Vitamin D3", "Cough Syrup"],
-    },
-    {
-      "orderId": "#622318248726487",
-      "name": "Rajesh Kumar",
-      "email": "rajesh.k@email.com",
-      "phone": "+91 87654 32109",
-      "city": "Delhi",
-      "amount": "₹4,200.00",
-      "status": "Pending",
-      "date": "Dec 16, 2024",
-      "time": "10:00 AM",
-      "tags": ["Insulin", "Glucometer"],
-    },
-    {
-      "orderId": "#622318248726487",
-      "name": "Anita Patel",
-      "email": "anita.patel@email.com",
-      "phone": "+91 76543 21098",
-      "city": "Ahmedabad",
-      "amount": "₹1,850.00",
-      "status": "Completed",
-      "date": "Dec 14, 2024",
-      "time": "4:15 PM",
-      "tags": ["Antibiotics", "Pain Relief", "Bandages"],
-    },
-    {
-      "orderId": "#622318248726487",
-      "name": "Suresh Gupta",
-      "email": "suresh.g@email.com",
-      "phone": "+91 65432 10987",
-      "city": " Pune",
-      "amount": "₹3,750.00",
-      "status": "Confirmed",
-      "date": "Dec 17, 2024",
-      "time": "11:30 AM",
-      "tags": ["Blood Pressure", "Heart Medication"],
-    },
-    {
-      "orderId": "#622318248726487",
-      "name": "Meera Singh",
-      "email": "meera.singh@email.com",
-      "phone": "++91 54321 09876",
-      "city": " Bangalore",
-      "amount": "₹1,200.00",
-      "status": "Pending",
-      "date": "Dec 18, 2024 ",
-      "time": "9:00 AM",
-      "tags": ["Multivitamins", "Calcium", "Iron Tablets"],
-    },
+  final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
+  final List<Map<String, String>> _statuses = [
+    {'label': 'All Status', 'value': ''},
+    {'label': 'New', 'value': 'new'},
+    {'label': 'Pending', 'value': 'pending'},
+    {'label': 'Confirmed', 'value': 'confirmed'},
+    {'label': 'Processing', 'value': 'processing'},
+    {'label': 'Shipped', 'value': 'shipped'},
+    {'label': 'Delivered', 'value': 'delivered'},
+    {'label': 'Cancelled', 'value': 'cancelled'},
   ];
-  Color _statusBgColor(String status) {
-    switch (status) {
-      case "Confirmed":
-        return AppColors.infoBg; // light blue
-      case "Pending":
-        return AppColors.orangeBg; // light orange
-      case "Completed":
-        return AppColors.successBg; // light green
-      default:
-        return AppColors.neutralBg; // grey
-    }
-  }
-
-  Color _statusTextColor(String status) {
-    switch (status) {
-      case "Confirmed":
-        return AppColors.info; // blue
-      case "Pending":
-        return AppColors.orange; // orange
-      case "Completed":
-        return AppColors.successDark; // green
-      default:
-        return AppColors.textPrimarySoft;
-    }
-  }
-
-  List<Map<String, dynamic>> get _filteredOrders {
-    final selectedStatus = _statusList[_selectedIndex];
-
-    List<Map<String, dynamic>> filtered = ordersList;
-
-    // STATUS FILTER
-    if (selectedStatus == "Active") {
-      filtered =
-          filtered.where((order) => order["status"] == "Confirmed").toList();
-    } else if (selectedStatus != "All") {
-      filtered =
-          filtered.where((order) => order["status"] == selectedStatus).toList();
-    }
-
-    // SEARCH FILTER
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((order) {
-        final query = _searchQuery.toLowerCase();
-        return order["orderId"].toLowerCase().contains(query) ||
-            order["name"].toLowerCase().contains(query) ||
-            order["email"].toLowerCase().contains(query);
-      }).toList();
-    }
-
-    return filtered;
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryDark,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.white),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-        title: Text(
-          "Orders",
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: AppColors.white,
-          ),
-        ),
+      backgroundColor: const Color(0xFFF3F6FF),
+      appBar: const CustomHomeAppBar(
+        title: "Order Items",
+        subtitle: "Manage and track all your order items",
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            const SizedBox(height: 27),
-
-            // 🔍 Search Input
-            _inputField(
-              hint: "Search by order ID, customer name, or email",
-              icon: Icons.search,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
+      body: Column(
+        children: [
+          _buildFilters(),
+          Expanded(
+            child: BlocBuilder<OrdersBloc, OrdersState>(
+              builder: (context, state) {
+                if (state is OrdersLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is OrdersLoaded) {
+                  return Column(
+                    children: [
+                      Expanded(child: _buildOrdersList(state.ordersList.orderItems)),
+                      _buildPaginationFooter(state.ordersList.pagination),
+                    ],
+                  );
+                } else if (state is OrdersError) {
+                  return Center(child: Text(state.message));
+                }
+                return const Center(child: Text('No orders found.'));
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            const SizedBox(height: 16),
-
-            // 🔄 Status Filter (Horizontal Scroll)
-            SizedBox(
-              height: 40,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(_statusList.length, (index) {
-                    final bool isSelected = _selectedIndex == index;
-
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.black
-                              : AppColors.neutralBg,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _statusList[index],
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color:
-                                isSelected ? AppColors.white : AppColors.black,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
+  Widget _buildFilters() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                      _currentPage = 1;
+                    });
+                    _onFilterChanged();
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Search by order item ID, customer name...",
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  ),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 17),
-
-            // Orders / Notifications list placeholder
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filteredOrders.length,
-                itemBuilder: (context, index) {
-                  final order = _filteredOrders[index];
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.borderLight, // light grey border
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.black.withOpacity(0.03),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 🔝 Order ID & Status
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Order ID: ${order["orderId"]}",
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w300,
-                                color: Color(0xff2B2E35),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _statusBgColor(order["status"]),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                order["status"],
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: _statusTextColor(order["status"]),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        Divider(
-                          color: Color(0xFFE5E7EB), // light grey
-                          thickness: 1,
-                        ),
-                        const SizedBox(height: 8.5),
-
-                        // 👤 Name & Amount
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              order["name"],
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              order["amount"],
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        // 📧 Email
-                        Text(
-                          order["email"],
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.grey600),
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        // 📍 Phone & City
-                        Text(
-                          "${order["phone"]} • ${order["city"]}",
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.grey600),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // 🏷️ Tags
-                        Wrap(
-                          spacing: 8,
-                          children: List.generate(order["tags"].length, (i) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3E8FF),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                order["tags"][i],
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.primaryDark,
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // 📅 Date & Time
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: AppColors.grey,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              "${order["date"]} • ${order["time"]}",
-                              style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.grey600),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-
-                        // 🎟️ Ticket Button
-                      ],
-                    ),
-                  );
-                },
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _buildDropdown(
+                  value: _durations.contains(_selectedDuration) ? _selectedDuration : _durations.first,
+                  items: _durations,
+                  onChanged: (val) {
+                    setState(() => _selectedDuration = val!);
+                  },
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdown(
+                  value: _selectedStatus,
+                  items: _statuses.map((s) => s['value']!).toList(),
+                  labels: _statuses.map((s) => s['label']!).toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedStatus = val!;
+                      _currentPage = 1;
+                    });
+                    _onFilterChanged();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String value,
+    required List<String> items,
+    List<String>? labels,
+    required void Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          items: List.generate(items.length, (index) {
+            return DropdownMenuItem(
+              value: items[index],
+              child: Text(
+                labels != null ? labels[index] : items[index],
+                style: GoogleFonts.inter(fontSize: 14),
+              ),
+            );
+          }),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  void _onFilterChanged() {
+    context.read<OrdersBloc>().add(GetOrdersEvent(
+          status: _selectedStatus,
+          search: _searchQuery,
+          page: _currentPage,
+        ));
+  }
+
+  Widget _buildPaginationFooter(PaginationEntity pagination) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ElevatedButton(
+            onPressed: pagination.page > 1
+                ? () {
+                    setState(() => _currentPage--);
+                    _onFilterChanged();
+                  }
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: Colors.grey[300],
+            ),
+            child: const Text("Previous"),
+          ),
+          Text(
+            "Page ${pagination.page} of ${pagination.totalPages}",
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          ),
+          ElevatedButton(
+            onPressed: pagination.page < pagination.totalPages
+                ? () {
+                    setState(() => _currentPage++);
+                    _onFilterChanged();
+                  }
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: Colors.grey[300],
+            ),
+            child: const Text("Next"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersList(List<OrderItemEntity> orders) {
+    if (orders.isEmpty) {
+      return const Center(child: Text("No orders matching filters."));
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        return _buildOrderItemCard(order);
+      },
+    );
+  }
+
+  Widget _buildOrderItemCard(OrderItemEntity item) {
+    final user = item.orderDetails.userDetails;
+    final product = item.productDetails;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.orderItemId,
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.tabletDetails != null ? product.tabletDetails['name'] : product.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    Text(
+                      "Type: ${item.type} • ${item.bookingType}",
+                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                _buildStatusBadge(item.orderStatus),
+              ],
+            ),
+            const Divider(height: 24),
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  child: const Icon(Icons.person_outline, color: AppColors.primary),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${user.firstName} ${user.lastName}",
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        user.email,
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        user.phone,
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Qty: ${item.quantity}",
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateFormat('MMM d, yyyy').format(item.createdAt),
+                          style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -388,37 +341,35 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  // 🔁 Reusable Input Field
-  static Widget _inputField({
-    required String hint,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    ValueChanged<String>? onChanged,
-  }) {
-    return SizedBox(
-      height: 48,
-      child: TextField(
-        onChanged: onChanged,
-        keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, size: 20, color: AppColors.textSecondary),
-          hintText: hint,
-          hintStyle:
-              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
-          ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: AppColors.grey300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.primary),
-          ),
+  Widget _buildStatusBadge(String status) {
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'new':
+        color = Colors.orange;
+        break;
+      case 'delivered':
+        color = Colors.green;
+        break;
+      case 'cancelled':
+        color = Colors.red;
+        break;
+      default:
+        color = AppColors.primary;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -87,7 +87,7 @@ class TopProductEntity {
   final int totalSales;
   final int orderCount;
   final String name;
-  final String category;
+  final String categoryName;
   final String? imageUrl;
 
   TopProductEntity({
@@ -95,7 +95,7 @@ class TopProductEntity {
     required this.totalSales,
     required this.orderCount,
     required this.name,
-    required this.category,
+    required this.categoryName,
     this.imageUrl,
   });
 }

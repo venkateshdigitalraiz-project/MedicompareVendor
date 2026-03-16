@@ -213,7 +213,7 @@ class DashboardPage extends StatelessWidget {
             builder: (context, constraints) {
               return Column(
                 children: [
-                  _buildSectionHeader("Top Selling Orders", () {}),
+                  _buildSectionHeader("Top Selling Orders", () => context.push('/orders')),
                   const SizedBox(height: 12),
                   ...dashboard.topProducts
                       .take(5)
@@ -447,7 +447,7 @@ class DashboardPage extends StatelessWidget {
                       fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 Text(
-                  product.category,
+                  "${product.categoryName}",
                   style:
                       GoogleFonts.inter(color: Colors.grey[500], fontSize: 12),
                 ),
