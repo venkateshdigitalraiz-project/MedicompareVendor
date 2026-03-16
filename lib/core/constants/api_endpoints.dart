@@ -14,6 +14,9 @@ class ApiEndpoints {
   static String get slotTimings => '$baseUrl/vendor/vendor-timings/list';
   static String updateSlotTimings(String id) => '$baseUrl/vendor/vendor-timings/update/$id';
   static String get pincodeList => '$baseUrl/vendor/pincode/list';
+  static String get pincodeCreate => '$baseUrl/vendor/pincode/create';
+  static String pincodeUpdate(String id) => '$baseUrl/vendor/pincode/update/$id';
+  static String pincodeDelete(String id) => '$baseUrl/vendor/pincode/delete/$id';
   static String get orderList => '$baseUrl/vendor/order/list';
   static String get orderDetails => '$baseUrl/vendor/order/details';
   static String get leadsList => '$baseUrl/vendor/leads/list';
