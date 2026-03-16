@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
@@ -237,105 +238,115 @@ class _OrdersPageState extends State<OrdersPage> {
     final user = item.orderDetails.userDetails;
     final product = item.productDetails;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.orderItemId,
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      product.tabletDetails != null ? product.tabletDetails['name'] : product.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    Text(
-                      "Type: ${item.type} • ${item.bookingType}",
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                _buildStatusBadge(item.orderStatus),
-              ],
+    return GestureDetector(
+      onTap: () => context.push('/order-details/${item.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            const Divider(height: 24),
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  child: const Icon(Icons.person_outline, color: AppColors.primary),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${user.firstName} ${user.lastName}",
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                        item.orderItemId,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        product.tabletDetails != null ? product.tabletDetails['name'] : product.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
                       ),
                       Text(
-                        user.email,
-                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                      ),
-                      Text(
-                        user.phone,
+                        "Type: ${item.type} • ${item.bookingType}",
                         style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Qty: ${item.quantity}",
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
+                  _buildStatusBadge(item.orderStatus),
+                ],
+              ),
+              const Divider(height: 24),
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    child: const Icon(Icons.person_outline, color: AppColors.primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
-                        const SizedBox(width: 4),
                         Text(
-                          DateFormat('MMM d, yyyy').format(item.createdAt),
+                          user != null ? "${user.firstName} ${user.lastName}" : "Unknown Customer",
+                          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          user?.email ?? "No Email",
+                          style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                        ),
+                        Text(
+                          user?.phone ?? "No Phone",
                           style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Qty: ${item.quantity}",
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                      Text(
+                        "₹${item.price.toStringAsFixed(2)}",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            DateFormat('MMM d, yyyy').format(item.createdAt),
+                            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

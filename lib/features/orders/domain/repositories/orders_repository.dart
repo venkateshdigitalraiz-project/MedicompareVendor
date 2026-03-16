@@ -7,4 +7,5 @@ abstract class OrdersRepository {
     String status = '',
     String search = '',
   });
+  Future<OrderItemEntity> getOrderDetails(String orderId);
 }

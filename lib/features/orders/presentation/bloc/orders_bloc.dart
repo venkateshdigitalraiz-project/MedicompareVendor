@@ -1,12 +1,17 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_orders_usecase.dart';
+import '../../domain/usecases/get_order_details_usecase.dart';
 import 'orders_event.dart';
 import 'orders_state.dart';
 
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   final GetOrdersUseCase getOrdersUseCase;
+  final GetOrderDetailsUseCase getOrderDetailsUseCase;
 
-  OrdersBloc({required this.getOrdersUseCase}) : super(OrdersInitial()) {
+  OrdersBloc({
+    required this.getOrdersUseCase,
+    required this.getOrderDetailsUseCase,
+  }) : super(OrdersInitial()) {
     on<GetOrdersEvent>((event, emit) async {
       emit(OrdersLoading());
       try {
@@ -23,6 +28,16 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         } else {
           emit(OrdersLoaded(result));
         }
+      } catch (e) {
+        emit(OrdersError(e.toString()));
+      }
+    });
+
+    on<GetOrderDetailsEvent>((event, emit) async {
+      emit(OrdersLoading());
+      try {
+        final result = await getOrderDetailsUseCase.call(event.orderId);
+        emit(OrderDetailsLoaded(result));
       } catch (e) {
         emit(OrdersError(e.toString()));
       }

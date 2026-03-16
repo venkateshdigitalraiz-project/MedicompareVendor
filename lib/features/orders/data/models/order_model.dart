@@ -16,6 +16,9 @@ class OrderItemModel extends OrderItemEntity {
     required super.createdAt,
     required super.orderDetails,
     required super.productDetails,
+    super.userDetails,
+    super.shippingAddressDetails,
+    super.billingAddressDetails,
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +37,9 @@ class OrderItemModel extends OrderItemEntity {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       orderDetails: OrderDetailsModel.fromJson(json['orderDetails'] ?? {}),
       productDetails: ProductDetailsModel.fromJson(json['productDetails'] ?? {}),
+      userDetails: json['userDetails'] != null ? FullUserDetailsModel.fromJson(json['userDetails']) : null,
+      shippingAddressDetails: json['shippingAddressDetails'] != null ? AddressDetailsModel.fromJson(json['shippingAddressDetails']) : null,
+      billingAddressDetails: json['billingAddressDetails'] != null ? AddressDetailsModel.fromJson(json['billingAddressDetails']) : null,
     );
   }
 }
@@ -48,9 +54,14 @@ class OrderDetailsModel extends OrderDetailsEntity {
     required super.orderStatus,
     required super.subtotal,
     required super.total,
+    super.shipping = 0,
+    super.discount = 0,
+    super.tax = 0,
+    super.cgst = 0,
+    super.sgst = 0,
     required super.personType,
     super.doctorName,
-    required super.userDetails,
+    super.userDetails,
   });
 
   factory OrderDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -63,9 +74,14 @@ class OrderDetailsModel extends OrderDetailsEntity {
       orderStatus: json['orderStatus']?.toString() ?? '',
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       total: (json['total'] ?? 0).toDouble(),
+      shipping: (json['shipping'] ?? 0).toDouble(),
+      discount: (json['discount'] ?? 0).toDouble(),
+      tax: (json['tax'] ?? 0).toDouble(),
+      cgst: (json['cgst'] ?? 0).toDouble(),
+      sgst: (json['sgst'] ?? 0).toDouble(),
       personType: json['persontype']?.toString() ?? '',
       doctorName: json['doctorName']?.toString(),
-      userDetails: UserDetailsModel.fromJson(json['userDetails'] ?? {}),
+      userDetails: json['userDetails'] != null ? UserDetailsModel.fromJson(json['userDetails']) : null,
     );
   }
 }
@@ -86,6 +102,59 @@ class UserDetailsModel extends UserDetailsEntity {
       lastName: json['last_name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
+    );
+  }
+}
+
+class FullUserDetailsModel extends FullUserDetailsEntity {
+  const FullUserDetailsModel({
+    required super.id,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.phone,
+    required super.age,
+    required super.gender,
+    required super.files,
+  });
+
+  factory FullUserDetailsModel.fromJson(Map<String, dynamic> json) {
+    return FullUserDetailsModel(
+      id: json['_id']?.toString() ?? '',
+      firstName: json['first_name']?.toString() ?? '',
+      lastName: json['last_name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      age: json['age'] ?? 0,
+      gender: json['gender']?.toString() ?? '',
+      files: (json['files'] as List?)?.map((e) => e.toString()).toList() ?? [],
+    );
+  }
+}
+
+class AddressDetailsModel extends AddressDetailsEntity {
+  const AddressDetailsModel({
+    required super.id,
+    required super.houseNo,
+    required super.area,
+    required super.landmark,
+    required super.description,
+    required super.addressType,
+    required super.pincode,
+    required super.fullAddress,
+  });
+
+  factory AddressDetailsModel.fromJson(Map<String, dynamic> json) {
+    final location = json['location'] ?? {};
+    return AddressDetailsModel(
+      id: json['_id']?.toString() ?? '',
+      houseNo: json['houseNo']?.toString() ?? '',
+      area: json['area']?.toString() ?? '',
+      landmark: json['landmark']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      addressType: json['addressType']?.toString() ?? '',
+      pincode: json['pincode']?.toString() ?? '',
+      fullAddress: location['address']?.toString() ?? '',
     );
   }
 }

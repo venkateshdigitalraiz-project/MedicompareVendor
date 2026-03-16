@@ -31,6 +31,7 @@ import 'package:MediCompare/features/vendor_profile/presentation/pages/step1_per
 import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_business_details_screen.dart';
 import 'package:MediCompare/features/orders/presentation/pages/order_page.dart';
 import 'package:MediCompare/features/leads/presentation/pages/leads_page.dart';
+import 'package:MediCompare/features/orders/presentation/pages/order_details_page.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -172,6 +173,13 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/leads',
       builder: (_, __) => const LeadsPage(),
+    ),
+    GoRoute(
+      path: '/order-details/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return OrderDetailPage(orderId: id);
+      },
     ),
   ],
 );

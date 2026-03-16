@@ -21,4 +21,9 @@ class OrdersRepositoryImpl implements OrdersRepository {
       search: search,
     );
   }
+
+  @override
+  Future<OrderItemEntity> getOrderDetails(String orderId) async {
+    return await remoteDataSource.getOrderDetails(orderId);
+  }
 }

@@ -11,6 +11,7 @@ abstract class OrdersRemoteDataSource {
     String status = '',
     String search = '',
   });
+  Future<OrderItemModel> getOrderDetails(String orderId);
 }
 
 class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
@@ -47,6 +48,32 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       throw Exception('UNAUTHORIZED');
     } else {
       throw Exception('Failed to fetch orders: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<OrderItemModel> getOrderDetails(String orderId) async {
+    final token = await TokenStorage.getToken();
+    final url = Uri.parse('${ApiEndpoints.orderDetails}/$orderId');
+
+    final response = await client.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 304) {
+      final decoded = json.decode(response.body);
+      if (decoded == null || decoded['data'] == null || decoded['data']['Order'] == null) {
+        throw Exception('Order details not found');
+      }
+      return OrderItemModel.fromJson(decoded['data']['Order']);
+    } else if (response.statusCode == 401) {
+      throw Exception('UNAUTHORIZED');
+    } else {
+      throw Exception('Failed to fetch order details: ${response.statusCode}');
     }
   }
 }

@@ -29,3 +29,12 @@ class OrdersError extends OrdersState {
   @override
   List<Object?> get props => [message];
 }
+
+class OrderDetailsLoaded extends OrdersState {
+  final OrderItemEntity order;
+
+  const OrderDetailsLoaded(this.order);
+
+  @override
+  List<Object?> get props => [order];
+}

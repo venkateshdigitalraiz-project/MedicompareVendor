@@ -23,3 +23,12 @@ class GetOrdersEvent extends OrdersEvent {
   @override
   List<Object?> get props => [page, limit, status, search];
 }
+
+class GetOrderDetailsEvent extends OrdersEvent {
+  final String orderId;
+
+  const GetOrderDetailsEvent(this.orderId);
+
+  @override
+  List<Object?> get props => [orderId];
+}

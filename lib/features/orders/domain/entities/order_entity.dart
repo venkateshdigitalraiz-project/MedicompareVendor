@@ -15,6 +15,9 @@ class OrderItemEntity extends Equatable {
   final DateTime createdAt;
   final OrderDetailsEntity orderDetails;
   final ProductDetailsEntity productDetails;
+  final FullUserDetailsEntity? userDetails;
+  final AddressDetailsEntity? shippingAddressDetails;
+  final AddressDetailsEntity? billingAddressDetails;
 
   const OrderItemEntity({
     required this.id,
@@ -31,6 +34,9 @@ class OrderItemEntity extends Equatable {
     required this.createdAt,
     required this.orderDetails,
     required this.productDetails,
+    this.userDetails,
+    this.shippingAddressDetails,
+    this.billingAddressDetails,
   });
 
   @override
@@ -49,6 +55,9 @@ class OrderItemEntity extends Equatable {
         createdAt,
         orderDetails,
         productDetails,
+        userDetails,
+        shippingAddressDetails,
+        billingAddressDetails,
       ];
 }
 
@@ -61,9 +70,14 @@ class OrderDetailsEntity extends Equatable {
   final String orderStatus;
   final double subtotal;
   final double total;
+  final double shipping;
+  final double discount;
+  final double tax;
+  final double cgst;
+  final double sgst;
   final String personType;
   final String? doctorName;
-  final UserDetailsEntity userDetails;
+  final UserDetailsEntity? userDetails;
 
   const OrderDetailsEntity({
     required this.id,
@@ -74,9 +88,14 @@ class OrderDetailsEntity extends Equatable {
     required this.orderStatus,
     required this.subtotal,
     required this.total,
+    this.shipping = 0,
+    this.discount = 0,
+    this.tax = 0,
+    this.cgst = 0,
+    this.sgst = 0,
     required this.personType,
     this.doctorName,
-    required this.userDetails,
+    this.userDetails,
   });
 
   @override
@@ -89,6 +108,11 @@ class OrderDetailsEntity extends Equatable {
         orderStatus,
         subtotal,
         total,
+        shipping,
+        discount,
+        tax,
+        cgst,
+        sgst,
         personType,
         doctorName,
         userDetails,
@@ -114,10 +138,60 @@ class UserDetailsEntity extends Equatable {
   List<Object?> get props => [id, firstName, lastName, email, phone];
 }
 
+class FullUserDetailsEntity extends Equatable {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String phone;
+  final int age;
+  final String gender;
+  final List<String> files;
+
+  const FullUserDetailsEntity({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.phone,
+    required this.age,
+    required this.gender,
+    required this.files,
+  });
+
+  @override
+  List<Object?> get props => [id, firstName, lastName, email, phone, age, gender, files];
+}
+
+class AddressDetailsEntity extends Equatable {
+  final String id;
+  final String houseNo;
+  final String area;
+  final String landmark;
+  final String description;
+  final String addressType;
+  final String pincode;
+  final String fullAddress;
+
+  const AddressDetailsEntity({
+    required this.id,
+    required this.houseNo,
+    required this.area,
+    required this.landmark,
+    required this.description,
+    required this.addressType,
+    required this.pincode,
+    required this.fullAddress,
+  });
+
+  @override
+  List<Object?> get props => [id, houseNo, area, landmark, description, addressType, pincode, fullAddress];
+}
+
 class ProductDetailsEntity extends Equatable {
   final String id;
   final String name;
-  final dynamic tabletDetails; // Can be a map or entity if needed
+  final dynamic tabletDetails;
 
   const ProductDetailsEntity({
     required this.id,
