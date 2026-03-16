@@ -12,6 +12,12 @@ class SlotsLoaded extends SlotsState {
   SlotsLoaded({required this.timings});
 }
 
+class SlotsUpdated extends SlotsState {
+  final SlotTimingEntity timing;
+
+  SlotsUpdated({required this.timing});
+}
+
 class SlotsError extends SlotsState {
   final String message;
 

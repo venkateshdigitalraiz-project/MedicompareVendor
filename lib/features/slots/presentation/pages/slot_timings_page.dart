@@ -9,6 +9,7 @@ import '../../../../core/utils/token_storage.dart';
 import '../bloc/slots_bloc.dart';
 import '../bloc/slots_event.dart';
 import '../bloc/slots_state.dart';
+import 'configure_availability_page.dart';
 
 class SlotTimingsPage extends StatelessWidget {
   const SlotTimingsPage({super.key});
@@ -87,7 +88,16 @@ class SlotTimingsPage extends StatelessWidget {
                 ),
               ),
               TextButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  if (timings.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ConfigureAvailabilityPage(timing: timings.first),
+                      ),
+                    );
+                  }
+                },
                 icon: const Icon(Icons.settings_outlined, size: 16),
                 label: const Text("Configure"),
                 style: TextButton.styleFrom(
@@ -111,7 +121,7 @@ class SlotTimingsPage extends StatelessWidget {
             ),
             itemCount: availability.length,
             itemBuilder: (context, index) {
-              return _buildTimingCard(availability[index]);
+              return _buildTimingCard(context, availability[index], timings.first);
             },
           ),
         ),
@@ -119,7 +129,7 @@ class SlotTimingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTimingCard(DayAvailabilityEntity item) {
+  Widget _buildTimingCard(BuildContext context, DayAvailabilityEntity item, SlotTimingEntity parentTiming) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -152,7 +162,17 @@ class SlotTimingsPage extends StatelessWidget {
                   ),
                 ],
               ),
-              const Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ConfigureAvailabilityPage(timing: parentTiming),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+              ),
             ],
           ),
           const SizedBox(height: 8),

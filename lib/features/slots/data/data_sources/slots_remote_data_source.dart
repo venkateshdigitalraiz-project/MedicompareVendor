@@ -6,6 +6,7 @@ import '../models/slot_timing_model.dart';
 
 abstract class SlotsRemoteDataSource {
   Future<List<SlotTimingModel>> getSlotTimings();
+  Future<SlotTimingModel> updateSlotTimings(String id, SlotTimingModel model);
 }
 
 class SlotsRemoteDataSourceImpl implements SlotsRemoteDataSource {
@@ -32,6 +33,31 @@ class SlotsRemoteDataSourceImpl implements SlotsRemoteDataSource {
         return timingsList.map((e) => SlotTimingModel.fromJson(e)).toList();
       } else {
         throw Exception(jsonResponse['message'] ?? 'Failed to load slot timings');
+      }
+    } else {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<SlotTimingModel> updateSlotTimings(String id, SlotTimingModel model) async {
+    final token = await TokenStorage.getToken();
+    
+    final response = await client.post(
+      Uri.parse(ApiEndpoints.updateSlotTimings(id)),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(model.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['success']) {
+        return SlotTimingModel.fromJson(jsonResponse['data']);
+      } else {
+        throw Exception(jsonResponse['message'] ?? 'Failed to update slot timings');
       }
     } else {
       throw Exception('Server error: ${response.statusCode}');

@@ -18,6 +18,17 @@ class SlotTimingModel extends SlotTimingEntity {
       updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'availability': availability.map((e) => {
+        'day': e.day,
+        'isOpen': e.isOpen,
+        'startTime': e.startTime,
+        'endTime': e.endTime,
+      }).toList(),
+    };
+  }
 }
 
 class DayAvailabilityModel extends DayAvailabilityEntity {
@@ -37,5 +48,14 @@ class DayAvailabilityModel extends DayAvailabilityEntity {
       endTime: json['endTime'] ?? '17:00',
       id: json['_id'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'day': day,
+      'isOpen': isOpen,
+      'startTime': startTime,
+      'endTime': endTime,
+    };
   }
 }
