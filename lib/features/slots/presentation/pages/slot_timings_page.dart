@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/utils/token_storage.dart';
 import '../bloc/slots_bloc.dart';
 import '../bloc/slots_event.dart';
@@ -14,26 +15,36 @@ class SlotTimingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FF),
-      body: BlocListener<SlotsBloc, SlotsState>(
-        listener: (context, state) {
-          if (state is SlotsError && state.message.contains('UNAUTHORIZED')) {
-            TokenStorage.clearAll().then((_) {
-              if (context.mounted) {
-                context.go('/login');
-              }
-            });
-          }
-        },
-        child: BlocBuilder<SlotsBloc, SlotsState>(
-          builder: (context, state) {
-            if (state is SlotsLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is SlotsLoaded) {
-              return _buildContent(context, state.timings);
-            } else if (state is SlotsError) {
-              return Center(
+    return BlocListener<SlotsBloc, SlotsState>(
+      listener: (context, state) {
+        if (state is SlotsError && state.message.contains('UNAUTHORIZED')) {
+          TokenStorage.clearAll().then((_) {
+            if (context.mounted) {
+              context.go('/login');
+            }
+          });
+        }
+      },
+      child: BlocBuilder<SlotsBloc, SlotsState>(
+        builder: (context, state) {
+          if (state is SlotsLoading) {
+            return const Scaffold(
+              backgroundColor: Color(0xFFF3F6FF),
+              body: Center(child: CircularProgressIndicator()),
+            );
+          } else if (state is SlotsLoaded) {
+            return Scaffold(
+              backgroundColor: const Color(0xFFF3F6FF),
+              appBar: const CustomHomeAppBar(
+                title: "Slot Timings",
+                subtitle: "Manage your weekly availability",
+              ),
+              body: _buildContent(context, state.timings),
+            );
+          } else if (state is SlotsError) {
+            return Scaffold(
+              backgroundColor: const Color(0xFFF3F6FF),
+              body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -45,11 +56,11 @@ class SlotTimingsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -58,79 +69,53 @@ class SlotTimingsPage extends StatelessWidget {
     // Usually there's only one timing document for a vendor
     final availability = timings.isNotEmpty ? timings.first.availability : [];
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// HEADER
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Slot Timings Management",
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Manage your weekly availability timings",
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Availability Grid",
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  height: 40,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      "Configure",
-                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// GRID OF CARDS
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.98, // Taller cards to prevent vertical overflow
               ),
-              itemCount: availability.length,
-              itemBuilder: (context, index) {
-                return _buildTimingCard(availability[index]);
-              },
-            ),
+              TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.settings_outlined, size: 16),
+                label: const Text("Configure"),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        /// GRID OF CARDS
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.98, // Taller cards to prevent vertical overflow
+            ),
+            itemCount: availability.length,
+            itemBuilder: (context, index) {
+              return _buildTimingCard(availability[index]);
+            },
+          ),
+        ),
+      ],
     );
   }
 

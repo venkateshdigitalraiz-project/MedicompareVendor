@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/utils/token_storage.dart';
 import '../bloc/pincodes_bloc.dart';
 import '../bloc/pincodes_event.dart';
@@ -29,21 +30,34 @@ class PincodesPage extends StatelessWidget {
         child: BlocBuilder<PincodesBloc, PincodesState>(
           builder: (context, state) {
             if (state is PincodesLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Scaffold(
+                backgroundColor: Color(0xFFF3F6FF),
+                body: Center(child: CircularProgressIndicator()),
+              );
             } else if (state is PincodesLoaded) {
-              return _buildContent(context, state.pincodes);
+              return Scaffold(
+                backgroundColor: const Color(0xFFF3F6FF),
+                appBar: const CustomHomeAppBar(
+                  title: "Pincode Management",
+                  subtitle: "Manage your service area pincodes",
+                ),
+                body: _buildContent(context, state.pincodes),
+              );
             } else if (state is PincodesError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(state.message, style: const TextStyle(color: Colors.red)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => context.read<PincodesBloc>().add(GetPincodesEvent()),
-                      child: const Text("Retry"),
-                    ),
-                  ],
+              return Scaffold(
+                backgroundColor: const Color(0xFFF3F6FF),
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(state.message, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => context.read<PincodesBloc>().add(GetPincodesEvent()),
+                        child: const Text("Retry"),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
@@ -55,59 +69,12 @@ class PincodesPage extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, List<PincodeDataEntity> pincodes) {
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// HEADER
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Pincode Management",
-                        style: GoogleFonts.inter(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Manage your service area pincodes",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 40,
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text("Add Pincode"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
 
-          /// LIST OF PINCODES
+        /// LIST OF PINCODES
           Expanded(
             child: pincodes.isEmpty
                 ? Center(
@@ -125,8 +92,7 @@ class PincodesPage extends StatelessWidget {
                   ),
           ),
         ],
-      ),
-    );
+      );
   }
 
   Widget _buildPincodeCard(PincodeDataEntity item) {
