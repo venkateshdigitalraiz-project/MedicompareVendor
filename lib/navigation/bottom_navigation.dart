@@ -1,9 +1,9 @@
-import 'package:MediCompare/features/earnings/presentation/pages/earnings.dart';
-import 'package:MediCompare/features/orders/presentation/pages/order_page.dart';
+import 'package:MediCompare/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:MediCompare/features/pincodes/presentation/pages/pincodes_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
+import 'package:MediCompare/features/slots/presentation/pages/slot_timings_page.dart';
 import 'package:flutter/material.dart';
 
-import '../features/home/presentation/pages/home_page.dart';
 import '../core/constants/app_colors.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -17,9 +17,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    HomePage(),
-    OrdersPage(),
-    EarningsPage(),
+    DashboardPage(),
+    SlotTimingsPage(),
+    PincodesPage(),
     MainprofileScreen(),
   ];
 
@@ -37,21 +37,21 @@ class _BottomNavigationState extends State<BottomNavigation> {
         type: BottomNavigationBarType.fixed,
         backgroundColor: AppColors.white,
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.greyText,
+        unselectedItemColor: AppColors.grey,
         showUnselectedLabels: true,
 
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.lock),
-            label: "Orders",
+            icon: Icon(Icons.access_time),
+            label: "Slot Timings",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money),
-            label: "Earnings",
+            icon: Icon(Icons.location_on),
+            label: "Pincodes",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

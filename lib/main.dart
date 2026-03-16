@@ -1,17 +1,43 @@
+import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'router/app_router.dart';
+
 import 'features/auth/auth_injection.dart';
 import 'features/auth/presentation/providers/register_provider.dart';
-import 'features/vendor_profile/vendor_profile_injection.dart';
+import 'features/dashboard/dashboard_injection.dart';
+import 'features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
+import 'features/vendor_profile/vendor_profile_injection.dart';
+import 'router/app_router.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Check for persisted token
+  final token = await TokenStorage.getToken();
+  final String initialLocation = token != null ? '/bottom-nav' : '/login';
+
+  runApp(MyApp(initialLocation: initialLocation));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  final String initialLocation;
+  const MyApp({super.key, required this.initialLocation});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createAppRouter(widget.initialLocation);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +50,20 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => VendorProfileProvider(
-            updateStepOneUseCase: VendorProfileInjection.provideUpdateStepOneUseCase(),
-            updateStepTwoUseCase: VendorProfileInjection.provideUpdateStepTwoUseCase(),
+            updateStepOneUseCase:
+                VendorProfileInjection.provideUpdateStepOneUseCase(),
+            updateStepTwoUseCase:
+                VendorProfileInjection.provideUpdateStepTwoUseCase(),
           ),
+        ),
+        BlocProvider(
+          create: (_) => DashboardInjection.provideDashboardBloc()
+            ..add(GetDashboardEvent()),
         ),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        routerConfig: appRouter,
+        routerConfig: _router,
       ),
     );
   }

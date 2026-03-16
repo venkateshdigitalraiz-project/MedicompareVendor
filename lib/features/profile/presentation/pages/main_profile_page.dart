@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/core/utils/token_storage.dart';
 
 class MainprofileScreen extends StatefulWidget {
   const MainprofileScreen({super.key});
@@ -231,9 +232,12 @@ class _ProfilePageState extends State<MainprofileScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close dialog
-                context.go('/login'); // Navigate to login
+              onPressed: () async {
+                await TokenStorage.clearAll();
+                if (context.mounted) {
+                  Navigator.pop(context); // Close dialog
+                  context.go('/login'); // Navigate to login
+                }
               },
               child: Text(
                 "Logout",

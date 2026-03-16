@@ -32,8 +32,8 @@ import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_bus
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
-final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+GoRouter createAppRouter(String initialLocation) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
     GoRoute(
       path: '/login',

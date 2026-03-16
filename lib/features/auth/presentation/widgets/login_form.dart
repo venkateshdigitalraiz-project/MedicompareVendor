@@ -1,10 +1,14 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:MediCompare/features/auth/auth_injection.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import '../../../../features/dashboard/presentation/bloc/dashboard_event.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -52,17 +56,22 @@ class _LoginFormState extends State<LoginForm> {
         // Sync vendor to VendorProfileProvider
         Provider.of<VendorProfileProvider>(context, listen: false).setVendor(vendor);
 
-        setState(() {
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
-        
-        // Check if profile is completed, if not go to step 1
-        if (!vendor.isProfileCompleted) {
-          context.go('/step1-personal-details');
-        } else {
+        // Save token and vendor ID for persistence
+        await TokenStorage.saveToken(vendor.token);
+        await TokenStorage.saveVendorId(vendor.id);
+
+        if (mounted) {
+          // Refresh dashboard data with new token
+          context.read<DashboardBloc>().add(GetDashboardEvent());
+          
+          setState(() {
+            isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login successful!')),
+          );
+          
+          // Directly navigate to bottom-nav (Home) as requested
           context.go('/bottom-nav');
         }
       }
@@ -212,28 +221,28 @@ class _LoginFormState extends State<LoginForm> {
 
             const SizedBox(height: 22),
 
-            /// REGISTER
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "New Vendor? ",
-                  style: GoogleFonts.poppins(fontSize: 12),
-                ),
-                TextButton(
-                  onPressed: () {
-                    context.push('/register');
-                  },
-                  child: Text(
-                    "Register Here",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // /// REGISTER
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     Text(
+            //       "New Vendor? ",
+            //       style: GoogleFonts.poppins(fontSize: 12),
+            //     ),
+            //     TextButton(
+            //       onPressed: () {
+            //         context.push('/register');
+            //       },
+            //       child: Text(
+            //         "Register Here",
+            //         style: GoogleFonts.poppins(
+            //           fontSize: 12,
+            //           color: AppColors.primary,
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
 
             const SizedBox(height: 20),
           ],
