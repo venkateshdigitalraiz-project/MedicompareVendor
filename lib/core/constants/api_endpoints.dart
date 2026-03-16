@@ -14,4 +14,5 @@ class ApiEndpoints {
   static String get slotTimings => '$baseUrl/vendor/vendor-timings/list';
   static String get pincodeList => '$baseUrl/vendor/pincode/list';
   static String get orderList => '$baseUrl/vendor/order/list';
+  static String get leadsList => '$baseUrl/vendor/leads/list';
 }

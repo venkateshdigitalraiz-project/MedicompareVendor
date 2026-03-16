@@ -203,6 +203,14 @@ class DashboardPage extends StatelessWidget {
                   Icons.group_outlined,
                   Colors.purple,
                 ),
+                _buildComparisonCard(
+                  "This Month Rating",
+                  dashboard.rating.currentMonthRating.toString(),
+                  dashboard.rating.ratingPercentageChange,
+                  dashboard.rating.ratingStatus,
+                  Icons.star_outline,
+                  Colors.orange,
+                ),
               ],
             ),
           ),
@@ -219,7 +227,7 @@ class DashboardPage extends StatelessWidget {
                       .take(5)
                       .map((product) => _buildTopProductItem(product)),
                   const SizedBox(height: 32),
-                  _buildSectionHeader("Recent Leads", () {}),
+                  _buildSectionHeader("Recent Leads", () => context.push('/leads')),
                   const SizedBox(height: 12),
                   ...dashboard.recentLeads
                       .take(5)

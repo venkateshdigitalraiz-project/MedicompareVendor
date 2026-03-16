@@ -14,6 +14,8 @@ import 'features/pincodes/pincodes_injection.dart';
 import 'features/pincodes/presentation/bloc/pincodes_event.dart';
 import 'features/orders/orders_injection.dart';
 import 'features/orders/presentation/bloc/orders_event.dart';
+import 'features/leads/leads_injection.dart';
+import 'features/leads/presentation/bloc/leads_event.dart';
 import 'features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
 import 'features/vendor_profile/vendor_profile_injection.dart';
 import 'router/app_router.dart';
@@ -74,6 +76,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => OrdersInjection.provideOrdersBloc()..add(const GetOrdersEvent()),
+        ),
+        BlocProvider(
+          create: (_) => LeadsInjection.provideLeadsBloc()..add(const GetLeadsEvent()),
         ),
       ],
       child: MaterialApp.router(
