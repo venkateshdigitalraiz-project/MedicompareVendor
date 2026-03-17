@@ -162,6 +162,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
               context.push('/subscription-plan');
             }),
+            _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
+              context.push('/lead-plan-history');
+            }),
             _menuTile("Banking Information", Icons.account_balance, () {
               context.push('/bank-info');
             }),

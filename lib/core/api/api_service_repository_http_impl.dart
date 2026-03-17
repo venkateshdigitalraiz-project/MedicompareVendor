@@ -348,6 +348,11 @@ class ApiServiceRepositoryHttpImplementation implements ApiServiceRepository {
   }
 
   Future<http.Response> _handleResponse(http.Response response) async {
+    if (response.statusCode == 401) {
+      // Clear token globally if needed, but throwing a unique error is better for Bloc/UI handling
+      throw ServerException("UNAUTHORIZED_ACCESS_401");
+    }
+
     if ((response.statusCode >= 200 && response.statusCode < 300) ||
         response.statusCode == 304) {
       return response;

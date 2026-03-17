@@ -46,10 +46,10 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFF),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryDark,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E1B4B)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             final state = context.read<TicketsBloc>().state;
             if (state is TicketsLoaded && 
@@ -69,14 +69,14 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF1E1B4B),
+                color: Colors.white,
               ),
             ),
             Text(
               "Chat with support team and manage your tickets",
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: Colors.grey,
+                color: Colors.white.withOpacity(0.8),
                 fontWeight: FontWeight.w400,
               ),
             ),
