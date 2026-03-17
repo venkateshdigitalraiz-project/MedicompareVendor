@@ -1,4 +1,4 @@
-import 'package:http/http.dart' as http;
+import '../../core/utils/core_injection.dart';
 import 'data/data_sources/dashboard_remote_data_source.dart';
 import 'data/repositories/dashboard_repository_impl.dart';
 import 'domain/repositories/dashboard_repository.dart';
@@ -7,7 +7,9 @@ import 'presentation/bloc/dashboard_bloc.dart';
 
 class DashboardInjection {
   static DashboardRemoteDataSource provideRemoteDataSource() {
-    return DashboardRemoteDataSourceImpl(client: http.Client());
+    return DashboardRemoteDataSourceImpl(
+      apiService: CoreInjection.provideApiService(),
+    );
   }
 
   static DashboardRepository provideRepository() {

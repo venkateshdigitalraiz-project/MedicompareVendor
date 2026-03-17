@@ -1,55 +1,39 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/api/api_endpoints.dart';
+import '../../../../core/api/api_service_repository.dart';
 import '../../../auth/data/models/vendor_response_model.dart';
 
 class VendorProfileService {
-  final http.Client client;
+  final ApiServiceRepository apiService;
 
-  VendorProfileService({required this.client});
+  VendorProfileService({required this.apiService});
 
   Future<VendorResponseModel> updateStepOne({
-    required String token,
     required String proofType,
     required String idNumber,
     required XFile frontImage,
     required XFile backImage,
     required String residentialAddress,
   }) async {
-    final request = http.MultipartRequest('POST', Uri.parse(ApiEndpoints.stepOneUpdate));
-    request.headers['Authorization'] = 'Bearer $token';
+    final response = await apiService.post(
+      ApiEndpoints.stepOneUpdate,
+      fields: {
+        'proofType': proofType,
+        'adharnumber': idNumber,
+        'residentaladdress': residentialAddress,
+      },
+      files: {
+        'adhaarfrontimage': File(frontImage.path),
+        'adhaarbackimage': File(backImage.path),
+      },
+    );
 
-    request.fields['proofType'] = proofType;
-    request.fields['adharnumber'] = idNumber; // Based on API response keys
-    request.fields['residentaladdress'] = residentialAddress;
-
-    final frontBytes = await frontImage.readAsBytes();
-    request.files.add(http.MultipartFile.fromBytes(
-      'adhaarfrontimage',
-      frontBytes,
-      filename: frontImage.name,
-    ));
-
-    final backBytes = await backImage.readAsBytes();
-    request.files.add(http.MultipartFile.fromBytes(
-      'adhaarbackimage',
-      backBytes,
-      filename: backImage.name,
-    ));
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return VendorResponseModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to update step one: ${response.body}');
-    }
+    return VendorResponseModel.fromJson(jsonDecode(response.body));
   }
 
   Future<VendorResponseModel> updateStepTwo({
-    required String token,
     required String name,
     required String businessLegalName,
     required String email,
@@ -60,13 +44,9 @@ class VendorProfileService {
     required double lng,
     required List<String> categoryIds,
   }) async {
-    final response = await client.post(
-      Uri.parse(ApiEndpoints.stepTwoUpdate),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
+    final response = await apiService.post(
+      ApiEndpoints.stepTwoUpdate,
+      body: {
         'name': name,
         'bussinesslegalname': businessLegalName,
         'email': email,
@@ -75,17 +55,13 @@ class VendorProfileService {
         'address': address,
         'location': {
           'type': 'Point',
-          'coordinates': [lng, lat], // [longitude, latitude] as per requirements
+          'coordinates': [lng, lat],
           'address': address,
         },
         'categoryIds': categoryIds,
-      }),
+      },
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return VendorResponseModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to update step two: ${response.body}');
-    }
+    return VendorResponseModel.fromJson(jsonDecode(response.body));
   }
 }

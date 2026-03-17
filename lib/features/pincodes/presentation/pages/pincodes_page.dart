@@ -319,7 +319,7 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
             const SizedBox(height: 16),
             _buildFieldLabel("Pincode *", Icons.location_on_outlined),
             const SizedBox(height: 8),
-            _buildTextField(_pincodeController, "Enter Pincode"),
+            _buildTextField(_pincodeController, "Enter Pincode", readOnly: isEdit),
             const SizedBox(height: 16),
             _buildFieldLabel("Estimated Delivery *", Icons.local_shipping_outlined),
             const SizedBox(height: 8),
@@ -401,10 +401,13 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint) {
+  Widget _buildTextField(TextEditingController controller, String hint, {bool readOnly = false}) {
     return TextField(
       controller: controller,
+      readOnly: readOnly,
       decoration: InputDecoration(
+        filled: readOnly,
+        fillColor: readOnly ? Colors.grey[100] : null,
         hintText: hint,
         hintStyle: GoogleFonts.inter(fontSize: 13, color: Colors.grey[400]),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

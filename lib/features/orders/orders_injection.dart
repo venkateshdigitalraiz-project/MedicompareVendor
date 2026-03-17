@@ -1,4 +1,4 @@
-import 'package:http/http.dart' as http;
+import '../../core/utils/core_injection.dart';
 import 'data/datasources/orders_remote_data_source.dart';
 import 'data/repositories/orders_repository_impl.dart';
 import 'domain/repositories/orders_repository.dart';
@@ -29,6 +29,8 @@ class OrdersInjection {
   }
 
   static OrdersRemoteDataSource provideOrdersRemoteDataSource() {
-    return OrdersRemoteDataSourceImpl(client: http.Client());
+    return OrdersRemoteDataSourceImpl(
+      apiService: CoreInjection.provideApiService(),
+    );
   }
 }

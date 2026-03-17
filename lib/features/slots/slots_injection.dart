@@ -1,4 +1,4 @@
-import 'package:http/http.dart' as http;
+import '../../core/utils/core_injection.dart';
 import 'data/data_sources/slots_remote_data_source.dart';
 import 'data/repositories/slots_repository_impl.dart';
 import 'domain/repositories/slots_repository.dart';
@@ -8,7 +8,9 @@ import 'presentation/bloc/slots_bloc.dart';
 
 class SlotsInjection {
   static SlotsRemoteDataSource provideRemoteDataSource() {
-    return SlotsRemoteDataSourceImpl(client: http.Client());
+    return SlotsRemoteDataSourceImpl(
+      apiService: CoreInjection.provideApiService(),
+    );
   }
 
   static SlotsRepository provideRepository() {

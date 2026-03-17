@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../../../core/constants/api_endpoints.dart';
-import '../../../../core/utils/token_storage.dart';
+import '../../../../core/api/api_endpoints.dart';
+import '../../../../core/api/api_service_repository.dart';
 import '../models/slot_timing_model.dart';
 
 abstract class SlotsRemoteDataSource {
@@ -10,57 +9,25 @@ abstract class SlotsRemoteDataSource {
 }
 
 class SlotsRemoteDataSourceImpl implements SlotsRemoteDataSource {
-  final http.Client client;
+  final ApiServiceRepository apiService;
 
-  SlotsRemoteDataSourceImpl({required this.client});
+  SlotsRemoteDataSourceImpl({required this.apiService});
 
   @override
   Future<List<SlotTimingModel>> getSlotTimings() async {
-    final token = await TokenStorage.getToken();
-    
-    final response = await client.get(
-      Uri.parse(ApiEndpoints.slotTimings),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      if (jsonResponse['success']) {
-        final List timingsList = jsonResponse['data']['vendorTimings'];
-        return timingsList.map((e) => SlotTimingModel.fromJson(e)).toList();
-      } else {
-        throw Exception(jsonResponse['message'] ?? 'Failed to load slot timings');
-      }
-    } else {
-      throw Exception('Server error: ${response.statusCode}');
-    }
+    final response = await apiService.get(ApiEndpoints.slotTimings);
+    final jsonResponse = json.decode(response.body);
+    final List timingsList = jsonResponse['data']['vendorTimings'];
+    return timingsList.map((e) => SlotTimingModel.fromJson(e)).toList();
   }
 
   @override
   Future<SlotTimingModel> updateSlotTimings(String id, SlotTimingModel model) async {
-    final token = await TokenStorage.getToken();
-    
-    final response = await client.post(
-      Uri.parse(ApiEndpoints.updateSlotTimings(id)),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode(model.toJson()),
+    final response = await apiService.post(
+      ApiEndpoints.updateSlotTimings(id),
+      body: model.toJson(),
     );
-
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      if (jsonResponse['success']) {
-        return SlotTimingModel.fromJson(jsonResponse['data']);
-      } else {
-        throw Exception(jsonResponse['message'] ?? 'Failed to update slot timings');
-      }
-    } else {
-      throw Exception('Server error: ${response.statusCode}');
-    }
+    final jsonResponse = json.decode(response.body);
+    return SlotTimingModel.fromJson(jsonResponse['data']);
   }
 }

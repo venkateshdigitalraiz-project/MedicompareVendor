@@ -1,4 +1,4 @@
-import 'package:http/http.dart' as http;
+import '../../core/utils/core_injection.dart';
 import 'data/data_sources/pincodes_remote_data_source.dart';
 import 'data/repositories/pincodes_repository_impl.dart';
 import 'domain/repositories/pincodes_repository.dart';
@@ -10,7 +10,9 @@ import 'presentation/bloc/pincodes_bloc.dart';
 
 class PincodesInjection {
   static PincodesRemoteDataSource provideRemoteDataSource() {
-    return PincodesRemoteDataSourceImpl(client: http.Client());
+    return PincodesRemoteDataSourceImpl(
+      apiService: CoreInjection.provideApiService(),
+    );
   }
 
   static PincodesRepository provideRepository() {

@@ -18,7 +18,6 @@ class VendorProfileRepositoryImpl implements VendorProfileRepository {
     required String residentialAddress,
   }) async {
     final responseModel = await service.updateStepOne(
-      token: token,
       proofType: proofType,
       idNumber: idNumber,
       frontImage: frontImage,
@@ -50,7 +49,6 @@ class VendorProfileRepositoryImpl implements VendorProfileRepository {
     required List<String> categoryIds,
   }) async {
     final responseModel = await service.updateStepTwo(
-      token: token,
       name: name,
       businessLegalName: businessLegalName,
       email: email,
