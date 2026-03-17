@@ -159,6 +159,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Documents", Icons.description_outlined, () {
               context.push('/documents');
             }),
+            _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
+              context.push('/subscription-plan');
+            }),
             _menuTile("Banking Information", Icons.account_balance, () {
               context.push('/bank-info');
             }),

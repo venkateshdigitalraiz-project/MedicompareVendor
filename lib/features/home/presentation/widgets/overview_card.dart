@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/theme/app_text.dart';
+import '../../../../core/constants/app_text.dart';
 
 class OverviewCard extends StatelessWidget {
   final String title;

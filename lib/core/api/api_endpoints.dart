@@ -21,4 +21,6 @@ class ApiEndpoints {
   static const String createTicket = '/vendor/support/tickets/create';
   static const String listTickets = '/vendor/support/tickets/list';
   static const String sendMessage = '/vendor/support/tickets/message';
+  static const String leadsSubscriptionHistory = '/vendor/leads-subscription/history';
+  static const String leadsSubscriptionList = '/vendor/leads-subscription/list';
 }

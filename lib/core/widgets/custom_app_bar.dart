@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../constants/app_colors.dart';
 
 class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -21,9 +20,6 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final formatter = DateFormat('EEE, d MMM');
-    final dateStr = formatter.format(now);
 
     return AppBar(
       backgroundColor: AppColors.primary,
@@ -53,31 +49,6 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        // Date Display
-        // Container(
-        //   margin: const EdgeInsets.symmetric(vertical: 22),
-        //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        //   decoration: BoxDecoration(
-        //     color: AppColors.primary.withOpacity(0.08),
-        //     borderRadius: BorderRadius.circular(20),
-        //   ),
-        //   child: Row(
-        //     children: [
-        //       Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.primary),
-        //       const SizedBox(width: 6),
-        //       Text(
-        //         dateStr,
-        //         style: GoogleFonts.inter(
-        //           fontSize: 12,
-        //           fontWeight: FontWeight.w600,
-        //           color: AppColors.primary,
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
-        // const SizedBox(width: 8),
-        // Notifications
         IconButton(
           onPressed: () {},
           icon: const Stack(

@@ -20,7 +20,9 @@ import 'features/vendor_profile/presentation/providers/vendor_profile_provider.d
 import 'features/vendor_profile/vendor_profile_injection.dart';
 import 'features/tickets/tickets_injection.dart';
 import 'features/tickets/presentation/bloc/tickets_event.dart';
-import 'router/app_router.dart';
+import 'features/subscription/subscription_injection.dart';
+import 'features/subscription/presentation/bloc/subscription_event.dart';
+import 'core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -85,6 +87,9 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(
           create: (_) =>
               TicketsInjection.provideTicketsBloc()..add(LoadTicketsEvent()),
+        ),
+        BlocProvider(
+          create: (_) => SubscriptionInjection.provideBloc()..add(LoadSubscriptionDataEvent()),
         ),
       ],
       child: MaterialApp.router(

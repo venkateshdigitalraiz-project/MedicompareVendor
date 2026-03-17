@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/theme/app_text.dart';
+import '../../../../core/constants/app_text.dart';
 
 class RecentMedicineTile extends StatelessWidget {
   final String name;
