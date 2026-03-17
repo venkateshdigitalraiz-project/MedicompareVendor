@@ -2,11 +2,13 @@ import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:MediCompare/features/auth/auth_injection.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../../features/dashboard/presentation/bloc/dashboard_event.dart';
 
@@ -185,7 +187,7 @@ class _LoginFormState extends State<LoginForm> {
               ],
             ),
 
-            const SizedBox(height: 128),
+            const SizedBox(height: 50),
 
             /// LOGIN BUTTON
             SizedBox(
@@ -218,31 +220,39 @@ class _LoginFormState extends State<LoginForm> {
                       ),
               ),
             ),
-
             const SizedBox(height: 22),
 
-            // /// REGISTER
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Text(
-            //       "New Vendor? ",
-            //       style: GoogleFonts.poppins(fontSize: 12),
-            //     ),
-            //     TextButton(
-            //       onPressed: () {
-            //         context.push('/register');
-            //       },
-            //       child: Text(
-            //         "Register Here",
-            //         style: GoogleFonts.poppins(
-            //           fontSize: 12,
-            //           color: AppColors.primary,
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
+            /// REGISTER
+            RichText(
+              text: TextSpan(
+                text: "Want to become a member? ",
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+                children: [
+                  TextSpan(
+                    text: "Create an account.",
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        final url = Uri.parse('https://vendor.medicompares.com/register');
+                        try {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        } catch (e) {
+                          debugPrint('Could not launch URL: $e');
+                          // Fallback to in-app if external fails
+                          await launchUrl(url, mode: LaunchMode.platformDefault);
+                        }
+                      },
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 20),
           ],

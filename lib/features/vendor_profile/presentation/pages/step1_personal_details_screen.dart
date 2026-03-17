@@ -7,7 +7,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/vendor_profile_provider.dart';
-import '../../vendor_profile_injection.dart';
+
 
 class Step1PersonalDetailsScreen extends StatefulWidget {
   const Step1PersonalDetailsScreen({super.key});
