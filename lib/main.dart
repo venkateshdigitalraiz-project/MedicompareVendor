@@ -18,6 +18,8 @@ import 'features/leads/leads_injection.dart';
 import 'features/leads/presentation/bloc/leads_event.dart';
 import 'features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
 import 'features/vendor_profile/vendor_profile_injection.dart';
+import 'features/tickets/tickets_injection.dart';
+import 'features/tickets/presentation/bloc/tickets_event.dart';
 import 'router/app_router.dart';
 
 void main() async {
@@ -79,6 +81,10 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => LeadsInjection.provideLeadsBloc()..add(const GetLeadsEvent()),
+        ),
+        BlocProvider(
+          create: (_) =>
+              TicketsInjection.provideTicketsBloc()..add(LoadTicketsEvent()),
         ),
       ],
       child: MaterialApp.router(

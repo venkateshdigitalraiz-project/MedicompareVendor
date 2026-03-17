@@ -18,4 +18,7 @@ class ApiEndpoints {
   static const String orderList = '/vendor/order/list';
   static const String orderDetails = '/vendor/order/details';
   static const String leadsList = '/vendor/leads/list';
+  static const String createTicket = '/vendor/support/tickets/create';
+  static const String listTickets = '/vendor/support/tickets/list';
+  static const String sendMessage = '/vendor/support/tickets/message';
 }

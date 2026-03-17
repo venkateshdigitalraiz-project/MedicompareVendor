@@ -162,8 +162,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Banking Information", Icons.account_balance, () {
               context.push('/bank-info');
             }),
-            _menuTile("Ticket List", Icons.support_agent, () {
-              context.push('/tickets-page');
+            _menuTile("Support & Help Center", Icons.support_agent, () {
+              context.push('/support-ticket');
             }),
 
             const SizedBox(height: 55),

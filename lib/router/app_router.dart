@@ -16,17 +16,13 @@ import 'package:MediCompare/features/home/presentation/pages/medicines_page.dart
 import 'package:MediCompare/features/home/presentation/pages/notification_page.dart';
 import 'package:MediCompare/features/home/presentation/pages/report_page.dart';
 import 'package:MediCompare/features/home/presentation/pages/sales_viewall.dart';
-import 'package:MediCompare/features/home/presentation/pages/ticket_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/bank_information_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/business_information_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/change_password_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/documents_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
-import 'package:MediCompare/features/profile/presentation/pages/support_ticket_screen.dart';
-import 'package:MediCompare/features/tickets/presentation/pages/generate_new_ticket.dart';
-import 'package:MediCompare/features/tickets/presentation/pages/generated_ticket.dart';
-import 'package:MediCompare/features/tickets/presentation/pages/view_ticket.dart';
+import 'package:MediCompare/features/tickets/presentation/pages/support_help_center_page.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/pages/step1_personal_details_screen.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_business_details_screen.dart';
 import 'package:MediCompare/features/orders/presentation/pages/order_page.dart';
@@ -87,10 +83,6 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
       builder: (_, __) => const HomePage(),
     ),
     GoRoute(
-      path: '/tickets-page',
-      builder: (_, __) => const TicketPage(),
-    ),
-    GoRoute(
       path: '/notification',
       builder: (_, __) => const NotificationPage(),
     ),
@@ -144,19 +136,7 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     ),
     GoRoute(
       path: '/support-ticket',
-      builder: (_, __) => const SupportTicketScreen(),
-    ),
-    GoRoute(
-      path: '/generate-ticket',
-      builder: (_, __) => const GenerateNewTicket(),
-    ),
-    GoRoute(
-      path: '/generated-ticket',
-      builder: (_, __) => const GeneratedTicket(),
-    ),
-    GoRoute(
-      path: '/view-ticket',
-      builder: (_, __) => const ViewTicket(),
+      builder: (_, __) => const SupportHelpCenterPage(),
     ),
      GoRoute(
       path: '/recent-earnings',
