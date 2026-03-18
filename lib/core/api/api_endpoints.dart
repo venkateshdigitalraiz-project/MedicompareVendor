@@ -25,4 +25,11 @@ class ApiEndpoints {
   static const String leadsSubscriptionList = '/vendor/leads-subscription/list';
   static const String leadsSubscriptionCreateOrder = '/vendor/leads-subscription/payment/create-order';
   static const String leadsSubscriptionPurchase = '/vendor/leads-subscription/purchase';
+  static const String medicineCategories = '/common/allcategory/medicine';
+  static const String medicineList = '/vendor/product/medicine/list';
+  static const String medicineDropdownSearch = '/common/tablets';
+  static const String createMedicine = '/vendor/product/medicine/create';
+  static String vendorMedicineDetails(String id) => '/vendor/product/medicine/details/$id';
+  static String updateMedicine(String id) => '/vendor/product/medicine/update/$id';
+  static String deleteMedicine(String id) => '/vendor/product/medicine/delete/$id';
 }

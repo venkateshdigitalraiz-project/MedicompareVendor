@@ -165,6 +165,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
               context.push('/lead-plan-history');
             }),
+            _menuTile("Medicines", Icons.medication_outlined, () {
+              context.push('/medicine-list');
+            }),
             _menuTile("Banking Information", Icons.account_balance, () {
               context.push('/bank-info');
             }),

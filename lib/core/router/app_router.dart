@@ -28,6 +28,9 @@ import 'package:MediCompare/features/leads/presentation/pages/leads_page.dart';
 import 'package:MediCompare/features/subscription/presentation/pages/subscription_plan_page.dart';
 import 'package:MediCompare/features/subscription/presentation/pages/lead_plan_history_page.dart';
 import 'package:MediCompare/features/orders/presentation/pages/order_details_page.dart';
+import 'package:MediCompare/features/medicine/presentation/pages/medicine_list_page.dart';
+import 'package:MediCompare/features/medicine/presentation/pages/medicine_details_page.dart';
+import 'package:MediCompare/features/medicine/data/models/medicine_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -153,6 +156,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/lead-plan-history',
       builder: (_, __) => const LeadPlanHistoryPage(),
+    ),
+    GoRoute(
+      path: '/medicine-list',
+      builder: (_, __) => const MedicineListPage(),
+    ),
+    GoRoute(
+      path: '/medicine-details',
+      builder: (context, state) => MedicineDetailsPage(medicine: state.extra as MedicineItem),
     ),
     GoRoute(
       path: '/order-details/:id',
