@@ -28,3 +28,36 @@ class SubscriptionError extends SubscriptionState {
   @override
   List<Object?> get props => [message];
 }
+
+class OrderProcessing extends SubscriptionState {}
+
+class OrderCreated extends SubscriptionState {
+  final String orderId;
+  final int amount;
+  final dynamic plan;
+
+  OrderCreated({required this.orderId, required this.amount, required this.plan});
+
+  @override
+  List<Object?> get props => [orderId, amount, plan];
+}
+
+class OrderFailure extends SubscriptionState {
+  final String message;
+
+  OrderFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class PurchaseProcessing extends SubscriptionState {}
+
+class PurchaseSuccess extends SubscriptionState {
+  final String message;
+
+  PurchaseSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

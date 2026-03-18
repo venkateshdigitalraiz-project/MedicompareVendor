@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class SubscriptionPlanPage extends StatefulWidget {
   const SubscriptionPlanPage({super.key});
@@ -15,60 +16,129 @@ class SubscriptionPlanPage extends StatefulWidget {
 }
 
 class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
+  late Razorpay _razorpay;
+  static const String _razorpayKey = "rzp_test_RsHwplQ9ACSY5s";
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Payment failed: ${response.message}")),
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("External wallet selected: ${response.walletName}")),
+    );
+  }
+
+  void _openCheckout(String orderId, int amount, String planName) {
+    var options = {
+      'key': _razorpayKey,
+      'amount': amount * 100, // Amount is in paise
+      'name': 'MediCompare',
+      'description': planName,
+      'timeout': 300, // in seconds
+      'prefill': {
+        'contact': '', // Optional: Fill from user profile
+        'email': '', // Optional: Fill from user profile
+      }
+    };
+
+    if (orderId.isNotEmpty) {
+      options['order_id'] = orderId;
+    }
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FF),
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryDark,
-        elevation: 0,
-        title: Text(
-          "My Subscription Plan",
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    return BlocListener<SubscriptionBloc, SubscriptionState>(
+      listener: (context, state) {
+        if (state is OrderCreated) {
+          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          _openCheckout(state.orderId, state.amount, state.plan.name);
+        } else if (state is OrderFailure) {
+          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to initiate payment: ${state.message}")),
+          );
+        } else if (state is PurchaseSuccess) {
+          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Plan upgraded successfully!")),
+          );
+        } else if (state is OrderProcessing || state is PurchaseProcessing) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(child: CircularProgressIndicator()),
+          );
+        } else if (state is SubscriptionError) {
+          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF3F6FF),
+        appBar: AppBar(
+          backgroundColor: AppColors.primaryDark,
+          elevation: 0,
+          title: Text(
+            "My Subscription Plan",
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: BlocBuilder<SubscriptionBloc, SubscriptionState>(
-        builder: (context, state) {
-          if (state is SubscriptionLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is SubscriptionLoaded) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeaderCard(),
-                    const SizedBox(height: 24),
-                    Text(
-                      "Available Plans",
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E1B4B),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ...state.plans.list.map((plan) {
-                      final isCurrentPlan = state.history.currentPack?.planId == plan.id;
-                      return _buildPlanCard(plan, isCurrentPlan);
-                    }).toList(),
-                    const SizedBox(height: 32),
-                    if (state.history.planHistory.isNotEmpty) ...[
+        body: BlocBuilder<SubscriptionBloc, SubscriptionState>(
+          buildWhen: (previous, current) => 
+            current is SubscriptionLoading || 
+            current is SubscriptionLoaded || 
+            current is SubscriptionError,
+          builder: (context, state) {
+            if (state is SubscriptionLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is SubscriptionLoaded) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeaderCard(),
+                      const SizedBox(height: 24),
                       Text(
-                        "Plan History",
+                        "Available Plans",
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -76,35 +146,64 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      ...state.history.planHistory.map((history) => _buildHistoryItem(history)).toList(),
+                      ...state.plans.list.map((plan) {
+                        final isCurrentPlan = state.history.currentPack?.planId == plan.id;
+                        return _buildPlanCard(plan, isCurrentPlan);
+                      }).toList(),
+                      const SizedBox(height: 32),
+                      if (state.history.planHistory.isNotEmpty) ...[
+                        Text(
+                          "Plan History",
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ...state.history.planHistory.map((history) => _buildHistoryItem(history)).toList(),
+                      ],
                     ],
+                  ),
+                ),
+              );
+            } else if (state is SubscriptionError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(state.message),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
+                      },
+                      child: const Text("Retry"),
+                    ),
                   ],
                 ),
-              ),
-            );
-          } else if (state is SubscriptionError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(state.message),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
-                    },
-                    child: const Text("Retry"),
-                  ),
-                ],
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
+  }
+
+  // To capture plan info for success callback
+  dynamic _selectedPlan;
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    if (_selectedPlan != null && response.paymentId != null) {
+      context.read<SubscriptionBloc>().add(PurchasePlanEvent(
+        planId: _selectedPlan.id,
+        razorpayPaymentId: response.paymentId!,
+        amount: _selectedPlan.price.toInt(),
+      ));
+    }
   }
 
   Widget _buildHeaderCard() {
@@ -253,7 +352,13 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: isCurrentPlan ? null : () {
-                // Future implementation: Payment gateway
+                _selectedPlan = plan;
+                context.read<SubscriptionBloc>().add(CreateOrderEvent(
+                  amount: plan.price.toInt(),
+                  currency: "INR",
+                  receipt: "plan_${DateTime.now().millisecondsSinceEpoch}",
+                  plan: plan,
+                ));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: isCurrentPlan ? const Color(0xFFE5E7EB) : AppColors.primary,

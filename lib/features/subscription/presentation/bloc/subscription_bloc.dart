@@ -23,5 +23,38 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
         emit(SubscriptionError(message: e.toString()));
       }
     });
+
+    on<CreateOrderEvent>((event, emit) async {
+      emit(OrderProcessing());
+      try {
+        final orderId = await repository.createOrder(
+          amount: event.amount,
+          currency: event.currency,
+          receipt: event.receipt,
+        );
+        emit(OrderCreated(orderId: orderId, amount: event.amount, plan: event.plan));
+      } catch (e) {
+        emit(OrderFailure(message: e.toString()));
+      }
+    });
+
+    on<PurchasePlanEvent>((event, emit) async {
+      emit(PurchaseProcessing());
+      try {
+        final success = await repository.purchasePlan(
+          planId: event.planId,
+          razorpayPaymentId: event.razorpayPaymentId,
+          amount: event.amount,
+        );
+        if (success) {
+          emit(PurchaseSuccess(message: "Plan upgraded successfully!"));
+          add(LoadSubscriptionDataEvent()); // Refresh data
+        } else {
+          emit(SubscriptionError(message: "Failed to verify purchase. Please contact support."));
+        }
+      } catch (e) {
+        emit(SubscriptionError(message: e.toString()));
+      }
+    });
   }
 }
