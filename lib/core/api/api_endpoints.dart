@@ -32,4 +32,14 @@ class ApiEndpoints {
   static String vendorMedicineDetails(String id) => '/vendor/product/medicine/details/$id';
   static String updateMedicine(String id) => '/vendor/product/medicine/update/$id';
   static String deleteMedicine(String id) => '/vendor/product/medicine/delete/$id';
+
+  // Surgeries
+  static const String surgeryCategories = '/common/allcategory/surgeries';
+  static const String surgeryList = '/vendor/product/surgeries/list';
+  static String surgeryDetails(String id) => '/vendor/product/surgery/details/$id';
+  static const String commonSurgeries = '/common/tablets?type=surgeries';
+  static String commonSurgeryDetails(String id) => '/common/tablets/$id';
+  static const String createSurgery = '/vendor/product/surgery/create';
+  static String updateSurgery(String id) => '/vendor/product/surgery/update/$id';
+  static String deleteSurgery(String id) => '/vendor/product/surgery/delete/$id';
 }

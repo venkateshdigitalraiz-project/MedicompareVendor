@@ -153,12 +153,6 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Change Password", Icons.remove_red_eye_outlined, () {
               context.push('/change-password');
             }),
-            _menuTile("Business Information", Icons.apartment, () {
-              context.push('/business-info');
-            }),
-            _menuTile("Documents", Icons.description_outlined, () {
-              context.push('/documents');
-            }),
             _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
               context.push('/subscription-plan');
             }),
@@ -168,8 +162,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Medicines", Icons.medication_outlined, () {
               context.push('/medicine-list');
             }),
-            _menuTile("Banking Information", Icons.account_balance, () {
-              context.push('/bank-info');
+            _menuTile("Surgeries", Icons.show_chart, () {
+              context.push('/surgery-list');
             }),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');

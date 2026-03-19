@@ -6,18 +6,7 @@ import 'package:MediCompare/features/auth/presentation/pages/forget_password_pag
 import 'package:MediCompare/features/auth/presentation/pages/login_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/registration_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/vendor_onboarding_screen.dart';
-import 'package:MediCompare/features/home/presentation/pages/add_medicine_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/bulk_upload_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/home_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/low_stock_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/medicines_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/notification_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/report_page.dart';
-import 'package:MediCompare/features/home/presentation/pages/sales_viewall.dart';
-import 'package:MediCompare/features/profile/presentation/pages/bank_information_screen.dart';
-import 'package:MediCompare/features/profile/presentation/pages/business_information_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/change_password_screen.dart';
-import 'package:MediCompare/features/profile/presentation/pages/documents_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/support_help_center_page.dart';
@@ -31,6 +20,9 @@ import 'package:MediCompare/features/orders/presentation/pages/order_details_pag
 import 'package:MediCompare/features/medicine/presentation/pages/medicine_list_page.dart';
 import 'package:MediCompare/features/medicine/presentation/pages/medicine_details_page.dart';
 import 'package:MediCompare/features/medicine/data/models/medicine_model.dart';
+import 'package:MediCompare/features/surgery/presentation/pages/surgery_list_page.dart';
+import 'package:MediCompare/features/surgery/presentation/pages/surgery_details_page.dart';
+import 'package:MediCompare/features/surgery/data/models/surgery_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -81,38 +73,6 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
       path: '/bottom-nav',
       builder: (_, __) => const BottomNavigation(),
     ),
-    GoRoute(
-      path: '/home',
-      builder: (_, __) => const HomePage(),
-    ),
-    GoRoute(
-      path: '/notification',
-      builder: (_, __) => const NotificationPage(),
-    ),
-    GoRoute(
-      path: '/medicines',
-      builder: (_, __) => const MedicinesPage(),
-    ),
-    GoRoute(
-      path: '/add-medicine',
-      builder: (_, __) => const AddMedicinePage(),
-    ),
-    GoRoute(
-      path: '/bulk-upload',
-      builder: (_, __) => const BulkUploadPage(),
-    ),
-    GoRoute(
-      path: '/low-stock',
-      builder: (_, __) => const LowStockPage(),
-    ),
-    GoRoute(
-      path: '/reports',
-      builder: (_, __) => const ReportPage(),
-    ),
-    GoRoute(
-      path: '/sales-viewall',
-      builder: (_, __) => const SalesViewall(),
-    ),
      GoRoute(
       path: '/profile-screen',
       builder: (_, __) => const MainprofileScreen(),
@@ -124,18 +84,6 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/change-password',
       builder: (_, __) => const ChangePasswordScreen(),
-    ),
-    GoRoute(
-      path: '/business-info',
-      builder: (_, __) => const BusinessInformationScreen(),
-    ),
-    GoRoute(
-      path: '/bank-info',
-      builder: (_, __) => const BankInformationScreen(),
-    ),
-    GoRoute(
-      path: '/documents',
-      builder: (_, __) => const DocumentsScreen(),
     ),
     GoRoute(
       path: '/support-ticket',
@@ -171,6 +119,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         final id = state.pathParameters['id']!;
         return OrderDetailPage(orderId: id);
       },
+    ),
+    GoRoute(
+      path: '/surgery-list',
+      builder: (_, __) => const SurgeryListPage(),
+    ),
+    GoRoute(
+      path: '/surgery-details',
+      builder: (context, state) => SurgeryDetailsPage(surgery: state.extra as SurgeryItem),
     ),
   ],
 );

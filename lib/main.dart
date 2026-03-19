@@ -24,6 +24,8 @@ import 'features/subscription/subscription_injection.dart';
 import 'features/subscription/presentation/bloc/subscription_event.dart';
 import 'features/medicine/medicine_injection.dart';
 import 'features/medicine/presentation/bloc/medicine_event.dart';
+import 'features/surgery/surgery_injection.dart';
+import 'features/surgery/presentation/bloc/surgery_event.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
@@ -95,6 +97,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => MedicineInjection.provideMedicineBloc()..add(LoadMedicineCategoriesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => SurgeryInjection.provideSurgeryBloc()..add(LoadSurgeryCategoriesEvent()),
         ),
       ],
       child: MaterialApp.router(
