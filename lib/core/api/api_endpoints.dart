@@ -42,4 +42,14 @@ class ApiEndpoints {
   static const String createSurgery = '/vendor/product/surgery/create';
   static String updateSurgery(String id) => '/vendor/product/surgery/update/$id';
   static String deleteSurgery(String id) => '/vendor/product/surgery/delete/$id';
+
+  // Lab Tests
+  static const String labTestsCategories = "/common/allcategory/labtests";
+  static const String labTestsList = "/vendor/product/labtests/list";
+  static String labTestDetails(String id) => "/vendor/product/labtests/details/$id";
+  static const String labTestsSearchTablets = "/common/tablets"; // Use ?search=&type=labtests
+  static const String createLabTest = "/vendor/product/labtests/create";
+  static String updateLabTest(String id) => "/vendor/product/labtests/update/$id";
+  static String deleteLabTest(String id) => "/vendor/product/labtests/delete/$id";
+  static String getTabletDetails(String id) => "/common/tablets/$id";
 }

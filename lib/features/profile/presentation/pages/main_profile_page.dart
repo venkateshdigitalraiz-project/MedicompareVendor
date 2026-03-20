@@ -165,6 +165,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Surgeries", Icons.show_chart, () {
               context.push('/surgery-list');
             }),
+            _menuTile("Lab Tests", Icons.science_outlined, () {
+              context.push('/lab-test-list');
+            }),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),
