@@ -31,6 +31,8 @@ import 'features/lab_test/presentation/bloc/lab_test_event.dart';
 import 'features/lab_test/presentation/bloc/lab_test_package_event.dart';
 import 'features/diagnostic/diagnostic_injection.dart';
 import 'features/diagnostic/presentation/bloc/diagnostic_event.dart';
+import 'features/home_care/home_care_injection.dart';
+import 'features/home_care/presentation/bloc/home_care_event.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
@@ -114,6 +116,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => DiagnosticInjection.provideDiagnosticBloc()..add(const LoadDiagnosticCategoriesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => HomeCareInjection.provideHomeCareBloc()..add(const LoadHomeCareCategoriesEvent()),
         ),
       ],
       child: MaterialApp.router(

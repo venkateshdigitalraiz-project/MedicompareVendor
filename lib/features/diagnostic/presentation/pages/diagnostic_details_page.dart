@@ -28,6 +28,7 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
     if (details.files.isNotEmpty) {
       final f = details.files.first;
       imageUrl = f.startsWith('http') ? f : '$baseUrl$f';
+      imageUrl = Uri.encodeFull(imageUrl);
     }
 
     return Scaffold(

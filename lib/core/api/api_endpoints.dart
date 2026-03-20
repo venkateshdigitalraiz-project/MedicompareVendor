@@ -67,4 +67,12 @@ class ApiEndpoints {
   static const String createDiagnostic = '/vendor/product/diagnostic/create';
   static String updateDiagnostic(String id) => '/vendor/product/diagnostic/update/$id';
   static String deleteDiagnostic(String id) => '/vendor/product/diagnostic/delete/$id';
+
+  // Home Care Services
+  static const String homeCareCategories = '/common/allcategory/homecare';
+  static const String homeCareList = '/vendor/product/homecare/list';
+  static String homeCareDetails(String id) => '/vendor/product/homecare/details/$id';
+  static const String createHomeCare = '/vendor/product/healthcareservice/create';
+  static String updateHomeCare(String id) => '/vendor/product/healthcareservice/update/$id';
+  static String deleteHomeCare(String id) => '/vendor/product/homecare/delete/$id';
 }

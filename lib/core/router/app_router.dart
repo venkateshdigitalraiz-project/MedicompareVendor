@@ -32,6 +32,9 @@ import 'package:MediCompare/features/lab_test/data/models/lab_test_package_model
 import 'package:MediCompare/features/diagnostic/presentation/pages/diagnostic_list_page.dart';
 import 'package:MediCompare/features/diagnostic/presentation/pages/diagnostic_details_page.dart';
 import 'package:MediCompare/features/diagnostic/data/models/diagnostic_model.dart';
+import 'package:MediCompare/features/home_care/presentation/pages/home_care_list_page.dart';
+import 'package:MediCompare/features/home_care/presentation/pages/home_care_details_page.dart';
+import 'package:MediCompare/features/home_care/data/models/home_care_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -160,6 +163,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/diagnostic-details',
       builder: (context, state) => DiagnosticDetailsPage(item: state.extra as DiagnosticItem),
+    ),
+    GoRoute(
+      path: '/homecare-list',
+      builder: (context, state) => const HomeCareListPage(),
+    ),
+    GoRoute(
+      path: '/homecare-details',
+      builder: (context, state) => HomeCareDetailsPage(item: state.extra as HomeCareItem),
     ),
   ],
 );

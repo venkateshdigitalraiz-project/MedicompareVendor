@@ -25,6 +25,7 @@ class DiagnosticCard extends StatelessWidget {
     if (details.files.isNotEmpty) {
       final f = details.files.first;
       imageUrl = f.startsWith('http') ? f : '$baseUrl$f';
+      imageUrl = Uri.encodeFull(imageUrl);
     }
 
     return GestureDetector(
