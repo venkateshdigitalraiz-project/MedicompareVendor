@@ -58,4 +58,13 @@ class ApiEndpoints {
   static const String createPackage = "/vendor/package/create";
   static String updatePackage(String id) => "/vendor/package/update/$id";
   static String deletePackage(String id) => "/vendor/package/delete/$id";
+
+  // Diagnostics
+  static const String diagnosticCategories = '/common/allcategory/diagnostics';
+  static const String diagnosticList = '/vendor/product/diagnostics/list';
+  static String diagnosticDetails(String id) => '/vendor/product/diagnostic/details/$id';
+  static const String commonTablets = '/common/tablets';
+  static const String createDiagnostic = '/vendor/product/diagnostic/create';
+  static String updateDiagnostic(String id) => '/vendor/product/diagnostic/update/$id';
+  static String deleteDiagnostic(String id) => '/vendor/product/diagnostic/delete/$id';
 }

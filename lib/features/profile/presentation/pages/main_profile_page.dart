@@ -183,6 +183,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 ],
               ),
             ),
+            _menuTile("Diagnostics", Icons.biotech_outlined, () {
+              context.push('/diagnostic-list');
+            }),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),

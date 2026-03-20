@@ -29,6 +29,8 @@ import 'features/surgery/presentation/bloc/surgery_event.dart';
 import 'features/lab_test/lab_test_injection.dart';
 import 'features/lab_test/presentation/bloc/lab_test_event.dart';
 import 'features/lab_test/presentation/bloc/lab_test_package_event.dart';
+import 'features/diagnostic/diagnostic_injection.dart';
+import 'features/diagnostic/presentation/bloc/diagnostic_event.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
@@ -109,6 +111,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => LabTestInjection.provideLabTestPackageBloc()..add(const LoadLabTestPackagesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => DiagnosticInjection.provideDiagnosticBloc()..add(const LoadDiagnosticCategoriesEvent()),
         ),
       ],
       child: MaterialApp.router(
