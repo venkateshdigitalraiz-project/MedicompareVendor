@@ -52,4 +52,10 @@ class ApiEndpoints {
   static String updateLabTest(String id) => "/vendor/product/labtests/update/$id";
   static String deleteLabTest(String id) => "/vendor/product/labtests/delete/$id";
   static String getTabletDetails(String id) => "/common/tablets/$id";
+
+  // Lab Test Packages
+  static const String packageList = "/vendor/package/list";
+  static const String createPackage = "/vendor/package/create";
+  static String updatePackage(String id) => "/vendor/package/update/$id";
+  static String deletePackage(String id) => "/vendor/package/delete/$id";
 }

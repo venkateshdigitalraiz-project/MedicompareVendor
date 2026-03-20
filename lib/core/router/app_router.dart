@@ -25,7 +25,10 @@ import 'package:MediCompare/features/surgery/presentation/pages/surgery_details_
 import 'package:MediCompare/features/surgery/data/models/surgery_model.dart';
 import 'package:MediCompare/features/lab_test/presentation/pages/lab_test_list_page.dart';
 import 'package:MediCompare/features/lab_test/presentation/pages/lab_test_details_page.dart';
+import 'package:MediCompare/features/lab_test/presentation/pages/lab_test_package_list_page.dart';
+import 'package:MediCompare/features/lab_test/presentation/pages/lab_test_package_details_page.dart';
 import 'package:MediCompare/features/lab_test/data/models/lab_test_model.dart';
+import 'package:MediCompare/features/lab_test/data/models/lab_test_package_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -138,6 +141,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/lab-test-details',
       builder: (context, state) => LabTestDetailsPage(item: state.extra as LabTestItem),
+    ),
+    GoRoute(
+      path: '/lab-test-package-list',
+      builder: (_, __) => const LabTestPackageListPage(),
+    ),
+    GoRoute(
+      path: '/lab-test-package-details',
+      builder: (context, state) => LabTestPackageDetailsPage(package: state.extra as LabTestPackageItem),
     ),
   ],
 );

@@ -93,8 +93,8 @@ class _MedicineListPageState extends State<MedicineListPage> {
               icon: const Icon(Icons.add, size: 18),
               label: Text("Add Medicine", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
-                foregroundColor: Colors.white,
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primaryDark,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),

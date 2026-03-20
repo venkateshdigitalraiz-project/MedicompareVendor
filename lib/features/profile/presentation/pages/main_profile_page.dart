@@ -165,9 +165,24 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Surgeries", Icons.show_chart, () {
               context.push('/surgery-list');
             }),
-            _menuTile("Lab Tests", Icons.science_outlined, () {
-              context.push('/lab-test-list');
-            }),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ExpansionTile(
+                leading: const Icon(Icons.science_outlined, color: AppColors.primaryDark),
+                title: Text("Lab Tests", style: GoogleFonts.inter(fontSize: 14)),
+                shape: const Border(),
+                childrenPadding: const EdgeInsets.only(left: 32),
+                trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                children: [
+                  _menuTile("List", Icons.list_alt_outlined, () {
+                    context.push('/lab-test-list');
+                  }, isSubTile: true),
+                  _menuTile("Packages", Icons.inventory_2_outlined, () {
+                    context.push('/lab-test-package-list');
+                  }, isSubTile: true),
+                ],
+              ),
+            ),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),
@@ -259,25 +274,25 @@ class _ProfilePageState extends State<MainprofileScreen> {
     );
   }
 
-  Widget _menuTile(String title, IconData icon, VoidCallback onTap) {
+  Widget _menuTile(String title, IconData icon, VoidCallback onTap, {bool isSubTile = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: isSubTile ? 0 : 16, vertical: 6),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: isSubTile ? Colors.transparent : AppColors.white,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Icon(icon, color: AppColors.primaryDark),
+              Icon(icon, color: AppColors.primaryDark, size: isSubTile ? 20 : 24),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(title, style: GoogleFonts.inter(fontSize: 14)),
+                child: Text(title, style: GoogleFonts.inter(fontSize: isSubTile ? 13 : 14)),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.primaryDark),
+              if (!isSubTile) const Icon(Icons.chevron_right, color: AppColors.primaryDark),
             ],
           ),
         ),

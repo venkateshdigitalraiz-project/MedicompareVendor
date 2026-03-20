@@ -75,7 +75,7 @@ class _LabTestListPageState extends State<LabTestListPage> {
       ),
       body: BlocBuilder<LabTestBloc, LabTestState>(
         builder: (context, state) {
-          if (state is LabTestInitial || (state is LabTestLoading && !(context.read<LabTestBloc>().state is LabTestLoaded))) {
+          if (state is LabTestInitial || (state is LabTestLoading && context.read<LabTestBloc>().state is! LabTestLoaded)) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -86,7 +86,7 @@ class _LabTestListPageState extends State<LabTestListPage> {
           if (state is LabTestLoaded) {
             return Column(
               children: [
-                _buildHeader(state),
+                // _buildHeader(state),
                 _buildFilters(state),
                 Expanded(
                   child: state.labTestResponse.list.isEmpty

@@ -87,11 +87,11 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
             padding: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
             child: ElevatedButton.icon(
               onPressed: _showCreateTicket,
-              icon: const Icon(Icons.add, size: 18, color: Colors.white),
+              icon: const Icon(Icons.add, size: 18, color: AppColors.primaryDark),
               label: Text("New Ticket", 
-                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600)),
+                style: GoogleFonts.inter(color: AppColors.primaryDark, fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

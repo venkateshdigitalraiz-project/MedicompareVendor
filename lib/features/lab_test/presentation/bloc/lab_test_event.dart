@@ -6,7 +6,9 @@ abstract class LabTestEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadLabTestCategoriesEvent extends LabTestEvent {}
+class LoadLabTestCategoriesEvent extends LabTestEvent {
+  const LoadLabTestCategoriesEvent();
+}
 
 class LoadLabTestsEvent extends LabTestEvent {
   final int page;

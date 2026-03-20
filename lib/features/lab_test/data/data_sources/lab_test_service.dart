@@ -1,8 +1,10 @@
 import 'dart:convert';
-import '../../../../core/api/api_endpoints.dart';
-import '../../../../core/api/api_service_repository.dart';
-import '../../../../core/error/exceptions.dart';
-import '../models/lab_test_model.dart';
+import 'dart:io';
+import 'package:MediCompare/core/api/api_endpoints.dart';
+import 'package:MediCompare/core/api/api_service_repository.dart';
+import 'package:MediCompare/core/error/exceptions.dart';
+import 'package:MediCompare/features/lab_test/data/models/lab_test_model.dart';
+import 'package:MediCompare/features/lab_test/data/models/lab_test_package_model.dart';
 
 class LabTestService {
   final ApiServiceRepository _apiService;
@@ -83,6 +85,23 @@ class LabTestService {
     }
   }
 
+  Future<List<LabTestDetails>> getAllLabTestTablets() async {
+    try {
+      final response = await _apiService.get(
+        ApiEndpoints.labTestsSearchTablets,
+        queryParameters: {'type': 'labtests'},
+      );
+      final body = jsonDecode(response.body);
+      if (body['success'] == true) {
+        final List lists = body['data']['tablets'] ?? [];
+        return lists.map((e) => LabTestDetails.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<LabTestDetails> getLabTestTabletDetails(String id) async {
     try {
       final response = await _apiService.get(ApiEndpoints.getTabletDetails(id));
@@ -126,6 +145,167 @@ class LabTestService {
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to delete lab test');
+      }
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  // --- Packages ---
+
+  Future<LabTestPackageResponse> getPackageList({
+    int page = 1,
+    int limit = 10,
+    String search = '',
+    String labTestId = '',
+  }) async {
+    try {
+      final queryParams = {
+        'page': page.toString(),
+        'limit': limit.toString(),
+        'search': search,
+        'labTest': labTestId,
+      };
+
+      final response = await _apiService.get(ApiEndpoints.packageList, queryParameters: queryParams);
+      final body = jsonDecode(response.body);
+
+      if (body['success'] == true) {
+        return LabTestPackageResponse.fromJson(body['data']);
+      }
+      throw ServerException(body['message'] ?? 'Failed to fetch packages');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  Future<LabTestPackageItem> getPackageDetails(String id) async {
+    try {
+      // Step 1: Find the package from the list
+      final listResp = await _apiService.get(ApiEndpoints.packageList, queryParameters: {
+        'page': '1',
+        'limit': '100',
+        'search': '',
+      });
+      final listBody = jsonDecode(listResp.body);
+
+      if (listBody['success'] != true) {
+        throw ServerException(listBody['message'] ?? 'Failed to fetch packages');
+      }
+
+      final List items = listBody['data']['list'] ?? [];
+      final matchJson = items.firstWhere(
+        (item) => item['_id'] == id,
+        orElse: () => null,
+      );
+
+      if (matchJson == null) throw ServerException('Package not found');
+
+      LabTestPackageItem pkg = LabTestPackageItem.fromJson(matchJson);
+
+      // Step 2: If tabletsdetails is not already populated, enrich using the
+      // all-tablets API (type=labtests) by matching products IDs
+      if (pkg.tabletsDetails.isEmpty && pkg.products.isNotEmpty) {
+        final allTests = await getAllLabTestTablets();
+        final matched = allTests.where((t) => pkg.products.contains(t.id)).toList();
+        pkg = LabTestPackageItem(
+          id: pkg.id,
+          name: pkg.name,
+          description: pkg.description,
+          price: pkg.price,
+          discountPrice: pkg.discountPrice,
+          status: pkg.status,
+          files: pkg.files,
+          products: pkg.products,
+          tabletsDetails: matched,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+        );
+      }
+
+      return pkg;
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  Future<void> createPackage(Map<String, dynamic> data, {File? image}) async {
+    try {
+      if (image != null) {
+        final fields = <String, String>{};
+        data.forEach((key, value) {
+          if (key == 'products' && value is List) {
+            for (int i = 0; i < value.length; i++) {
+              fields['products[$i]'] = value[i].toString();
+            }
+          } else {
+            fields[key] = value.toString();
+          }
+        });
+
+        final response = await _apiService.post(
+          ApiEndpoints.createPackage,
+          fields: fields,
+          files: {'image': image},
+        );
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to create package');
+        }
+      } else {
+        final response = await _apiService.post(ApiEndpoints.createPackage, body: data);
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to create package');
+        }
+      }
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  Future<void> updatePackage(String id, Map<String, dynamic> data, {File? image}) async {
+    try {
+      if (image != null) {
+        final fields = <String, String>{};
+        data.forEach((key, value) {
+          if (key == 'products' && value is List) {
+            for (int i = 0; i < value.length; i++) {
+              fields['products[$i]'] = value[i].toString();
+            }
+          } else {
+            fields[key] = value.toString();
+          }
+        });
+
+        final response = await _apiService.post(
+          ApiEndpoints.updatePackage(id),
+          fields: fields,
+          files: {'image': image},
+        );
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to update package');
+        }
+      } else {
+        final response = await _apiService.post(ApiEndpoints.updatePackage(id), body: data);
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to update package');
+        }
+      }
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  Future<void> deletePackage(String id) async {
+    try {
+      final response = await _apiService.post(ApiEndpoints.deletePackage(id));
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) {
+        throw ServerException(body['message'] ?? 'Failed to delete package');
       }
     } catch (e) {
       throw ServerException(e.toString());
