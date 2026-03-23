@@ -68,7 +68,13 @@ class SurgeryService {
 
   Future<List<SurgeryDropdownItem>> getCommonSurgeries(String search) async {
     try {
-      final response = await _apiService.get("${ApiEndpoints.commonSurgeries}&search=$search");
+      final response = await _apiService.get(
+        ApiEndpoints.commonSurgeries,
+        queryParameters: {
+          'type': 'surgeries',
+          'search': search,
+        },
+      );
       final body = jsonDecode(response.body);
       
       if (body['success'] == true) {

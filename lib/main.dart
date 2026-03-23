@@ -41,6 +41,8 @@ import 'package:MediCompare/features/medical_treatment/medical_treatment_injecti
 import 'package:MediCompare/features/medical_treatment/presentation/bloc/medical_treatment_event.dart';
 import 'package:MediCompare/features/medical_equipment/medical_equipment_injection.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_event.dart';
+import 'package:MediCompare/features/ambulance/ambulance_injection.dart';
+import 'package:MediCompare/features/ambulance/presentation/bloc/ambulance_event.dart';
 import 'package:MediCompare/core/router/app_router.dart';
 
 void main() async {
@@ -139,6 +141,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => MedicalEquipmentInjection.provideMedicalEquipmentBloc()..add(const LoadMedicalEquipmentCategoriesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => AmbulanceInjection.provideAmbulanceBloc()..add(const GetAmbulanceListEvent()),
         ),
       ],
       child: MaterialApp.router(

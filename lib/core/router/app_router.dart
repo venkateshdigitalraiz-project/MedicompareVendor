@@ -47,6 +47,9 @@ import 'package:MediCompare/features/medical_treatment/data/models/medical_treat
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_list_page.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_details_page.dart';
 import 'package:MediCompare/features/medical_equipment/data/models/medical_equipment_model.dart';
+import 'package:MediCompare/features/ambulance/presentation/pages/ambulance_list_page.dart';
+import 'package:MediCompare/features/ambulance/presentation/pages/ambulance_details_page.dart';
+import 'package:MediCompare/features/ambulance/domain/entities/ambulance_entity.dart';
 import 'package:MediCompare/features/orders/orders_injection.dart';
 import 'package:MediCompare/features/leads/leads_injection.dart';
 import 'package:MediCompare/features/leads/presentation/pages/lead_details_page.dart';
@@ -235,6 +238,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/equipment-details',
       builder: (context, state) => MedicalEquipmentDetailsPage(item: state.extra as MedicalEquipmentItem),
+    ),
+    GoRoute(
+      path: '/ambulance-list',
+      builder: (context, state) => const AmbulanceListPage(),
+    ),
+    GoRoute(
+      path: '/ambulance-details',
+      builder: (context, state) => AmbulanceDetailsPage(ambulance: state.extra as AmbulanceEntity),
     ),
   ],
 );

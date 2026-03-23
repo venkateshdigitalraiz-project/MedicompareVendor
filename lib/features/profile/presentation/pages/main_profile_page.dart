@@ -201,6 +201,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Medical Equipment Services", Icons.medical_services_outlined, () {
               context.push('/equipment-list');
             }),
+            _menuTile("Ambulance", Icons.airport_shuttle_outlined, () {
+              context.push('/ambulance-list');
+            }),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),

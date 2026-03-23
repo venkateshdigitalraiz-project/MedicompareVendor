@@ -47,7 +47,7 @@ class ApiEndpoints {
   static const String surgeryList = '/vendor/product/surgeries/list';
   static String surgeryDetails(String id) =>
       '/vendor/product/surgery/details/$id';
-  static const String commonSurgeries = '/common/tablets?type=surgeries';
+  static const String commonSurgeries = '/common/tablets';
   static String commonSurgeryDetails(String id) => '/common/tablets/$id';
   static const String createSurgery = '/vendor/product/surgery/create';
   static String updateSurgery(String id) =>
@@ -150,4 +150,22 @@ class ApiEndpoints {
       '/vendor/product/medicalequipment/update/$id';
   static String deleteMedicalEquipment(String id) =>
       '/vendor/product/medicalequipment/delete/$id';
+
+  // Ambulance Services
+  static const String ambulanceCategories =
+      '/common/allcategory/ambulanceservice';
+  static const String ambulanceList =
+      '/vendor/product/ambulanceservice/list';
+  static String ambulanceDetails(String id) =>
+      '/vendor/product/ambulanceservice/details/$id';
+  static const String createAmbulance =
+      '/vendor/product/ambulanceservice/create';
+  static String updateAmbulance(String id) =>
+      '/vendor/product/ambulanceservice/update/$id';
+  static String deleteAmbulance(String id) =>
+      '/vendor/product/ambulanceservice/delete/$id';
+  static const String ambulanceNames =
+      '/common/tablets';
+  static const String facilitiesList =
+      '/vendor/facilities/list';
 }
