@@ -17,12 +17,14 @@ class AmbulanceLoaded extends AmbulanceState {
   final bool isLoadingMore;
   final String selectedCategoryId;
   final String searchQuery;
+  final List<AmbulanceCategoryEntity> categories;
 
   const AmbulanceLoaded(
     this.ambulanceList, {
     this.isLoadingMore = false,
     this.selectedCategoryId = '',
     this.searchQuery = '',
+    this.categories = const [],
   });
 
   AmbulanceLoaded copyWith({
@@ -30,17 +32,20 @@ class AmbulanceLoaded extends AmbulanceState {
     bool? isLoadingMore,
     String? selectedCategoryId,
     String? searchQuery,
+    List<AmbulanceCategoryEntity>? categories,
   }) {
     return AmbulanceLoaded(
       ambulanceList ?? this.ambulanceList,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
       searchQuery: searchQuery ?? this.searchQuery,
+      categories: categories ?? this.categories,
     );
   }
 
   @override
-  List<Object?> get props => [ambulanceList, isLoadingMore, selectedCategoryId, searchQuery];
+  List<Object?> get props =>
+      [ambulanceList, isLoadingMore, selectedCategoryId, searchQuery, categories];
 }
 
 class AmbulanceFormOptionsLoaded extends AmbulanceState {

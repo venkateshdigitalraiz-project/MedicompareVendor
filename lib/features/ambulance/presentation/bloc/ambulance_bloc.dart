@@ -28,7 +28,9 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
     required this.updateAmbulanceUseCase,
     required this.deleteAmbulanceUseCase,
   }) : super(AmbulanceInitial()) {
+    on<LoadAmbulanceCategoriesEvent>(_onLoadCategories);
     on<GetAmbulanceListEvent>(_onGetAmbulanceList);
+    on<SelectAmbulanceCategoryEvent>(_onSelectCategory);
     on<GetAmbulanceFormOptionsEvent>(_onGetFormOptions);
     on<SearchAmbulanceNamesEvent>(_onSearchAmbulanceNames);
     on<CreateAmbulanceEvent>(_onCreateAmbulance);
@@ -36,11 +38,35 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
     on<DeleteAmbulanceEvent>(_onDeleteAmbulance);
   }
 
+  /// Fetches categories AND the first page of items (initial load for the list page)
+  Future<void> _onLoadCategories(
+    LoadAmbulanceCategoriesEvent event,
+    Emitter<AmbulanceState> emit,
+  ) async {
+    emit(AmbulanceLoading());
+    try {
+      final categories = await getAmbulanceCategoriesUseCase.call();
+      final result = await getAmbulanceListUseCase.call(page: 1, limit: 10);
+      emit(AmbulanceLoaded(result, categories: categories));
+    } catch (e) {
+      emit(AmbulanceError(e.toString()));
+    }
+  }
+
   Future<void> _onGetAmbulanceList(
     GetAmbulanceListEvent event,
     Emitter<AmbulanceState> emit,
   ) async {
     final currentState = state;
+
+    // Preserve existing categories and selectedCategoryId across reloads
+    List<AmbulanceCategoryEntity> categories = [];
+    String selectedCategoryId = event.categoryId;
+    if (currentState is AmbulanceLoaded) {
+      categories = currentState.categories;
+      if (selectedCategoryId.isEmpty) selectedCategoryId = currentState.selectedCategoryId;
+    }
+
     if (event.isLoadMore && currentState is AmbulanceLoaded) {
       emit(currentState.copyWith(isLoadingMore: true));
     } else {
@@ -57,16 +83,49 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
 
       if (event.isLoadMore && currentState is AmbulanceLoaded) {
         final updatedItems = currentState.ambulanceList.items + result.items;
-        emit(AmbulanceLoaded(
-          AmbulanceListEntity(
+        emit(currentState.copyWith(
+          ambulanceList: AmbulanceListEntity(
             items: updatedItems,
             pagination: result.pagination,
           ),
           isLoadingMore: false,
+          categories: categories,
         ));
       } else {
-        emit(AmbulanceLoaded(result));
+        emit(AmbulanceLoaded(
+          result,
+          categories: categories,
+          selectedCategoryId: event.categoryId,
+          searchQuery: event.search,
+        ));
       }
+    } catch (e) {
+      emit(AmbulanceError(e.toString()));
+    }
+  }
+
+  Future<void> _onSelectCategory(
+    SelectAmbulanceCategoryEvent event,
+    Emitter<AmbulanceState> emit,
+  ) async {
+    final currentState = state;
+    List<AmbulanceCategoryEntity> categories = [];
+    if (currentState is AmbulanceLoaded) {
+      categories = currentState.categories;
+    }
+
+    emit(AmbulanceLoading());
+    try {
+      final result = await getAmbulanceListUseCase.call(
+        page: 1,
+        limit: 10,
+        categoryId: event.categoryId,
+      );
+      emit(AmbulanceLoaded(
+        result,
+        categories: categories,
+        selectedCategoryId: event.categoryId,
+      ));
     } catch (e) {
       emit(AmbulanceError(e.toString()));
     }

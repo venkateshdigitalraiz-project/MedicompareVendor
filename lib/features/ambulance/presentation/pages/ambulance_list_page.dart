@@ -27,13 +27,17 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _loadInitialData();
+    // Load categories + first page together
+    context.read<AmbulanceBloc>().add(const LoadAmbulanceCategoriesEvent());
   }
 
-  void _loadInitialData() {
-    if (mounted) {
-      context.read<AmbulanceBloc>().add(const GetAmbulanceListEvent());
-    }
+  void _reloadList() {
+    if (!mounted) return;
+    final currentState = _lastLoadedState;
+    context.read<AmbulanceBloc>().add(GetAmbulanceListEvent(
+      categoryId: currentState?.selectedCategoryId ?? '',
+      search: currentState?.searchQuery ?? '',
+    ));
   }
 
   void _onScroll() {
@@ -73,10 +77,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
           child: BlocProvider.value(
             value: context.read<AmbulanceBloc>(),
-            child: AddAmbulanceSheet(
-              // onSuccess is handled by the list page's BlocConsumer listener
-              onSuccess: () {},
-            ),
+            child: AddAmbulanceSheet(onSuccess: () {}),
           ),
         ),
       ),
@@ -95,11 +96,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
           child: BlocProvider.value(
             value: context.read<AmbulanceBloc>(),
-            child: AddAmbulanceSheet(
-              editAmbulance: item,
-              // onSuccess is handled by the list page's BlocConsumer listener
-              onSuccess: () {},
-            ),
+            child: AddAmbulanceSheet(editAmbulance: item, onSuccess: () {}),
           ),
         ),
       ),
@@ -145,7 +142,6 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
       ),
       body: BlocConsumer<AmbulanceBloc, AmbulanceState>(
         listener: (context, state) {
-          // Cache the loaded state whenever we get a fresh one
           if (state is AmbulanceLoaded) {
             _lastLoadedState = state;
           }
@@ -154,21 +150,21 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.green),
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                  ),
                 );
-                _loadInitialData();
+                _reloadList();
               }
             });
           }
         },
         builder: (context, state) {
-          // Use the latest loaded state regardless of current bloc state
           if (state is AmbulanceLoaded) {
             _lastLoadedState = state;
           }
 
-          // Show loading spinner only on first load (no cached state yet)
+          // First load — no cached state yet
           if (state is AmbulanceLoading && _lastLoadedState == null) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -180,13 +176,14 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline,
-                        size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: _loadInitialData,
+                      onPressed: () => context
+                          .read<AmbulanceBloc>()
+                          .add(const LoadAmbulanceCategoriesEvent()),
                       child: const Text("Retry"),
                     ),
                   ],
@@ -195,7 +192,6 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
             );
           }
 
-          // Render from cached state if available
           final displayState = _lastLoadedState;
           if (displayState == null) {
             return const Center(child: CircularProgressIndicator());
@@ -204,14 +200,12 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
           final items = displayState.ambulanceList.items;
           return Column(
             children: [
-              _buildSearchBar(displayState),
+              _buildFilters(displayState),
               Expanded(
                 child: items.isEmpty
                     ? _buildEmptyState()
                     : RefreshIndicator(
-                        onRefresh: () async {
-                          _loadInitialData();
-                        },
+                        onRefresh: () async => _reloadList(),
                         child: ListView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.symmetric(
@@ -232,8 +226,9 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                             final item = items[index];
                             return AmbulanceCard(
                               item: item,
-                              onTap: () =>
-                                  context.push('/ambulance-details', extra: item),
+                              onTap: () => context.push(
+                                  '/ambulance-details',
+                                  extra: item),
                               onEdit: () => _openEditSheet(item),
                               onDelete: () => _showDeleteDialog(item),
                             );
@@ -248,29 +243,154 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
     );
   }
 
-  Widget _buildSearchBar(AmbulanceLoaded state) {
+  Widget _buildFilters(AmbulanceLoaded state) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.white,
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          context.read<AmbulanceBloc>().add(GetAmbulanceListEvent(
-            search: value,
-            categoryId: state.selectedCategoryId,
-          ));
-        },
-        decoration: InputDecoration(
-          hintText: "Search ambulance services...",
-          prefixIcon: const Icon(Icons.search, size: 20),
-          filled: true,
-          fillColor: Colors.grey[100],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Search bar
+          TextField(
+            controller: _searchController,
+            onChanged: (val) {
+              context.read<AmbulanceBloc>().add(GetAmbulanceListEvent(
+                search: val,
+                categoryId: state.selectedCategoryId,
+              ));
+            },
+            style: GoogleFonts.inter(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: "Search ambulance services...",
+              hintStyle:
+                  GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              prefixIconColor: Colors.grey[400],
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              filled: true,
+              fillColor: const Color(0xFFF8FAFF),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide:
+                    const BorderSide(color: AppColors.primaryDark, width: 1.5),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Category dropdown
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                menuMaxHeight: 400,
+                borderRadius: BorderRadius.circular(12),
+                dropdownColor: Colors.white,
+                value: state.selectedCategoryId.isEmpty
+                    ? null
+                    : state.selectedCategoryId,
+                hint: Text("All Categories",
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: Colors.grey[600])),
+                selectedItemBuilder: (BuildContext context) {
+                  return [
+                    DropdownMenuItem(
+                        value: '',
+                        child: Text("All Categories",
+                            style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500))),
+                    ...state.categories.map((c) => DropdownMenuItem(
+                          value: c.id,
+                          child: Text(c.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500)),
+                        )),
+                  ].map((e) {
+                    return Container(
+                      alignment: Alignment.centerLeft,
+                      child: e.child,
+                    );
+                  }).toList();
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: '',
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom:
+                                  BorderSide(color: Colors.grey[100]!))),
+                      child: Text(
+                        "All Categories",
+                        style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryDark),
+                      ),
+                    ),
+                  ),
+                  ...state.categories.map((c) {
+                    return DropdownMenuItem(
+                      value: c.id,
+                      child: Container(
+                        width: double.infinity,
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Colors.grey[100]!))),
+                        child: Text(
+                          c.name,
+                          style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    context
+                        .read<AmbulanceBloc>()
+                        .add(SelectAmbulanceCategoryEvent(val));
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -293,8 +413,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
           const SizedBox(height: 8),
           Text(
             "Add your first service by clicking the + button",
-            style:
-                GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
           ),
         ],
       ),
@@ -306,11 +425,12 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Delete Service",
-            style:
-                GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+            style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold, fontSize: 16)),
         content: Text(
-            "Are you sure you want to delete ${item.name}? This action cannot be undone.",
-            style: GoogleFonts.inter(fontSize: 14)),
+          "Are you sure you want to delete ${item.name}? This action cannot be undone.",
+          style: GoogleFonts.inter(fontSize: 14),
+        ),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
@@ -318,7 +438,8 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
             onPressed: () => Navigator.pop(ctx),
             child: Text("Cancel",
                 style: GoogleFonts.inter(
-                    color: Colors.grey[600], fontWeight: FontWeight.w600)),
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -328,7 +449,8 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                   .add(DeleteAmbulanceEvent(item.id));
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white),
             child: const Text("Delete"),
           ),
         ],

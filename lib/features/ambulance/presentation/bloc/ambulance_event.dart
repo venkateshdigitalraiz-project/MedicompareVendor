@@ -7,6 +7,10 @@ abstract class AmbulanceEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class LoadAmbulanceCategoriesEvent extends AmbulanceEvent {
+  const LoadAmbulanceCategoriesEvent();
+}
+
 class GetAmbulanceListEvent extends AmbulanceEvent {
   final int page;
   final int limit;
@@ -24,6 +28,14 @@ class GetAmbulanceListEvent extends AmbulanceEvent {
 
   @override
   List<Object?> get props => [page, limit, categoryId, search, isLoadMore];
+}
+
+class SelectAmbulanceCategoryEvent extends AmbulanceEvent {
+  final String categoryId;
+  const SelectAmbulanceCategoryEvent(this.categoryId);
+
+  @override
+  List<Object?> get props => [categoryId];
 }
 
 class GetAmbulanceFormOptionsEvent extends AmbulanceEvent {
