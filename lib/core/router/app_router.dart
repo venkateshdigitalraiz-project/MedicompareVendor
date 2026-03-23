@@ -35,10 +35,19 @@ import 'package:MediCompare/features/diagnostic/data/models/diagnostic_model.dar
 import 'package:MediCompare/features/home_care/presentation/pages/home_care_list_page.dart';
 import 'package:MediCompare/features/home_care/presentation/pages/home_care_details_page.dart';
 import 'package:MediCompare/features/home_care/data/models/home_care_model.dart';
+import 'package:MediCompare/features/nursing_care/presentation/pages/nursing_care_list_page.dart';
+import 'package:MediCompare/features/nursing_care/presentation/pages/nursing_care_details_page.dart';
+import 'package:MediCompare/features/nursing_care/data/models/nursing_care_model.dart';
+import 'package:MediCompare/features/dental_service/presentation/pages/dental_service_list_page.dart';
+import 'package:MediCompare/features/dental_service/presentation/pages/dental_service_details_page.dart';
+import 'package:MediCompare/features/dental_service/data/models/dental_service_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 GoRouter createAppRouter(String initialLocation) => GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: initialLocation,
   routes: [
     GoRoute(
@@ -171,6 +180,22 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/homecare-details',
       builder: (context, state) => HomeCareDetailsPage(item: state.extra as HomeCareItem),
+    ),
+    GoRoute(
+      path: '/nursing-list',
+      builder: (context, state) => const NursingCareListPage(),
+    ),
+    GoRoute(
+      path: '/nursing-details',
+      builder: (context, state) => NursingCareDetailsPage(item: state.extra as NursingCareItem),
+    ),
+    GoRoute(
+      path: '/dental-list',
+      builder: (context, state) => const DentalServiceListPage(),
+    ),
+    GoRoute(
+      path: '/dental-details',
+      builder: (context, state) => DentalServiceDetailsPage(item: state.extra as DentalServiceItem),
     ),
   ],
 );

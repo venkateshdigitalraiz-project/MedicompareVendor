@@ -33,6 +33,10 @@ import 'features/diagnostic/diagnostic_injection.dart';
 import 'features/diagnostic/presentation/bloc/diagnostic_event.dart';
 import 'features/home_care/home_care_injection.dart';
 import 'features/home_care/presentation/bloc/home_care_event.dart';
+import 'features/nursing_care/nursing_care_injection.dart';
+import 'features/nursing_care/presentation/bloc/nursing_care_event.dart';
+import 'features/dental_service/dental_service_injection.dart';
+import 'features/dental_service/presentation/bloc/dental_service_event.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
@@ -119,6 +123,12 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => HomeCareInjection.provideHomeCareBloc()..add(const LoadHomeCareCategoriesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => NursingCareInjection.provideNursingCareBloc()..add(const LoadNursingCareCategoriesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => DentalServiceInjection.provideDentalServiceBloc()..add(const LoadDentalServiceCategoriesEvent()),
         ),
       ],
       child: MaterialApp.router(

@@ -1,6 +1,7 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../data/models/lab_test_model.dart';
 
 class LabTestCard extends StatelessWidget {
@@ -23,10 +24,10 @@ class LabTestCard extends StatelessWidget {
     final String name = details.name;
     final String category = details.subcategory?.name ?? "No Category";
     final isFasting = details.isFasting?.toLowerCase() == 'yes';
-    final String imageUrl = details.files.isNotEmpty 
-        ? "https://api.medicompares.com${details.files.first}" 
+    final String imageUrl = details.files.isNotEmpty
+        ? "https://api.medicompares.com${details.files.first}"
         : "";
-    
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -52,12 +53,13 @@ class LabTestCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => _placeholderImage(),
+                        errorBuilder: (context, error, stackTrace) =>
+                            _placeholderImage(),
                       )
                     : _placeholderImage(),
               ),
               const SizedBox(width: 12),
-              
+
               // Text Content
               Expanded(
                 child: Column(
@@ -94,7 +96,7 @@ class LabTestCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Action Buttons & Price
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -175,7 +177,9 @@ class LabTestCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isFasting ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+            isFasting
+                ? Icons.warning_amber_rounded
+                : Icons.check_circle_outline,
             size: 10,
             color: isFasting ? Colors.orange : Colors.blue,
           ),

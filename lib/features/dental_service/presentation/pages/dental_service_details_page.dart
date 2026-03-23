@@ -1,29 +1,34 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../data/models/dental_service_model.dart';
 
-import '../../data/models/lab_test_model.dart';
+class DentalServiceDetailsPage extends StatefulWidget {
+  final DentalServiceItem item;
 
-class LabTestDetailsPage extends StatefulWidget {
-  final LabTestItem item;
-  const LabTestDetailsPage({super.key, required this.item});
+  const DentalServiceDetailsPage({super.key, required this.item});
 
   @override
-  State<LabTestDetailsPage> createState() => _LabTestDetailsPageState();
+  State<DentalServiceDetailsPage> createState() => _DentalServiceDetailsPageState();
 }
 
-class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
+class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
   bool _showAllDescription = false;
-  bool _showAllPrecaution = false;
-  bool _showAllPreparation = false;
-  bool _showAllParameters = false;
 
   @override
   Widget build(BuildContext context) {
     final details = widget.item.details;
-    final isFasting = details.isFasting?.toLowerCase() == 'yes';
+    const baseUrl = 'https://api.medicompares.com';
+    String? imageUrl;
+    if (details.files.isNotEmpty) {
+      imageUrl = details.files.first;
+      if (!imageUrl.startsWith('http')) {
+        imageUrl = '$baseUrl$imageUrl';
+      }
+      imageUrl = Uri.encodeFull(imageUrl);
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
@@ -48,57 +53,23 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
-            _buildHeader(details, isFasting),
+            _buildHeader(details, imageUrl),
             const SizedBox(height: 16),
 
             // Info Grid
             _buildInfoGrid(details),
             const SizedBox(height: 16),
 
-            // Precaution Section
-            if (details.precaution != null &&
-                details.precaution!.isNotEmpty) ...[
-              _buildCollapsibleSection(
-                title: "Precaution",
-                content: details.precaution!,
-                icon: Icons.warning_amber_rounded,
-                iconColor: Colors.orange,
-                isExpanded: _showAllPrecaution,
-                onToggle: () =>
-                    setState(() => _showAllPrecaution = !_showAllPrecaution),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Preparation Instructions Section
-            if (details.preparationInstructions != null &&
-                details.preparationInstructions!.isNotEmpty) ...[
-              _buildCollapsibleSection(
-                title: "Preparation Instructions",
-                content: details.preparationInstructions!,
-                icon: Icons.menu_book_outlined,
-                iconColor: Colors.blue,
-                isExpanded: _showAllPreparation,
-                onToggle: () =>
-                    setState(() => _showAllPreparation = !_showAllPreparation),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Test Parameters
-            _buildParametersTable(details.parameters),
-            const SizedBox(height: 16),
-
             // Description
-            _buildCollapsibleSection(
-              title: "Description",
-              content: details.description ?? "No description available",
-              icon: Icons.description_outlined,
-              iconColor: const Color(0xFF059669),
-              isExpanded: _showAllDescription,
-              onToggle: () =>
-                  setState(() => _showAllDescription = !_showAllDescription),
-            ),
+            if (details.description.isNotEmpty)
+              _buildCollapsibleSection(
+                title: "Description",
+                content: details.description,
+                icon: Icons.description_outlined,
+                iconColor: const Color(0xFF059669),
+                isExpanded: _showAllDescription,
+                onToggle: () => setState(() => _showAllDescription = !_showAllDescription),
+              ),
             const SizedBox(height: 100),
           ],
         ),
@@ -106,7 +77,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
     );
   }
 
-  Widget _buildHeader(LabTestDetails details, bool isFasting) {
+  Widget _buildHeader(DentalServiceDetails details, String? imageUrl) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -121,9 +92,9 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: details.files.isNotEmpty
+                    child: imageUrl != null && imageUrl.isNotEmpty
                         ? Image.network(
-                            "https://api.medicompares.com${details.files.first}",
+                            imageUrl,
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
@@ -141,7 +112,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                       decoration: BoxDecoration(
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(4)),
-                      child: Text("active",
+                      child: Text(widget.item.status,
                           style: GoogleFonts.inter(
                               fontSize: 9,
                               color: Colors.white,
@@ -162,22 +133,8 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF1E1B4B))),
                     const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        _chip(details.subcategory?.name ?? "N/A",
-                            Icons.style_outlined, Colors.indigo),
-                        _chip(details.sampleType ?? "N/A",
-                            Icons.biotech_outlined, Colors.purple),
-                        _chip(
-                            isFasting ? "Fasting" : "No Fasting",
-                            isFasting
-                                ? Icons.warning_amber_rounded
-                                : Icons.check_circle_outline,
-                            isFasting ? Colors.orange : Colors.green),
-                      ],
-                    ),
+                    _chip(details.subcategory?.name ?? "Teeth Whitening",
+                        Icons.category_outlined, Colors.indigo),
                   ],
                 ),
               ),
@@ -211,7 +168,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
 
   Widget _buildPriceArea() {
     final double saving = widget.item.price - widget.item.discountPrice;
-    final int percent = ((saving / widget.item.price) * 100).toInt();
+    final double percent = widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
 
     return Container(
       width: double.infinity,
@@ -253,43 +210,30 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                       fontWeight: FontWeight.bold)),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-                color: Colors.red[50], borderRadius: BorderRadius.circular(6)),
-            child: Text("$percent% OFF",
-                style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: Colors.red[700],
-                    fontWeight: FontWeight.bold)),
-          ),
+          if (percent > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                  color: Colors.red[50], borderRadius: BorderRadius.circular(6)),
+              child: Text("${percent.toInt()}% OFF",
+                  style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: Colors.red[700],
+                      fontWeight: FontWeight.bold)),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoGrid(LabTestDetails details) {
-    return Column(
+  Widget _buildInfoGrid(DentalServiceDetails details) {
+    return Row(
       children: [
-        Row(
-          children: [
-            _infoItem("CATEGORY", details.subcategory?.name ?? "N/A",
-                Icons.style_outlined, Colors.blue),
-            const SizedBox(width: 12),
-            _infoItem("SAMPLE TYPE", details.sampleType ?? "N/A",
-                Icons.biotech_outlined, Colors.purple),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            _infoItem("REPORT DURATION", details.reportsDuration ?? "N/A",
-                Icons.access_time, Colors.orange),
-            const SizedBox(width: 12),
-            _infoItem("GENDER", details.gender ?? "Both", Icons.person_outline,
-                Colors.green),
-          ],
-        ),
+        _infoItem("CATEGORY", details.subcategory?.name ?? "N/A",
+            Icons.category_outlined, Colors.blue),
+        const SizedBox(width: 12),
+        _infoItem("STATUS", widget.item.status.toUpperCase(),
+            Icons.check_circle_outline, Colors.green),
       ],
     );
   }
@@ -323,135 +267,6 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                     color: const Color(0xFF1E1B4B))),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildParametersTable(List<LabTestParameter> params) {
-    final showAll = _showAllParameters || params.length <= 3;
-    final displayParams = showAll ? params : params.take(3).toList();
-
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          color: const Color(0xFFF5F3FF),
-                          borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.list_alt,
-                          color: Color(0xFF7C3AED), size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Test Parameters",
-                            style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E1B4B))),
-                        Text("Parameters included in this test",
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: Colors.grey[500])),
-                      ],
-                    ),
-                  ],
-                ),
-                if (params.length > 3)
-                  GestureDetector(
-                    onTap: () => setState(
-                        () => _showAllParameters = !_showAllParameters),
-                    child: Row(
-                      children: [
-                        Text(_showAllParameters ? "Show Less" : "Show More",
-                            style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary)),
-                        Icon(
-                            _showAllParameters
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                            size: 18,
-                            color: AppColors.primary),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          // Table Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: const Color(0xFFF8F9FD),
-            child: Row(
-              children: [
-                Expanded(
-                    child: Text("PARAMETER NAME",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-                Expanded(
-                    child: Text("NORMAL RANGE",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-                Expanded(
-                    child: Text("UNITS",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-              ],
-            ),
-          ),
-          ...displayParams.map((p) => Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                    border:
-                        Border(bottom: BorderSide(color: Colors.grey[100]!))),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Text(p.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E1B4B)))),
-                    Expanded(
-                        child: Text(p.normalRange ?? "N/A",
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: const Color(0xFF475569)))),
-                    Expanded(
-                        child: Text(p.units ?? "N/A",
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: const Color(0xFF475569)))),
-                  ],
-                ),
-              )),
-          if (params.isEmpty)
-            const Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(child: Text("No parameters listed"))),
-        ],
       ),
     );
   }
@@ -557,7 +372,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
       width: 80,
       height: 80,
       color: const Color(0xFFF1F5F9),
-      child: const Icon(Icons.science_outlined, color: Colors.grey, size: 28),
+      child: const Icon(Icons.medical_services_outlined, color: Colors.grey, size: 28),
     );
   }
 }

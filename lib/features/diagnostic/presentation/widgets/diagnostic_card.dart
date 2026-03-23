@@ -1,6 +1,7 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../data/models/diagnostic_model.dart';
 
 class DiagnosticCard extends StatelessWidget {
@@ -37,7 +38,10 @@ class DiagnosticCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2)),
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -66,7 +70,10 @@ class DiagnosticCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           details.name,
-                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                          style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E1B4B)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -78,7 +85,8 @@ class DiagnosticCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       details.subcategory!.name,
-                      style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
+                      style: GoogleFonts.inter(
+                          fontSize: 11, color: Colors.grey[500]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -87,14 +95,19 @@ class DiagnosticCard extends StatelessWidget {
                   Row(
                     children: [
                       if (details.bodyPart != null) ...[
-                        _chip(Icons.location_on_outlined, details.bodyPart!, Colors.blue),
+                        _chip(Icons.location_on_outlined, details.bodyPart!,
+                            Colors.blue),
                         const SizedBox(width: 6),
                       ],
                       if (details.isContrast != null)
                         _chip(
                           Icons.contrast,
-                          details.isContrast!.toLowerCase() == 'yes' ? 'Contrast' : 'No Contrast',
-                          details.isContrast!.toLowerCase() == 'yes' ? Colors.orange : Colors.green,
+                          details.isContrast!.toLowerCase() == 'yes'
+                              ? 'Contrast'
+                              : 'No Contrast',
+                          details.isContrast!.toLowerCase() == 'yes'
+                              ? Colors.orange
+                              : Colors.green,
                         ),
                     ],
                   ),
@@ -108,20 +121,28 @@ class DiagnosticCard extends StatelessWidget {
                           if (item.price > 0)
                             Text(
                               '₹${item.price.toInt()}',
-                              style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[400], decoration: TextDecoration.lineThrough),
+                              style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: Colors.grey[400],
+                                  decoration: TextDecoration.lineThrough),
                             ),
                           Text(
                             '₹${item.discountPrice.toInt()}',
-                            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primary),
+                            style: GoogleFonts.inter(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary),
                           ),
                         ],
                       ),
                       // Actions
                       Row(
                         children: [
-                          _actionBtn(Icons.edit_outlined, AppColors.primary, onEdit),
+                          _actionBtn(
+                              Icons.edit_outlined, AppColors.primary, onEdit),
                           const SizedBox(width: 8),
-                          _actionBtn(Icons.delete_outline, Colors.red, onDelete),
+                          _actionBtn(
+                              Icons.delete_outline, Colors.red, onDelete),
                         ],
                       ),
                     ],
@@ -139,8 +160,11 @@ class DiagnosticCard extends StatelessWidget {
     return Container(
       width: 64,
       height: 64,
-      decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
-      child: const Icon(Icons.biotech_outlined, color: AppColors.primary, size: 28),
+      decoration: BoxDecoration(
+          color: const Color(0xFFF5F3FF),
+          borderRadius: BorderRadius.circular(12)),
+      child: const Icon(Icons.biotech_outlined,
+          color: AppColors.primary, size: 28),
     );
   }
 
@@ -154,7 +178,10 @@ class DiagnosticCard extends StatelessWidget {
       ),
       child: Text(
         isActive ? 'Active' : 'Inactive',
-        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: isActive ? Colors.green[700] : Colors.grey[600]),
+        style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isActive ? Colors.green[700] : Colors.grey[600]),
       ),
     );
   }
@@ -165,7 +192,9 @@ class DiagnosticCard extends StatelessWidget {
       children: [
         Icon(icon, size: 11, color: color),
         const SizedBox(width: 3),
-        Text(label, style: GoogleFonts.inter(fontSize: 11, color: color, fontWeight: FontWeight.w500)),
+        Text(label,
+            style: GoogleFonts.inter(
+                fontSize: 11, color: color, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -175,7 +204,9 @@ class DiagnosticCard extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.all(7),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8)),
         child: Icon(icon, size: 16, color: color),
       ),
     );

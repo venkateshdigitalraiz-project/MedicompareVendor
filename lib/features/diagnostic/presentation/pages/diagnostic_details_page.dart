@@ -1,8 +1,9 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../data/models/diagnostic_model.dart';
 
 class DiagnosticDetailsPage extends StatefulWidget {
@@ -36,8 +37,14 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Color(0xFF1E1B4B)), onPressed: () => context.pop()),
-        title: Text(details.name, style: GoogleFonts.inter(color: const Color(0xFF1E1B4B), fontWeight: FontWeight.bold, fontSize: 18)),
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF1E1B4B)),
+            onPressed: () => context.pop()),
+        title: Text(details.name,
+            style: GoogleFonts.inter(
+                color: const Color(0xFF1E1B4B),
+                fontWeight: FontWeight.bold,
+                fontSize: 18)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -60,29 +67,53 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
 
             // Description
             if (details.description != null && details.description!.isNotEmpty)
-              _buildCollapsibleHtml("Description", details.description!, Icons.description_outlined, Colors.green,
-                  _showAllDescription, () => setState(() => _showAllDescription = !_showAllDescription)),
+              _buildCollapsibleHtml(
+                  "Description",
+                  details.description!,
+                  Icons.description_outlined,
+                  Colors.green,
+                  _showAllDescription,
+                  () => setState(
+                      () => _showAllDescription = !_showAllDescription)),
 
             const SizedBox(height: 12),
 
             // Precaution
             if (details.precaution != null && details.precaution!.isNotEmpty)
-              _buildCollapsibleHtml("Precautions", details.precaution!, Icons.warning_amber_outlined, Colors.orange,
-                  _showAllPrecaution, () => setState(() => _showAllPrecaution = !_showAllPrecaution)),
+              _buildCollapsibleHtml(
+                  "Precautions",
+                  details.precaution!,
+                  Icons.warning_amber_outlined,
+                  Colors.orange,
+                  _showAllPrecaution,
+                  () =>
+                      setState(() => _showAllPrecaution = !_showAllPrecaution)),
 
             const SizedBox(height: 12),
 
             // Preparation Instructions
-            if (details.preparationInstructions != null && details.preparationInstructions!.isNotEmpty)
-              _buildCollapsibleHtml("Preparation Instructions", details.preparationInstructions!, Icons.checklist_outlined, AppColors.primary,
-                  _showAllPrep, () => setState(() => _showAllPrep = !_showAllPrep)),
+            if (details.preparationInstructions != null &&
+                details.preparationInstructions!.isNotEmpty)
+              _buildCollapsibleHtml(
+                  "Preparation Instructions",
+                  details.preparationInstructions!,
+                  Icons.checklist_outlined,
+                  AppColors.primary,
+                  _showAllPrep,
+                  () => setState(() => _showAllPrep = !_showAllPrep)),
 
             const SizedBox(height: 12),
 
             // Side Effects
             if (details.sideEffects != null && details.sideEffects!.isNotEmpty)
-              _buildCollapsibleHtml("Side Effects", details.sideEffects!, Icons.medical_services_outlined, Colors.red,
-                  _showAllSideEffects, () => setState(() => _showAllSideEffects = !_showAllSideEffects)),
+              _buildCollapsibleHtml(
+                  "Side Effects",
+                  details.sideEffects!,
+                  Icons.medical_services_outlined,
+                  Colors.red,
+                  _showAllSideEffects,
+                  () => setState(
+                      () => _showAllSideEffects = !_showAllSideEffects)),
 
             const SizedBox(height: 80),
           ],
@@ -95,7 +126,8 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
     final details = item.details;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
           Row(
@@ -106,7 +138,10 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: imageUrl != null
-                        ? Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover,
+                        ? Image.network(imageUrl,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => _placeholder())
                         : _placeholder(),
                   ),
@@ -114,12 +149,19 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
                     top: 4,
                     left: 4,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 2),
                       decoration: BoxDecoration(
-                        color: item.status == 'active' ? Colors.green : Colors.grey,
+                        color: item.status == 'active'
+                            ? Colors.green
+                            : Colors.grey,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(item.status, style: GoogleFonts.inter(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: Text(item.status,
+                          style: GoogleFonts.inter(
+                              fontSize: 9,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -129,23 +171,37 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(details.name, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                    Text(details.name,
+                        style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B))),
                     if (details.subcategory != null) ...[
                       const SizedBox(height: 4),
-                      Text(details.subcategory!.name, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
+                      Text(details.subcategory!.name,
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey[500])),
                     ],
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
                       children: [
-                        if (details.bodyPart != null) _chip(details.bodyPart!, Icons.location_on_outlined, Colors.blue),
-                        if (details.reportsDuration != null) _chip(details.reportsDuration!, Icons.schedule_outlined, Colors.purple),
+                        if (details.bodyPart != null)
+                          _chip(details.bodyPart!, Icons.location_on_outlined,
+                              Colors.blue),
+                        if (details.reportsDuration != null)
+                          _chip(details.reportsDuration!,
+                              Icons.schedule_outlined, Colors.purple),
                         if (details.isContrast != null)
                           _chip(
-                            details.isContrast!.toLowerCase() == 'yes' ? 'Contrast Required' : 'No Contrast Required',
+                            details.isContrast!.toLowerCase() == 'yes'
+                                ? 'Contrast Required'
+                                : 'No Contrast Required',
                             Icons.contrast,
-                            details.isContrast!.toLowerCase() == 'yes' ? Colors.orange : Colors.green,
+                            details.isContrast!.toLowerCase() == 'yes'
+                                ? Colors.orange
+                                : Colors.green,
                           ),
                       ],
                     ),
@@ -178,22 +234,44 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("MRP", style: GoogleFonts.inter(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold)),
-              Text("₹${item.price.toInt()}", style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[500], decoration: TextDecoration.lineThrough)),
+              Text("MRP",
+                  style: GoogleFonts.inter(
+                      fontSize: 9,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.bold)),
+              Text("₹${item.price.toInt()}",
+                  style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: Colors.grey[500],
+                      decoration: TextDecoration.lineThrough)),
             ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("SELLING PRICE", style: GoogleFonts.inter(fontSize: 9, color: Colors.grey[600], fontWeight: FontWeight.bold)),
-              Text("₹${item.discountPrice.toInt()}", style: GoogleFonts.inter(fontSize: 16, color: Colors.green[700], fontWeight: FontWeight.bold)),
+              Text("SELLING PRICE",
+                  style: GoogleFonts.inter(
+                      fontSize: 9,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.bold)),
+              Text("₹${item.discountPrice.toInt()}",
+                  style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.bold)),
             ],
           ),
           if (percent > 0)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(6)),
-              child: Text("$percent% OFF", style: GoogleFonts.inter(fontSize: 10, color: Colors.red[700], fontWeight: FontWeight.bold)),
+              decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(6)),
+              child: Text("$percent% OFF",
+                  style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: Colors.red[700],
+                      fontWeight: FontWeight.bold)),
             ),
         ],
       ),
@@ -203,12 +281,21 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
   Widget _buildInfoGrid(DiagnosticItem item) {
     return Row(
       children: [
-        _infoTile("BODY PART", item.details.bodyPart ?? 'N/A', Icons.location_on_outlined, Colors.blue),
+        _infoTile("BODY PART", item.details.bodyPart ?? 'N/A',
+            Icons.location_on_outlined, Colors.blue),
         const SizedBox(width: 12),
-        _infoTile("CONTRAST", item.details.isContrast?.toLowerCase() == 'yes' ? 'Required' : 'Not Required',
-            Icons.contrast, item.details.isContrast?.toLowerCase() == 'yes' ? Colors.orange : Colors.green),
+        _infoTile(
+            "CONTRAST",
+            item.details.isContrast?.toLowerCase() == 'yes'
+                ? 'Required'
+                : 'Not Required',
+            Icons.contrast,
+            item.details.isContrast?.toLowerCase() == 'yes'
+                ? Colors.orange
+                : Colors.green),
         const SizedBox(width: 12),
-        _infoTile("STATUS", item.status.toUpperCase(), Icons.check_circle_outline, Colors.teal),
+        _infoTile("STATUS", item.status.toUpperCase(),
+            Icons.check_circle_outline, Colors.teal),
       ],
     );
   }
@@ -217,7 +304,8 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -225,11 +313,23 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
               children: [
                 Icon(icon, size: 13, color: color),
                 const SizedBox(width: 4),
-                Expanded(child: Text(label, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: color, letterSpacing: 0.2))),
+                Expanded(
+                    child: Text(label,
+                        style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                            letterSpacing: 0.2))),
               ],
             ),
             const SizedBox(height: 4),
-            Text(value, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(value,
+                style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
           ],
         ),
       ),
@@ -241,15 +341,23 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(
+              color: const Color(0xFFF5F3FF),
+              borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: const Color(0xFF7C3AED), size: 18),
         ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-            Text(subtitle, style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+            Text(title,
+                style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B))),
+            Text(subtitle,
+                style:
+                    GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
           ],
         ),
       ],
@@ -258,22 +366,30 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
 
   Widget _buildDetailsGrid(DiagnosticDetails details) {
     return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          _detailRow("DIAGNOSTIC NAME", details.name, Icons.crop_free_outlined, Colors.indigo),
+          _detailRow("DIAGNOSTIC NAME", details.name, Icons.crop_free_outlined,
+              Colors.indigo),
           const Divider(height: 1),
-          _detailRow("BODY PART", details.bodyPart ?? 'N/A', Icons.location_on_outlined, Colors.blue),
+          _detailRow("BODY PART", details.bodyPart ?? 'N/A',
+              Icons.location_on_outlined, Colors.blue),
           if (details.subcategory != null) ...[
             const Divider(height: 1),
-            _detailRow("CATEGORY", details.subcategory!.name, Icons.category_outlined, Colors.purple),
+            _detailRow("CATEGORY", details.subcategory!.name,
+                Icons.category_outlined, Colors.purple),
           ],
           const Divider(height: 1),
           _detailRow(
             "CONTRAST REQUIRED",
-            details.isContrast?.toLowerCase() == 'yes' ? 'Yes' : 'No Contrast Required',
+            details.isContrast?.toLowerCase() == 'yes'
+                ? 'Yes'
+                : 'No Contrast Required',
             Icons.contrast,
-            details.isContrast?.toLowerCase() == 'yes' ? Colors.orange : Colors.green,
+            details.isContrast?.toLowerCase() == 'yes'
+                ? Colors.orange
+                : Colors.green,
           ),
         ],
       ),
@@ -287,7 +403,9 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(width: 12),
@@ -295,9 +413,17 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey[500])),
+                Text(label,
+                    style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[500])),
                 const SizedBox(height: 4),
-                Text(value, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                Text(value,
+                    style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E1B4B))),
               ],
             ),
           ),
@@ -306,11 +432,13 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
     );
   }
 
-  Widget _buildCollapsibleHtml(String title, String content, IconData icon, Color iconColor, bool isExpanded, VoidCallback onToggle) {
+  Widget _buildCollapsibleHtml(String title, String content, IconData icon,
+      Color iconColor, bool isExpanded, VoidCallback onToggle) {
     final hasLong = content.length > 200;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -322,14 +450,20 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(
+                          color: iconColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8)),
                       child: Icon(icon, color: iconColor, size: 18),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(child: Text(title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                     style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)))),
+                    Expanded(
+                        child: Text(title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E1B4B)))),
                   ],
                 ),
               ),
@@ -339,8 +473,17 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(isExpanded ? "Show Less" : "Show More", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                      Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 18, color: AppColors.primary),
+                      Text(isExpanded ? "Show Less" : "Show More",
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary)),
+                      Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          size: 18,
+                          color: AppColors.primary),
                     ],
                   ),
                 ),
@@ -348,12 +491,22 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
           ),
           const SizedBox(height: 12),
           isExpanded
-              ? HtmlWidget(content, textStyle: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF4B5563), height: 1.6))
+              ? HtmlWidget(content,
+                  textStyle: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF4B5563),
+                      height: 1.6))
               : Text(
-                  content.replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim(),
+                  content
+                      .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
+                      .replaceAll(RegExp(r'\s+'), ' ')
+                      .trim(),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF4B5563), height: 1.6),
+                  style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF4B5563),
+                      height: 1.6),
                 ),
         ],
       ),
@@ -363,13 +516,17 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
   Widget _chip(String label, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(6)),
+      decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
-          Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+          Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 11, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );
@@ -380,7 +537,8 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
       width: 80,
       height: 80,
       color: const Color(0xFFF5F3FF),
-      child: const Icon(Icons.biotech_outlined, color: AppColors.primary, size: 28),
+      child: const Icon(Icons.biotech_outlined,
+          color: AppColors.primary, size: 28),
     );
   }
 }

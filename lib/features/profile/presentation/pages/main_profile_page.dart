@@ -189,6 +189,12 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Home Care Services", Icons.home_repair_service_outlined, () {
               context.push('/homecare-list');
             }),
+            _menuTile("Care Taker Services", Icons.person_search_outlined, () {
+              context.push('/nursing-list');
+            }),
+            _menuTile("Odontogram Services", Icons.sentiment_satisfied_alt_outlined, () {
+              context.push('/dental-list');
+            }),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),

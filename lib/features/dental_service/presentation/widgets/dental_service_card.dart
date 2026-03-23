@@ -1,18 +1,18 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
-import 'package:MediCompare/features/home_care/data/models/home_care_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../data/models/dental_service_model.dart';
 
-class HomeCareCard extends StatelessWidget {
-  final HomeCareItem item;
-  final VoidCallback onView;
+class DentalServiceCard extends StatelessWidget {
+  final DentalServiceItem item;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  const HomeCareCard({
+  const DentalServiceCard({
     super.key,
     required this.item,
-    required this.onView,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
   });
@@ -20,73 +20,72 @@ class HomeCareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final details = item.details;
-
-    final baseUrl = 'https://api.medicompares.com';
-    String? imageUrl;
+    final String name = details.name;
+    final String category = details.subcategory?.name ?? "No Category";
+    
+    const baseUrl = 'https://api.medicompares.com';
+    String imageUrl = "";
     if (details.files.isNotEmpty) {
-      final f = details.files.first;
-      imageUrl = f.startsWith('http') ? f : '$baseUrl$f';
-      // Handle special characters in filename
+      imageUrl = details.files.first;
+      if (!imageUrl.startsWith('http')) {
+        imageUrl = '$baseUrl$imageUrl';
+      }
       imageUrl = Uri.encodeFull(imageUrl);
     }
-
+    
     return Card(
       color: Colors.white,
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey[200]!),
       ),
       child: InkWell(
-        onTap: onView,
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Service Image
+              // Treatment Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  color: const Color(0xFFF5F3FF),
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
-                              Icons.medical_services_outlined,
-                              color: AppColors.primary,
-                              size: 24),
-                        )
-                      : const Icon(Icons.medical_services_outlined,
-                          color: AppColors.primary, size: 24),
-                ),
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => _placeholderImage(),
+                      )
+                    : _placeholderImage(),
               ),
               const SizedBox(width: 12),
-
+              
               // Text Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      details.name,
+                      name,
                       style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E1B4B)),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E1B4B),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      details.subcategory?.name ?? "General",
+                      category,
                       style: GoogleFonts.inter(
-                          fontSize: 12, color: Colors.grey[600]),
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -95,7 +94,7 @@ class HomeCareCard extends StatelessWidget {
                   ],
                 ),
               ),
-
+              
               // Action Buttons & Price
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -110,11 +109,12 @@ class HomeCareCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "₹${item.price.toInt()}",
+                    "₹${item.discountPrice.toInt()}",
                     style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -122,6 +122,15 @@ class HomeCareCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _placeholderImage() {
+    return Container(
+      width: 60,
+      height: 60,
+      color: Colors.grey[100],
+      child: const Icon(Icons.medical_services_outlined, color: Colors.grey, size: 24),
     );
   }
 
@@ -159,7 +168,7 @@ class HomeCareCard extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(6),

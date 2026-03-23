@@ -9,7 +9,9 @@ import 'package:http_parser/http_parser.dart';
 import '../error/exceptions.dart';
 import '../network/connection_checker.dart';
 import '../utils/token_storage.dart';
+import '../router/app_router.dart';
 import 'api_service_repository.dart';
+import 'package:go_router/go_router.dart';
 
 /// ---------------- LOGGER ----------------
 class ApiLogger {
@@ -349,7 +351,11 @@ class ApiServiceRepositoryHttpImplementation implements ApiServiceRepository {
 
   Future<http.Response> _handleResponse(http.Response response) async {
     if (response.statusCode == 401) {
-      // Clear token globally if needed, but throwing a unique error is better for Bloc/UI handling
+      await TokenStorage.clearAll();
+      final context = rootNavigatorKey.currentContext;
+      if (context != null) {
+        context.go('/login');
+      }
       throw ServerException("UNAUTHORIZED_ACCESS_401");
     }
 
