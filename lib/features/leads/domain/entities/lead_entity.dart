@@ -72,3 +72,64 @@ class LeadsPaginationEntity extends Equatable {
   @override
   List<Object?> get props => [total, page, limit, totalPages];
 }
+
+class LeadDetailsEntity extends Equatable {
+  final String id;
+  final String name;
+  final String phone;
+  final String? address;
+  final String leadSource;
+  final String leadStage;
+  final String serviceType;
+  final String vendorAssigned;
+  final DateTime? date;
+  final String leadType;
+  final int age;
+  final String gender;
+  final String vendorPermission;
+  final double price;
+  final double discountPrice;
+  final String serviceName;
+  final String duration;
+
+  const LeadDetailsEntity({
+    required this.id,
+    required this.name,
+    required this.phone,
+    this.address,
+    required this.leadSource,
+    required this.leadStage,
+    required this.serviceType,
+    required this.vendorAssigned,
+    this.date,
+    required this.leadType,
+    required this.age,
+    required this.gender,
+    required this.vendorPermission,
+    required this.price,
+    required this.discountPrice,
+    required this.serviceName,
+    required this.duration,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        phone,
+        address,
+        leadSource,
+        leadStage,
+        serviceType,
+        vendorAssigned,
+        date,
+        leadType,
+        age,
+        gender,
+        vendorPermission,
+        price,
+        discountPrice,
+        serviceName,
+        duration,
+      ];
+}

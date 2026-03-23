@@ -8,4 +8,5 @@ abstract class LeadsRepository {
     String leadStage = '',
     String search = '',
   });
+  Future<LeadDetailsEntity> getLeadDetails(String id);
 }

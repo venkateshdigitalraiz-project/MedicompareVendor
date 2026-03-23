@@ -23,4 +23,9 @@ class LeadsRepositoryImpl implements LeadsRepository {
       search: search,
     );
   }
+
+  @override
+  Future<LeadDetailsEntity> getLeadDetails(String id) async {
+    return await remoteDataSource.getLeadDetails(id);
+  }
 }

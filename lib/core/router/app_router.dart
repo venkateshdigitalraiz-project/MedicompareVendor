@@ -48,6 +48,8 @@ import 'package:MediCompare/features/medical_equipment/presentation/pages/medica
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_details_page.dart';
 import 'package:MediCompare/features/medical_equipment/data/models/medical_equipment_model.dart';
 import 'package:MediCompare/features/orders/orders_injection.dart';
+import 'package:MediCompare/features/leads/leads_injection.dart';
+import 'package:MediCompare/features/leads/presentation/pages/lead_details_page.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -125,6 +127,16 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/leads',
       builder: (_, __) => const LeadsPage(),
+    ),
+    GoRoute(
+      path: '/lead-details/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return BlocProvider(
+          create: (_) => LeadsInjection.provideLeadsBloc(),
+          child: LeadDetailsPage(leadId: id),
+        );
+      },
     ),
     GoRoute(
       path: '/subscription-plan',

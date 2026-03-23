@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -21,6 +22,40 @@ class _LeadsPageState extends State<LeadsPage> {
   String _searchQuery = '';
   String _selectedStage = '';
   int _currentPage = 1;
+  int _totalPages = 1;
+  bool _isFetchingMore = false;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isFetchingMore) return;
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_currentPage < _totalPages) {
+        setState(() {
+          _currentPage++;
+          _isFetchingMore = true;
+        });
+        context.read<LeadsBloc>().add(GetLeadsEvent(
+              page: _currentPage,
+              limit: 10,
+              search: _searchQuery,
+              leadStage: _selectedStage,
+              isLoadMore: true,
+            ));
+      }
+    }
+  }
 
   final List<Map<String, String>> _stages = [
     {'label': 'All Status', 'value': ''},
@@ -48,12 +83,9 @@ class _LeadsPageState extends State<LeadsPage> {
                 if (state is LeadsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is LeadsLoaded) {
-                  return Column(
-                    children: [
-                      Expanded(child: _buildLeadsList(state.leadsList.leads)),
-                      _buildPaginationFooter(state.leadsList.pagination),
-                    ],
-                  );
+                  _totalPages = state.leadsList.pagination.totalPages;
+                  _isFetchingMore = state.isLoadingMore;
+                  return _buildLeadsList(state.leadsList.leads, state.isLoadingMore);
                 } else if (state is LeadsError) {
                   return Center(child: Text(state.message));
                 }
@@ -157,58 +189,21 @@ class _LeadsPageState extends State<LeadsPage> {
         ));
   }
 
-  Widget _buildPaginationFooter(LeadsPaginationEntity pagination) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton(
-            onPressed: pagination.page > 1
-                ? () {
-                    setState(() => _currentPage--);
-                    _onFilterChanged();
-                  }
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey[300],
-            ),
-            child: const Text("Previous"),
-          ),
-          Text(
-            "Page ${pagination.page} of ${pagination.totalPages}",
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          ),
-          ElevatedButton(
-            onPressed: pagination.page < pagination.totalPages
-                ? () {
-                    setState(() => _currentPage++);
-                    _onFilterChanged();
-                  }
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey[300],
-            ),
-            child: const Text("Next"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLeadsList(List<LeadEntity> leads) {
+  Widget _buildLeadsList(List<LeadEntity> leads, bool isLoadingMore) {
     if (leads.isEmpty) {
       return const Center(child: Text("No leads matching filters."));
     }
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: leads.length,
+      itemCount: leads.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == leads.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final lead = leads[index];
         return _buildLeadCard(lead);
       },
@@ -216,115 +211,192 @@ class _LeadsPageState extends State<LeadsPage> {
   }
 
   Widget _buildLeadCard(LeadEntity lead) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+    final bool isAccepted = lead.vendorPermission.toLowerCase() == 'accepted';
+
+    return GestureDetector(
+      onTap: () {
+        if (isAccepted) {
+          context.push('/lead-details/${lead.id}');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Only accepted leads can be viewed in detail.")),
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey[200]!),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  child: const Icon(Icons.person_outline, color: AppColors.primary),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Header Section
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: isAccepted ? Colors.green.withOpacity(0.05) : Colors.orange.withOpacity(0.05),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: isAccepted ? Colors.green[200]! : Colors.orange[200]!),
+                    ),
+                    child: Icon(
+                      Icons.person_outline,
+                      color: isAccepted ? Colors.green[600] : Colors.orange[600],
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          lead.name,
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          lead.phone,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildPermissionBadge(lead.vendorPermission),
+                ],
+              ),
+            ),
+            
+            // Content Section
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        lead.name,
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+                      Expanded(
+                        child: _buildBeautifulInfoItem(
+                          label: "Service",
+                          value: lead.serviceName,
+                          icon: Icons.medical_services_outlined,
+                          color: AppColors.primary,
+                        ),
                       ),
-                      Text(
-                        lead.phone,
-                        style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600]),
+                      Expanded(
+                        child: _buildBeautifulInfoItem(
+                          label: "Posted On",
+                          value: DateFormat('MMM d, yyyy').format(lead.createdAt),
+                          icon: Icons.calendar_today_outlined,
+                          color: Colors.blue,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                _buildPermissionBadge(lead.vendorPermission),
-              ],
-            ),
-            const Divider(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoItem(
-                    label: "SERVICE",
-                    value: lead.serviceName,
-                    icon: Icons.medical_services_outlined,
-                  ),
-                ),
-                Expanded(
-                  child: _buildInfoItem(
-                    label: "DATE",
-                    value: DateFormat('MMM d, yyyy').format(lead.createdAt),
-                    icon: Icons.calendar_today_outlined,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (lead.address != null) ...[
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      lead.address!,
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+                  if (lead.address != null && lead.address!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              lead.address!,
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: Colors.grey[700],
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
-            ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoItem({required String label, required String value, required IconData icon}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildBeautifulInfoItem({required String label, required String value, required IconData icon, required Color color}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(icon, size: 14, color: color),
         ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Icon(icon, size: 14, color: AppColors.primary),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: GoogleFonts.inter(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[500],
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
                 value,
-                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
+
 
   Widget _buildPermissionBadge(String permission) {
     Color color;

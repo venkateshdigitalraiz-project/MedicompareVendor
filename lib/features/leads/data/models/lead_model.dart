@@ -73,3 +73,58 @@ class LeadsPaginationModel extends LeadsPaginationEntity {
     );
   }
 }
+
+class LeadDetailsModel extends LeadDetailsEntity {
+  const LeadDetailsModel({
+    required super.id,
+    required super.name,
+    required super.phone,
+    super.address,
+    required super.leadSource,
+    required super.leadStage,
+    required super.serviceType,
+    required super.vendorAssigned,
+    super.date,
+    required super.leadType,
+    required super.age,
+    required super.gender,
+    required super.vendorPermission,
+    required super.price,
+    required super.discountPrice,
+    required super.serviceName,
+    required super.duration,
+  });
+
+  factory LeadDetailsModel.fromJson(Map<String, dynamic> json) {
+    final productDetails = json['productdetails'] ?? {};
+    final tabletDetailsList = (productDetails['tabletdetails'] as List?) ?? [];
+    
+    String sName = 'Unknown Service';
+    String duration = 'N/A';
+    if (tabletDetailsList.isNotEmpty) {
+      final tDetails = tabletDetailsList[0];
+      sName = tDetails['name'] ?? 'Unknown Service';
+      duration = tDetails['duration']?.toString() ?? 'N/A';
+    }
+
+    return LeadDetailsModel(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? 'Unknown',
+      phone: json['phone']?.toString() ?? '',
+      address: json['address'],
+      leadSource: json['leadSource'] ?? 'Unknown',
+      leadStage: json['leadStage'] ?? 'Unknown',
+      serviceType: json['serviceType'] ?? 'Unknown',
+      vendorAssigned: json['vendorassined'] ?? 'Unknown',
+      date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
+      leadType: json['leadType'] ?? 'Unknown',
+      age: json['age'] is int ? json['age'] : int.tryParse(json['age']?.toString() ?? '0') ?? 0,
+      gender: json['gender'] ?? 'Unknown',
+      vendorPermission: json['vendorPermission'] ?? 'Unknown',
+      price: (productDetails['price'] ?? 0).toDouble(),
+      discountPrice: (productDetails['discountprice'] ?? 0).toDouble(),
+      serviceName: sName,
+      duration: duration,
+    );
+  }
+}

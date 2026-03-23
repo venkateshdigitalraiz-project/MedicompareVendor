@@ -14,11 +14,22 @@ class LeadsLoading extends LeadsState {}
 
 class LeadsLoaded extends LeadsState {
   final LeadsListEntity leadsList;
+  final bool isLoadingMore;
 
-  const LeadsLoaded(this.leadsList);
+  const LeadsLoaded(this.leadsList, {this.isLoadingMore = false});
+
+  LeadsLoaded copyWith({
+    LeadsListEntity? leadsList,
+    bool? isLoadingMore,
+  }) {
+    return LeadsLoaded(
+      leadsList ?? this.leadsList,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 
   @override
-  List<Object?> get props => [leadsList];
+  List<Object?> get props => [leadsList, isLoadingMore];
 }
 
 class LeadsError extends LeadsState {
@@ -28,4 +39,13 @@ class LeadsError extends LeadsState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class LeadDetailsLoaded extends LeadsState {
+  final LeadDetailsEntity leadDetails;
+
+  const LeadDetailsLoaded(this.leadDetails);
+
+  @override
+  List<Object?> get props => [leadDetails];
 }

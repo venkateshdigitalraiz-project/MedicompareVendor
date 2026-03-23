@@ -11,6 +11,7 @@ abstract class LeadsRemoteDataSource {
     String leadStage = '',
     String search = '',
   });
+  Future<LeadDetailsModel> getLeadDetails(String id);
 }
 
 class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
@@ -50,5 +51,19 @@ class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
       );
     }
     return LeadsListModel.fromJson(decoded['data']);
+  }
+
+  @override
+  Future<LeadDetailsModel> getLeadDetails(String id) async {
+    final response = await apiService.get(ApiEndpoints.leadDetails(id));
+    final decoded = json.decode(response.body);
+
+    if (decoded == null ||
+        decoded['data'] == null ||
+        decoded['data']['lead'] == null) {
+      throw Exception('Lead details not found');
+    }
+
+    return LeadDetailsModel.fromJson(decoded['data']['lead']);
   }
 }
