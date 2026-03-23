@@ -18,6 +18,7 @@ class ApiEndpoints {
   static String pincodeDelete(String id) => '/vendor/pincode/delete/$id';
   static const String orderList = '/vendor/order/list';
   static const String orderDetails = '/vendor/order/details';
+  static String updateOrderStatus(String id) => '/vendor/order/update-status/$id';
   static const String leadsList = '/vendor/leads/list';
   static const String createTicket = '/vendor/support/tickets/create';
   static const String listTickets = '/vendor/support/tickets/list';

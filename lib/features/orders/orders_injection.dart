@@ -4,6 +4,7 @@ import 'data/repositories/orders_repository_impl.dart';
 import 'domain/repositories/orders_repository.dart';
 import 'domain/usecases/get_orders_usecase.dart';
 import 'domain/usecases/get_order_details_usecase.dart';
+import 'domain/usecases/update_order_status_usecase.dart';
 import 'presentation/bloc/orders_bloc.dart';
 
 class OrdersInjection {
@@ -11,6 +12,7 @@ class OrdersInjection {
     return OrdersBloc(
       getOrdersUseCase: provideGetOrdersUseCase(),
       getOrderDetailsUseCase: provideGetOrderDetailsUseCase(),
+      updateOrderStatusUseCase: provideUpdateOrderStatusUseCase(),
     );
   }
 
@@ -20,6 +22,10 @@ class OrdersInjection {
 
   static GetOrderDetailsUseCase provideGetOrderDetailsUseCase() {
     return GetOrderDetailsUseCase(provideOrdersRepository());
+  }
+
+  static UpdateOrderStatusUseCase provideUpdateOrderStatusUseCase() {
+    return UpdateOrderStatusUseCase(provideOrdersRepository());
   }
 
   static OrdersRepository provideOrdersRepository() {

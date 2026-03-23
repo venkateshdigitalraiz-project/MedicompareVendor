@@ -11,6 +11,7 @@ abstract class OrdersRemoteDataSource {
     String search = '',
   });
   Future<OrderItemModel> getOrderDetails(String orderId);
+  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload);
 }
 
 class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
@@ -56,5 +57,19 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       throw Exception('Order details not found');
     }
     return OrderItemModel.fromJson(decoded['data']['Order']);
+  }
+
+  @override
+  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload) async {
+    final response = await apiService.post(
+      ApiEndpoints.updateOrderStatus(orderItemId),
+      body: payload,
+    );
+    final decoded = json.decode(response.body);
+    if (decoded['success'] == true) {
+      return true;
+    } else {
+      throw Exception(decoded['message'] ?? 'Failed to update order status');
+    }
   }
 }

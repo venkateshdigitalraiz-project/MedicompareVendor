@@ -61,14 +61,41 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ],
         ),
         actions: [
-          _buildCompactActionButton("Reject", Colors.red, () {}),
-          _buildCompactActionButton("Accept", AppColors.primary, () {}),
+          BlocBuilder<OrdersBloc, OrdersState>(
+            builder: (context, state) {
+              if (state is OrderDetailsLoaded) {
+                final status = state.order.orderStatus.toLowerCase();
+                if (status == 'new' || status == 'pending') {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCompactActionButton("Reject", Colors.red, () => _handleUpdateStatus('cancelled')),
+                      _buildCompactActionButton("Accept", AppColors.primary, () => _handleUpdateStatus('confirmed')),
+                    ],
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           const SizedBox(width: 8),
         ],
       ),
-      body: BlocBuilder<OrdersBloc, OrdersState>(
+      body: BlocConsumer<OrdersBloc, OrdersState>(
+        listener: (context, state) {
+          if (state is OrderStatusUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.green),
+            );
+            context.read<OrdersBloc>().add(GetOrderDetailsEvent(widget.orderId));
+          } else if (state is OrdersError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
         builder: (context, state) {
-          if (state is OrdersLoading) {
+          if (state is OrdersLoading || state is OrderActionLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is OrderDetailsLoaded) {
             final order = state.order;
@@ -99,6 +126,28 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         },
       ),
     );
+  }
+
+  void _handleUpdateStatus(String status) {
+    final state = context.read<OrdersBloc>().state;
+    if (state is OrderDetailsLoaded) {
+      final order = state.order;
+      final payload = {
+        "orderStatus": status,
+        "status": status,
+        "orderId": order.orderId,
+        "productIds": [order.productId],
+        "packageIds": [],
+        "deliveryPartner": _selectedDeliveryPartner,
+        "readyTime": _selectedParcelTime.toString(),
+        "assignedPartnerId": null
+      };
+
+      context.read<OrdersBloc>().add(UpdateOrderStatusEvent(
+            orderItemId: order.id,
+            payload: payload,
+          ));
+    }
   }
 
   Widget _buildCompactActionButton(String label, Color color, VoidCallback onTap) {

@@ -47,8 +47,10 @@ import 'package:MediCompare/features/medical_treatment/data/models/medical_treat
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_list_page.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_details_page.dart';
 import 'package:MediCompare/features/medical_equipment/data/models/medical_equipment_model.dart';
+import 'package:MediCompare/features/orders/orders_injection.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -144,7 +146,10 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
       path: '/order-details/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        return OrderDetailPage(orderId: id);
+        return BlocProvider(
+          create: (_) => OrdersInjection.provideOrdersBloc(),
+          child: OrderDetailPage(orderId: id),
+        );
       },
     ),
     GoRoute(

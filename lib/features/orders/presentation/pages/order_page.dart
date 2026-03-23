@@ -23,6 +23,7 @@ class _OrdersPageState extends State<OrdersPage> {
   String _selectedStatus = '';
   String _selectedDuration = 'No delivery Time';
   int _currentPage = 1;
+  final ScrollController _scrollController = ScrollController();
 
   final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
@@ -35,6 +36,36 @@ class _OrdersPageState extends State<OrdersPage> {
     {'label': 'Delivered', 'value': 'delivered'},
     {'label': 'Cancelled', 'value': 'cancelled'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<OrdersBloc>().state;
+      if (state is OrdersLoaded && !state.isLoadingMore) {
+        if (state.ordersList.pagination.page < state.ordersList.pagination.totalPages) {
+          _currentPage++;
+          context.read<OrdersBloc>().add(GetOrdersEvent(
+                status: _selectedStatus,
+                search: _searchQuery,
+                page: _currentPage,
+                isLoadMore: true,
+              ));
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,10 +86,9 @@ class _OrdersPageState extends State<OrdersPage> {
                 } else if (state is OrdersLoaded) {
                   return Column(
                     children: [
-                      Expanded(child: _buildOrdersList(state.ordersList.orderItems)),
-                      _buildPaginationFooter(state.ordersList.pagination),
-                    ],
-                  );
+                        Expanded(child: _buildOrdersList(state.ordersList.orderItems, state.isLoadingMore)),
+                      ],
+                    );
                 } else if (state is OrdersError) {
                   return Center(child: Text(state.message));
                 }
@@ -176,60 +206,27 @@ class _OrdersPageState extends State<OrdersPage> {
         ));
   }
 
-  Widget _buildPaginationFooter(PaginationEntity pagination) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton(
-            onPressed: pagination.page > 1
-                ? () {
-                    setState(() => _currentPage--);
-                    _onFilterChanged();
-                  }
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey[300],
-            ),
-            child: const Text("Previous"),
-          ),
-          Text(
-            "Page ${pagination.page} of ${pagination.totalPages}",
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          ),
-          ElevatedButton(
-            onPressed: pagination.page < pagination.totalPages
-                ? () {
-                    setState(() => _currentPage++);
-                    _onFilterChanged();
-                  }
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey[300],
-            ),
-            child: const Text("Next"),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildOrdersList(List<OrderItemEntity> orders) {
+  Widget _buildOrdersList(List<OrderItemEntity> orders, bool isLoadingMore) {
     if (orders.isEmpty) {
       return const Center(child: Text("No orders matching filters."));
     }
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: orders.length,
+      itemCount: isLoadingMore ? orders.length + 1 : orders.length,
       itemBuilder: (context, index) {
-        final order = orders[index];
-        return _buildOrderItemCard(order);
+        if (index < orders.length) {
+          final order = orders[index];
+          return _buildOrderItemCard(order);
+        } else {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
       },
     );
   }
@@ -239,7 +236,11 @@ class _OrdersPageState extends State<OrdersPage> {
     final product = item.productDetails;
 
     return GestureDetector(
-      onTap: () => context.push('/order-details/${item.id}'),
+      onTap: () {
+        context.push('/order-details/${item.id}').then((_) {
+          _onFilterChanged(); // Refresh the list when coming back
+        });
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(

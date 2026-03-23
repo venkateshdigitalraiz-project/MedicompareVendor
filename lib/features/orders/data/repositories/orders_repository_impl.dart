@@ -26,4 +26,9 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<OrderItemEntity> getOrderDetails(String orderId) async {
     return await remoteDataSource.getOrderDetails(orderId);
   }
+
+  @override
+  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload) async {
+    return await remoteDataSource.updateOrderStatus(orderItemId, payload);
+  }
 }

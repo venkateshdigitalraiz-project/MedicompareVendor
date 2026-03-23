@@ -8,4 +8,5 @@ abstract class OrdersRepository {
     String search = '',
   });
   Future<OrderItemEntity> getOrderDetails(String orderId);
+  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload);
 }
