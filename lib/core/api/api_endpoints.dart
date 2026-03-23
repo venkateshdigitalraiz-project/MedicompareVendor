@@ -134,4 +134,18 @@ class ApiEndpoints {
       '/vendor/product/medicaltreatment/update/$id';
   static String deleteMedicalTreatment(String id) =>
       '/vendor/product/medicaltreatment/delete/$id';
+
+  // Medical Equipment Services
+  static const String medicalEquipmentCategories =
+      '/common/allcategory/medicalequipment';
+  static const String medicalEquipmentList =
+      '/vendor/product/medicalequipment/list';
+  static String medicalEquipmentDetails(String id) =>
+      '/vendor/product/medicalequipment/details/$id';
+  static const String createMedicalEquipment =
+      '/vendor/product/medicalequipment/create';
+  static String updateMedicalEquipment(String id) =>
+      '/vendor/product/medicalequipment/update/$id';
+  static String deleteMedicalEquipment(String id) =>
+      '/vendor/product/medicalequipment/delete/$id';
 }

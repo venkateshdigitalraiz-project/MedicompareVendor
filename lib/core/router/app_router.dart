@@ -44,6 +44,9 @@ import 'package:MediCompare/features/dental_service/data/models/dental_service_m
 import 'package:MediCompare/features/medical_treatment/presentation/pages/medical_treatment_list_page.dart';
 import 'package:MediCompare/features/medical_treatment/presentation/pages/medical_treatment_details_page.dart';
 import 'package:MediCompare/features/medical_treatment/data/models/medical_treatment_model.dart';
+import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_list_page.dart';
+import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_details_page.dart';
+import 'package:MediCompare/features/medical_equipment/data/models/medical_equipment_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -207,6 +210,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/medical-treatment-details',
       builder: (context, state) => MedicalTreatmentDetailsPage(item: state.extra as MedicalTreatmentItem),
+    ),
+    GoRoute(
+      path: '/equipment-list',
+      builder: (context, state) => const MedicalEquipmentListPage(),
+    ),
+    GoRoute(
+      path: '/equipment-details',
+      builder: (context, state) => MedicalEquipmentDetailsPage(item: state.extra as MedicalEquipmentItem),
     ),
   ],
 );
