@@ -120,4 +120,18 @@ class ApiEndpoints {
       '/vendor/product/dentalservice/update/$id';
   static String deleteDentalService(String id) =>
       '/vendor/product/dentalservice/delete/$id';
+
+  // Medical Treatment Services
+  static const String medicalTreatmentCategories =
+      '/common/allcategory/medicaltreatment';
+  static const String medicalTreatmentList =
+      '/vendor/product/medicaltreatment/list';
+  static String medicalTreatmentDetails(String id) =>
+      '/vendor/product/medicaltreatment/details/$id';
+  static const String createMedicalTreatment =
+      '/vendor/product/medicaltreatment/create';
+  static String updateMedicalTreatment(String id) =>
+      '/vendor/product/medicaltreatment/update/$id';
+  static String deleteMedicalTreatment(String id) =>
+      '/vendor/product/medicaltreatment/delete/$id';
 }

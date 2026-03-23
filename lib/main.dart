@@ -36,8 +36,10 @@ import 'features/home_care/presentation/bloc/home_care_event.dart';
 import 'features/nursing_care/nursing_care_injection.dart';
 import 'features/nursing_care/presentation/bloc/nursing_care_event.dart';
 import 'features/dental_service/dental_service_injection.dart';
-import 'features/dental_service/presentation/bloc/dental_service_event.dart';
-import 'core/router/app_router.dart';
+import 'package:MediCompare/features/dental_service/presentation/bloc/dental_service_event.dart';
+import 'package:MediCompare/features/medical_treatment/medical_treatment_injection.dart';
+import 'package:MediCompare/features/medical_treatment/presentation/bloc/medical_treatment_event.dart';
+import 'package:MediCompare/core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -129,6 +131,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider(
           create: (_) => DentalServiceInjection.provideDentalServiceBloc()..add(const LoadDentalServiceCategoriesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => MedicalTreatmentInjection.provideMedicalTreatmentBloc()..add(const LoadMedicalTreatmentCategoriesEvent()),
         ),
       ],
       child: MaterialApp.router(

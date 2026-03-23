@@ -41,6 +41,9 @@ import 'package:MediCompare/features/nursing_care/data/models/nursing_care_model
 import 'package:MediCompare/features/dental_service/presentation/pages/dental_service_list_page.dart';
 import 'package:MediCompare/features/dental_service/presentation/pages/dental_service_details_page.dart';
 import 'package:MediCompare/features/dental_service/data/models/dental_service_model.dart';
+import 'package:MediCompare/features/medical_treatment/presentation/pages/medical_treatment_list_page.dart';
+import 'package:MediCompare/features/medical_treatment/presentation/pages/medical_treatment_details_page.dart';
+import 'package:MediCompare/features/medical_treatment/data/models/medical_treatment_model.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -196,6 +199,14 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/dental-details',
       builder: (context, state) => DentalServiceDetailsPage(item: state.extra as DentalServiceItem),
+    ),
+    GoRoute(
+      path: '/medical-treatment-list',
+      builder: (context, state) => const MedicalTreatmentListPage(),
+    ),
+    GoRoute(
+      path: '/medical-treatment-details',
+      builder: (context, state) => MedicalTreatmentDetailsPage(item: state.extra as MedicalTreatmentItem),
     ),
   ],
 );

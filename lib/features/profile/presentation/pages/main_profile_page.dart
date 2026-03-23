@@ -195,6 +195,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Odontogram Services", Icons.sentiment_satisfied_alt_outlined, () {
               context.push('/dental-list');
             }),
+            _menuTile("Medical Treatment Services", Icons.health_and_safety_outlined, () {
+              context.push('/medical-treatment-list');
+            }),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),
