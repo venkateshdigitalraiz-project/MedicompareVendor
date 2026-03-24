@@ -76,6 +76,7 @@ class _MedicalTreatmentListPageState extends State<MedicalTreatmentListPage> {
       backgroundColor: const Color(0xFFF8FAFF),
       appBar: AppBar(
         backgroundColor: AppColors.primaryDark,
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         title: Text(

@@ -9,6 +9,9 @@ class ApiEndpoints {
   static const String stepOneUpdate = '/vendor/profile/step_one_update';
   static const String stepTwoUpdate = '/vendor/profile/step_two';
   static const String dashboard = '/vendor/dashboard';
+  static const String vendorProfile = '/vendor/profile';
+  static const String updateProfilePicture = '/vendor/profile/update/profile';
+  static const String changePassword = '/vendor/profile/change-password';
   static const String slotTimings = '/vendor/vendor-timings/list';
   static String updateSlotTimings(String id) =>
       '/vendor/vendor-timings/update/$id';

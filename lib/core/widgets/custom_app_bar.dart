@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 
@@ -67,16 +68,21 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         if (showUserInfo) ...[
           const SizedBox(width: 4),
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: Colors.white.withOpacity(0.2),
-            backgroundImage: userImageUrl != null ? NetworkImage(userImageUrl!) : null,
-            child: userImageUrl == null
-                ? Text(
-                    userName?.isNotEmpty == true ? userName![0].toUpperCase() : 'U',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  )
-                : null,
+          GestureDetector(
+            onTap: () {
+              context.push('/profile-screen');
+            },
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundImage: userImageUrl != null ? NetworkImage(userImageUrl!) : null,
+              child: userImageUrl == null
+                  ? Text(
+                      userName?.isNotEmpty == true ? userName![0].toUpperCase() : 'U',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    )
+                  : null,
+            ),
           ),
           const SizedBox(width: 16),
         ] else
