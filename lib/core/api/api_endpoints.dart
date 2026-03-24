@@ -168,4 +168,10 @@ class ApiEndpoints {
       '/common/tablets';
   static const String facilitiesList =
       '/vendor/facilities/list';
+
+  // Ambulance Orders (Bookings)
+  static const String ambulanceBookingList =
+      '/vendor/ambulance-booking/list';
+  static String ambulanceBookingSingle(String id) =>
+      '/vendor/ambulance-booking/single/$id';
 }

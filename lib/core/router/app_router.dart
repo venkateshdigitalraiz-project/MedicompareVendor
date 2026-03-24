@@ -50,6 +50,10 @@ import 'package:MediCompare/features/medical_equipment/data/models/medical_equip
 import 'package:MediCompare/features/ambulance/presentation/pages/ambulance_list_page.dart';
 import 'package:MediCompare/features/ambulance/presentation/pages/ambulance_details_page.dart';
 import 'package:MediCompare/features/ambulance/domain/entities/ambulance_entity.dart';
+import 'package:MediCompare/features/ambulance_orders/presentation/pages/ambulance_orders_page.dart';
+import 'package:MediCompare/features/ambulance_orders/presentation/pages/ambulance_order_details_page.dart';
+import 'package:MediCompare/features/ambulance_orders/domain/entities/ambulance_order_entity.dart';
+import 'package:MediCompare/features/ambulance_orders/ambulance_orders_injection.dart';
 import 'package:MediCompare/features/orders/orders_injection.dart';
 import 'package:MediCompare/features/leads/leads_injection.dart';
 import 'package:MediCompare/features/leads/presentation/pages/lead_details_page.dart';
@@ -246,6 +250,17 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/ambulance-details',
       builder: (context, state) => AmbulanceDetailsPage(ambulance: state.extra as AmbulanceEntity),
+    ),
+    GoRoute(
+      path: '/ambulance-orders',
+      builder: (context, state) => BlocProvider(
+        create: (_) => AmbulanceOrdersInjection.provideAmbulanceOrdersBloc(),
+        child: const AmbulanceOrdersPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/ambulance-order-details',
+      builder: (context, state) => AmbulanceOrderDetailsPage(order: state.extra as AmbulanceOrderEntity),
     ),
   ],
 );

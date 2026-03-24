@@ -201,9 +201,24 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Medical Equipment Services", Icons.medical_services_outlined, () {
               context.push('/equipment-list');
             }),
-            _menuTile("Ambulance", Icons.airport_shuttle_outlined, () {
-              context.push('/ambulance-list');
-            }),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ExpansionTile(
+                leading: const Icon(Icons.airport_shuttle_outlined, color: AppColors.primaryDark),
+                title: Text("Ambulance", style: GoogleFonts.inter(fontSize: 14)),
+                shape: const Border(),
+                childrenPadding: const EdgeInsets.only(left: 32),
+                trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                children: [
+                  _menuTile("List", Icons.list_alt_outlined, () {
+                    context.push('/ambulance-list');
+                  }, isSubTile: true),
+                  _menuTile("Orders", Icons.shopping_cart_outlined, () {
+                    context.push('/ambulance-orders');
+                  }, isSubTile: true),
+                ],
+              ),
+            ),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),
