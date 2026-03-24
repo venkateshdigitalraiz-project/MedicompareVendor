@@ -43,6 +43,8 @@ import 'package:MediCompare/features/medical_equipment/medical_equipment_injecti
 import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_event.dart';
 import 'package:MediCompare/features/ambulance/ambulance_injection.dart';
 import 'package:MediCompare/features/ambulance/presentation/bloc/ambulance_event.dart';
+import 'package:MediCompare/features/notifications/notifications_injection.dart';
+import 'package:MediCompare/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:MediCompare/core/router/app_router.dart';
 
 void main() async {
@@ -145,8 +147,12 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(
           create: (_) => AmbulanceInjection.provideAmbulanceBloc()..add(const GetAmbulanceListEvent()),
         ),
+        BlocProvider(
+          create: (_) => NotificationsInjection.provideNotificationsBloc()..add(LoadNotificationsEvent(refresh: true)),
+        ),
       ],
       child: MaterialApp.router(
+        title: 'Medicompares Vendor',
         debugShowCheckedModeBanner: false,
         routerConfig: _router,
       ),

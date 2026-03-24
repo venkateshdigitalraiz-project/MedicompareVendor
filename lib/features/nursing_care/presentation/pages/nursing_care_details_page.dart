@@ -175,27 +175,27 @@ class NursingCareDetailsPage extends StatelessWidget {
 
             // Content Sections
             if (details.description != null && details.description!.isNotEmpty)
-              _buildHtmlSection(
-                  "Nursing Care Information",
-                  details.description!,
-                  Icons.description_outlined,
-                  const Color(0xFFEAF9F1),
-                  const Color(0xFF15803D)),
+              ExpandableHtmlSection(
+                  title: "Nursing Care Information",
+                  htmlContent: details.description!,
+                  icon: Icons.description_outlined,
+                  bg: const Color(0xFFEAF9F1),
+                  color: const Color(0xFF15803D)),
             if (details.precaution != null && details.precaution!.isNotEmpty)
-              _buildHtmlSection(
-                  "Precautions",
-                  details.precaution!,
-                  Icons.warning_amber_rounded,
-                  const Color(0xFFFFF6E5),
-                  const Color(0xFFC2410C)),
+              ExpandableHtmlSection(
+                  title: "Precautions",
+                  htmlContent: details.precaution!,
+                  icon: Icons.warning_amber_rounded,
+                  bg: const Color(0xFFFFF6E5),
+                  color: const Color(0xFFC2410C)),
             if (details.preparationInstructions != null &&
                 details.preparationInstructions!.isNotEmpty)
-              _buildHtmlSection(
-                  "Preparation",
-                  details.preparationInstructions!,
-                  Icons.checklist_rtl_outlined,
-                  const Color(0xFFF5EAFC),
-                  const Color(0xFF9333EA)),
+              ExpandableHtmlSection(
+                  title: "Preparation",
+                  htmlContent: details.preparationInstructions!,
+                  icon: Icons.checklist_rtl_outlined,
+                  bg: const Color(0xFFF5EAFC),
+                  color: const Color(0xFF9333EA)),
             const SizedBox(height: 32),
           ],
         ),
@@ -262,36 +262,107 @@ class NursingCareDetailsPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildHtmlSection(
-      String title, String html, IconData icon, Color bg, Color color) {
+class ExpandableHtmlSection extends StatefulWidget {
+  final String title;
+  final String htmlContent;
+  final IconData icon;
+  final Color bg;
+  final Color color;
+
+  const ExpandableHtmlSection({
+    super.key,
+    required this.title,
+    required this.htmlContent,
+    required this.icon,
+    required this.bg,
+    required this.color,
+  });
+
+  @override
+  State<ExpandableHtmlSection> createState() => _ExpandableHtmlSectionState();
+}
+
+class _ExpandableHtmlSectionState extends State<ExpandableHtmlSection> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      color: bg, borderRadius: BorderRadius.circular(8)),
-                  child: Icon(icon, color: color, size: 20)),
-              const SizedBox(width: 12),
-              Text(title,
-                  style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1B1B1B))),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                          color: widget.bg,
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Icon(widget.icon, color: widget.color, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        widget.title,
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => setState(() => isExpanded = !isExpanded),
+                child: Row(
+                  children: [
+                    Text(
+                      isExpanded ? "Show Less" : "Show More",
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
+                        size: 16, color: AppColors.primary),
+                  ],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          HtmlWidget(html,
-              textStyle: GoogleFonts.poppins(
-                  fontSize: 14, color: const Color(0xFF4B5563), height: 1.6)),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: isExpanded ? double.infinity : 100, // Roughly 3-4 lines
+            ),
+            child: ClipRect(
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: HtmlWidget(
+                  widget.htmlContent,
+                  textStyle: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: const Color(0xFF4B5563),
+                      height: 1.6),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

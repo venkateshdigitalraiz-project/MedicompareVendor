@@ -57,6 +57,7 @@ import 'package:MediCompare/features/ambulance_orders/ambulance_orders_injection
 import 'package:MediCompare/features/orders/orders_injection.dart';
 import 'package:MediCompare/features/leads/leads_injection.dart';
 import 'package:MediCompare/features/leads/presentation/pages/lead_details_page.dart';
+import 'package:MediCompare/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -261,6 +262,10 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/ambulance-order-details',
       builder: (context, state) => AmbulanceOrderDetailsPage(order: state.extra as AmbulanceOrderEntity),
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (_, __) => const NotificationsPage(),
     ),
   ],
 );

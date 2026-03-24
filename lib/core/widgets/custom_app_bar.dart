@@ -1,4 +1,6 @@
+import 'package:MediCompare/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
@@ -50,21 +52,49 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        IconButton(
-          onPressed: () {},
-          icon: const Stack(
-            children: [
-              Icon(Icons.notifications_none_outlined, color: Colors.white),
-              Positioned(
-                right: 2,
-                top: 2,
-                child: CircleAvatar(
-                  radius: 4,
-                  backgroundColor: Colors.red,
-                ),
+        BlocBuilder<NotificationsBloc, NotificationsState>(
+          builder: (context, state) {
+            int unreadCount = 0;
+            if (state is NotificationsLoaded) {
+              unreadCount = state.unreadCount;
+            }
+            return IconButton(
+              onPressed: () {
+                context.push('/notifications');
+              },
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(Icons.notifications_none_outlined, color: Colors.white, size: 24),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: -4,
+                      top: -4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          unreadCount > 9 ? '9+' : unreadCount.toString(),
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
         if (showUserInfo) ...[
           const SizedBox(width: 4),

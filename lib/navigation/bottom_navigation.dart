@@ -13,6 +13,7 @@ import 'package:MediCompare/features/tickets/presentation/bloc/tickets_state.dar
 import 'package:MediCompare/features/subscription/presentation/bloc/subscription_bloc.dart';
 import 'package:MediCompare/features/subscription/presentation/bloc/subscription_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -86,7 +87,20 @@ class _BottomNavigationState extends State<BottomNavigation> {
           },
         ),
       ],
-      child: Scaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          if (_currentIndex != 0) {
+            setState(() => _currentIndex = 0);
+            return;
+          }
+          final shouldExit = await _showExitConfirmationDialog(context);
+          if (shouldExit == true) {
+            SystemNavigator.pop();
+          }
+        },
+        child: Scaffold(
         body: _pages[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -130,6 +144,44 @@ class _BottomNavigationState extends State<BottomNavigation> {
             ),
           ],
         ),
+      ),
+    ),
+  );
+}
+
+  Future<bool?> _showExitConfirmationDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          "Exit App",
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        content: Text(
+          "Are you sure you want to exit the app?",
+          style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[700]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.inter(color: AppColors.grey, fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              "Exit",
+              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }

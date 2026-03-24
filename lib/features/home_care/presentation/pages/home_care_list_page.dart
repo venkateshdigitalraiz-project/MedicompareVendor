@@ -110,7 +110,7 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
              Text("Home Care Services", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFFF8FAFC))),
-             Text("Manage home care services and vendors", style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFF8FAFC))),
+            //  Text("Manage home care services and vendors", style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFF8FAFC))),
           ],
         ),
         actions: [

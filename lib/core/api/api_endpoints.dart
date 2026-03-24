@@ -12,6 +12,8 @@ class ApiEndpoints {
   static const String vendorProfile = '/vendor/profile';
   static const String updateProfilePicture = '/vendor/profile/update/profile';
   static const String changePassword = '/vendor/profile/change-password';
+  static const String notificationList = '/vendor/notifications/list';
+  static const String markAllNotificationsRead = '/vendor/notifications/mark-all-read';
   static const String slotTimings = '/vendor/vendor-timings/list';
   static String updateSlotTimings(String id) =>
       '/vendor/vendor-timings/update/$id';

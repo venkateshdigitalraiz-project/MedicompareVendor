@@ -82,7 +82,7 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Care Taker Services", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-            Text("Manage nursing care services and vendors", style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
+            // Text("Manage nursing care services and vendors", style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
           ],
         ),
         actions: [
