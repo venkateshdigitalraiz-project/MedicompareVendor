@@ -1,4 +1,3 @@
-import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:MediCompare/features/auth/auth_injection.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
@@ -30,6 +29,23 @@ class _LoginFormState extends State<LoginForm> {
   final _loginUseCase = AuthInjection.provideLoginUseCase();
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final credentials = await TokenStorage.getSavedCredentials();
+    if (credentials['rememberMe'] == true) {
+      setState(() {
+        rememberMe = true;
+        emailController.text = credentials['email'] ?? '';
+        passwordController.text = credentials['password'] ?? '';
+      });
+    }
+  }
+
+  @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
@@ -37,7 +53,10 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _handleLogin() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter email and password')),
       );
@@ -50,11 +69,14 @@ class _LoginFormState extends State<LoginForm> {
 
     try {
       final vendor = await _loginUseCase.call(
-        email: emailController.text.trim(),
-        password: passwordController.text,
+        email: email,
+        password: password,
       );
 
       if (mounted) {
+        // Handle Remember Me
+        await TokenStorage.saveCredentials(email, password, rememberMe);
+
         // Sync vendor to VendorProfileProvider
         Provider.of<VendorProfileProvider>(context, listen: false).setVendor(vendor);
 
@@ -91,95 +113,95 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Center(
       child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 110),
-
             /// LOGO
-            SizedBox(
-              width: 191,
-              height: 72,
-              child: Image.asset(
-                'assets/medi_compare_logo.png',
-                fit: BoxFit.contain,
-              ),
+            Image.asset(
+              'assets/medi_compare_logo.png',
+              width: 200,
+              height: 80,
+              fit: BoxFit.contain,
             ),
-
             const SizedBox(height: 12),
-
-            /// TITLE
             Text(
               "Sign in to Your Account",
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w400,
+                color: const Color(0xFF64748B),
               ),
             ),
-
-            const SizedBox(height: 33),
+            const SizedBox(height: 48),
 
             /// EMAIL
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Email Address",
-                style: GoogleFonts.poppins(fontSize: 14),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF334155),
+                ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             _inputField(
-              hint: "Enter Your email",
+              hint: "Enter your email",
               controller: emailController,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             /// PASSWORD
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Password",
-                style: GoogleFonts.poppins(fontSize: 14),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF334155),
+                ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             _passwordField(controller: passwordController),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
             /// REMEMBER + FORGOT
             Row(
               children: [
                 SizedBox(
-                  height: 18,
-                  width: 18,
+                  height: 20,
+                  width: 20,
                   child: Checkbox(
                     value: rememberMe,
                     onChanged: (value) {
                       setState(() => rememberMe = value!);
                     },
-                    activeColor: AppColors.primary,
-                    checkColor: AppColors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    activeColor: const Color(0xFF8046F1),
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Text(
                   "Remember me",
-                  style: GoogleFonts.poppins(fontSize: 12),
+                  style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF64748B)),
                 ),
                 const Spacer(),
                 TextButton(
-                  onPressed: () {
-                    context.push('/forgot-password');
-                  },
+                  onPressed: () => context.push('/forgot-password'),
                   child: Text(
                     "Forgot Password?",
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF8046F1),
                     ),
                   ),
@@ -187,18 +209,20 @@ class _LoginFormState extends State<LoginForm> {
               ],
             ),
 
-            const SizedBox(height: 50),
+            const SizedBox(height: 40),
 
             /// LOGIN BUTTON
             SizedBox(
               width: double.infinity,
-              height: 52,
+              height: 54,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryAccent,
+                  backgroundColor: const Color(0xFF8046F1),
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: 0,
                 ),
                 onPressed: isLoading ? null : _handleLogin,
                 child: isLoading
@@ -206,7 +230,7 @@ class _LoginFormState extends State<LoginForm> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: AppColors.white,
+                          color: Colors.white,
                           strokeWidth: 2,
                         ),
                       )
@@ -215,45 +239,39 @@ class _LoginFormState extends State<LoginForm> {
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.white,
                         ),
                       ),
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 32),
 
             /// REGISTER
             RichText(
               text: TextSpan(
                 text: "Want to become a member? ",
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                  color: const Color(0xFF64748B),
                 ),
                 children: [
                   TextSpan(
                     text: "Create an account.",
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: const Color(0xFF8046F1),
+                      fontWeight: FontWeight.bold,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
                         final url = Uri.parse('https://vendor.medicompares.com/register');
-                        try {
+                        if (await canLaunchUrl(url)) {
                           await launchUrl(url, mode: LaunchMode.externalApplication);
-                        } catch (e) {
-                          debugPrint('Could not launch URL: $e');
-                          // Fallback to in-app if external fails
-                          await launchUrl(url, mode: LaunchMode.platformDefault);
                         }
                       },
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
           ],
         ),
@@ -261,83 +279,65 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  /// EMAIL FIELD
-  static Widget _inputField({
+  Widget _inputField({
     required String hint,
     required TextEditingController controller,
   }) {
-    return SizedBox(
-      height: 48,
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: AppColors.grey),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.primary),
-          ),
+    return TextField(
+      controller: controller,
+      style: GoogleFonts.poppins(fontSize: 14),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        filled: true,
+        fillColor: const Color(0xFFF8FAFC),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF8046F1), width: 1.5),
         ),
       ),
     );
   }
 
-  /// PASSWORD FIELD
   Widget _passwordField({required TextEditingController controller}) {
-    return SizedBox(
-      height: 48,
-      child: TextField(
-        controller: controller,
-        obscureText: !isPasswordVisible,
-        style: const TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          hintText: "Enter Your Password",
-          hintStyle: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
+    return TextField(
+      controller: controller,
+      obscureText: !isPasswordVisible,
+      style: GoogleFonts.poppins(fontSize: 14),
+      decoration: InputDecoration(
+        hintText: "Enter your password",
+        hintStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        filled: true,
+        fillColor: const Color(0xFFF8FAFC),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            size: 20,
+            color: const Color(0xFF94A3B8),
           ),
-          suffixIcon: IconButton(
-            icon: Icon(
-              isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-              size: 18,
-              color: AppColors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                isPasswordVisible = !isPasswordVisible;
-              });
-            },
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: AppColors.grey),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.primary),
-          ),
+          onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF8046F1), width: 1.5),
         ),
       ),
     );

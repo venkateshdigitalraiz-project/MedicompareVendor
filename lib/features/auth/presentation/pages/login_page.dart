@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 import '../widgets/login_form.dart';
 
@@ -8,10 +7,13 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(255, 237, 237, 237),
-      resizeToAvoidBottomInset: false,
-      body: LoginForm(),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true, // Better for scrollable forms
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: const LoginForm(),
+      ),
     );
   }
 }

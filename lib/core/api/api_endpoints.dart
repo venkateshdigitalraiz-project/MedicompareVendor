@@ -6,6 +6,7 @@ class ApiEndpoints {
   // Paths
   static const String register = '/vendor/auth/register';
   static const String login = '/vendor/auth/login';
+  static const String forgotPassword = '/vendor/auth/forgot-password';
   static const String stepOneUpdate = '/vendor/profile/step_one_update';
   static const String stepTwoUpdate = '/vendor/profile/step_two';
   static const String dashboard = '/vendor/dashboard';

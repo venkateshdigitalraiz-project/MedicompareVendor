@@ -29,6 +29,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
   String _mobile = '';
   String _email = '';
   String? _profileImageUrl;
+  List<String> _activeModules = [];
 
   @override
   void initState() {
@@ -61,6 +62,14 @@ class _ProfilePageState extends State<MainprofileScreen> {
             if (profileImg is Map && profileImg['url'] != null) {
               _profileImageUrl = profileImg['url'].toString();
             }
+
+            // Parse permissions
+            final permissions = body['data']['permission'] as List<dynamic>? ?? [];
+            _activeModules = permissions
+                .where((p) => p['status'] == 'active')
+                .map((p) => p['module']?.toString() ?? '')
+                .toList();
+
             _isLoading = false;
           });
         }
@@ -151,6 +160,11 @@ class _ProfilePageState extends State<MainprofileScreen> {
         ),
       ),
     );
+  }
+
+  bool _hasPermission(String module) {
+    if (_isLoading) return true;
+    return _activeModules.contains(module);
   }
 
   @override
@@ -282,66 +296,76 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
               context.push('/lead-plan-history');
             }),
-            _menuTile("Medicines", Icons.medication_outlined, () {
-              context.push('/medicine-list');
-            }),
-            _menuTile("Surgeries", Icons.show_chart, () {
-              context.push('/surgery-list');
-            }),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ExpansionTile(
-                leading: const Icon(Icons.science_outlined, color: AppColors.primaryDark),
-                title: Text("Lab Tests", style: GoogleFonts.inter(fontSize: 14)),
-                shape: const Border(),
-                childrenPadding: const EdgeInsets.only(left: 32),
-                trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
-                children: [
-                  _menuTile("List", Icons.list_alt_outlined, () {
-                    context.push('/lab-test-list');
-                  }, isSubTile: true),
-                  _menuTile("Packages", Icons.inventory_2_outlined, () {
-                    context.push('/lab-test-package-list');
-                  }, isSubTile: true),
-                ],
+            if (_hasPermission('medicine'))
+              _menuTile("Medicines", Icons.medication_outlined, () {
+                context.push('/medicine-list');
+              }),
+            if (_hasPermission('surgeries'))
+              _menuTile("Surgeries", Icons.show_chart, () {
+                context.push('/surgery-list');
+              }),
+            if (_hasPermission('lab-tests'))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ExpansionTile(
+                  leading: const Icon(Icons.science_outlined, color: AppColors.primaryDark),
+                  title: Text("Lab Tests", style: GoogleFonts.inter(fontSize: 14)),
+                  shape: const Border(),
+                  childrenPadding: const EdgeInsets.only(left: 32),
+                  trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                  children: [
+                    _menuTile("List", Icons.list_alt_outlined, () {
+                      context.push('/lab-test-list');
+                    }, isSubTile: true),
+                    _menuTile("Packages", Icons.inventory_2_outlined, () {
+                      context.push('/lab-test-package-list');
+                    }, isSubTile: true),
+                  ],
+                ),
               ),
-            ),
-            _menuTile("Diagnostics", Icons.biotech_outlined, () {
-              context.push('/diagnostic-list');
-            }),
-            _menuTile("Home Care Services", Icons.home_repair_service_outlined, () {
-              context.push('/homecare-list');
-            }),
-            _menuTile("Care Taker Services", Icons.person_search_outlined, () {
-              context.push('/nursing-list');
-            }),
-            _menuTile("Odontogram Services", Icons.sentiment_satisfied_alt_outlined, () {
-              context.push('/dental-list');
-            }),
-            _menuTile("Medical Treatment Services", Icons.health_and_safety_outlined, () {
-              context.push('/medical-treatment-list');
-            }),
-            _menuTile("Medical Equipment Services", Icons.medical_services_outlined, () {
-              context.push('/equipment-list');
-            }),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ExpansionTile(
-                leading: const Icon(Icons.airport_shuttle_outlined, color: AppColors.primaryDark),
-                title: Text("Ambulance", style: GoogleFonts.inter(fontSize: 14)),
-                shape: const Border(),
-                childrenPadding: const EdgeInsets.only(left: 32),
-                trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
-                children: [
-                  _menuTile("List", Icons.list_alt_outlined, () {
-                    context.push('/ambulance-list');
-                  }, isSubTile: true),
-                  _menuTile("Orders", Icons.shopping_cart_outlined, () {
-                    context.push('/ambulance-orders');
-                  }, isSubTile: true),
-                ],
+            if (_hasPermission('diagnostics'))
+              _menuTile("Diagnostics", Icons.biotech_outlined, () {
+                context.push('/diagnostic-list');
+              }),
+            if (_hasPermission('home-care'))
+              _menuTile("Home Care Services", Icons.home_repair_service_outlined, () {
+                context.push('/homecare-list');
+              }),
+            if (_hasPermission('nursing-care'))
+              _menuTile("Care Taker Services", Icons.person_search_outlined, () {
+                context.push('/nursing-list');
+              }),
+            if (_hasPermission('dental-service'))
+              _menuTile("Odontogram Services", Icons.sentiment_satisfied_alt_outlined, () {
+                context.push('/dental-list');
+              }),
+            if (_hasPermission('medical-treatment'))
+              _menuTile("Medical Treatment Services", Icons.health_and_safety_outlined, () {
+                context.push('/medical-treatment-list');
+              }),
+            if (_hasPermission('medical-equipment'))
+              _menuTile("Medical Equipment Services", Icons.medical_services_outlined, () {
+                context.push('/equipment-list');
+              }),
+            if (_hasPermission('ambulance-service'))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ExpansionTile(
+                  leading: const Icon(Icons.airport_shuttle_outlined, color: AppColors.primaryDark),
+                  title: Text("Ambulance", style: GoogleFonts.inter(fontSize: 14)),
+                  shape: const Border(),
+                  childrenPadding: const EdgeInsets.only(left: 32),
+                  trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                  children: [
+                    _menuTile("List", Icons.list_alt_outlined, () {
+                      context.push('/ambulance-list');
+                    }, isSubTile: true),
+                    _menuTile("Orders", Icons.shopping_cart_outlined, () {
+                      context.push('/ambulance-orders');
+                    }, isSubTile: true),
+                  ],
+                ),
               ),
-            ),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),
