@@ -77,7 +77,12 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
           child: BlocProvider.value(
             value: context.read<AmbulanceBloc>(),
-            child: AddAmbulanceSheet(onSuccess: () {}),
+            child: AddAmbulanceSheet(
+              onSuccess: () {},
+              existingIds: (_lastLoadedState != null)
+                  ? _lastLoadedState!.ambulanceList.items.map((m) => m.tabletId).toList()
+                  : [],
+            ),
           ),
         ),
       ),
@@ -96,7 +101,13 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
           child: BlocProvider.value(
             value: context.read<AmbulanceBloc>(),
-            child: AddAmbulanceSheet(editAmbulance: item, onSuccess: () {}),
+            child: AddAmbulanceSheet(
+              editAmbulance: item, 
+              onSuccess: () {},
+              existingIds: (_lastLoadedState != null)
+                  ? _lastLoadedState!.ambulanceList.items.map((m) => m.tabletId).toList()
+                  : [],
+            ),
           ),
         ),
       ),

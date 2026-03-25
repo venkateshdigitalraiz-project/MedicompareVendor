@@ -82,6 +82,10 @@ class _MedicineListPageState extends State<MedicineListPage> {
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
                       child: AddMedicineSheet(
+                        existingIds: (context.read<MedicineBloc>().state as MedicineLoaded)
+                            .medicineResponse.list
+                            .map((m) => m.details.id)
+                            .toList(),
                         onSuccess: () {
                           context.read<MedicineBloc>().add(LoadMedicineCategoriesEvent());
                         },
@@ -163,6 +167,10 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                         constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
                                         child: AddMedicineSheet(
                                           editMedicine: medicine,
+                                          existingIds: (context.read<MedicineBloc>().state as MedicineLoaded)
+                                              .medicineResponse.list
+                                              .map((m) => m.details.id)
+                                              .toList(),
                                           onSuccess: () {
                                             context.read<MedicineBloc>().add(const LoadMedicinesEvent());
                                           },

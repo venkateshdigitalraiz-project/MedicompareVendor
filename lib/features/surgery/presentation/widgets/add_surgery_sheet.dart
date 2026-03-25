@@ -7,8 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 class AddSurgerySheet extends StatefulWidget {
   final VoidCallback onSuccess;
   final SurgeryItem? editSurgery;
+  final List<String> existingIds;
 
-  const AddSurgerySheet({super.key, required this.onSuccess, this.editSurgery});
+  const AddSurgerySheet({
+    super.key, 
+    required this.onSuccess, 
+    this.editSurgery,
+    this.existingIds = const [],
+  });
 
   @override
   State<AddSurgerySheet> createState() => _AddSurgerySheetState();
@@ -76,6 +82,18 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
       return;
     }
 
+    if (!isEditMode && widget.existingIds.contains(_selectedSurgery!.id)) {
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('This product already present'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       final Map<String, dynamic> payload = {
@@ -99,7 +117,16 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
       }
       
       widget.onSuccess();
-      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        final messenger = ScaffoldMessenger.of(context);
+        Navigator.pop(context);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {

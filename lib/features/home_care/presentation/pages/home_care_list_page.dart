@@ -56,6 +56,7 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: AddHomeCareSheet(
           editItem: item,
+          existingIds: context.read<HomeCareBloc>().state.items.map((m) => m.details.id).toList(),
           onSuccess: _loadInitial,
         ),
       ),

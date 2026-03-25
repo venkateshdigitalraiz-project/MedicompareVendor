@@ -64,6 +64,10 @@ class _DiagnosticListPageState extends State<DiagnosticListPage> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
           child: AddDiagnosticSheet(
             editItem: editItem,
+            existingIds: (context.read<DiagnosticBloc>().state as DiagnosticLoaded)
+                .diagnosticResponse.list
+                .map((m) => m.details.id)
+                .toList(),
             onSuccess: () {
               context.read<DiagnosticBloc>().add(const LoadDiagnosticCategoriesEvent());
             },

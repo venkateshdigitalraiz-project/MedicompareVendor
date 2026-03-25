@@ -54,6 +54,10 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
           child: AddDentalServiceSheet(
             editItem: item,
+            existingIds: (context.read<DentalServiceBloc>().state as DentalServiceLoaded)
+                .response.list
+                .map((m) => m.details.id)
+                .toList(),
             onSuccess: () {
               context.read<DentalServiceBloc>().add(const LoadDentalServiceCategoriesEvent());
             },

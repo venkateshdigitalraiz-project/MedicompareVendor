@@ -9,8 +9,14 @@ import 'package:google_fonts/google_fonts.dart';
 class AddAmbulanceSheet extends StatefulWidget {
   final VoidCallback onSuccess;
   final AmbulanceEntity? editAmbulance;
+  final List<String> existingIds;
 
-  const AddAmbulanceSheet({super.key, required this.onSuccess, this.editAmbulance});
+  const AddAmbulanceSheet({
+    super.key, 
+    required this.onSuccess, 
+    this.editAmbulance,
+    this.existingIds = const [],
+  });
 
   @override
   State<AddAmbulanceSheet> createState() => _AddAmbulanceSheetState();
@@ -67,6 +73,18 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
       return;
     }
 
+    if (!isEditMode && widget.existingIds.contains(_selectedAmbulance!.id)) {
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('This product already present'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final payload = {
       "name": isEditMode ? widget.editAmbulance!.tabletId : _selectedAmbulance!.id,
       "price": double.tryParse(_priceController.text) ?? 0,
@@ -93,8 +111,14 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
         if (state is AmbulanceFormOptionsLoaded) {
           if (mounted) setState(() => _availableFacilities = state.facilities);
         } else if (state is AmbulanceOperationSuccess) {
-          // Pop first, then call onSuccess to avoid using a deactivated context
+          final messenger = ScaffoldMessenger.of(context);
           Navigator.pop(context);
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
           widget.onSuccess();
         } else if (state is AmbulanceError) {
           if (mounted) {

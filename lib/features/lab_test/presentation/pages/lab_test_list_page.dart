@@ -135,6 +135,10 @@ class _LabTestListPageState extends State<LabTestListPage> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
                 child: AddLabTestSheet(
+                  existingIds: (context.read<LabTestBloc>().state as LabTestLoaded)
+                      .labTestResponse.list
+                      .map((m) => m.details.id)
+                      .toList(),
                   onSuccess: () {
                     context.read<LabTestBloc>().add(LoadLabTestCategoriesEvent());
                   },

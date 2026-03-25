@@ -147,6 +147,10 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
               child: AddSurgerySheet(
+                existingIds: (context.read<SurgeryBloc>().state as SurgeryLoaded)
+                    .surgeryResponse.list
+                    .map((m) => m.details.id)
+                    .toList(),
                 onSuccess: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -437,6 +441,10 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                                     MediaQuery.of(context).viewInsets.bottom),
                             child: AddSurgerySheet(
                               editSurgery: item,
+                              existingIds: (context.read<SurgeryBloc>().state as SurgeryLoaded)
+                                  .surgeryResponse.list
+                                  .map((m) => m.details.id)
+                                  .toList(),
                               onSuccess: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

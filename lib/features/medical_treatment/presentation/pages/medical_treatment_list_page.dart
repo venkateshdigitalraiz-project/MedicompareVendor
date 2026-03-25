@@ -54,6 +54,10 @@ class _MedicalTreatmentListPageState extends State<MedicalTreatmentListPage> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
           child: AddMedicalTreatmentSheet(
             editItem: item,
+            existingIds: (context.read<MedicalTreatmentBloc>().state as MedicalTreatmentLoaded)
+                .response.list
+                .map((m) => m.details.id)
+                .toList(),
             onSuccess: () {
               context.read<MedicalTreatmentBloc>().add(const LoadMedicalTreatmentCategoriesEvent());
             },

@@ -9,6 +9,7 @@ import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:MediCompare/core/utils/core_injection.dart';
 import 'package:MediCompare/core/api/api_endpoints.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MainprofileScreen extends StatefulWidget {
   const MainprofileScreen({super.key});
@@ -165,6 +166,17 @@ class _ProfilePageState extends State<MainprofileScreen> {
   bool _hasPermission(String module) {
     if (_isLoading) return true;
     return _activeModules.contains(module);
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $url')),
+        );
+      }
+    }
   }
 
   @override
@@ -370,6 +382,25 @@ class _ProfilePageState extends State<MainprofileScreen> {
               context.push('/support-ticket');
             }),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ExpansionTile(
+                leading: const Icon(Icons.gavel_outlined, color: AppColors.primaryDark),
+                title: Text("Legal Information", style: GoogleFonts.inter(fontSize: 14)),
+                shape: const Border(),
+                childrenPadding: const EdgeInsets.only(left: 32),
+                trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                children: [
+                  _menuTile("Terms and Conditions", Icons.description_outlined, () {
+                    _launchURL("https://vendor.medicompares.com/terms-and-conditions");
+                  }, isSubTile: true),
+                  _menuTile("Privacy Policy", Icons.privacy_tip_outlined, () {
+                    _launchURL("https://vendor.medicompares.com/privacy-policy");
+                  }, isSubTile: true),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 55),
 
             /// LOGOUT BUTTON
@@ -396,6 +427,29 @@ class _ProfilePageState extends State<MainprofileScreen> {
             ),
 
             const SizedBox(height: 20),
+
+            Center(
+              child: Text(
+                "Version 1.0.0 (1)",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: Text(
+                "© 2026 MediCompares. All rights reserved.",
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),

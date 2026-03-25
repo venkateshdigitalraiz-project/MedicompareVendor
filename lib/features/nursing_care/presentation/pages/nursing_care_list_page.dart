@@ -55,6 +55,10 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
           child: AddNursingCareSheet(
             editItem: item,
+            existingIds: (context.read<NursingCareBloc>().state as NursingCareLoaded)
+                .response.list
+                .map((m) => m.details.id)
+                .toList(),
             onSuccess: () {
               context.read<NursingCareBloc>().add(const LoadNursingCareCategoriesEvent());
             },

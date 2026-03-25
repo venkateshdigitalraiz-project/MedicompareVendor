@@ -1,4 +1,4 @@
-package com.example.screen1
+package com.medicompares.vendor
 
 import io.flutter.embedding.android.FlutterActivity
 
