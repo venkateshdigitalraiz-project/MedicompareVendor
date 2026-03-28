@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/features/surgery/data/data_sources/surgery_service.dart';
 import 'package:MediCompare/features/surgery/data/models/surgery_model.dart';
 import 'package:MediCompare/features/surgery/surgery_injection.dart';
@@ -32,6 +33,10 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
   bool _isLoading = false;
   bool _isFetchingDetails = false;
 
+  final _searchController = TextEditingController();
+  List<SurgeryDropdownItem> _searchResults = [];
+  Timer? _debounce;
+
   bool get isEditMode => widget.editSurgery != null;
 
   @override
@@ -60,6 +65,7 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
         _priceController.text = surgery.price.toString();
         _discountController.text = surgery.discountPrice.toString();
         _isActive = surgery.status == 'active';
+        _searchController.text = _selectedSurgery?.name ?? '';
       });
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -72,7 +78,19 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
   void dispose() {
     _priceController.dispose();
     _discountController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      try {
+        final results = await _surgeryService.getCommonSurgeries(query);
+        if (mounted) setState(() => _searchResults = results);
+      } catch (_) {}
+    });
   }
 
   Future<void> _submit() async {
@@ -223,60 +241,47 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                                   const SizedBox(height: 4),
                                   Text("Surgery name cannot be changed.", style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500])),
                                 ] else ...[
-                                  Autocomplete<SurgeryDropdownItem>(
-                                  displayStringForOption: (option) => option.name,
-                                  optionsBuilder: (TextEditingValue textEditingValue) async {
-                                    if (textEditingValue.text.isEmpty) return const Iterable<SurgeryDropdownItem>.empty();
-                                    try {
-                                      return await _surgeryService.getCommonSurgeries(textEditingValue.text);
-                                    } catch (e) {
-                                      return const Iterable<SurgeryDropdownItem>.empty();
-                                    }
-                                  },
-                                  onSelected: (SurgeryDropdownItem selection) {
-                                    setState(() => _selectedSurgery = selection);
-                                  },
-                                  fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                                    return TextFormField(
-                                      controller: controller,
-                                      focusNode: focusNode,
-                                      style: GoogleFonts.poppins(fontSize: 14),
-                                      decoration: _inputDecoration(hint: "Search Surgery...").copyWith(
-                                        suffixIcon: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (controller.text.isNotEmpty)
-                                              IconButton(icon: const Icon(Icons.close, size: 16), onPressed: () {
-                                                controller.clear();
-                                                setState(() => _selectedSurgery = null);
-                                              }),
-                                            const Icon(Icons.keyboard_arrow_down),
-                                            const SizedBox(width: 8),
-                                          ],
-                                        )
+                                  Column(
+                                    children: [
+                                      TextFormField(
+                                        controller: _searchController,
+                                        style: GoogleFonts.poppins(fontSize: 14),
+                                        onTap: () {
+                                          if (_searchController.text.isEmpty) _onSearchChanged('');
+                                        },
+                                        decoration: _inputDecoration(hint: "Search Surgery...").copyWith(
+                                          suffixIcon: const Icon(Icons.keyboard_arrow_down)
+                                        ),
+                                        onChanged: (val) {
+                                          setState(() { _selectedSurgery = null; });
+                                          _onSearchChanged(val);
+                                        },
+                                        validator: (value) => _selectedSurgery == null ? "Required" : null,
                                       ),
-                                      validator: (value) => _selectedSurgery == null ? "Required" : null,
-                                    );
-                                  },
-                                  optionsViewBuilder: (context, onSelected, options) {
-                                    return Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Material(
-                                        elevation: 4,
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxHeight: 250,
-                                            maxWidth: MediaQuery.of(context).size.width - 100,
+                                      if (_selectedSurgery == null && _searchResults.isNotEmpty)
+                                        Container(
+                                          constraints: const BoxConstraints(maxHeight: 250),
+                                          margin: const EdgeInsets.only(top: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: Colors.grey[200]!),
+                                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
                                           ),
                                           child: ListView.builder(
                                             padding: EdgeInsets.zero,
                                             shrinkWrap: true,
-                                            itemCount: options.length,
-                                            itemBuilder: (BuildContext context, int index) {
-                                              final option = options.elementAt(index);
+                                            itemCount: _searchResults.length,
+                                            itemBuilder: (context, index) {
+                                              final option = _searchResults[index];
                                               return InkWell(
-                                                onTap: () => onSelected(option),
+                                                onTap: () {
+                                                  setState(() {
+                                                    _selectedSurgery = option;
+                                                    _searchController.text = option.name;
+                                                    _searchResults = [];
+                                                  });
+                                                },
                                                 child: Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                                   child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
@@ -285,10 +290,8 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                                             },
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                    ],
+                                  ),
                               ],
                             ],
                             ),
@@ -348,7 +351,15 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                                 decoration: _inputDecoration(hint: "0.00").copyWith(
                                   suffixIcon: const Icon(Icons.unfold_more, size: 18, color: Colors.grey),
                                 ),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) {
+                                  if (val == null || val.isEmpty) return "Required";
+                                  final discount = double.tryParse(val);
+                                  final price = double.tryParse(_priceController.text);
+                                  if (discount != null && price != null && discount > price) {
+                                    return "Over price";
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),

@@ -99,7 +99,7 @@ class LabTestPackageCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "₹${package.price.toInt()}",
+                    "₹${package.discountPrice.toInt()}",
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

@@ -11,10 +11,12 @@ class MedicalTreatmentDetailsPage extends StatefulWidget {
   const MedicalTreatmentDetailsPage({super.key, required this.item});
 
   @override
-  State<MedicalTreatmentDetailsPage> createState() => _MedicalTreatmentDetailsPageState();
+  State<MedicalTreatmentDetailsPage> createState() =>
+      _MedicalTreatmentDetailsPageState();
 }
 
-class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPage> {
+class _MedicalTreatmentDetailsPageState
+    extends State<MedicalTreatmentDetailsPage> {
   bool _showAllDescription = false;
 
   @override
@@ -30,7 +32,8 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
       imageUrl = Uri.encodeFull(imageUrl);
     }
     final double saving = widget.item.price - widget.item.discountPrice;
-    final double percent = widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
+    final double percent =
+        widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
@@ -70,9 +73,10 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFF059669),
                 isExpanded: _showAllDescription,
-                onToggle: () => setState(() => _showAllDescription = !_showAllDescription),
+                onToggle: () =>
+                    setState(() => _showAllDescription = !_showAllDescription),
               ),
-              
+
             const SizedBox(height: 100),
           ],
         ),
@@ -80,7 +84,8 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
     );
   }
 
-  Widget _buildHeader(MedicalTreatmentDetails details, String? imageUrl, double percent) {
+  Widget _buildHeader(
+      MedicalTreatmentDetails details, String? imageUrl, double percent) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -198,7 +203,7 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("SELLING PRICE",
+              Text("Price",
                   style: GoogleFonts.inter(
                       fontSize: 9,
                       color: Colors.grey[600],
@@ -214,7 +219,8 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                  color: Colors.red[50], borderRadius: BorderRadius.circular(6)),
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(6)),
               child: Text("${percent.toInt()}% OFF",
                   style: GoogleFonts.inter(
                       fontSize: 10,
@@ -244,7 +250,7 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
             _infoItem("RECOVERY", details.recoveryTime ?? "N/A",
                 Icons.restore_outlined, Colors.green),
             const SizedBox(width: 12),
-             _infoItem("STATUS", widget.item.status.toUpperCase(),
+            _infoItem("STATUS", widget.item.status.toUpperCase(),
                 Icons.check_circle_outline, Colors.teal),
           ],
         ),
@@ -386,7 +392,8 @@ class _MedicalTreatmentDetailsPageState extends State<MedicalTreatmentDetailsPag
       width: 80,
       height: 80,
       color: const Color(0xFFF1F5F9),
-      child: const Icon(Icons.medical_services_outlined, color: Colors.grey, size: 28),
+      child: const Icon(Icons.medical_services_outlined,
+          color: Colors.grey, size: 28),
     );
   }
 }

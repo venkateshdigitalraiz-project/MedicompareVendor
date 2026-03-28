@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/features/medicine/data/data_sources/medicine_service.dart';
 import 'package:MediCompare/features/medicine/data/models/medicine_model.dart';
 import 'package:MediCompare/features/medicine/medicine_injection.dart';
@@ -38,6 +39,10 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
   bool _isLoading = false;
   bool _isFetchingDetails = false;
 
+  final _searchController = TextEditingController();
+  List<MedicineDropdownItem> _searchResults = [];
+  Timer? _debounce;
+
   bool get isEditMode => widget.editMedicine != null;
 
   final List<Map<String, dynamic>> _returnPolicies = [
@@ -71,6 +76,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           price: (tabletData['price'] ?? 0).toDouble(),
           subcategoryId: data['subcategoryId'] ?? '',
         );
+        _searchController.text = _selectedTablet!.name;
         
         _selectedReturnPolicy = data['returnDetails']?.toString();
         _mrpPriceController.text = (data['price'] ?? 0).toString();
@@ -96,7 +102,19 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     _quantityController.dispose();
     _pricePerUnitController.dispose();
     _percentagePerUnitController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      try {
+        final results = await _medicineService.searchMedicineDropdown(query);
+        if (mounted) setState(() => _searchResults = results);
+      } catch (_) {}
+    });
   }
 
   Future<void> _submit() async {
@@ -254,62 +272,57 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                         const SizedBox(height: 4),
                         Text("10 medicines in database. Medicine name cannot be changed.", style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500])),
                       ] else ...[
-                        Autocomplete<MedicineDropdownItem>(
-                          displayStringForOption: (option) => option.name,
-                          optionsBuilder: (TextEditingValue textEditingValue) async {
-                            if (textEditingValue.text.isEmpty) return const Iterable<MedicineDropdownItem>.empty();
-                            try {
-                              return await _medicineService.searchMedicineDropdown(textEditingValue.text);
-                            } catch (e) {
-                              return const Iterable<MedicineDropdownItem>.empty();
-                            }
-                          },
-                          onSelected: (MedicineDropdownItem selection) {
-                             setState(() {
-                               _selectedTablet = selection;
-                               _mrpPriceController.text = selection.price.toString();
-                             });
-                          },
-                          fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                            return TextFormField(
-                              controller: controller,
-                              focusNode: focusNode,
+                        Column(
+                          children: [
+                            TextFormField(
+                              controller: _searchController,
+                              style: GoogleFonts.poppins(fontSize: 14),
+                              onTap: () {
+                                if (_searchController.text.isEmpty) _onSearchChanged('');
+                              },
                               decoration: _inputDecoration(hint: "e.g., Paracetamol, Ibuprofen...").copyWith(
-                                  suffixIcon: const Icon(Icons.keyboard_arrow_down)
+                                suffixIcon: const Icon(Icons.keyboard_arrow_down)
                               ),
+                              onChanged: (val) {
+                                setState(() { _selectedTablet = null; });
+                                _onSearchChanged(val);
+                              },
                               validator: (value) => _selectedTablet == null ? "Required" : null,
-                            );
-                          },
-                          optionsViewBuilder: (context, onSelected, options) {
-                            return Align(
-                              alignment: Alignment.topLeft,
-                              child: Material(
-                                elevation: 4,
-                                borderRadius: BorderRadius.circular(8),
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxHeight: 200,
-                                    maxWidth: MediaQuery.of(context).size.width - 40,
-                                  ),
-                                  child: ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    shrinkWrap: true,
-                                    itemCount: options.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      final option = options.elementAt(index);
-                                      return InkWell(
-                                        onTap: () => onSelected(option),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                            ),
+                            if (_selectedTablet == null && _searchResults.isNotEmpty)
+                              Container(
+                                constraints: const BoxConstraints(maxHeight: 200),
+                                margin: const EdgeInsets.only(top: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey[200]!),
+                                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
+                                ),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  itemCount: _searchResults.length,
+                                  itemBuilder: (context, index) {
+                                    final option = _searchResults[index];
+                                    return InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedTablet = option;
+                                          _searchController.text = option.name;
+                                          _mrpPriceController.text = option.price.toString();
+                                          _searchResults = [];
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
-                            );
-                          },
+                          ],
                         ),
                       ],
                       
@@ -351,7 +364,13 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                               const SizedBox(height: 16),
                               Row(
                                 children: [
-                                  Expanded(child: _buildTextField("Vendor Price (₹)", _discountController, hint: "0.00", icon: Icons.currency_rupee)),
+                                  Expanded(child: _buildTextField("Vendor Price (₹)", _discountController, hint: "0.00", icon: Icons.currency_rupee, validator: (val) {
+                                    if (val == null || val.isEmpty) return "Required";
+                                    final discount = double.tryParse(val);
+                                    final mrp = double.tryParse(_mrpPriceController.text);
+                                    if (discount != null && mrp != null && discount > mrp) return "Over MRP";
+                                    return null;
+                                  })),
                                   const SizedBox(width: 12),
                                   Expanded(child: _buildTextField("Quantity", _quantityController, hint: "0", icon: Icons.inventory_2_outlined)),
                                 ],
@@ -507,7 +526,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {required String hint, required IconData icon, bool isRequired = true}) {
+  Widget _buildTextField(String label, TextEditingController controller, {required String hint, required IconData icon, bool isRequired = true, String? Function(String?)? validator}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -517,7 +536,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: _inputDecoration(hint: hint),
-          validator: (val) {
+          validator: validator ?? (val) {
             if (isRequired && (val == null || val.isEmpty)) return "Required";
             return null;
           },

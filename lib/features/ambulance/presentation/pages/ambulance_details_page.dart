@@ -87,9 +87,9 @@ class AmbulanceDetailsPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _priceInfo("MRP PRICE", "₹${ambulance.price.toInt()}/km", Colors.grey[100]!, Colors.grey[700]!),
+                      _priceInfo("Price Per KM", "₹${ambulance.price.toInt()}/km", Colors.grey[100]!, Colors.grey[700]!),
                       const SizedBox(width: 12),
-                      _priceInfo("SELLING PRICE", "₹${(ambulance.discountPrice > 0 ? ambulance.discountPrice : ambulance.price).toInt()}/km", const Color(0xFFF0FDF4), const Color(0xFF15803D)),
+                      _priceInfo("Discount", "₹${(ambulance.discountPrice > 0 ? ambulance.discountPrice : ambulance.price).toInt()}/km", const Color(0xFFF0FDF4), const Color(0xFF15803D)),
                     ],
                   ),
                 ],

@@ -217,12 +217,20 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                children: [
                                  _buildLabel("Discount Price (₹)", isRequired: true, icon: Icons.currency_rupee),
                                  const SizedBox(height: 8),
-                                 TextFormField(
-                                   controller: _discountController,
-                                   keyboardType: TextInputType.number,
-                                   decoration: _inputDecoration(hint: "0.00"),
-                                   validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
-                                 ),
+                                  TextFormField(
+                                    controller: _discountController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: _inputDecoration(hint: "0.00"),
+                                    validator: (val) {
+                                      if (val == null || val.isEmpty) return "Required";
+                                      final discount = double.tryParse(val);
+                                      final price = double.tryParse(_priceController.text);
+                                      if (discount != null && price != null && discount > price) {
+                                        return "Over price";
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                ],
                              ),
                            ),

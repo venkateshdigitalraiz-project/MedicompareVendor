@@ -55,18 +55,9 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
       _selectedTabletId = item.details.id;
       _searchController.text = item.details.name;
     }
-    _loadInitialSearchResults();
   }
 
-  Future<void> _loadInitialSearchResults() async {
-    setState(() => _isLoading = true);
-    try {
-      final results = await _service.searchDiagnostics('');
-      if (mounted) setState(() { _searchResults = results; _isLoading = false; });
-    } catch (_) {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
+
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -257,7 +248,15 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                                 keyboardType: TextInputType.number,
                                 style: GoogleFonts.inter(fontSize: 13),
                                 decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) {
+                                  if (val == null || val.isEmpty) return "Required";
+                                  final discount = double.tryParse(val);
+                                  final price = double.tryParse(_priceController.text);
+                                  if (discount != null && price != null && discount > price) {
+                                    return "Over price";
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),
@@ -380,6 +379,9 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
         TextFormField(
           controller: _searchController,
           style: GoogleFonts.inter(fontSize: 13),
+          onTap: () {
+            if (_searchController.text.isEmpty) _onSearchChanged('');
+          },
           decoration: _inputDecoration(hint: "Search Diagnostic...").copyWith(
             suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           ),
@@ -389,7 +391,7 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
           },
           validator: (_) => _selectedTabletId == null ? "Please select a diagnostic" : null,
         ),
-        if (_searchController.text.isNotEmpty && _selectedTabletId == null)
+        if (_selectedTabletId == null && _searchResults.isNotEmpty)
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
             margin: const EdgeInsets.only(top: 4),

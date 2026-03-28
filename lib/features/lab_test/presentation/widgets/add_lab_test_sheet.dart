@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/features/lab_test/data/data_sources/lab_test_service.dart';
 import 'package:MediCompare/features/lab_test/data/models/lab_test_model.dart';
 import 'package:MediCompare/features/lab_test/lab_test_injection.dart';
@@ -29,8 +30,13 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
   
+  final _searchController = TextEditingController();
+  List<LabTestDropdownItem> _searchResults = [];
+  Timer? _debounce;
+  
   bool _isLoading = false;
   bool _isFetchingDetails = false;
+  String _selectedStatus = 'active';
 
   bool get isEditMode => widget.editItem != null;
 
@@ -58,6 +64,8 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
         
         _priceController.text = widget.editItem!.price.toString();
         _discountController.text = widget.editItem!.discountPrice.toString();
+        _searchController.text = _selectedTest?.name ?? '';
+        _selectedStatus = widget.editItem!.status;
       });
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -70,7 +78,28 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
   void dispose() {
     _priceController.dispose();
     _discountController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      try {
+        final results = await _labTestService.searchLabTests(query);
+        if (mounted) {
+          setState(() {
+            _searchResults = results.map((e) => LabTestDropdownItem(
+              id: e.id,
+              name: e.name,
+              price: 0,
+              subcategoryId: e.subcategory?.id ?? '',
+            )).toList();
+          });
+        }
+      } catch (_) {}
+    });
   }
 
   Future<void> _submit() async {
@@ -97,7 +126,10 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
       final Map<String, dynamic> payload = {
         "name": _selectedTest!.id,
         "price": double.tryParse(_priceController.text) ?? 0,
-        "discount": double.tryParse(_discountController.text) ?? 0,
+        "discountprice": double.tryParse(_discountController.text) ?? 0,
+        "status": _selectedStatus,
+        "files": [],
+        "facilities": [],
       };
 
       if (isEditMode) {
@@ -194,68 +226,56 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                       // Test Name Input
                       _buildLabel("Test Name", isRequired: true, icon: Icons.science_outlined),
                       const SizedBox(height: 8),
-                      Autocomplete<LabTestDropdownItem>(
-                        displayStringForOption: (option) => option.name,
-                        initialValue: TextEditingValue(text: _selectedTest?.name ?? ""),
-                        optionsBuilder: (TextEditingValue textEditingValue) async {
-                          if (textEditingValue.text.isEmpty) return const Iterable<LabTestDropdownItem>.empty();
-                          try {
-                            final results = await _labTestService.searchLabTests(textEditingValue.text);
-                            return results.map((e) => LabTestDropdownItem(
-                              id: e.id,
-                              name: e.name,
-                              price: 0,
-                              subcategoryId: e.subcategory?.id ?? '',
-                            ));
-                          } catch (e) {
-                            return const Iterable<LabTestDropdownItem>.empty();
-                          }
-                        },
-                        onSelected: (LabTestDropdownItem selection) {
-                           setState(() {
-                             _selectedTest = selection;
-                           });
-                        },
-                        fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                          return TextFormField(
-                            controller: controller,
-                            focusNode: focusNode,
+                      Column(
+                        children: [
+                          TextFormField(
+                            controller: _searchController,
+                            style: GoogleFonts.poppins(fontSize: 14),
+                            onTap: () {
+                              if (_searchController.text.isEmpty) _onSearchChanged('');
+                            },
                             decoration: _inputDecoration(hint: "Search for lab test...").copyWith(
                                 suffixIcon: const Icon(Icons.keyboard_arrow_down)
                             ),
+                            onChanged: (val) {
+                              setState(() { _selectedTest = null; });
+                              _onSearchChanged(val);
+                            },
                             validator: (value) => _selectedTest == null ? "Required" : null,
-                          );
-                        },
-                        optionsViewBuilder: (context, onSelected, options) {
-                          return Align(
-                            alignment: Alignment.topLeft,
-                            child: Material(
-                              elevation: 4,
-                              borderRadius: BorderRadius.circular(8),
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxHeight: 200,
-                                  maxWidth: MediaQuery.of(context).size.width - 40,
-                                ),
-                                child: ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  itemCount: options.length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    final option = options.elementAt(index);
-                                    return InkWell(
-                                      onTap: () => onSelected(option),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
-                                      ),
-                                    );
-                                  },
-                                ),
+                          ),
+                          if (_selectedTest == null && _searchResults.isNotEmpty)
+                            Container(
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              margin: const EdgeInsets.only(top: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[200]!),
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: _searchResults.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final option = _searchResults[index];
+                                  return InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedTest = option;
+                                        _searchController.text = option.name;
+                                        _searchResults = [];
+                                      });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
-                          );
-                        },
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text("Search and select a test to auto-fill details and price", style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500])),
@@ -291,7 +311,15 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                                   controller: _discountController,
                                   keyboardType: TextInputType.number,
                                   decoration: _inputDecoration(hint: "0.00"),
-                                  validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty) return "Required";
+                                    final discount = double.tryParse(val);
+                                    final price = double.tryParse(_priceController.text);
+                                    if (discount != null && price != null && discount > price) {
+                                      return "Over price";
+                                    }
+                                    return null;
+                                  },
                                 ),
                                 // const SizedBox(height: 4),
                                 // Text("Auto-filled when discount price selected, can be edited if needed", style: GoogleFonts.poppins(fontSize: 9, color: Colors.grey[500])),
@@ -301,6 +329,15 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                         ],
                       ),
                       
+                      const SizedBox(height: 20),
+                      _buildLabel("Active Status", isRequired: false, icon: Icons.power_settings_new),
+                      const SizedBox(height: 8),
+                      _buildToggleBtn(
+                        _selectedStatus == 'active' ? "Active" : "Inactive", 
+                        Icons.power_settings_new, 
+                        _selectedStatus == 'active' ? const Color(0xFF7C3AED) : Colors.grey,
+                        () => setState(() => _selectedStatus = _selectedStatus == 'active' ? 'inactive' : 'active'),
+                      ),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -373,6 +410,31 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF7C3AED))),
       errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.red)),
+    );
+  }
+
+  Widget _buildToggleBtn(String label, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05),
+          border: Border.all(color: color.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: color),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

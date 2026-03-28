@@ -55,7 +55,11 @@ class LabTestBloc extends Bloc<LabTestEvent, LabTestState> {
           ));
         }
       } catch (e) {
-        emit(LabTestError(e.toString()));
+        if (event.isLoadMore) {
+          emit(currentState.copyWith(isLoadingMore: false));
+        } else {
+          emit(LabTestError(e.toString()));
+        }
       }
     }
   }

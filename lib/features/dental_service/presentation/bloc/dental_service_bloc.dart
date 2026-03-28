@@ -32,9 +32,8 @@ class DentalServiceBloc extends Bloc<DentalServiceEvent, DentalServiceState> {
     if (s is DentalServiceLoaded) {
       if (event.isLoadMore) {
         emit(s.copyWith(isLoadingMore: true));
-      } else {
-        emit(DentalServiceLoading());
       }
+
       try {
         final resp = await service.getDentalServiceList(
           page: event.page,
@@ -54,10 +53,15 @@ class DentalServiceBloc extends Bloc<DentalServiceEvent, DentalServiceState> {
             response: resp,
             selectedCategoryId: event.categoryId,
             searchQuery: event.search,
+            isLoadingMore: false,
           ));
         }
       } catch (e) {
-        emit(DentalServiceError(e.toString()));
+        if (event.isLoadMore) {
+          emit(s.copyWith(isLoadingMore: false));
+        } else {
+          emit(DentalServiceError(e.toString()));
+        }
       }
     }
   }

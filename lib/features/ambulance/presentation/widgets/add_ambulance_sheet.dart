@@ -167,7 +167,15 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                             children: [
                               Expanded(child: _buildTextField("Price per KM", _priceController, hint: "0.00", icon: Icons.currency_rupee)),
                               const SizedBox(width: 16),
-                              Expanded(child: _buildTextField("Discount Price", _discountPriceController, hint: "0.00", icon: Icons.currency_rupee)),
+                              Expanded(child: _buildTextField("Discount Price", _discountPriceController, hint: "0.00", icon: Icons.currency_rupee, validator: (val) {
+                                if (val == null || val.isEmpty) return "Required";
+                                final discount = double.tryParse(val);
+                                final price = double.tryParse(_priceController.text);
+                                if (discount != null && price != null && discount > price) {
+                                  return "Over price";
+                                }
+                                return null;
+                              })),
                             ],
                           ),
                           const SizedBox(height: 20),
@@ -332,7 +340,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {required String hint, required IconData icon}) {
+  Widget _buildTextField(String label, TextEditingController controller, {required String hint, required IconData icon, String? Function(String?)? validator}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -343,7 +351,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
           keyboardType: TextInputType.number,
           style: GoogleFonts.poppins(fontSize: 14),
           decoration: _inputDecoration(hint: hint),
-          validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+          validator: validator ?? (val) => (val == null || val.isEmpty) ? "Required" : null,
         ),
       ],
     );

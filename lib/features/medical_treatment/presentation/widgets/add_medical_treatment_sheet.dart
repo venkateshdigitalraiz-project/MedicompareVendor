@@ -235,7 +235,15 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                                 keyboardType: TextInputType.number,
                                 style: GoogleFonts.inter(fontSize: 13),
                                 decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) {
+                                  if (val == null || val.isEmpty) return "Required";
+                                  final discount = double.tryParse(val);
+                                  final price = double.tryParse(_priceController.text);
+                                  if (discount != null && price != null && discount > price) {
+                                    return "Over price";
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),

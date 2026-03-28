@@ -30,9 +30,8 @@ class NursingCareBloc extends Bloc<NursingCareEvent, NursingCareState> {
     if (s is NursingCareLoaded) {
       if (event.isLoadMore) {
         emit(s.copyWith(isLoadingMore: true));
-      } else {
-        emit(NursingCareLoading());
       }
+
       try {
         final resp = await service.getNursingCareList(
           page: event.page,
@@ -52,10 +51,15 @@ class NursingCareBloc extends Bloc<NursingCareEvent, NursingCareState> {
             response: resp,
             selectedCategoryId: event.categoryId,
             searchQuery: event.search,
+            isLoadingMore: false,
           ));
         }
       } catch (e) {
-        emit(NursingCareError(e.toString()));
+        if (event.isLoadMore) {
+          emit(s.copyWith(isLoadingMore: false));
+        } else {
+          emit(NursingCareError(e.toString()));
+        }
       }
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +27,7 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
   final LabTestService _labTestService = LabTestInjection.provideLabTestService();
 
   List<LabTestDetails> _allLabTests = [];
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -63,6 +65,7 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -229,7 +232,12 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
           // Search Bar
           TextField(
             controller: _searchController,
-            onChanged: (val) => context.read<LabTestPackageBloc>().add(SearchLabTestPackagesEvent(val)),
+            onChanged: (val) {
+              _debounce?.cancel();
+              _debounce = Timer(const Duration(milliseconds: 500), () {
+                context.read<LabTestPackageBloc>().add(SearchLabTestPackagesEvent(val));
+              });
+            },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search packages...",

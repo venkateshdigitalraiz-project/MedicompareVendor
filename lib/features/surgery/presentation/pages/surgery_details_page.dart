@@ -152,7 +152,7 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              "SURGERY PRICE: ",
+                                              "Discount: ",
                                               style: GoogleFonts.poppins(
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.w600,
@@ -160,7 +160,7 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                                       const Color(0xFF166534)),
                                             ),
                                             Text(
-                                              "₹${_currentSurgery.price.toInt()}",
+                                              "₹${_currentSurgery.discountPrice}",
                                               style: GoogleFonts.poppins(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,

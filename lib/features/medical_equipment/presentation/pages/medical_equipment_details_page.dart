@@ -11,10 +11,12 @@ class MedicalEquipmentDetailsPage extends StatefulWidget {
   const MedicalEquipmentDetailsPage({super.key, required this.item});
 
   @override
-  State<MedicalEquipmentDetailsPage> createState() => _MedicalEquipmentDetailsPageState();
+  State<MedicalEquipmentDetailsPage> createState() =>
+      _MedicalEquipmentDetailsPageState();
 }
 
-class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPage> {
+class _MedicalEquipmentDetailsPageState
+    extends State<MedicalEquipmentDetailsPage> {
   bool _showAllDescription = false;
 
   @override
@@ -30,7 +32,8 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
       imageUrl = Uri.encodeFull(imageUrl);
     }
     final double saving = widget.item.price - widget.item.discountPrice;
-    final double percent = widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
+    final double percent =
+        widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
@@ -70,9 +73,10 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFF059669),
                 isExpanded: _showAllDescription,
-                onToggle: () => setState(() => _showAllDescription = !_showAllDescription),
+                onToggle: () =>
+                    setState(() => _showAllDescription = !_showAllDescription),
               ),
-              
+
             const SizedBox(height: 100),
           ],
         ),
@@ -80,7 +84,8 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
     );
   }
 
-  Widget _buildHeader(MedicalEquipmentDetails details, String? imageUrl, double percent) {
+  Widget _buildHeader(
+      MedicalEquipmentDetails details, String? imageUrl, double percent) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -198,7 +203,7 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("SELLING PRICE",
+              Text("Price",
                   style: GoogleFonts.inter(
                       fontSize: 9,
                       color: Colors.grey[600],
@@ -214,7 +219,8 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                  color: Colors.red[50], borderRadius: BorderRadius.circular(6)),
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(6)),
               child: Text("${percent.toInt()}% OFF",
                   style: GoogleFonts.inter(
                       fontSize: 10,
@@ -244,7 +250,7 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
             _infoItem("SERVICE CHARGE", "₹${item.serviceCharges?.toInt() ?? 0}",
                 Icons.design_services_outlined, Colors.green),
             const SizedBox(width: 12),
-             _infoItem("STATUS", item.status.toUpperCase(),
+            _infoItem("STATUS", item.status.toUpperCase(),
                 Icons.check_circle_outline, Colors.teal),
           ],
         ),
@@ -386,7 +392,8 @@ class _MedicalEquipmentDetailsPageState extends State<MedicalEquipmentDetailsPag
       width: 80,
       height: 80,
       color: const Color(0xFFF1F5F9),
-      child: const Icon(Icons.medical_services_outlined, color: Colors.grey, size: 28),
+      child: const Icon(Icons.medical_services_outlined,
+          color: Colors.grey, size: 28),
     );
   }
 }

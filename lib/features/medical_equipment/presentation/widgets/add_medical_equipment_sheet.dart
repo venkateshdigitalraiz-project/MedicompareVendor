@@ -213,7 +213,15 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
                       children: [
                         Expanded(child: _buildInputField("Price (₹)", _priceController, Icons.currency_rupee)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildInputField("Discount Price (₹)", _discountController, Icons.local_offer_outlined)),
+                        Expanded(child: _buildInputField("Discount Price (₹)", _discountController, Icons.local_offer_outlined, validator: (val) {
+                          if (val == null || val.isEmpty) return "Required";
+                          final discount = double.tryParse(val);
+                          final price = double.tryParse(_priceController.text);
+                          if (discount != null && price != null && discount > price) {
+                            return "Over price";
+                          }
+                          return null;
+                        })),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -294,7 +302,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller, IconData icon) {
+  Widget _buildInputField(String label, TextEditingController controller, IconData icon, {String? Function(String?)? validator}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -305,7 +313,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
           keyboardType: TextInputType.number,
           style: GoogleFonts.inter(fontSize: 13),
           decoration: _inputDecoration(hint: "0.00"),
-          validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+          validator: validator ?? (val) => (val == null || val.isEmpty) ? "Required" : null,
         ),
       ],
     );

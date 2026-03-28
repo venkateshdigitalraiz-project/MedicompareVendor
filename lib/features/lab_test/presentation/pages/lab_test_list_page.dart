@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +22,7 @@ class LabTestListPage extends StatefulWidget {
 class _LabTestListPageState extends State<LabTestListPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -50,6 +52,7 @@ class _LabTestListPageState extends State<LabTestListPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -220,7 +223,12 @@ class _LabTestListPageState extends State<LabTestListPage> {
           // Search Bar
           TextField(
             controller: _searchController,
-            onChanged: (val) => context.read<LabTestBloc>().add(SearchLabTestsEvent(val)),
+            onChanged: (val) {
+              _debounce?.cancel();
+              _debounce = Timer(const Duration(milliseconds: 500), () {
+                context.read<LabTestBloc>().add(SearchLabTestsEvent(val));
+              });
+            },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search lab tests...",

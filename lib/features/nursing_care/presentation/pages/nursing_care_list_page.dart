@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/nursing_care/nursing_care_injection.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class NursingCareListPage extends StatefulWidget {
 class _NursingCareListPageState extends State<NursingCareListPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -72,6 +74,7 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -170,7 +173,12 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
         children: [
           TextField(
             controller: _searchController,
-            onChanged: (val) => context.read<NursingCareBloc>().add(SearchNursingCareEvent(val)),
+            onChanged: (val) {
+              _debounce?.cancel();
+              _debounce = Timer(const Duration(milliseconds: 500), () {
+                context.read<NursingCareBloc>().add(SearchNursingCareEvent(val));
+              });
+            },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search services...",

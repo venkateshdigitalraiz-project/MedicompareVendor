@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/medicine/presentation/bloc/medicine_bloc.dart';
 import 'package:MediCompare/features/medicine/presentation/bloc/medicine_event.dart';
@@ -20,6 +21,7 @@ class MedicineListPage extends StatefulWidget {
 class _MedicineListPageState extends State<MedicineListPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _MedicineListPageState extends State<MedicineListPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -255,7 +258,12 @@ class _MedicineListPageState extends State<MedicineListPage> {
           // Search Bar
           TextField(
             controller: _searchController,
-            onChanged: (val) => context.read<MedicineBloc>().add(SearchMedicinesEvent(val)),
+            onChanged: (val) {
+              _debounce?.cancel();
+              _debounce = Timer(const Duration(milliseconds: 500), () {
+                context.read<MedicineBloc>().add(SearchMedicinesEvent(val));
+              });
+            },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search medicines...",

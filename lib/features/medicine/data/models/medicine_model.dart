@@ -54,6 +54,8 @@ class MedicineItem extends Equatable {
   final double discountPrice;
   final String status;
   final MedicineDetails details;
+  final bool isStock;
+  final int stock;
 
   const MedicineItem({
     required this.id,
@@ -61,6 +63,8 @@ class MedicineItem extends Equatable {
     required this.discountPrice,
     required this.status,
     required this.details,
+    this.isStock = true,
+    this.stock = 0,
   });
 
   factory MedicineItem.fromJson(Map<String, dynamic> json) {
@@ -70,11 +74,13 @@ class MedicineItem extends Equatable {
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
       status: json['status'] ?? 'inactive',
       details: MedicineDetails.fromJson(json['tablets'] ?? {}),
+      isStock: json['isStock'] ?? true,
+      stock: json['stock'] ?? 0,
     );
   }
 
   @override
-  List<Object?> get props => [id, price, discountPrice, status, details];
+  List<Object?> get props => [id, price, discountPrice, status, details, isStock, stock];
 }
 
 class MedicineDetails extends Equatable {

@@ -107,7 +107,7 @@ class _HomeCareDetailsPageState extends State<HomeCareDetailsPage> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text("SELLING PRICE: ",
+                                  Text("Price: ",
                                       style: GoogleFonts.poppins(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w600,

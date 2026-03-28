@@ -77,7 +77,8 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                           ),
                           child: imageUrl.isNotEmpty
                               ? Image.network(imageUrl, fit: BoxFit.contain)
-                              : const Icon(Icons.medication, size: 30, color: Colors.grey),
+                              : const Icon(Icons.medication,
+                                  size: 30, color: Colors.grey),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -95,25 +96,55 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF0FDF4),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "SELLING PRICE: ",
-                                    style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF166534)),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF0FDF4),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  Text(
-                                    "₹${widget.medicine.price.toInt()}",
-                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF15803D)),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "Discount: ",
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF166534)),
+                                      ),
+                                      Text(
+                                        "₹${widget.medicine.discountPrice}",
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF15803D)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (!widget.medicine.isStock) ...[
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red[50],
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.red[100]!),
+                                    ),
+                                    child: Text(
+                                      "Out of Stock",
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red[500]),
+                                    ),
                                   ),
                                 ],
-                              ),
+                              ],
                             ),
                           ],
                         ),
@@ -126,10 +157,15 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _badge(Icons.business, details.manufacture?.name ?? "N/A", const Color(0xFFE8EEFF), const Color(0xFF506CCF)),
+                      _badge(Icons.business, details.manufacture?.name ?? "N/A",
+                          const Color(0xFFE8EEFF), const Color(0xFF506CCF)),
                       // _badge(Icons.layers, details.form ?? "N/A", const Color(0xFFF3E8FF), const Color(0xFF9333EA)),
                       // _badge(Icons.label_important_outline, details.subcategory?.name ?? "N/A", const Color(0xFFE6FFFA), const Color(0xFF0D9488)),
-                      _badge(Icons.science_outlined, details.composition ?? "N/A", const Color(0xFFFFF7ED), const Color(0xFFC2410C)),
+                      _badge(
+                          Icons.science_outlined,
+                          details.composition ?? "N/A",
+                          const Color(0xFFFFF7ED),
+                          const Color(0xFFC2410C)),
                       // _badge(Icons.history, "Return Date: 7 Days", const Color(0xFFFEF2F2), const Color(0xFFB91C1C)),
                     ],
                   ),
@@ -137,17 +173,24 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                   // Grid Info Cards
                   Row(
                     children: [
-                      _infoCard("CATEGORY", details.subcategory?.name ?? "N/A", const Color(0xFFE8F1FF), Icons.category_outlined),
+                      _infoCard("CATEGORY", details.subcategory?.name ?? "N/A",
+                          const Color(0xFFE8F1FF), Icons.category_outlined),
                       const SizedBox(width: 12),
-                      _infoCard("FORM", details.form ?? "N/A", const Color(0xFFF5EAFC), Icons.table_chart_outlined),
+                      _infoCard("FORM", details.form ?? "N/A",
+                          const Color(0xFFF5EAFC), Icons.table_chart_outlined),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _infoCard("STRENGTH", "N/A", const Color(0xFFFFF6E5), Icons.fitness_center),
+                      _infoCard("STRENGTH", "N/A", const Color(0xFFFFF6E5),
+                          Icons.fitness_center),
                       const SizedBox(width: 12),
-                      _infoCard("MANUFACTURER", details.manufacture?.name ?? "N/A", const Color(0xFFEAF9F1), Icons.domain),
+                      _infoCard(
+                          "MANUFACTURER",
+                          details.manufacture?.name ?? "N/A",
+                          const Color(0xFFEAF9F1),
+                          Icons.domain),
                     ],
                   ),
                 ],
@@ -208,24 +251,35 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                     children: [
                       Row(
                         children: [
-                          _iconBox(Icons.description_outlined, const Color(0xFFEAF9F1), const Color(0xFF15803D)),
+                          _iconBox(Icons.description_outlined,
+                              const Color(0xFFEAF9F1), const Color(0xFF15803D)),
                           const SizedBox(width: 12),
                           Text(
                             "Description",
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                       TextButton(
-                        onPressed: () => setState(() => isExpanded = !isExpanded),
+                        onPressed: () =>
+                            setState(() => isExpanded = !isExpanded),
                         child: Row(
                           children: [
                             Text(
                               isExpanded ? "Show Less" : "Show More",
-                              style: GoogleFonts.poppins(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600),
+                              style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(width: 4),
-                            Icon(isExpanded ? Icons.expand_less : Icons.expand_more, size: 16, color: AppColors.primary),
+                            Icon(
+                                isExpanded
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
+                                size: 16,
+                                color: AppColors.primary),
                           ],
                         ),
                       ),
@@ -241,7 +295,10 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                         physics: const NeverScrollableScrollPhysics(),
                         child: HtmlWidget(
                           details.description ?? "No description available.",
-                          textStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF4B5563), height: 1.6),
+                          textStyle: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: const Color(0xFF4B5563),
+                              height: 1.6),
                           renderMode: RenderMode.column,
                         ),
                       ),
@@ -273,7 +330,8 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               label,
-              style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: text),
+              style: GoogleFonts.poppins(
+                  fontSize: 11, fontWeight: FontWeight.w500, color: text),
             ),
           ),
         ],
@@ -294,18 +352,25 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
           children: [
             Row(
               children: [
-                Icon(icon, size: 14, color: Colors.indigo[900]?.withOpacity(0.5)),
+                Icon(icon,
+                    size: 14, color: Colors.indigo[900]?.withOpacity(0.5)),
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.indigo[900]?.withOpacity(0.6)),
+                  style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.indigo[900]?.withOpacity(0.6)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               value,
-              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF1E1B4B)),
+              style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF1E1B4B)),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -318,7 +383,8 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
   Widget _iconBox(IconData icon, Color bg, Color color) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
       child: Icon(icon, color: color, size: 20),
     );
   }
@@ -340,14 +406,20 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary.withOpacity(0.7)),
+                style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary.withOpacity(0.7)),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             value,
-            style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1E1B4B)),
+            style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1E1B4B)),
           ),
         ],
       ),

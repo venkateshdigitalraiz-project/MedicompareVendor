@@ -249,7 +249,7 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("SELLING PRICE",
+              Text("Price",
                   style: GoogleFonts.inter(
                       fontSize: 9,
                       color: Colors.grey[600],

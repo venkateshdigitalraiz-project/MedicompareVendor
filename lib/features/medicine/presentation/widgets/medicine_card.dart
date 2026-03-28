@@ -83,7 +83,15 @@ class MedicineCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    _statusBadge(item.status),
+                    Row(
+                      children: [
+                        _statusBadge(item.status),
+                        if (!item.isStock) ...[
+                          const SizedBox(width: 8),
+                          _outOfStockBadge(),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -103,7 +111,7 @@ class MedicineCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "₹${item.price.toInt()}",
+                    "₹${item.discountPrice}",
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -168,6 +176,25 @@ class MedicineCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(icon, color: color, size: 16),
+      ),
+    );
+  }
+
+  Widget _outOfStockBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.withOpacity(0.3)),
+      ),
+      child: Text(
+        "OUT OF STOCK",
+        style: GoogleFonts.inter(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: Colors.red,
+        ),
       ),
     );
   }

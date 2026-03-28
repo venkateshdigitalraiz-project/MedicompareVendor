@@ -11,7 +11,8 @@ class DentalServiceDetailsPage extends StatefulWidget {
   const DentalServiceDetailsPage({super.key, required this.item});
 
   @override
-  State<DentalServiceDetailsPage> createState() => _DentalServiceDetailsPageState();
+  State<DentalServiceDetailsPage> createState() =>
+      _DentalServiceDetailsPageState();
 }
 
 class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
@@ -68,7 +69,8 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFF059669),
                 isExpanded: _showAllDescription,
-                onToggle: () => setState(() => _showAllDescription = !_showAllDescription),
+                onToggle: () =>
+                    setState(() => _showAllDescription = !_showAllDescription),
               ),
             const SizedBox(height: 100),
           ],
@@ -168,7 +170,8 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
 
   Widget _buildPriceArea() {
     final double saving = widget.item.price - widget.item.discountPrice;
-    final double percent = widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
+    final double percent =
+        widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
 
     return Container(
       width: double.infinity,
@@ -198,7 +201,7 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("SELLING PRICE",
+              Text("Price",
                   style: GoogleFonts.inter(
                       fontSize: 9,
                       color: Colors.grey[600],
@@ -214,7 +217,8 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                  color: Colors.red[50], borderRadius: BorderRadius.circular(6)),
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(6)),
               child: Text("${percent.toInt()}% OFF",
                   style: GoogleFonts.inter(
                       fontSize: 10,
@@ -372,7 +376,8 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
       width: 80,
       height: 80,
       color: const Color(0xFFF1F5F9),
-      child: const Icon(Icons.medical_services_outlined, color: Colors.grey, size: 28),
+      child: const Icon(Icons.medical_services_outlined,
+          color: Colors.grey, size: 28),
     );
   }
 }

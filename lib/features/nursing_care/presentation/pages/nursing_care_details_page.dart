@@ -98,7 +98,7 @@ class NursingCareDetailsPage extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text("SELLING PRICE: ",
+                                  Text("Discount: ",
                                       style: GoogleFonts.poppins(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w600,
@@ -348,7 +348,8 @@ class _ExpandableHtmlSectionState extends State<ExpandableHtmlSection> {
           const SizedBox(height: 16),
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: isExpanded ? double.infinity : 100, // Roughly 3-4 lines
+              maxHeight:
+                  isExpanded ? double.infinity : 100, // Roughly 3-4 lines
             ),
             child: ClipRect(
               child: SingleChildScrollView(

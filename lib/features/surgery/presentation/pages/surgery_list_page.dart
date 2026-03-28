@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +22,7 @@ class SurgeryListPage extends StatefulWidget {
 class _SurgeryListPageState extends State<SurgeryListPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -50,6 +52,7 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -244,8 +247,12 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
           // Search Bar
           TextField(
             controller: _searchController,
-            onChanged: (val) =>
-                context.read<SurgeryBloc>().add(SearchSurgeriesEvent(val)),
+            onChanged: (val) {
+              _debounce?.cancel();
+              _debounce = Timer(const Duration(milliseconds: 500), () {
+                context.read<SurgeryBloc>().add(SearchSurgeriesEvent(val));
+              });
+            },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search surgeries...",
@@ -477,13 +484,13 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        "₹${item.price.toInt()}",
-                        style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary),
-                      ),
+                      // Text(
+                      //   "₹${item.price.toInt()}",
+                      //   style: GoogleFonts.inter(
+                      //       fontSize: 14,
+                      //       fontWeight: FontWeight.bold,
+                      //       color: AppColors.primary),
+                      // ),
                       if (item.discountPrice > 0)
                         Text(
                           "₹${item.discountPrice.toInt()}",

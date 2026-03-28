@@ -110,7 +110,7 @@ class HomeCareCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "₹${item.price.toInt()}",
+                    "₹${item.discountPrice.toInt()}",
                     style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

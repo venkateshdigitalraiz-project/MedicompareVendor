@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/home_care/data/data_sources/home_care_service.dart';
 import 'package:MediCompare/features/home_care/home_care_injection.dart';
@@ -22,6 +23,7 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   final HomeCareService _service = HomeCareInjection.provideHomeCareService();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -97,6 +99,7 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -153,7 +156,12 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary)),
                         ),
-                        onSubmitted: (val) => context.read<HomeCareBloc>().add(SearchHomeCareEvent(val)),
+                        onChanged: (val) {
+                          _debounce?.cancel();
+                          _debounce = Timer(const Duration(milliseconds: 500), () {
+                            context.read<HomeCareBloc>().add(SearchHomeCareEvent(val));
+                          });
+                        },
                      ),
                      const SizedBox(height: 12),
                      // Category Row
