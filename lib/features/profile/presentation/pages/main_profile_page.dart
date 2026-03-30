@@ -204,6 +204,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
         ),
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             const SizedBox(height: 22),
@@ -214,7 +215,6 @@ class _ProfilePageState extends State<MainprofileScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [
@@ -226,7 +226,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                           backgroundImage: _buildProfileImage(),
                           child: _isLoading || _isUploading
                               ? Container(
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: Colors.black38,
                                     shape: BoxShape.circle,
                                   ),
@@ -295,12 +295,11 @@ class _ProfilePageState extends State<MainprofileScreen> {
 
             const SizedBox(height: 30),
 
-            /// MENU OPTIONS
-            // _menuTile("Edit Profile", Icons.person_outline, () {
-            //   context.push('/edit-profile');
-            // }),
             _menuTile("Change Password", Icons.remove_red_eye_outlined, () {
               context.push('/change-password');
+            }),
+            _menuTile("Branches", Icons.business_outlined, () {
+              context.push('/branches');
             }),
             _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
               context.push('/subscription-plan');

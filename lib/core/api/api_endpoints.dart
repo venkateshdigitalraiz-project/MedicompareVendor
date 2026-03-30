@@ -180,4 +180,5 @@ class ApiEndpoints {
       '/vendor/ambulance-booking/list';
   static String ambulanceBookingSingle(String id) =>
       '/vendor/ambulance-booking/single/$id';
+  static const String branchList = '/vendor/branch/list';
 }
