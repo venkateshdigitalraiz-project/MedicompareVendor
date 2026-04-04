@@ -33,4 +33,18 @@ class BranchService {
       throw ServerException(e.toString());
     }
   }
+  Future<BranchDetailsResponse> getBranchDetails(String id) async {
+    try {
+      final response = await _apiService.get(ApiEndpoints.branchDetails(id));
+      final body = jsonDecode(response.body);
+      
+      if (body['success'] == true) {
+        return BranchDetailsResponse.fromJson(body);
+      }
+      throw ServerException(body['message'] ?? 'Failed to fetch branch details');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
 }

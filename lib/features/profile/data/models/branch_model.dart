@@ -109,3 +109,23 @@ class Pagination {
     );
   }
 }
+
+class BranchDetailsResponse {
+  final bool success;
+  final String message;
+  final Branch branch;
+
+  BranchDetailsResponse({
+    required this.success,
+    required this.message,
+    required this.branch,
+  });
+
+  factory BranchDetailsResponse.fromJson(Map<String, dynamic> json) {
+    return BranchDetailsResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      branch: Branch.fromJson(json['data']?['list'] ?? {}),
+    );
+  }
+}

@@ -330,10 +330,13 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                   children: [
                     Row(
                       children: [
+
                         Text(
                           ticket.subject,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF1E1B4B),
                           ),

@@ -10,6 +10,7 @@ import 'package:MediCompare/features/profile/presentation/pages/change_password_
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branches_list_page.dart';
+import 'package:MediCompare/features/profile/presentation/pages/branch_details_page.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/support_help_center_page.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/pages/step1_personal_details_screen.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_business_details_screen.dart';
@@ -128,6 +129,12 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
     GoRoute(
       path: '/branches',
       builder: (_, __) => const BranchesListPage(),
+    ),
+    GoRoute(
+      path: '/branch-details/:id',
+      builder: (context, state) => BranchDetailsPage(
+        branchId: state.pathParameters['id']!,
+      ),
     ),
     GoRoute(
       path: '/support-ticket',

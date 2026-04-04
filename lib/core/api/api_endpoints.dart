@@ -80,6 +80,7 @@ class ApiEndpoints {
   static const String createPackage = "/vendor/package/create";
   static String updatePackage(String id) => "/vendor/package/update/$id";
   static String deletePackage(String id) => "/vendor/package/delete/$id";
+  static const String adminPackageList = "/vendor/admin/package/list";
 
   // Diagnostics
   static const String diagnosticCategories = '/common/allcategory/diagnostics';
@@ -181,4 +182,5 @@ class ApiEndpoints {
   static String ambulanceBookingSingle(String id) =>
       '/vendor/ambulance-booking/single/$id';
   static const String branchList = '/vendor/branch/list';
+  static String branchDetails(String id) => '/vendor/branch/details/$id';
 }

@@ -300,6 +300,19 @@ class LabTestService {
     }
   }
 
+  Future<LabTestPackageResponse> getAdminPackageList() async {
+    try {
+      final response = await _apiService.get(ApiEndpoints.adminPackageList, queryParameters: {'page': '1', 'limit': '100'});
+      final body = jsonDecode(response.body);
+      if (body['success'] == true) {
+        return LabTestPackageResponse.fromJson(body['data']);
+      }
+      throw ServerException(body['message'] ?? 'Failed to fetch admin packages');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<void> deletePackage(String id) async {
     try {
       final response = await _apiService.post(ApiEndpoints.deletePackage(id));

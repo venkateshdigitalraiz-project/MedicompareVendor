@@ -36,6 +36,12 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
   bool _isLoading = false;
   bool _isFetchingTests = false;
 
+  // Admin Templates State
+  bool _isTemplatesMode = false;
+  List<LabTestPackageItem> _adminTemplates = [];
+  String? _selectedTemplateId;
+  bool _isFetchingTemplates = false;
+
   bool get isEditMode => widget.editItem != null;
 
   @override
@@ -56,14 +62,44 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
     setState(() => _isFetchingTests = true);
     try {
       final tests = await _labTestService.getAllLabTestTablets();
-      setState(() {
-        _allLabTests = tests;
-      });
+      if (mounted) {
+        setState(() {
+          _allLabTests = tests;
+        });
+      }
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isFetchingTests = false);
     }
+  }
+
+  Future<void> _fetchAdminTemplates() async {
+    if (_adminTemplates.isNotEmpty) return;
+    setState(() => _isFetchingTemplates = true);
+    try {
+      final response = await _labTestService.getAdminPackageList();
+      if (mounted) {
+        setState(() {
+          _adminTemplates = response.list;
+        });
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _isFetchingTemplates = false);
+    }
+  }
+
+  void _onTemplateSelected(String? templateId) {
+    if (templateId == null) return;
+    final template = _adminTemplates.firstWhere((t) => t.id == templateId);
+    setState(() {
+      _selectedTemplateId = templateId;
+      _nameController.text = template.name;
+      _descriptionController.text = template.description ?? "";
+      _selectedProductIds = List<String>.from(template.products);
+    });
   }
 
   Future<void> _pickImage() async {
@@ -103,10 +139,6 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         "status": _selectedStatus,
       };
 
-      // Since the Service's createPackage/updatePackage is using json, if there's an image, we should check if we need to change it to multipart or if there's a separate method.
-      // For now, I'll pass the image to the service's post call if needed.
-      // Actually, I'll update the LabTestService to handle the image in a better way if needed.
-      
       if (isEditMode) {
         await _labTestService.updatePackage(widget.editItem!.id, payload, image: _selectedImage);
       } else {
@@ -117,7 +149,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -140,7 +172,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Container(
+                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.science_outlined, color: AppColors.primary, size: 24),
@@ -162,7 +194,37 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                 ],
               ),
             ),
-            const Divider(height: 1),
+            
+            // Tabs (Custom vs Admin)
+            if (!isEditMode)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFF),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFEDF2FF)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _tabButton("Custom Package", Icons.add, !_isTemplatesMode, () {
+                          setState(() => _isTemplatesMode = false);
+                        }),
+                      ),
+                      Expanded(
+                        child: _tabButton("Admin Templates", Icons.science_outlined, _isTemplatesMode, () {
+                          setState(() => _isTemplatesMode = true);
+                          _fetchAdminTemplates();
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+             const Divider(height: 1),
             
             // Form Content
             Flexible(
@@ -173,6 +235,23 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Admin Template Selector
+                      if (_isTemplatesMode && !isEditMode) ...[
+                        _buildTemplateSelector(),
+                        const SizedBox(height: 24),
+                      ],
+
+                      Text(
+                        "Package Information",
+                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Please provide accurate information for the lab test package",
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
+                      ),
+                      const SizedBox(height: 20),
+
                       Row(
                         children: [
                            Expanded(
@@ -183,7 +262,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                  const SizedBox(height: 8),
                                  TextFormField(
                                    controller: _nameController,
-                                   decoration: _inputDecoration(hint: "cbc"),
+                                   decoration: _inputDecoration(hint: "e.g. Health Checkup"),
                                    validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
                                  ),
                                ],
@@ -226,7 +305,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                       final discount = double.tryParse(val);
                                       final price = double.tryParse(_priceController.text);
                                       if (discount != null && price != null && discount > price) {
-                                        return "Over price";
+                                        return "Must be <= price";
                                       }
                                       return null;
                                     },
@@ -257,7 +336,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                         ],
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       _buildLabel("Select Lab Tests", isRequired: true, icon: Icons.science_outlined),
                       const SizedBox(height: 8),
                       _isFetchingTests 
@@ -265,11 +344,11 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                           : _buildTestSelector(),
                       
                       const SizedBox(height: 16),
-                      _buildLabel("Description", icon: Icons.show_chart),
+                      _buildLabel("Description", icon: Icons.description_outlined),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _descriptionController,
-                        maxLines: 3,
+                        maxLines: 2,
                         decoration: _inputDecoration(hint: "Describe the lab test package..."),
                       ),
                       
@@ -278,7 +357,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                       const SizedBox(height: 8),
                       _buildImagePicker(),
                       
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -295,22 +374,21 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  
-                   TextButton(
+                    TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text("Cancel", style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
                    ),
                    const SizedBox(width: 12),
                    ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C3AED),
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       elevation: 0,
                     ),
                     onPressed: _isLoading ? null : _submit,
-                    icon: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.science_outlined, size: 18),
+                    icon: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.add, size: 18),
                     label: Text(_isLoading ? "Saving..." : (isEditMode ? "Update Package" : "Add Package"), style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                    ),
                 ],
@@ -318,6 +396,89 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _tabButton(String text, IconData icon, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isActive ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))] : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: isActive ? AppColors.primary : Colors.grey[500]),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                color: isActive ? AppColors.primary : Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTemplateSelector() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F3FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFDDD6FE)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.science_outlined, size: 16, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                "Select from Admin Template",
+                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _isFetchingTemplates
+              ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(strokeWidth: 2)))
+              : Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: _selectedTemplateId,
+                      hint: Text("Choose an admin package", style: GoogleFonts.inter(fontSize: 14, color: Colors.grey)),
+                      items: _adminTemplates.map((t) => DropdownMenuItem(
+                        value: t.id,
+                        child: Text(t.name, style: GoogleFonts.inter(fontSize: 14)),
+                      )).toList(),
+                      onChanged: _onTemplateSelected,
+                    ),
+                  ),
+                ),
+          const SizedBox(height: 4),
+          // Text(
+          //   "Selecting a template will auto-fill the package name, description, and included tests.",
+          //   style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
+          // ),
+        ],
       ),
     );
   }
@@ -332,11 +493,12 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
       child: Column(
         children: [
           SizedBox(
-            height: 250,
+            height: 200,
             child: _allLabTests.isEmpty 
               ? Center(child: Text("No tests found", style: GoogleFonts.inter(color: Colors.grey)))
               : ListView.separated(
                   shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
                   itemCount: _allLabTests.length,
                   separatorBuilder: (context, index) => const Divider(height: 1),
                   itemBuilder: (context, index) {
@@ -359,7 +521,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                           children: [
                             Checkbox(
                               value: isSelected,
-                              activeColor: const Color(0xFF7C3AED),
+                              activeColor: AppColors.primary,
                               onChanged: (val) {
                                  setState(() {
                                    if (val == true) {
@@ -378,7 +540,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                 children: [
                                   Text(test.name, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
                                   Text(
-                                    "${test.sampleType ?? 'Unknown'} • ${test.reportsDuration ?? 'Duration not specified'}",
+                                    "${test.sampleType ?? 'N/A'} • ${test.reportsDuration ?? 'N/A'}",
                                     style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
                                   ),
                                 ],
@@ -461,7 +623,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
       fillColor: Colors.white,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF7C3AED))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
       errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.red)),
     );
   }

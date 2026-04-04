@@ -40,7 +40,7 @@ class ApiLogger {
 📤 API REQUEST
 METHOD: $method
 URL: ${uri.toString()}
-HEADERS: ${jsonEncode(headers ?? {})}
+HEADERS: ${jsonEncode(headers ?? {})} 
 BODY: $bodyStr
 ''', name: "API");
   }

@@ -298,6 +298,12 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Change Password", Icons.remove_red_eye_outlined, () {
               context.push('/change-password');
             }),
+            _menuTile("Orders", Icons.shopping_bag_outlined, () {
+              context.push('/orders');
+            }),
+            _menuTile("Leads", Icons.leaderboard_outlined, () {
+              context.push('/leads');
+            }),
             _menuTile("Branches", Icons.business_outlined, () {
               context.push('/branches');
             }),

@@ -4,6 +4,7 @@ import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/core_injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../data/data_sources/branch_service.dart';
 import '../../data/models/branch_model.dart';
@@ -138,7 +139,11 @@ class _BranchListTabState extends State<BranchListTab> {
                 child: ListView.builder(
                   itemCount: _branches.length,
                   itemBuilder: (context, index) {
-                    return BranchCard(branch: _branches[index]);
+                    return BranchCard(
+                      branch: _branches[index],
+                      onTap: () =>
+                          context.push('/branch-details/${_branches[index].id}'),
+                    );
                   },
                 ),
               ),
