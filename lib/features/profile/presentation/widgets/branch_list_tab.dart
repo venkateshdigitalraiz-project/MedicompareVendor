@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/data_sources/branch_service.dart';
 import '../../data/models/branch_model.dart';
 import './branch_card.dart';
+import './edit_branch_sheet.dart';
 
 class BranchListTab extends StatefulWidget {
   const BranchListTab({super.key});
@@ -143,6 +144,18 @@ class _BranchListTabState extends State<BranchListTab> {
                       branch: _branches[index],
                       onTap: () =>
                           context.push('/branch-details/${_branches[index].id}'),
+                      onEdit: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (ctx) => EditBranchSheet(
+                            branch: _branches[index],
+                            onSuccess: () =>
+                                _fetchBranches(search: _searchController.text),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../data/data_sources/branch_service.dart';
 import '../../data/models/branch_model.dart';
+import '../widgets/edit_branch_sheet.dart';
 
 class BranchDetailsPage extends StatefulWidget {
   final String branchId;
@@ -42,6 +43,38 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
           ),
         ),
         leading: const BackButton(color: Colors.white),
+        actions: [
+          FutureBuilder<BranchDetailsResponse>(
+            future: _branchFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (ctx) => EditBranchSheet(
+                        branch: snapshot.data!.branch,
+                        onSuccess: () {
+                          setState(() {
+                            _branchFuture = _branchService.getBranchDetails(widget.branchId);
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Branch updated successfully'), backgroundColor: Colors.green),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: FutureBuilder<BranchDetailsResponse>(
         future: _branchFuture,

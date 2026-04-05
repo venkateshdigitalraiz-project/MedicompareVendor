@@ -6,11 +6,15 @@ import '../../data/models/branch_model.dart';
 class BranchCard extends StatelessWidget {
   final Branch branch;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const BranchCard({
     super.key,
     required this.branch,
     this.onTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -77,9 +81,30 @@ class BranchCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              _statusBadge(branch.status),
+                              Row(
+                                children: [
+                                  if (onEdit != null)
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                                      onPressed: onEdit,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  if (onEdit != null && onDelete != null)
+                                    const SizedBox(width: 8),
+                                  if (onDelete != null)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                      onPressed: onDelete,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                ],
+                              ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          _statusBadge(branch.status),
                           const SizedBox(height: 12),
                           _infoRow(Icons.location_on_outlined, branch.address),
                           const SizedBox(height: 8),

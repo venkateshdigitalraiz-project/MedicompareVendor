@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:MediCompare/core/api/api_endpoints.dart';
 import 'package:MediCompare/core/api/api_service_repository.dart';
 import 'package:MediCompare/core/error/exceptions.dart';
@@ -42,6 +43,36 @@ class BranchService {
         return BranchDetailsResponse.fromJson(body);
       }
       throw ServerException(body['message'] ?? 'Failed to fetch branch details');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  Future<void> updateBranch(String id, Map<String, dynamic> data, {File? image}) async {
+    try {
+      if (image != null) {
+        final Map<String, String> fields = {};
+        data.forEach((key, value) {
+          fields[key] = value.toString();
+        });
+        
+        final response = await _apiService.post(
+          ApiEndpoints.updateBranch(id),
+          fields: fields,
+          files: {'image': image},
+        );
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to update branch');
+        }
+      } else {
+        final response = await _apiService.post(ApiEndpoints.updateBranch(id), body: data);
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to update branch');
+        }
+      }
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
