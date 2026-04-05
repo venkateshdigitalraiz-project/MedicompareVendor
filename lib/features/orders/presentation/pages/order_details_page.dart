@@ -11,8 +11,13 @@ import '../bloc/orders_state.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
+  final String orderType;
 
-  const OrderDetailPage({super.key, required this.orderId});
+  const OrderDetailPage({
+    super.key,
+    required this.orderId,
+    this.orderType = 'normal',
+  });
 
   @override
   State<OrderDetailPage> createState() => _OrderDetailPageState();
@@ -25,7 +30,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   @override
   void initState() {
     super.initState();
-    context.read<OrdersBloc>().add(GetOrderDetailsEvent(widget.orderId));
+    context
+        .read<OrdersBloc>()
+        .add(GetOrderDetailsEvent(widget.orderId, orderType: widget.orderType));
   }
 
   @override
@@ -692,6 +699,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildOrderSummary(OrderItemEntity order) {
     final details = order.orderDetails;
+    final isRental = widget.orderType == 'rental' || details.rentalPlan != null;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -731,22 +739,68 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Icon(Icons.payment_outlined, size: 12, color: Colors.grey[600]),
-              const SizedBox(width: 4),
-              Text(
-                "Payment: ${details.paymentMethod.toUpperCase()}",
-                style: GoogleFonts.inter(
-                    fontSize: 9,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500),
-              ),
+          if (details.tax > 0) ...[
+            const SizedBox(height: 8),
+            _buildCompactSummaryRow("Tax", details.tax),
+          ],
+          if (isRental) ...[
+            const SizedBox(height: 8),
+            _buildCompactSummaryRow("Fixed Deposit", details.fixedDeposit),
+            _buildCompactSummaryRow("Service Charges", details.serviceCharges),
+            _buildCompactSummaryRow("Return Charge", details.returnCharge),
+            const SizedBox(height: 12),
+            _buildCompactTextRow(
+                "Payment Method", details.paymentMethod.toUpperCase()),
+            const SizedBox(height: 4),
+            if (details.paymentType != null) ...[
+              _buildCompactTextRow("Payment Type", details.paymentType!),
+              const SizedBox(height: 4),
             ],
-          ),
+            if (details.rentalPlan != null) ...[
+              _buildCompactTextRow("Rental Plan", details.rentalPlan!),
+              const SizedBox(height: 4),
+            ],
+            if (details.startDate != null && details.endDate != null)
+              _buildCompactTextRow("Rental Period",
+                  "${DateFormat('M/d/yyyy').format(details.startDate!)} - ${DateFormat('M/d/yyyy').format(details.endDate!)}"),
+          ] else ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(Icons.payment_outlined, size: 12, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  "Payment: ${details.paymentMethod.toUpperCase()}",
+                  style: GoogleFonts.inter(
+                      fontSize: 9,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildCompactTextRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("$label: ",
+            style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 10)),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

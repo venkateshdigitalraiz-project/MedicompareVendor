@@ -31,11 +31,12 @@ class GetOrdersEvent extends OrdersEvent {
 
 class GetOrderDetailsEvent extends OrdersEvent {
   final String orderId;
+  final String orderType;
 
-  const GetOrderDetailsEvent(this.orderId);
+  const GetOrderDetailsEvent(this.orderId, {this.orderType = 'normal'});
 
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderId, orderType];
 }
 
 class UpdateOrderStatusEvent extends OrdersEvent {

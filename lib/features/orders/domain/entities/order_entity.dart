@@ -79,6 +79,15 @@ class OrderDetailsEntity extends Equatable {
   final String? doctorName;
   final UserDetailsEntity? userDetails;
 
+  // Rental specific fields
+  final double fixedDeposit;
+  final double serviceCharges;
+  final double returnCharge;
+  final String? rentalPlan;
+  final String? paymentType;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
   const OrderDetailsEntity({
     required this.id,
     required this.orderId,
@@ -96,6 +105,13 @@ class OrderDetailsEntity extends Equatable {
     required this.personType,
     this.doctorName,
     this.userDetails,
+    this.fixedDeposit = 0,
+    this.serviceCharges = 0,
+    this.returnCharge = 0,
+    this.rentalPlan,
+    this.paymentType,
+    this.startDate,
+    this.endDate,
   });
 
   @override
@@ -116,6 +132,13 @@ class OrderDetailsEntity extends Equatable {
         personType,
         doctorName,
         userDetails,
+        fixedDeposit,
+        serviceCharges,
+        returnCharge,
+        rentalPlan,
+        paymentType,
+        startDate,
+        endDate,
       ];
 }
 

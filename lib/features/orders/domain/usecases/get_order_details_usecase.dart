@@ -6,7 +6,8 @@ class GetOrderDetailsUseCase {
 
   GetOrderDetailsUseCase(this.repository);
 
-  Future<OrderItemEntity> call(String orderId) async {
-    return await repository.getOrderDetails(orderId);
+  Future<OrderItemEntity> call(String orderId,
+      {String orderType = 'normal'}) async {
+    return await repository.getOrderDetails(orderId, orderType: orderType);
   }
 }

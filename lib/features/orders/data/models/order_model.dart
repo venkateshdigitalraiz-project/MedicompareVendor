@@ -71,6 +71,13 @@ class OrderDetailsModel extends OrderDetailsEntity {
     required super.personType,
     super.doctorName,
     super.userDetails,
+    super.fixedDeposit = 0,
+    super.serviceCharges = 0,
+    super.returnCharge = 0,
+    super.rentalPlan,
+    super.paymentType,
+    super.startDate,
+    super.endDate,
   });
 
   factory OrderDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -93,6 +100,14 @@ class OrderDetailsModel extends OrderDetailsEntity {
       userDetails: json['userDetails'] != null
           ? UserDetailsModel.fromJson(json['userDetails'])
           : null,
+      fixedDeposit: (json['fixedDeposit'] ?? 0).toDouble(),
+      serviceCharges: (json['serviceCharges'] ?? 0).toDouble(),
+      returnCharge: (json['returnCharge'] ?? 0).toDouble(),
+      rentalPlan: json['rentalPlan']?.toString(),
+      paymentType: json['paymentType']?.toString(),
+      startDate:
+          json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
     );
   }
 }

@@ -11,7 +11,8 @@ abstract class OrdersRemoteDataSource {
     String search = '',
     String orderType = 'normal',
   });
-  Future<OrderItemModel> getOrderDetails(String orderId);
+  Future<OrderItemModel> getOrderDetails(String orderId,
+      {String orderType = 'normal'});
   Future<bool> updateOrderStatus(
       String orderItemId, Map<String, dynamic> payload);
 }
@@ -55,9 +56,12 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   @override
-  Future<OrderItemModel> getOrderDetails(String orderId) async {
-    final response =
-        await apiService.get('${ApiEndpoints.orderDetails}/$orderId');
+  Future<OrderItemModel> getOrderDetails(String orderId,
+      {String orderType = 'normal'}) async {
+    final endpoint = orderType == 'rental'
+        ? ApiEndpoints.rentalOrderDetails
+        : ApiEndpoints.orderDetails;
+    final response = await apiService.get('$endpoint/$orderId');
 
     final decoded = json.decode(response.body);
     if (decoded == null ||

@@ -8,7 +8,8 @@ abstract class OrdersRepository {
     String search = '',
     String orderType = 'normal',
   });
-  Future<OrderItemEntity> getOrderDetails(String orderId);
+  Future<OrderItemEntity> getOrderDetails(String orderId,
+      {String orderType = 'normal'});
   Future<bool> updateOrderStatus(
       String orderItemId, Map<String, dynamic> payload);
 }

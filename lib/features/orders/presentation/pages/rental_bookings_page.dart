@@ -248,7 +248,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
 
     return GestureDetector(
       onTap: () {
-        context.push('/order-details/${item.id}').then((_) {
+        context.push('/rental-order-details/${item.id}').then((_) {
           _onFilterChanged(); // Refresh the list when coming back
         });
       },

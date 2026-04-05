@@ -197,6 +197,16 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
           },
         ),
         GoRoute(
+          path: '/rental-order-details/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return BlocProvider(
+              create: (_) => OrdersInjection.provideOrdersBloc(),
+              child: OrderDetailPage(orderId: id, orderType: 'rental'),
+            );
+          },
+        ),
+        GoRoute(
           path: '/surgery-list',
           builder: (_, __) => const SurgeryListPage(),
         ),

@@ -54,7 +54,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<GetOrderDetailsEvent>((event, emit) async {
       emit(OrdersLoading());
       try {
-        final result = await getOrderDetailsUseCase.call(event.orderId);
+        final result = await getOrderDetailsUseCase.call(event.orderId,
+            orderType: event.orderType);
         emit(OrderDetailsLoaded(result));
       } catch (e) {
         emit(OrdersError(e.toString()));

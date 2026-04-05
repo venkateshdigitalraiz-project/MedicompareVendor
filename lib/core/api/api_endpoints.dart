@@ -26,6 +26,7 @@ class ApiEndpoints {
   static const String orderList = '/vendor/order/list';
   static const String rentalOrderList = '/vendor/order/rental/list';
   static const String orderDetails = '/vendor/order/details';
+  static const String rentalOrderDetails = '/vendor/order/rental/details';
   static String updateOrderStatus(String id) =>
       '/vendor/order/update-status/$id';
   static const String leadsList = '/vendor/leads/list';
