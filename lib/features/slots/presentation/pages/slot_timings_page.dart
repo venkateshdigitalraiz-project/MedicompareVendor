@@ -170,19 +170,19 @@ class SlotTimingsPage extends StatelessWidget {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ConfigureAvailabilityPage(timing: parentTiming),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.edit_outlined,
-                    size: 18, color: Colors.grey),
-              ),
+              // GestureDetector(
+              //   onTap: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) =>
+              //             ConfigureAvailabilityPage(timing: parentTiming),
+              //       ),
+              //     );
+              //   },
+              //   child: const Icon(Icons.edit_outlined,
+              //       size: 18, color: Colors.grey),
+              // ),
             ],
           ),
           const SizedBox(height: 8),
