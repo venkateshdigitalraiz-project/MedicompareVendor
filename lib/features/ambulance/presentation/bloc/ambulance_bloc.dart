@@ -64,7 +64,8 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
     String selectedCategoryId = event.categoryId;
     if (currentState is AmbulanceLoaded) {
       categories = currentState.categories;
-      if (selectedCategoryId.isEmpty) selectedCategoryId = currentState.selectedCategoryId;
+      if (selectedCategoryId.isEmpty)
+        selectedCategoryId = currentState.selectedCategoryId;
     }
 
     if (event.isLoadMore && currentState is AmbulanceLoaded) {
@@ -168,7 +169,8 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
     emit(AmbulanceLoading());
     try {
       await createAmbulanceUseCase.call(event.payload);
-      emit(const AmbulanceOperationSuccess('Ambulance service created successfully'));
+      emit(const AmbulanceOperationSuccess(
+          'Ambulance service created successfully'));
     } catch (e) {
       emit(AmbulanceError(e.toString()));
     }
@@ -181,7 +183,8 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
     emit(AmbulanceLoading());
     try {
       await updateAmbulanceUseCase.call(event.id, event.payload);
-      emit(const AmbulanceOperationSuccess('Ambulance service updated successfully'));
+      emit(const AmbulanceOperationSuccess(
+          'Ambulance service updated successfully'));
     } catch (e) {
       emit(AmbulanceError(e.toString()));
     }
@@ -194,7 +197,8 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
     emit(AmbulanceLoading());
     try {
       await deleteAmbulanceUseCase.call(event.id);
-      emit(const AmbulanceOperationSuccess('Ambulance service deleted successfully'));
+      emit(const AmbulanceOperationSuccess(
+          'Ambulance service deleted successfully'));
     } catch (e) {
       emit(AmbulanceError(e.toString()));
     }

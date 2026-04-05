@@ -12,6 +12,7 @@ class GetOrdersEvent extends OrdersEvent {
   final int limit;
   final String status;
   final String search;
+  final String orderType;
   final bool isLoadMore;
 
   const GetOrdersEvent({
@@ -19,11 +20,13 @@ class GetOrdersEvent extends OrdersEvent {
     this.limit = 10,
     this.status = '',
     this.search = '',
+    this.orderType = 'normal',
     this.isLoadMore = false,
   });
 
   @override
-  List<Object?> get props => [page, limit, status, search, isLoadMore];
+  List<Object?> get props =>
+      [page, limit, status, search, orderType, isLoadMore];
 }
 
 class GetOrderDetailsEvent extends OrdersEvent {

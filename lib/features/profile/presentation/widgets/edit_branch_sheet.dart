@@ -13,7 +13,8 @@ class EditBranchSheet extends StatefulWidget {
   final Branch branch;
   final VoidCallback onSuccess;
 
-  const EditBranchSheet({super.key, required this.branch, required this.onSuccess});
+  const EditBranchSheet(
+      {super.key, required this.branch, required this.onSuccess});
 
   @override
   State<EditBranchSheet> createState() => _EditBranchSheetState();
@@ -21,7 +22,8 @@ class EditBranchSheet extends StatefulWidget {
 
 class _EditBranchSheetState extends State<EditBranchSheet> {
   final _formKey = GlobalKey<FormState>();
-  final BranchService _branchService = BranchService(CoreInjection.provideApiService());
+  final BranchService _branchService =
+      BranchService(CoreInjection.provideApiService());
   final String _googleApiKey = "AIzaSyCrQfumXF2fKkdxz0Z1SRD-9XlAthO3vZs";
 
   late final TextEditingController _nameController;
@@ -30,12 +32,12 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
   late final TextEditingController _stateController;
   late final TextEditingController _mobileController;
   late final TextEditingController _emailController;
-  
+
   String _selectedStatus = 'active';
   String _selectedRole = 'Manager';
   File? _selectedImage;
   bool _isLoading = false;
-  
+
   // Google Places API state
   List<dynamic> _predictions = [];
   bool _isSearchingAddress = false;
@@ -51,7 +53,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
     _emailController = TextEditingController(text: widget.branch.email);
     _selectedStatus = widget.branch.status;
     // Assuming roleId or some other string matches. Default to 'Manager'
-    _selectedRole = 'Manager'; 
+    _selectedRole = 'Manager';
   }
 
   @override
@@ -73,10 +75,11 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
 
     setState(() => _isSearchingAddress = true);
     try {
-      final url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&key=$_googleApiKey&sessiontoken=branch_edit_v1";
+      final url =
+          "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&key=$_googleApiKey&sessiontoken=branch_edit_v1";
       final response = await http.get(Uri.parse(url));
       final data = jsonDecode(response.body);
-      
+
       if (data['status'] == 'OK' && mounted) {
         setState(() {
           _predictions = data['predictions'];
@@ -123,12 +126,14 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
         "roleId": widget.branch.roleId, // Should match what backend expects
       };
 
-      await _branchService.updateBranch(widget.branch.id, payload, image: _selectedImage);
+      await _branchService.updateBranch(widget.branch.id, payload,
+          image: _selectedImage);
       widget.onSuccess();
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -137,14 +142,16 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final String currentImageUrl = widget.branch.images.isNotEmpty ? widget.branch.images.first : "";
+    final String currentImageUrl =
+        widget.branch.images.isNotEmpty ? widget.branch.images.first : "";
 
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -156,7 +163,10 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
               children: [
                 Text(
                   "Edit Branch",
-                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                  style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E1B4B)),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
@@ -166,7 +176,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
             ),
           ),
           const Divider(height: 1),
-          
+
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -179,58 +189,74 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _nameController,
-                      decoration: _inputDecoration(hint: "Digitalraiz Sub-Branch"),
-                      validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                      decoration:
+                          _inputDecoration(hint: "Digitalraiz Sub-Branch"),
+                      validator: (val) =>
+                          (val == null || val.isEmpty) ? "Required" : null,
                     ),
                     const SizedBox(height: 20),
-
                     _buildLabel("Branch Image"),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                         Container(
-                           width: 60,
-                           height: 60,
-                           decoration: BoxDecoration(
-                             color: const Color(0xFFF9FAFB),
-                             borderRadius: BorderRadius.circular(12),
-                             border: Border.all(color: Colors.grey[200]!),
-                           ),
-                           child: _selectedImage != null 
-                             ? ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_selectedImage!, fit: BoxFit.cover))
-                             : currentImageUrl.isNotEmpty 
-                               ? ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(currentImageUrl, fit: BoxFit.cover))
-                               : const Icon(Icons.business, color: Colors.grey),
-                         ),
-                         const SizedBox(width: 16),
-                         Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
-                           children: [
-                              OutlinedButton(
-                                onPressed: _pickImage,
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                child: Text("Change Image", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1E1B4B))),
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF9FAFB),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
+                          child: _selectedImage != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(_selectedImage!,
+                                      fit: BoxFit.cover))
+                              : currentImageUrl.isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.network(currentImageUrl,
+                                          fit: BoxFit.cover))
+                                  : const Icon(Icons.business,
+                                      color: Colors.grey),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            OutlinedButton(
+                              onPressed: _pickImage,
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
                               ),
-                              const SizedBox(height: 4),
-                              Text("JPG, PNG or GIF. Max 2MB.", style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
-                           ],
-                         ),
+                              child: Text("Change Image",
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1E1B4B))),
+                            ),
+                            const SizedBox(height: 4),
+                            Text("JPG, PNG or GIF. Max 2MB.",
+                                style: GoogleFonts.inter(
+                                    fontSize: 11, color: Colors.grey[500])),
+                          ],
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
                     _buildLabel("Branch Address", isRequired: true),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _addressController,
-                      decoration: _inputDecoration(hint: "Enter branch address"),
-                      validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                      decoration:
+                          _inputDecoration(hint: "Enter branch address"),
+                      validator: (val) =>
+                          (val == null || val.isEmpty) ? "Required" : null,
                     ),
                     const SizedBox(height: 16),
-
                     _buildLabel("Branch Address (Editable)", isRequired: true),
                     const SizedBox(height: 8),
                     Stack(
@@ -239,7 +265,9 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                           controller: _editableAddressController,
                           maxLines: 3,
                           onChanged: _searchAddress,
-                          decoration: _inputDecoration(hint: "Address will be auto-filled from Google Maps or enter manually"),
+                          decoration: _inputDecoration(
+                              hint:
+                                  "Address will be auto-filled from Google Maps or enter manually"),
                         ),
                         if (_predictions.isNotEmpty)
                           Container(
@@ -248,18 +276,24 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10)
+                              ],
                               border: Border.all(color: Colors.grey[200]!),
                             ),
                             child: ListView.separated(
                               shrinkWrap: true,
                               itemCount: _predictions.length,
-                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
                               itemBuilder: (context, index) {
                                 final p = _predictions[index];
                                 return ListTile(
                                   dense: true,
-                                  title: Text(p['description'], style: GoogleFonts.inter(fontSize: 12)),
+                                  title: Text(p['description'],
+                                      style: GoogleFonts.inter(fontSize: 12)),
                                   onTap: () => _onAddressSelected(p),
                                 );
                               },
@@ -268,7 +302,6 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     Row(
                       children: [
                         Expanded(
@@ -280,7 +313,9 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                               TextFormField(
                                 controller: _stateController,
                                 decoration: _inputDecoration(hint: "State"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) => (val == null || val.isEmpty)
+                                    ? "Required"
+                                    : null,
                               ),
                             ],
                           ),
@@ -295,8 +330,11 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                               TextFormField(
                                 controller: _mobileController,
                                 keyboardType: TextInputType.phone,
-                                decoration: _inputDecoration(hint: "7777777777"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                decoration:
+                                    _inputDecoration(hint: "7777777777"),
+                                validator: (val) => (val == null || val.isEmpty)
+                                    ? "Required"
+                                    : null,
                               ),
                             ],
                           ),
@@ -304,7 +342,6 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     Row(
                       children: [
                         Expanded(
@@ -315,7 +352,8 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _emailController,
-                                decoration: _inputDecoration(hint: "digi@gmail.com"),
+                                decoration:
+                                    _inputDecoration(hint: "digi@gmail.com"),
                               ),
                             ],
                           ),
@@ -331,14 +369,23 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                                 value: _selectedRole,
                                 isExpanded: true,
                                 items: const [
-                                  DropdownMenuItem(value: 'Select Role', child: Text("Select Role")),
-                                  DropdownMenuItem(value: 'Manager', child: Text("Manager")),
-                                  DropdownMenuItem(value: 'pharmacist', child: Text("pharmacist")),
-                                  DropdownMenuItem(value: 'nurse', child: Text("nurse")),
-                                  DropdownMenuItem(value: 'doctor', child: Text("doctor")),
+                                  DropdownMenuItem(
+                                      value: 'Select Role',
+                                      child: Text("Select Role")),
+                                  DropdownMenuItem(
+                                      value: 'Manager', child: Text("Manager")),
+                                  DropdownMenuItem(
+                                      value: 'pharmacist',
+                                      child: Text("pharmacist")),
+                                  DropdownMenuItem(
+                                      value: 'nurse', child: Text("nurse")),
+                                  DropdownMenuItem(
+                                      value: 'doctor', child: Text("doctor")),
                                 ],
-                                onChanged: (val) => setState(() => _selectedRole = val!),
-                                decoration: _inputDecoration(hint: "Select Role"),
+                                onChanged: (val) =>
+                                    setState(() => _selectedRole = val!),
+                                decoration:
+                                    _inputDecoration(hint: "Select Role"),
                               ),
                             ],
                           ),
@@ -346,21 +393,21 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     _buildLabel("Status"),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _selectedStatus,
                       items: const [
-                        DropdownMenuItem(value: 'active', child: Text("Active")),
-                        DropdownMenuItem(value: 'inactive', child: Text("Inactive")),
+                        DropdownMenuItem(
+                            value: 'active', child: Text("Active")),
+                        DropdownMenuItem(
+                            value: 'inactive', child: Text("Inactive")),
                       ],
-                      onChanged: (val) => setState(() => _selectedStatus = val!),
+                      onChanged: (val) =>
+                          setState(() => _selectedStatus = val!),
                       decoration: _inputDecoration(hint: "Status"),
                     ),
-                    
                     const SizedBox(height: 40),
-                    
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -369,12 +416,19 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                           elevation: 0,
                         ),
-                        child: _isLoading 
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : Text("Update Branch", style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2))
+                            : Text("Update Branch",
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -382,7 +436,10 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                       width: double.infinity,
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey[600], fontWeight: FontWeight.w600)),
+                        child: Text("Cancel",
+                            style: GoogleFonts.inter(
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -401,10 +458,17 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
       children: [
         Text(
           text,
-          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF4B5563)),
+          style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF4B5563)),
         ),
         if (isRequired)
-          Text(" *", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+          Text(" *",
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -416,9 +480,15 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: true,
       fillColor: const Color(0xFFF9FAFB),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary)),
     );
   }
 }

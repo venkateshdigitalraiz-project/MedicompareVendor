@@ -35,9 +35,9 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
     if (!mounted) return;
     final currentState = _lastLoadedState;
     context.read<AmbulanceBloc>().add(GetAmbulanceListEvent(
-      categoryId: currentState?.selectedCategoryId ?? '',
-      search: currentState?.searchQuery ?? '',
-    ));
+          categoryId: currentState?.selectedCategoryId ?? '',
+          search: currentState?.searchQuery ?? '',
+        ));
   }
 
   void _onScroll() {
@@ -48,11 +48,11 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
         final pagination = state.ambulanceList.pagination;
         if (pagination.page < pagination.totalPages) {
           context.read<AmbulanceBloc>().add(GetAmbulanceListEvent(
-            page: pagination.page + 1,
-            categoryId: state.selectedCategoryId,
-            search: state.searchQuery,
-            isLoadMore: true,
-          ));
+                page: pagination.page + 1,
+                categoryId: state.selectedCategoryId,
+                search: state.searchQuery,
+                isLoadMore: true,
+              ));
         }
       }
     }
@@ -80,7 +80,9 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
             child: AddAmbulanceSheet(
               onSuccess: () {},
               existingIds: (_lastLoadedState != null)
-                  ? _lastLoadedState!.ambulanceList.items.map((m) => m.tabletId).toList()
+                  ? _lastLoadedState!.ambulanceList.items
+                      .map((m) => m.tabletId)
+                      .toList()
                   : [],
             ),
           ),
@@ -102,10 +104,12 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
           child: BlocProvider.value(
             value: context.read<AmbulanceBloc>(),
             child: AddAmbulanceSheet(
-              editAmbulance: item, 
+              editAmbulance: item,
               onSuccess: () {},
               existingIds: (_lastLoadedState != null)
-                  ? _lastLoadedState!.ambulanceList.items.map((m) => m.tabletId).toList()
+                  ? _lastLoadedState!.ambulanceList.items
+                      .map((m) => m.tabletId)
+                      .toList()
                   : [],
             ),
           ),
@@ -187,7 +191,8 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
@@ -227,8 +232,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                           itemBuilder: (context, index) {
                             if (index >= items.length) {
                               return const Padding(
-                                padding:
-                                    EdgeInsets.symmetric(vertical: 24.0),
+                                padding: EdgeInsets.symmetric(vertical: 24.0),
                                 child: Center(
                                     child: CircularProgressIndicator(
                                         strokeWidth: 2)),
@@ -237,8 +241,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                             final item = items[index];
                             return AmbulanceCard(
                               item: item,
-                              onTap: () => context.push(
-                                  '/ambulance-details',
+                              onTap: () => context.push('/ambulance-details',
                                   extra: item),
                               onEdit: () => _openEditSheet(item),
                               onDelete: () => _showDeleteDialog(item),
@@ -274,9 +277,9 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
             controller: _searchController,
             onChanged: (val) {
               context.read<AmbulanceBloc>().add(GetAmbulanceListEvent(
-                search: val,
-                categoryId: state.selectedCategoryId,
-              ));
+                    search: val,
+                    categoryId: state.selectedCategoryId,
+                  ));
             },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
@@ -330,16 +333,14 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                         value: '',
                         child: Text("All Categories",
                             style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500))),
+                                fontSize: 13, fontWeight: FontWeight.w500))),
                     ...state.categories.map((c) => DropdownMenuItem(
                           value: c.id,
                           child: Text(c.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500)),
+                                  fontSize: 13, fontWeight: FontWeight.w500)),
                         )),
                   ].map((e) {
                     return Container(
@@ -356,8 +357,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                           border: Border(
-                              bottom:
-                                  BorderSide(color: Colors.grey[100]!))),
+                              bottom: BorderSide(color: Colors.grey[100]!))),
                       child: Text(
                         "All Categories",
                         style: GoogleFonts.inter(
@@ -372,18 +372,14 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                       value: c.id,
                       child: Container(
                         width: double.infinity,
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                             border: Border(
-                                bottom: BorderSide(
-                                    color: Colors.grey[100]!))),
+                                bottom: BorderSide(color: Colors.grey[100]!))),
                         child: Text(
                           c.name,
                           style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: Colors.black87,
-                              height: 1.4),
+                              fontSize: 13, color: Colors.black87, height: 1.4),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -436,32 +432,27 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Delete Service",
-            style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold, fontSize: 16)),
+            style:
+                GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
         content: Text(
           "Are you sure you want to delete ${item.name}? This action cannot be undone.",
           style: GoogleFonts.inter(fontSize: 14),
         ),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text("Cancel",
                 style: GoogleFonts.inter(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600)),
+                    color: Colors.grey[600], fontWeight: FontWeight.w600)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context
-                  .read<AmbulanceBloc>()
-                  .add(DeleteAmbulanceEvent(item.id));
+              context.read<AmbulanceBloc>().add(DeleteAmbulanceEvent(item.id));
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white),
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text("Delete"),
           ),
         ],

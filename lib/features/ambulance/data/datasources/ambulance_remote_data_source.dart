@@ -133,7 +133,8 @@ class AmbulanceRemoteDataSourceImpl implements AmbulanceRemoteDataSource {
 
     final decoded = json.decode(response.body);
     if (decoded == null || decoded['success'] != true) {
-      throw Exception(decoded?['message'] ?? 'Failed to create ambulance service');
+      throw Exception(
+          decoded?['message'] ?? 'Failed to create ambulance service');
     }
   }
 
@@ -146,7 +147,8 @@ class AmbulanceRemoteDataSourceImpl implements AmbulanceRemoteDataSource {
 
     final decoded = json.decode(response.body);
     if (decoded == null || decoded['success'] != true) {
-      throw Exception(decoded?['message'] ?? 'Failed to update ambulance service');
+      throw Exception(
+          decoded?['message'] ?? 'Failed to update ambulance service');
     }
   }
 
@@ -158,7 +160,8 @@ class AmbulanceRemoteDataSourceImpl implements AmbulanceRemoteDataSource {
     );
     final decoded = json.decode(response.body);
     if (decoded == null || decoded['success'] != true) {
-      throw Exception(decoded?['message'] ?? 'Failed to delete ambulance service');
+      throw Exception(
+          decoded?['message'] ?? 'Failed to delete ambulance service');
     }
   }
 }

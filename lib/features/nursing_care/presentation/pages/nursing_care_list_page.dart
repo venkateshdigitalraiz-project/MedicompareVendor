@@ -34,13 +34,14 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
   void _onScroll() {
     final state = context.read<NursingCareBloc>().state;
     if (state is NursingCareLoaded && !state.isLoadingMore) {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         final pagination = state.response.pagination;
         if (pagination.page < pagination.totalPages) {
           context.read<NursingCareBloc>().add(LoadNursingCareListEvent(
-            page: pagination.page + 1,
-            isLoadMore: true,
-          ));
+                page: pagination.page + 1,
+                isLoadMore: true,
+              ));
         }
       }
     }
@@ -54,15 +55,20 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
           child: AddNursingCareSheet(
             editItem: item,
-            existingIds: (context.read<NursingCareBloc>().state as NursingCareLoaded)
-                .response.list
-                .map((m) => m.details.id)
-                .toList(),
+            existingIds:
+                (context.read<NursingCareBloc>().state as NursingCareLoaded)
+                    .response
+                    .list
+                    .map((m) => m.details.id)
+                    .toList(),
             onSuccess: () {
-              context.read<NursingCareBloc>().add(const LoadNursingCareCategoriesEvent());
+              context
+                  .read<NursingCareBloc>()
+                  .add(const LoadNursingCareCategoriesEvent());
             },
           ),
         ),
@@ -88,7 +94,11 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Care Taker Services", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text("Care Taker Services",
+                style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
             // Text("Manage nursing care services and vendors", style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
           ],
         ),
@@ -98,13 +108,15 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
             child: ElevatedButton.icon(
               onPressed: () => _showAddEditSheet(),
               icon: const Icon(Icons.add, size: 16),
-              label: const Text("Add Service", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              label: const Text("Add Service",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppColors.primary,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
             ),
           ),
@@ -116,12 +128,17 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is NursingCareError) {
-            return Center(child: Column(
+            return Center(
+                child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(state.message, style: const TextStyle(color: Colors.red)),
                 const SizedBox(height: 16),
-                ElevatedButton(onPressed: () => context.read<NursingCareBloc>().add(const LoadNursingCareCategoriesEvent()), child: const Text("Retry"))
+                ElevatedButton(
+                    onPressed: () => context
+                        .read<NursingCareBloc>()
+                        .add(const LoadNursingCareCategoriesEvent()),
+                    child: const Text("Retry"))
               ],
             ));
           }
@@ -133,19 +150,29 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
                   child: state.response.list.isEmpty
                       ? _buildEmptyState()
                       : RefreshIndicator(
-                          onRefresh: () async => context.read<NursingCareBloc>().add(const LoadNursingCareCategoriesEvent()),
+                          onRefresh: () async => context
+                              .read<NursingCareBloc>()
+                              .add(const LoadNursingCareCategoriesEvent()),
                           child: ListView.builder(
                             controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            itemCount: state.isLoadingMore ? state.response.list.length + 1 : state.response.list.length,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            itemCount: state.isLoadingMore
+                                ? state.response.list.length + 1
+                                : state.response.list.length,
                             itemBuilder: (context, index) {
                               if (index >= state.response.list.length) {
-                                return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(strokeWidth: 2)));
+                                return const Center(
+                                    child: Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2)));
                               }
                               final item = state.response.list[index];
                               return NursingCareCard(
                                 item: item,
-                                onTap: () => context.push('/nursing-details', extra: item),
+                                onTap: () => context.push('/nursing-details',
+                                    extra: item),
                                 onEdit: () => _showAddEditSheet(item: item),
                                 onDelete: () => _showDeleteDialog(item),
                               );
@@ -167,7 +194,12 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
+        ],
       ),
       child: Column(
         children: [
@@ -176,36 +208,58 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
             onChanged: (val) {
               _debounce?.cancel();
               _debounce = Timer(const Duration(milliseconds: 500), () {
-                context.read<NursingCareBloc>().add(SearchNursingCareEvent(val));
+                context
+                    .read<NursingCareBloc>()
+                    .add(SearchNursingCareEvent(val));
               });
             },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search services...",
-              hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
+              hintStyle:
+                  GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
               prefixIcon: const Icon(Icons.search, size: 20),
               filled: true,
               fillColor: const Color(0xFFF8FAFF),
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none),
             ),
           ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(color: const Color(0xFFF8FAFF), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFF),
+                borderRadius: BorderRadius.circular(12)),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty ? null : state.selectedCategoryId,
-                hint: Text("All Categories", style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600])),
+                value: state.selectedCategoryId.isEmpty
+                    ? null
+                    : state.selectedCategoryId,
+                hint: Text("All Categories",
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: Colors.grey[600])),
                 items: [
-                   DropdownMenuItem(value: '', child: Text("All Categories", style: GoogleFonts.inter(fontSize: 13, color: Colors.black87))),
-                   ...state.categories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name, style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)))),
+                  DropdownMenuItem(
+                      value: '',
+                      child: Text("All Categories",
+                          style: GoogleFonts.inter(
+                              fontSize: 13, color: Colors.black87))),
+                  ...state.categories.map((c) => DropdownMenuItem(
+                      value: c.id,
+                      child: Text(c.name,
+                          style: GoogleFonts.inter(
+                              fontSize: 13, color: Colors.black87)))),
                 ],
                 onChanged: (val) {
-                   if (val != null) context.read<NursingCareBloc>().add(SelectNursingCareCategoryEvent(val));
+                  if (val != null)
+                    context
+                        .read<NursingCareBloc>()
+                        .add(SelectNursingCareCategoryEvent(val));
                 },
               ),
             ),
@@ -219,26 +273,43 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Delete Service", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
-        content: Text("Are you sure you want to delete ${item.details.name}?", style: GoogleFonts.inter(fontSize: 14)),
+        title: Text("Delete Service",
+            style:
+                GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+        content: Text("Are you sure you want to delete ${item.details.name}?",
+            style: GoogleFonts.inter(fontSize: 14)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child:
+                  Text("Cancel", style: GoogleFonts.inter(color: Colors.grey))),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
               try {
-                final service = NursingCareInjection.provideNursingCareService();
+                final service =
+                    NursingCareInjection.provideNursingCareService();
                 await service.deleteNursingCare(item.id);
                 if (mounted) {
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Deleted successfully'), backgroundColor: Colors.green));
-                   context.read<NursingCareBloc>().add(const LoadNursingCareCategoriesEvent());
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Deleted successfully'),
+                      backgroundColor: Colors.green));
+                  context
+                      .read<NursingCareBloc>()
+                      .add(const LoadNursingCareCategoriesEvent());
                 }
               } catch (e) {
-                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                if (mounted)
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(e.toString()),
+                      backgroundColor: Colors.red));
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, elevation: 0),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                elevation: 0),
             child: const Text("Delete"),
           ),
         ],
@@ -253,7 +324,8 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
         children: [
           Icon(Icons.person_outline, size: 64, color: Colors.grey[200]),
           const SizedBox(height: 16),
-          Text("No services found", style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400])),
+          Text("No services found",
+              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400])),
         ],
       ),
     );

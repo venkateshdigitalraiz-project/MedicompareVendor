@@ -47,7 +47,8 @@ class OrderCountModel extends OrderCountEntity {
       currentMonthOrders: json['currentMonthOrders'] ?? 0,
       previousMonthOrders: json['previousMonthOrders'] ?? 0,
       orderStatus: json['orderStatus'] ?? 'no change',
-      orderPercentageChange: (json['orderPercentageChange'] as num?)?.toDouble() ?? 0.0,
+      orderPercentageChange:
+          (json['orderPercentageChange'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -64,10 +65,13 @@ class RevenueModel extends RevenueEntity {
   factory RevenueModel.fromJson(Map<String, dynamic> json) {
     return RevenueModel(
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      currentMonthAmount: (json['currentMonthAmount'] as num?)?.toDouble() ?? 0.0,
-      previousMonthAmount: (json['previousMonthAmount'] as num?)?.toDouble() ?? 0.0,
+      currentMonthAmount:
+          (json['currentMonthAmount'] as num?)?.toDouble() ?? 0.0,
+      previousMonthAmount:
+          (json['previousMonthAmount'] as num?)?.toDouble() ?? 0.0,
       amountStatus: json['amountStatus'] ?? 'no change',
-      amountPercentageChange: (json['amountPercentageChange'] as num?)?.toDouble() ?? 0.0,
+      amountPercentageChange:
+          (json['amountPercentageChange'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -87,7 +91,8 @@ class LeadsModel extends LeadsEntity {
       currentMonthLeads: json['currentMonthLeads'] ?? 0,
       previousMonthLeads: json['previousMonthLeads'] ?? 0,
       leadStatus: json['leadStatus'] ?? 'no change',
-      leadPercentageChange: (json['leadPercentageChange'] as num?)?.toDouble() ?? 0.0,
+      leadPercentageChange:
+          (json['leadPercentageChange'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -104,10 +109,13 @@ class RatingModel extends RatingEntity {
   factory RatingModel.fromJson(Map<String, dynamic> json) {
     return RatingModel(
       totalRating: (json['totalrating'] as num?)?.toDouble() ?? 0.0,
-      currentMonthRating: (json['currentMonthrating'] as num?)?.toDouble() ?? 0.0,
-      previousMonthRating: (json['previousMonthrating'] as num?)?.toDouble() ?? 0.0,
+      currentMonthRating:
+          (json['currentMonthrating'] as num?)?.toDouble() ?? 0.0,
+      previousMonthRating:
+          (json['previousMonthrating'] as num?)?.toDouble() ?? 0.0,
       ratingStatus: json['ratingStatus'] ?? 'no change',
-      ratingPercentageChange: (json['ratingPercentageChange'] as num?)?.toDouble() ?? 0.0,
+      ratingPercentageChange:
+          (json['ratingPercentageChange'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -125,12 +133,12 @@ class TopProductModel extends TopProductEntity {
   factory TopProductModel.fromJson(Map<String, dynamic> json) {
     final tabletDetails = json['tabletDetails'] ?? {};
     final files = (tabletDetails['files'] as List?) ?? [];
-    
+
     // Prioritize main category name (Medicine, Nursing Care, etc.) as per user request
     final categoryDetails = tabletDetails['categoryDetails'] ?? {};
-    
+
     String catName = categoryDetails['name']?.toString() ?? 'Medicine';
-    
+
     return TopProductModel(
       id: json['_id'] ?? '',
       totalSales: json['totalSales'] ?? 0,
@@ -155,7 +163,7 @@ class RecentLeadModel extends RecentLeadEntity {
 
   factory RecentLeadModel.fromJson(Map<String, dynamic> json) {
     final tabletDetails = json['tabletDetails'] ?? {};
-    
+
     return RecentLeadModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? 'Unknown',
@@ -181,7 +189,8 @@ class DashboardUserModel extends DashboardUserEntity {
       id: json['_id'] ?? '',
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
-      profileImageUrl: json['profileImage'] != null ? json['profileImage']['url'] : null,
+      profileImageUrl:
+          json['profileImage'] != null ? json['profileImage']['url'] : null,
     );
   }
 }

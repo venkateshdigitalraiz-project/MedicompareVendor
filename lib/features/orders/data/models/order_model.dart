@@ -34,12 +34,21 @@ class OrderItemModel extends OrderItemEntity {
       paymentStatus: json['paymentStatus']?.toString() ?? '',
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
       orderDetails: OrderDetailsModel.fromJson(json['orderDetails'] ?? {}),
-      productDetails: ProductDetailsModel.fromJson(json['productDetails'] ?? {}),
-      userDetails: json['userDetails'] != null ? FullUserDetailsModel.fromJson(json['userDetails']) : null,
-      shippingAddressDetails: json['shippingAddressDetails'] != null ? AddressDetailsModel.fromJson(json['shippingAddressDetails']) : null,
-      billingAddressDetails: json['billingAddressDetails'] != null ? AddressDetailsModel.fromJson(json['billingAddressDetails']) : null,
+      productDetails:
+          ProductDetailsModel.fromJson(json['productDetails'] ?? {}),
+      userDetails: json['userDetails'] != null
+          ? FullUserDetailsModel.fromJson(json['userDetails'])
+          : null,
+      shippingAddressDetails: json['shippingAddressDetails'] != null
+          ? AddressDetailsModel.fromJson(json['shippingAddressDetails'])
+          : null,
+      billingAddressDetails: json['billingAddressDetails'] != null
+          ? AddressDetailsModel.fromJson(json['billingAddressDetails'])
+          : null,
     );
   }
 }
@@ -81,7 +90,9 @@ class OrderDetailsModel extends OrderDetailsEntity {
       sgst: (json['sgst'] ?? 0).toDouble(),
       personType: json['persontype']?.toString() ?? '',
       doctorName: json['doctorName']?.toString(),
-      userDetails: json['userDetails'] != null ? UserDetailsModel.fromJson(json['userDetails']) : null,
+      userDetails: json['userDetails'] != null
+          ? UserDetailsModel.fromJson(json['userDetails'])
+          : null,
     );
   }
 }
@@ -202,7 +213,8 @@ class OrdersListModel extends OrdersListEntity {
   factory OrdersListModel.fromJson(Map<String, dynamic> json) {
     final List<dynamic> orderItemsJson = json['orderitems'] ?? [];
     return OrdersListModel(
-      orderItems: orderItemsJson.map((item) => OrderItemModel.fromJson(item)).toList(),
+      orderItems:
+          orderItemsJson.map((item) => OrderItemModel.fromJson(item)).toList(),
       pagination: PaginationModel.fromJson(json['pagination'] ?? {}),
     );
   }

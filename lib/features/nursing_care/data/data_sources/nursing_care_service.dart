@@ -12,10 +12,13 @@ class NursingCareService {
     final response = await apiService.get(ApiEndpoints.nursingCareCategories);
     final data = jsonDecode(response.body);
     // Based on response structure for categories in other services
-    final categoriesList = (data['data'] is Map && data['data']['allcategory'] != null)
-        ? data['data']['allcategory']
-        : (data['data'] is List ? data['data'] : (data['data']['categories'] ?? data['data']['list'] ?? []));
-    
+    final categoriesList =
+        (data['data'] is Map && data['data']['allcategory'] != null)
+            ? data['data']['allcategory']
+            : (data['data'] is List
+                ? data['data']
+                : (data['data']['categories'] ?? data['data']['list'] ?? []));
+
     return (categoriesList as List)
         .map((c) => NursingCareCategory.fromJson(c))
         .toList();
@@ -33,7 +36,8 @@ class NursingCareService {
       'categoryId': categoryId ?? '',
       'search': search ?? '',
     };
-    final response = await apiService.get(ApiEndpoints.nursingCareList, queryParameters: query);
+    final response = await apiService.get(ApiEndpoints.nursingCareList,
+        queryParameters: query);
     final data = jsonDecode(response.body);
     return NursingCareResponse.fromJson(data['data']);
   }
@@ -59,7 +63,8 @@ class NursingCareService {
     await apiService.post(ApiEndpoints.createNursingCare, body: payload);
   }
 
-  Future<void> updateNursingCare(String id, Map<String, dynamic> payload) async {
+  Future<void> updateNursingCare(
+      String id, Map<String, dynamic> payload) async {
     await apiService.post(ApiEndpoints.updateNursingCare(id), body: payload);
   }
 

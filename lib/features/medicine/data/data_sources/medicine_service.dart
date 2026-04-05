@@ -32,13 +32,15 @@ class MedicineService {
     String search = '',
   }) async {
     try {
-      final String endpoint = "${ApiEndpoints.medicineList}?page=$page&limit=$limit&categoryId=$categoryId&search=$search";
+      final String endpoint =
+          "${ApiEndpoints.medicineList}?page=$page&limit=$limit&categoryId=$categoryId&search=$search";
       final response = await _apiService.get(endpoint);
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return MedicineResponse.fromJson(body['data']);
       } else {
-        throw ServerException(body['message'] ?? 'Failed to fetch medicine list');
+        throw ServerException(
+            body['message'] ?? 'Failed to fetch medicine list');
       }
     } catch (e) {
       if (e is ServerException) rethrow;
@@ -46,9 +48,11 @@ class MedicineService {
     }
   }
 
-  Future<List<MedicineDropdownItem>> searchMedicineDropdown(String query) async {
+  Future<List<MedicineDropdownItem>> searchMedicineDropdown(
+      String query) async {
     try {
-      final response = await _apiService.get("${ApiEndpoints.medicineDropdownSearch}?search=$query&type=medicine");
+      final response = await _apiService.get(
+          "${ApiEndpoints.medicineDropdownSearch}?search=$query&type=medicine");
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List tablets = body['data']['tablets'] ?? [];
@@ -64,12 +68,14 @@ class MedicineService {
 
   Future<MedicineDropdownItem> getMedicineDetails(String id) async {
     try {
-      final response = await _apiService.get("${ApiEndpoints.medicineDropdownSearch}/$id");
+      final response =
+          await _apiService.get("${ApiEndpoints.medicineDropdownSearch}/$id");
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return MedicineDropdownItem.fromJson(body['data']['tablets']);
       } else {
-        throw ServerException(body['message'] ?? 'Failed to get medicine details');
+        throw ServerException(
+            body['message'] ?? 'Failed to get medicine details');
       }
     } catch (e) {
       if (e is ServerException) rethrow;
@@ -79,7 +85,8 @@ class MedicineService {
 
   Future<void> addMedicine(Map<String, dynamic> payload) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.createMedicine, body: payload);
+      final response =
+          await _apiService.post(ApiEndpoints.createMedicine, body: payload);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to add medicine');
@@ -92,12 +99,14 @@ class MedicineService {
 
   Future<Map<String, dynamic>> getVendorMedicineDetails(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.vendorMedicineDetails(id));
+      final response =
+          await _apiService.post(ApiEndpoints.vendorMedicineDetails(id));
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return body['data']['product'];
       } else {
-        throw ServerException(body['message'] ?? 'Failed to get medicine details');
+        throw ServerException(
+            body['message'] ?? 'Failed to get medicine details');
       }
     } catch (e) {
       if (e is ServerException) rethrow;
@@ -107,7 +116,8 @@ class MedicineService {
 
   Future<void> updateMedicine(String id, Map<String, dynamic> payload) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.updateMedicine(id), body: payload);
+      final response = await _apiService.post(ApiEndpoints.updateMedicine(id),
+          body: payload);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to update medicine');
@@ -130,4 +140,4 @@ class MedicineService {
       throw ServerException(e.toString());
     }
   }
-}    
+}

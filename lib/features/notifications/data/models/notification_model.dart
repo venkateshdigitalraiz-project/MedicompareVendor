@@ -8,7 +8,9 @@ class NotificationModel {
       message: json['message'] ?? '',
       read: json['read'] ?? false,
       platform: json['platform']?.toString(),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
     );
   }
 

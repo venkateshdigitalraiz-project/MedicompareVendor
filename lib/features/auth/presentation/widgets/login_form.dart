@@ -78,7 +78,8 @@ class _LoginFormState extends State<LoginForm> {
         await TokenStorage.saveCredentials(email, password, rememberMe);
 
         // Sync vendor to VendorProfileProvider
-        Provider.of<VendorProfileProvider>(context, listen: false).setVendor(vendor);
+        Provider.of<VendorProfileProvider>(context, listen: false)
+            .setVendor(vendor);
 
         // Save token and vendor ID for persistence
         await TokenStorage.saveToken(vendor.token);
@@ -87,14 +88,14 @@ class _LoginFormState extends State<LoginForm> {
         if (mounted) {
           // Refresh dashboard data with new token
           context.read<DashboardBloc>().add(GetDashboardEvent());
-          
+
           setState(() {
             isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Login successful!')),
           );
-          
+
           // Directly navigate to bottom-nav (Home) as requested
           context.go('/bottom-nav');
         }
@@ -185,14 +186,16 @@ class _LoginFormState extends State<LoginForm> {
                     onChanged: (value) {
                       setState(() => rememberMe = value!);
                     },
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
                     activeColor: const Color(0xFF8046F1),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   "Remember me",
-                  style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF64748B)),
+                  style: GoogleFonts.poppins(
+                      fontSize: 13, color: const Color(0xFF64748B)),
                 ),
                 const Spacer(),
                 TextButton(
@@ -263,9 +266,11 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
-                        final url = Uri.parse('https://vendor.medicompares.com/register');
+                        final url = Uri.parse(
+                            'https://vendor.medicompares.com/register');
                         if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
                         }
                       },
                   ),
@@ -288,8 +293,10 @@ class _LoginFormState extends State<LoginForm> {
       style: GoogleFonts.poppins(fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        hintStyle:
+            GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
         border: OutlineInputBorder(
@@ -315,8 +322,10 @@ class _LoginFormState extends State<LoginForm> {
       style: GoogleFonts.poppins(fontSize: 14),
       decoration: InputDecoration(
         hintText: "Enter your password",
-        hintStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        hintStyle:
+            GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
         suffixIcon: IconButton(
@@ -325,7 +334,8 @@ class _LoginFormState extends State<LoginForm> {
             size: 20,
             color: const Color(0xFF94A3B8),
           ),
-          onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+          onPressed: () =>
+              setState(() => isPasswordVisible = !isPasswordVisible),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

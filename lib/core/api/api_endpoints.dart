@@ -14,7 +14,8 @@ class ApiEndpoints {
   static const String updateProfilePicture = '/vendor/profile/update/profile';
   static const String changePassword = '/vendor/profile/change-password';
   static const String notificationList = '/vendor/notifications/list';
-  static const String markAllNotificationsRead = '/vendor/notifications/mark-all-read';
+  static const String markAllNotificationsRead =
+      '/vendor/notifications/mark-all-read';
   static const String slotTimings = '/vendor/vendor-timings/list';
   static String updateSlotTimings(String id) =>
       '/vendor/vendor-timings/update/$id';
@@ -23,8 +24,10 @@ class ApiEndpoints {
   static String pincodeUpdate(String id) => '/vendor/pincode/update/$id';
   static String pincodeDelete(String id) => '/vendor/pincode/delete/$id';
   static const String orderList = '/vendor/order/list';
+  static const String rentalOrderList = '/vendor/order/rental/list';
   static const String orderDetails = '/vendor/order/details';
-  static String updateOrderStatus(String id) => '/vendor/order/update-status/$id';
+  static String updateOrderStatus(String id) =>
+      '/vendor/order/update-status/$id';
   static const String leadsList = '/vendor/leads/list';
   static String leadDetails(String id) => '/vendor/leads/details/$id';
   static const String createTicket = '/vendor/support/tickets/create';
@@ -161,8 +164,7 @@ class ApiEndpoints {
   // Ambulance Services
   static const String ambulanceCategories =
       '/common/allcategory/ambulanceservice';
-  static const String ambulanceList =
-      '/vendor/product/ambulanceservice/list';
+  static const String ambulanceList = '/vendor/product/ambulanceservice/list';
   static String ambulanceDetails(String id) =>
       '/vendor/product/ambulanceservice/details/$id';
   static const String createAmbulance =
@@ -171,14 +173,11 @@ class ApiEndpoints {
       '/vendor/product/ambulanceservice/update/$id';
   static String deleteAmbulance(String id) =>
       '/vendor/product/ambulanceservice/delete/$id';
-  static const String ambulanceNames =
-      '/common/tablets';
-  static const String facilitiesList =
-      '/vendor/facilities/list';
+  static const String ambulanceNames = '/common/tablets';
+  static const String facilitiesList = '/vendor/facilities/list';
 
   // Ambulance Orders (Bookings)
-  static const String ambulanceBookingList =
-      '/vendor/ambulance-booking/list';
+  static const String ambulanceBookingList = '/vendor/ambulance-booking/list';
   static String ambulanceBookingSingle(String id) =>
       '/vendor/ambulance-booking/single/$id';
   static const String branchList = '/vendor/branch/list';

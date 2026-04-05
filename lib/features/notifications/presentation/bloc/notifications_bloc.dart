@@ -66,14 +66,16 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     on<MarkAllNotificationsReadEvent>(_onMarkAllRead);
   }
 
-  Future<void> _onLoadNotifications(LoadNotificationsEvent event, Emitter<NotificationsState> emit) async {
+  Future<void> _onLoadNotifications(
+      LoadNotificationsEvent event, Emitter<NotificationsState> emit) async {
     if (event.refresh) {
       _currentPage = 1;
       emit(NotificationsLoading());
     }
 
     try {
-      final response = await apiService.get(ApiEndpoints.notificationList, queryParameters: {
+      final response =
+          await apiService.get(ApiEndpoints.notificationList, queryParameters: {
         'page': _currentPage.toString(),
         'limit': _limit.toString(),
       });
@@ -82,11 +84,17 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       if (json['success'] == true) {
         final data = json['data'];
         final List<dynamic> notifList = data['notifications'] ?? [];
-        final items = notifList.map((n) => NotificationModel.fromJson(n)).toList();
+        final items =
+            notifList.map((n) => NotificationModel.fromJson(n)).toList();
         final unreadCount = data['unreadCount'] ?? 0;
-        final pagination = NotificationModel.paginationFromJson(data['pagination'] ?? {});
+        final pagination =
+            NotificationModel.paginationFromJson(data['pagination'] ?? {});
 
-        List<NotificationEntity> updatedList = event.refresh ? [] : (state is NotificationsLoaded ? (state as NotificationsLoaded).notifications : []);
+        List<NotificationEntity> updatedList = event.refresh
+            ? []
+            : (state is NotificationsLoaded
+                ? (state as NotificationsLoaded).notifications
+                : []);
         updatedList.addAll(items);
 
         final hasMore = _currentPage < pagination.pages;
@@ -99,16 +107,19 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           hasMore: hasMore,
         ));
       } else {
-        emit(NotificationsError(json['message'] ?? 'Failed to load notifications'));
+        emit(NotificationsError(
+            json['message'] ?? 'Failed to load notifications'));
       }
     } catch (e) {
       emit(NotificationsError(e.toString()));
     }
   }
 
-  Future<void> _onMarkAllRead(MarkAllNotificationsReadEvent event, Emitter<NotificationsState> emit) async {
+  Future<void> _onMarkAllRead(MarkAllNotificationsReadEvent event,
+      Emitter<NotificationsState> emit) async {
     try {
-      final response = await apiService.post(ApiEndpoints.markAllNotificationsRead);
+      final response =
+          await apiService.post(ApiEndpoints.markAllNotificationsRead);
       final json = jsonDecode(response.body);
       if (json['success'] == true) {
         // Refresh local state without reload? No, just reload.

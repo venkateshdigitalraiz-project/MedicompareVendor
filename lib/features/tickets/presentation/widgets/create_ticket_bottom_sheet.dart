@@ -9,7 +9,8 @@ class CreateTicketBottomSheet extends StatefulWidget {
   const CreateTicketBottomSheet({super.key});
 
   @override
-  State<CreateTicketBottomSheet> createState() => _CreateTicketBottomSheetState();
+  State<CreateTicketBottomSheet> createState() =>
+      _CreateTicketBottomSheetState();
 }
 
 class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
@@ -55,8 +56,8 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                             color: const Color(0xFFF3E8FF),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.confirmation_number_outlined, 
-                            color: Color(0xFF8B5CF6), size: 20),
+                          child: const Icon(Icons.confirmation_number_outlined,
+                              color: Color(0xFF8B5CF6), size: 20),
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -76,7 +77,6 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                   ],
                 ),
                 const Divider(height: 30),
-                
                 Text(
                   "Subject *",
                   style: GoogleFonts.inter(
@@ -90,7 +90,8 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                   controller: _subjectController,
                   decoration: InputDecoration(
                     hintText: "What do you need help with?",
-                    hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+                    hintStyle:
+                        GoogleFonts.inter(fontSize: 14, color: Colors.grey),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -100,12 +101,11 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
                     ),
                   ),
-                  validator: (value) => 
-                    (value == null || value.isEmpty) ? "Subject is required" : null,
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? "Subject is required"
+                      : null,
                 ),
-                
                 const SizedBox(height: 20),
-                
                 Text(
                   "Priority",
                   style: GoogleFonts.inter(
@@ -127,15 +127,15 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
                     ),
                   ),
-                  items: ['low', 'medium', 'high'].map((p) => DropdownMenuItem(
-                    value: p,
-                    child: Text(p[0].toUpperCase() + p.substring(1)),
-                  )).toList(),
+                  items: ['low', 'medium', 'high']
+                      .map((p) => DropdownMenuItem(
+                            value: p,
+                            child: Text(p[0].toUpperCase() + p.substring(1)),
+                          ))
+                      .toList(),
                   onChanged: (val) => setState(() => _priority = val!),
                 ),
-                
                 const SizedBox(height: 20),
-                
                 Text(
                   "Initial Message *",
                   style: GoogleFonts.inter(
@@ -150,7 +150,8 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                   maxLines: 4,
                   decoration: InputDecoration(
                     hintText: "Describe your issue in detail...",
-                    hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+                    hintStyle:
+                        GoogleFonts.inter(fontSize: 14, color: Colors.grey),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -160,12 +161,11 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
                     ),
                   ),
-                  validator: (value) => 
-                    (value == null || value.isEmpty) ? "Message is required" : null,
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? "Message is required"
+                      : null,
                 ),
-                
                 const SizedBox(height: 30),
-                
                 Row(
                   children: [
                     Expanded(
@@ -174,15 +174,15 @@ class _CreateTicketBottomSheetState extends State<CreateTicketBottomSheet> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             context.read<TicketsBloc>().add(CreateTicketEvent(
-                              subject: _subjectController.text,
-                              priority: _priority,
-                              message: _messageController.text,
-                            ));
+                                  subject: _subjectController.text,
+                                  priority: _priority,
+                                  message: _messageController.text,
+                                ));
                             Navigator.pop(context);
                           }
                         },
-                        icon: const Icon(Icons.confirmation_number_outlined, 
-                          color: Colors.white, size: 18),
+                        icon: const Icon(Icons.confirmation_number_outlined,
+                            color: Colors.white, size: 18),
                         label: Text(
                           "Create Ticket",
                           style: GoogleFonts.inter(

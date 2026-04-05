@@ -16,23 +16,26 @@ class AmbulanceModel extends AmbulanceEntity {
     String parsedName = 'Unknown';
     String parsedAmbulanceType = 'Unknown';
     String parsedTabletId = '';
-    
+
     if (json['tablets'] is Map<String, dynamic>) {
       parsedName = json['tablets']['name'] ?? 'Unknown';
       parsedAmbulanceType = json['tablets']['ambulancetype'] ?? 'Unknown';
       parsedTabletId = json['tablets']['_id'] ?? '';
-    } else if (json['tablets'] is List && (json['tablets'] as List).isNotEmpty) {
+    } else if (json['tablets'] is List &&
+        (json['tablets'] as List).isNotEmpty) {
       final tList = json['tablets'] as List;
       if (tList[0] is Map) {
-         parsedName = tList[0]['name'] ?? 'Unknown';
-         parsedAmbulanceType = tList[0]['ambulancetype'] ?? 'Unknown';
-         parsedTabletId = tList[0]['_id'] ?? '';
+        parsedName = tList[0]['name'] ?? 'Unknown';
+        parsedAmbulanceType = tList[0]['ambulancetype'] ?? 'Unknown';
+        parsedTabletId = tList[0]['_id'] ?? '';
       }
     }
 
     List<AmbulanceFacilityEntity> facilitiesList = [];
     if (json['facilitiesDetails'] is List) {
-      facilitiesList = (json['facilitiesDetails'] as List).map((e) => AmbulanceFacilityModel.fromJson(e)).toList();
+      facilitiesList = (json['facilitiesDetails'] as List)
+          .map((e) => AmbulanceFacilityModel.fromJson(e))
+          .toList();
     }
 
     return AmbulanceModel(

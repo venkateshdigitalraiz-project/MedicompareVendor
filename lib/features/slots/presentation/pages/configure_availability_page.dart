@@ -13,7 +13,8 @@ class ConfigureAvailabilityPage extends StatefulWidget {
   const ConfigureAvailabilityPage({super.key, required this.timing});
 
   @override
-  State<ConfigureAvailabilityPage> createState() => _ConfigureAvailabilityPageState();
+  State<ConfigureAvailabilityPage> createState() =>
+      _ConfigureAvailabilityPageState();
 }
 
 class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
@@ -23,19 +24,25 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
   void initState() {
     super.initState();
     // Create a mutable copy of the availability list
-    _tempAvailability = widget.timing.availability.map((e) => DayAvailabilityEntity(
-      day: e.day,
-      isOpen: e.isOpen,
-      startTime: e.startTime,
-      endTime: e.endTime,
-      id: e.id,
-    )).toList();
+    _tempAvailability = widget.timing.availability
+        .map((e) => DayAvailabilityEntity(
+              day: e.day,
+              isOpen: e.isOpen,
+              startTime: e.startTime,
+              endTime: e.endTime,
+              id: e.id,
+            ))
+        .toList();
   }
 
-  Future<void> _selectTime(BuildContext context, int index, bool isStartTime) async {
-    final currentTime = isStartTime ? _tempAvailability[index].startTime : _tempAvailability[index].endTime;
+  Future<void> _selectTime(
+      BuildContext context, int index, bool isStartTime) async {
+    final currentTime = isStartTime
+        ? _tempAvailability[index].startTime
+        : _tempAvailability[index].endTime;
     final parts = currentTime.split(':');
-    final initialTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    final initialTime =
+        TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -45,7 +52,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
           data: ThemeData.light().copyWith(
             primaryColor: AppColors.primary,
             colorScheme: const ColorScheme.light(primary: AppColors.primary),
-            buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
         );
@@ -54,7 +62,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
 
     if (picked != null) {
       setState(() {
-        final formattedTime = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+        final formattedTime =
+            "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
         final current = _tempAvailability[index];
         _tempAvailability[index] = DayAvailabilityEntity(
           day: current.day,
@@ -117,7 +126,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
             const Divider(height: 1),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: _tempAvailability.length,
                 itemBuilder: (context, index) {
                   return _buildAvailabilityRow(index);
@@ -174,12 +184,17 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: item.isOpen ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    color: item.isOpen
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: item.isOpen ? Colors.green.withOpacity(0.5) : Colors.red.withOpacity(0.5),
+                      color: item.isOpen
+                          ? Colors.green.withOpacity(0.5)
+                          : Colors.red.withOpacity(0.5),
                     ),
                   ),
                   child: Row(
@@ -238,7 +253,10 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 9, color: Colors.grey[600], fontWeight: FontWeight.bold),
+          style: GoogleFonts.inter(
+              fontSize: 9,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         InkWell(
@@ -254,7 +272,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
               children: [
                 Text(
                   time,
-                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                  style: GoogleFonts.inter(
+                      fontSize: 13, fontWeight: FontWeight.w600),
                 ),
                 Icon(Icons.access_time, size: 16, color: Colors.grey[400]),
               ],
@@ -285,7 +304,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 "Discard Changes",
-                style: GoogleFonts.inter(color: Colors.grey[600], fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(
+                    color: Colors.grey[600], fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -296,29 +316,37 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
               builder: (context, state) {
                 final isLoading = state is SlotsLoading;
                 return ElevatedButton(
-                  onPressed: isLoading ? null : () {
-                    final updatedEntity = SlotTimingEntity(
-                      id: widget.timing.id,
-                      vendorId: widget.timing.vendorId,
-                      availability: _tempAvailability,
-                      updatedAt: DateTime.now(),
-                    );
-                    context.read<SlotsBloc>().add(UpdateSlotTimingsEvent(
-                      id: widget.timing.id,
-                      entity: updatedEntity,
-                    ));
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          final updatedEntity = SlotTimingEntity(
+                            id: widget.timing.id,
+                            vendorId: widget.timing.vendorId,
+                            availability: _tempAvailability,
+                            updatedAt: DateTime.now(),
+                          );
+                          context.read<SlotsBloc>().add(UpdateSlotTimingsEvent(
+                                id: widget.timing.id,
+                                entity: updatedEntity,
+                              ));
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: isLoading 
-                    ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text(
-                        "Save Timing Settings",
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : Text(
+                          "Save Timing Settings",
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
                 );
               },
             ),

@@ -4,7 +4,8 @@ import 'medical_equipment_event.dart';
 import 'medical_equipment_state.dart';
 import '../../data/models/medical_equipment_model.dart';
 
-class MedicalEquipmentBloc extends Bloc<MedicalEquipmentEvent, MedicalEquipmentState> {
+class MedicalEquipmentBloc
+    extends Bloc<MedicalEquipmentEvent, MedicalEquipmentState> {
   final MedicalEquipmentService service;
 
   MedicalEquipmentBloc(this.service) : super(MedicalEquipmentInitial()) {
@@ -14,8 +15,8 @@ class MedicalEquipmentBloc extends Bloc<MedicalEquipmentEvent, MedicalEquipmentS
     on<SearchMedicalEquipmentEvent>(_onSearch);
   }
 
-  Future<void> _onLoadCategories(
-      LoadMedicalEquipmentCategoriesEvent event, Emitter<MedicalEquipmentState> emit) async {
+  Future<void> _onLoadCategories(LoadMedicalEquipmentCategoriesEvent event,
+      Emitter<MedicalEquipmentState> emit) async {
     emit(MedicalEquipmentLoading());
     try {
       final categories = await service.getCategories();
@@ -26,8 +27,8 @@ class MedicalEquipmentBloc extends Bloc<MedicalEquipmentEvent, MedicalEquipmentS
     }
   }
 
-  Future<void> _onLoadList(
-      LoadMedicalEquipmentListEvent event, Emitter<MedicalEquipmentState> emit) async {
+  Future<void> _onLoadList(LoadMedicalEquipmentListEvent event,
+      Emitter<MedicalEquipmentState> emit) async {
     final currentState = state;
     if (currentState is MedicalEquipmentLoaded) {
       try {
@@ -54,7 +55,8 @@ class MedicalEquipmentBloc extends Bloc<MedicalEquipmentEvent, MedicalEquipmentS
           );
           emit(currentState.copyWith(
             response: response,
-            selectedCategoryId: event.categoryId ?? currentState.selectedCategoryId,
+            selectedCategoryId:
+                event.categoryId ?? currentState.selectedCategoryId,
             searchQuery: event.search ?? currentState.searchQuery,
           ));
         }
@@ -64,8 +66,8 @@ class MedicalEquipmentBloc extends Bloc<MedicalEquipmentEvent, MedicalEquipmentS
     }
   }
 
-  Future<void> _onSelectCategory(
-      SelectMedicalEquipmentCategoryEvent event, Emitter<MedicalEquipmentState> emit) async {
+  Future<void> _onSelectCategory(SelectMedicalEquipmentCategoryEvent event,
+      Emitter<MedicalEquipmentState> emit) async {
     final currentState = state;
     if (currentState is MedicalEquipmentLoaded) {
       emit(MedicalEquipmentLoading());
@@ -85,7 +87,8 @@ class MedicalEquipmentBloc extends Bloc<MedicalEquipmentEvent, MedicalEquipmentS
     }
   }
 
-  Future<void> _onSearch(SearchMedicalEquipmentEvent event, Emitter<MedicalEquipmentState> emit) async {
+  Future<void> _onSearch(SearchMedicalEquipmentEvent event,
+      Emitter<MedicalEquipmentState> emit) async {
     final currentState = state;
     if (currentState is MedicalEquipmentLoaded) {
       try {

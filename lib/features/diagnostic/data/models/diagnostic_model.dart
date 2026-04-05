@@ -113,8 +113,18 @@ class DiagnosticDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-        id, name, description, precaution, preparationInstructions,
-        sideEffects, bodyPart, isContrast, reportsDuration, gender, files, subcategory
+        id,
+        name,
+        description,
+        precaution,
+        preparationInstructions,
+        sideEffects,
+        bodyPart,
+        isContrast,
+        reportsDuration,
+        gender,
+        files,
+        subcategory
       ];
 }
 
@@ -123,7 +133,8 @@ class DiagnosticSubcategory extends Equatable {
   final String name;
   final String? description;
 
-  const DiagnosticSubcategory({required this.id, required this.name, this.description});
+  const DiagnosticSubcategory(
+      {required this.id, required this.name, this.description});
 
   factory DiagnosticSubcategory.fromJson(Map<String, dynamic> json) {
     return DiagnosticSubcategory(
@@ -171,7 +182,9 @@ class DiagnosticResponse extends Equatable {
 
   factory DiagnosticResponse.fromJson(Map<String, dynamic> json) {
     return DiagnosticResponse(
-      list: (json['list'] as List? ?? []).map((i) => DiagnosticItem.fromJson(i)).toList(),
+      list: (json['list'] as List? ?? [])
+          .map((i) => DiagnosticItem.fromJson(i))
+          .toList(),
       pagination: DiagnosticPagination.fromJson(json['pagination'] ?? {}),
     );
   }
@@ -220,5 +233,6 @@ class DiagnosticDropdownItem extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, subcategoryId, bodyPart, isContrast, reportsDuration];
+  List<Object?> get props =>
+      [id, name, subcategoryId, bodyPart, isContrast, reportsDuration];
 }

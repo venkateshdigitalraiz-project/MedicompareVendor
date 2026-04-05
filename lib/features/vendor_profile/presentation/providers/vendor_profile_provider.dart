@@ -39,8 +39,9 @@ class VendorProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_vendor == null) throw Exception("Session expired. Please login again.");
-      
+      if (_vendor == null)
+        throw Exception("Session expired. Please login again.");
+
       _vendor = await updateStepOneUseCase.call(
         token: _vendor!.token,
         proofType: proofType,
@@ -76,7 +77,8 @@ class VendorProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_vendor == null) throw Exception("Session expired. Please login again.");
+      if (_vendor == null)
+        throw Exception("Session expired. Please login again.");
 
       _vendor = await updateStepTwoUseCase.call(
         token: _vendor!.token,

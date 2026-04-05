@@ -82,7 +82,8 @@ class DentalServiceSubcategory {
   final String name;
   final String? description;
 
-  DentalServiceSubcategory({required this.id, required this.name, this.description});
+  DentalServiceSubcategory(
+      {required this.id, required this.name, this.description});
 
   factory DentalServiceSubcategory.fromJson(Map<String, dynamic> json) {
     return DentalServiceSubcategory(

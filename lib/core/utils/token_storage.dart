@@ -28,7 +28,8 @@ class TokenStorage {
     return prefs.getString(_vendorIdKey);
   }
 
-  static Future<void> saveCredentials(String email, String password, bool remember) async {
+  static Future<void> saveCredentials(
+      String email, String password, bool remember) async {
     final prefs = await SharedPreferences.getInstance();
     if (remember) {
       await prefs.setBool(_rememberMeKey, true);

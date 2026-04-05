@@ -29,7 +29,8 @@ class VendorProfileRepositoryImpl implements VendorProfileRepository {
         responseModel.data != null &&
         responseModel.data!.user != null) {
       final newToken = responseModel.data!.token;
-      return responseModel.data!.user!.toEntity(newToken.isEmpty ? token : newToken);
+      return responseModel.data!.user!
+          .toEntity(newToken.isEmpty ? token : newToken);
     } else {
       throw Exception(responseModel.message);
     }
@@ -64,7 +65,8 @@ class VendorProfileRepositoryImpl implements VendorProfileRepository {
         responseModel.data != null &&
         responseModel.data!.user != null) {
       final newToken = responseModel.data!.token;
-      return responseModel.data!.user!.toEntity(newToken.isEmpty ? token : newToken);
+      return responseModel.data!.user!
+          .toEntity(newToken.isEmpty ? token : newToken);
     } else {
       throw Exception(responseModel.message);
     }

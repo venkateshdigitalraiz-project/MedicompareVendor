@@ -23,17 +23,19 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       } else {
         emit(OrdersLoading());
       }
-      
+
       try {
         final result = await getOrdersUseCase.call(
           page: event.page,
           limit: event.limit,
           status: event.status,
           search: event.search,
+          orderType: event.orderType,
         );
-        
+
         if (event.isLoadMore && currentState is OrdersLoaded) {
-          final updatedOrders = currentState.ordersList.orderItems + result.orderItems;
+          final updatedOrders =
+              currentState.ordersList.orderItems + result.orderItems;
           emit(OrdersLoaded(
             OrdersListEntity(
               orderItems: updatedOrders,

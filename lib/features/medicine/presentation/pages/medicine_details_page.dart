@@ -133,7 +133,8 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                                     decoration: BoxDecoration(
                                       color: Colors.red[50],
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.red[100]!),
+                                      border:
+                                          Border.all(color: Colors.red[100]!),
                                     ),
                                     child: Text(
                                       "Out of Stock",

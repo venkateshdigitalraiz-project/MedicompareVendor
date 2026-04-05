@@ -2,7 +2,8 @@ import 'package:equatable/equatable.dart';
 
 abstract class AmbulanceOrdersEvent extends Equatable {
   const AmbulanceOrdersEvent();
-  @override List<Object?> get props => [];
+  @override
+  List<Object?> get props => [];
 }
 
 class LoadAmbulanceOrdersEvent extends AmbulanceOrdersEvent {
@@ -18,11 +19,13 @@ class LoadAmbulanceOrdersEvent extends AmbulanceOrdersEvent {
     this.search = '',
     this.isLoadMore = false,
   });
-  @override List<Object?> get props => [page, limit, status, search, isLoadMore];
+  @override
+  List<Object?> get props => [page, limit, status, search, isLoadMore];
 }
 
 class LoadAmbulanceOrderDetailsEvent extends AmbulanceOrdersEvent {
   final String id;
   const LoadAmbulanceOrderDetailsEvent(this.id);
-  @override List<Object?> get props => [id];
+  @override
+  List<Object?> get props => [id];
 }

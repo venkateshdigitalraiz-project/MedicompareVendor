@@ -25,7 +25,8 @@ class LabTestPackageLoaded extends LabTestPackageState {
   });
 
   @override
-  List<Object?> get props => [response, isLoadingMore, searchQuery, selectedLabTestId];
+  List<Object?> get props =>
+      [response, isLoadingMore, searchQuery, selectedLabTestId];
 
   LabTestPackageLoaded copyWith({
     LabTestPackageResponse? response,

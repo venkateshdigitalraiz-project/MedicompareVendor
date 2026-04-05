@@ -26,17 +26,23 @@ class PincodesPage extends StatelessWidget {
         }
         if (state is PincodeCreated) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Pincode added successfully!"), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text("Pincode added successfully!"),
+                backgroundColor: Colors.green),
           );
         }
         if (state is PincodeUpdated) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Pincode updated successfully!"), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text("Pincode updated successfully!"),
+                backgroundColor: Colors.green),
           );
         }
         if (state is PincodeDeleted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Pincode deleted successfully!"), backgroundColor: Colors.green),
+            const SnackBar(
+                content: Text("Pincode deleted successfully!"),
+                backgroundColor: Colors.green),
           );
         }
         if (state is PincodeOperationError) {
@@ -78,7 +84,8 @@ class PincodesPage extends StatelessWidget {
             Text(state.message, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.read<PincodesBloc>().add(GetPincodesEvent()),
+              onPressed: () =>
+                  context.read<PincodesBloc>().add(GetPincodesEvent()),
               child: const Text("Retry"),
             ),
           ],
@@ -138,7 +145,8 @@ class PincodesPage extends StatelessWidget {
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.location_on, color: AppColors.primary, size: 24),
+                child:
+                    Icon(Icons.location_on, color: AppColors.primary, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -157,7 +165,8 @@ class PincodesPage extends StatelessWidget {
                       "Status: ${item.status}",
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: item.status == 'active' ? Colors.green : Colors.red,
+                        color:
+                            item.status == 'active' ? Colors.green : Colors.red,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -167,12 +176,15 @@ class PincodesPage extends StatelessWidget {
               Row(
                 children: [
                   IconButton(
-                    onPressed: () => _showAddEditDropdown(context, pincode: item),
-                    icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                    onPressed: () =>
+                        _showAddEditDropdown(context, pincode: item),
+                    icon: const Icon(Icons.edit_outlined,
+                        color: Colors.blue, size: 20),
                   ),
                   IconButton(
                     onPressed: () => _showDeleteConfirmation(context, item),
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                    icon: const Icon(Icons.delete_outline,
+                        color: Colors.red, size: 20),
                   ),
                 ],
               ),
@@ -208,9 +220,12 @@ class PincodesPage extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: item.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                  color: item.status == 'active'
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.red.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -229,7 +244,8 @@ class PincodesPage extends StatelessWidget {
     );
   }
 
-  void _showAddEditDropdown(BuildContext context, {PincodeDataEntity? pincode}) {
+  void _showAddEditDropdown(BuildContext context,
+      {PincodeDataEntity? pincode}) {
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -246,20 +262,28 @@ class PincodesPage extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text("Delete Pincode", style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-          content: Text("Are you sure you want to delete pincode ${item.pincode.name}?"),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text("Delete Pincode",
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          content: Text(
+              "Are you sure you want to delete pincode ${item.pincode.name}?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey)),
+              child:
+                  Text("Cancel", style: GoogleFonts.inter(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
-                context.read<PincodesBloc>().add(DeletePincodeEvent(id: item.id));
+                context
+                    .read<PincodesBloc>()
+                    .add(DeletePincodeEvent(id: item.id));
                 Navigator.pop(dialogContext);
               },
-              child: Text("Delete", style: GoogleFonts.inter(color: Colors.red, fontWeight: FontWeight.bold)),
+              child: Text("Delete",
+                  style: GoogleFonts.inter(
+                      color: Colors.red, fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -284,8 +308,10 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
   @override
   void initState() {
     super.initState();
-    _pincodeController = TextEditingController(text: widget.pincode?.pincode.name ?? '');
-    _deliveryController = TextEditingController(text: widget.pincode?.estimatedDelivery ?? '');
+    _pincodeController =
+        TextEditingController(text: widget.pincode?.pincode.name ?? '');
+    _deliveryController =
+        TextEditingController(text: widget.pincode?.estimatedDelivery ?? '');
     _status = widget.pincode?.status ?? 'active';
   }
 
@@ -319,9 +345,11 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
             const SizedBox(height: 16),
             _buildFieldLabel("Pincode *", Icons.location_on_outlined),
             const SizedBox(height: 8),
-            _buildTextField(_pincodeController, "Enter Pincode", readOnly: isEdit),
+            _buildTextField(_pincodeController, "Enter Pincode",
+                readOnly: isEdit),
             const SizedBox(height: 16),
-            _buildFieldLabel("Estimated Delivery *", Icons.local_shipping_outlined),
+            _buildFieldLabel(
+                "Estimated Delivery *", Icons.local_shipping_outlined),
             const SizedBox(height: 8),
             _buildTextField(_deliveryController, "e.g. Within 2 Days"),
             const SizedBox(height: 16),
@@ -346,21 +374,21 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
                         _deliveryController.text.isNotEmpty) {
                       if (isEdit) {
                         context.read<PincodesBloc>().add(
-                          UpdatePincodeEvent(
-                            id: widget.pincode!.id,
-                            pincode: _pincodeController.text,
-                            estimatedDelivery: _deliveryController.text,
-                            status: _status,
-                          ),
-                        );
+                              UpdatePincodeEvent(
+                                id: widget.pincode!.id,
+                                pincode: _pincodeController.text,
+                                estimatedDelivery: _deliveryController.text,
+                                status: _status,
+                              ),
+                            );
                       } else {
                         context.read<PincodesBloc>().add(
-                          CreatePincodeEvent(
-                            pincode: _pincodeController.text,
-                            estimatedDelivery: _deliveryController.text,
-                            status: _status,
-                          ),
-                        );
+                              CreatePincodeEvent(
+                                pincode: _pincodeController.text,
+                                estimatedDelivery: _deliveryController.text,
+                                status: _status,
+                              ),
+                            );
                       }
                       Navigator.pop(context);
                     }
@@ -373,7 +401,8 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
                   ),
                   child: Text(
                     "Save",
-                    style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.inter(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -401,7 +430,8 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, {bool readOnly = false}) {
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {bool readOnly = false}) {
     return TextField(
       controller: controller,
       readOnly: readOnly,
@@ -410,7 +440,8 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
         fillColor: readOnly ? Colors.grey[100] : null,
         hintText: hint,
         hintStyle: GoogleFonts.inter(fontSize: 13, color: Colors.grey[400]),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.grey[300]!),

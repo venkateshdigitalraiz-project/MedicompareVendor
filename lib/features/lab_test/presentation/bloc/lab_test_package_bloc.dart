@@ -5,7 +5,8 @@ import '../../data/models/lab_test_package_model.dart';
 import 'lab_test_package_event.dart';
 import 'lab_test_package_state.dart';
 
-class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> {
+class LabTestPackageBloc
+    extends Bloc<LabTestPackageEvent, LabTestPackageState> {
   final LabTestService _labTestService;
 
   LabTestPackageBloc(this._labTestService) : super(LabTestPackageInitial()) {
@@ -14,9 +15,10 @@ class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> 
     on<SelectLabTestForPackageFilterEvent>(_onSelectLabTest);
   }
 
-  Future<void> _onLoadPackages(LoadLabTestPackagesEvent event, Emitter<LabTestPackageState> emit) async {
+  Future<void> _onLoadPackages(
+      LoadLabTestPackagesEvent event, Emitter<LabTestPackageState> emit) async {
     final currentState = state;
-    
+
     if (currentState is LabTestPackageInitial) {
       emit(LabTestPackageLoading());
     } else if (currentState is LabTestPackageLoaded) {
@@ -24,7 +26,7 @@ class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> 
         emit(currentState.copyWith(isLoadingMore: true));
       }
     } else {
-       if (!event.isLoadMore) emit(LabTestPackageLoading());
+      if (!event.isLoadMore) emit(LabTestPackageLoading());
     }
 
     try {
@@ -38,7 +40,8 @@ class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> 
         final currentLoaded = state as LabTestPackageLoaded;
         final newList = [...currentLoaded.response.list, ...response.list];
         emit(currentLoaded.copyWith(
-          response: response.copyWith(list: newList), // Assuming copyWith exists or just manually
+          response: response.copyWith(
+              list: newList), // Assuming copyWith exists or just manually
           isLoadingMore: false,
           searchQuery: event.search,
           selectedLabTestId: event.labTestId,
@@ -55,9 +58,9 @@ class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> 
       if (errorMessage.contains('No packages found') && !event.isLoadMore) {
         emit(LabTestPackageLoaded(
           response: const LabTestPackageResponse(
-            list: [], 
-            pagination: LabTestPagination(page: 1, limit: 10, total: 0, totalPages: 0)
-          ),
+              list: [],
+              pagination: LabTestPagination(
+                  page: 1, limit: 10, total: 0, totalPages: 0)),
           searchQuery: event.search,
           selectedLabTestId: event.labTestId,
         ));
@@ -71,19 +74,22 @@ class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> 
     }
   }
 
-  Future<void> _onSearchPackages(SearchLabTestPackagesEvent event, Emitter<LabTestPackageState> emit) async {
-     final currentState = state;
-     if (currentState is LabTestPackageLoaded) {
-       add(LoadLabTestPackagesEvent(
-         search: event.query,
-         labTestId: currentState.selectedLabTestId,
-       ));
-     } else if (currentState is LabTestPackageInitial || currentState is LabTestPackageError) {
-        add(LoadLabTestPackagesEvent(search: event.query));
-     }
+  Future<void> _onSearchPackages(SearchLabTestPackagesEvent event,
+      Emitter<LabTestPackageState> emit) async {
+    final currentState = state;
+    if (currentState is LabTestPackageLoaded) {
+      add(LoadLabTestPackagesEvent(
+        search: event.query,
+        labTestId: currentState.selectedLabTestId,
+      ));
+    } else if (currentState is LabTestPackageInitial ||
+        currentState is LabTestPackageError) {
+      add(LoadLabTestPackagesEvent(search: event.query));
+    }
   }
 
-  Future<void> _onSelectLabTest(SelectLabTestForPackageFilterEvent event, Emitter<LabTestPackageState> emit) async {
+  Future<void> _onSelectLabTest(SelectLabTestForPackageFilterEvent event,
+      Emitter<LabTestPackageState> emit) async {
     final currentState = state;
     if (currentState is LabTestPackageLoaded) {
       add(LoadLabTestPackagesEvent(
@@ -91,7 +97,7 @@ class LabTestPackageBloc extends Bloc<LabTestPackageEvent, LabTestPackageState> 
         labTestId: event.labTestId,
       ));
     } else {
-       add(LoadLabTestPackagesEvent(labTestId: event.labTestId));
+      add(LoadLabTestPackagesEvent(labTestId: event.labTestId));
     }
   }
 }

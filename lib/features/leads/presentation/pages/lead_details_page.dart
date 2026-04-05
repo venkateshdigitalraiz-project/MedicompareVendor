@@ -71,7 +71,8 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
                 children: [
                   _buildTopBanner(lead),
                   const SizedBox(height: 24),
-                  _buildSectionHeader("Personal Information", Icons.person_outline),
+                  _buildSectionHeader(
+                      "Personal Information", Icons.person_outline),
                   const SizedBox(height: 12),
                   _buildPersonalInformationGrid(lead),
                   const SizedBox(height: 24),
@@ -109,7 +110,8 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.person_outline, color: Colors.white, size: 30),
+            child:
+                const Icon(Icons.person_outline, color: Colors.white, size: 30),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -191,17 +193,28 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
           crossAxisSpacing: 12,
           childAspectRatio: 2.2,
           children: [
-            _buildInfoCard("Full Name", lead.name, Icons.person_outline, Colors.blue),
-            _buildInfoCard("Phone Number", lead.phone, Icons.phone_outlined, Colors.green),
-            _buildInfoCard("Age", "${lead.age} years", Icons.calendar_today_outlined, Colors.orange),
+            _buildInfoCard(
+                "Full Name", lead.name, Icons.person_outline, Colors.blue),
+            _buildInfoCard(
+                "Phone Number", lead.phone, Icons.phone_outlined, Colors.green),
+            _buildInfoCard("Age", "${lead.age} years",
+                Icons.calendar_today_outlined, Colors.orange),
             _buildInfoCard("Gender", lead.gender, Icons.person, Colors.teal),
-            _buildInfoCard("Lead Type", lead.leadType, Icons.local_offer_outlined, Colors.indigo),
-            _buildInfoCard("Vendor Assignment", lead.vendorAssigned, Icons.check_circle_outline, Colors.purple),
-            _buildInfoCard("Vendor Permission", lead.vendorPermission, Icons.verified_user_outlined, Colors.blueAccent),
+            _buildInfoCard("Lead Type", lead.leadType,
+                Icons.local_offer_outlined, Colors.indigo),
+            _buildInfoCard("Vendor Assignment", lead.vendorAssigned,
+                Icons.check_circle_outline, Colors.purple),
+            _buildInfoCard("Vendor Permission", lead.vendorPermission,
+                Icons.verified_user_outlined, Colors.blueAccent),
             if (lead.date != null)
-              _buildInfoCard("Preferred Date", DateFormat('MMM d, yyyy').format(lead.date!), Icons.date_range_outlined, AppColors.primary),
+              _buildInfoCard(
+                  "Preferred Date",
+                  DateFormat('MMM d, yyyy').format(lead.date!),
+                  Icons.date_range_outlined,
+                  AppColors.primary),
             if (lead.address != null && lead.address!.isNotEmpty)
-              _buildInfoCard("Address", lead.address!, Icons.location_on_outlined, Colors.amber),
+              _buildInfoCard("Address", lead.address!,
+                  Icons.location_on_outlined, Colors.amber),
           ],
         );
       },
@@ -221,15 +234,18 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
           childAspectRatio: 2.2,
           children: [
             _buildPriceCard(lead),
-            _buildInfoCard("Service Name", lead.serviceName, Icons.medical_services_outlined, Colors.indigo),
-            _buildInfoCard("Duration", lead.duration, Icons.timer_outlined, Colors.blue),
+            _buildInfoCard("Service Name", lead.serviceName,
+                Icons.medical_services_outlined, Colors.indigo),
+            _buildInfoCard(
+                "Duration", lead.duration, Icons.timer_outlined, Colors.blue),
           ],
         );
       },
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon, Color iconBgColor) {
+  Widget _buildInfoCard(
+      String title, String value, IconData icon, Color iconBgColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -289,7 +305,8 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
   }
 
   Widget _buildPriceCard(LeadDetailsEntity lead) {
-    final hasDiscount = lead.discountPrice > 0 && lead.discountPrice < lead.price;
+    final hasDiscount =
+        lead.discountPrice > 0 && lead.discountPrice < lead.price;
     final finalPrice = hasDiscount ? lead.discountPrice : lead.price;
 
     return Container(
@@ -314,7 +331,8 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
               color: Colors.green.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.currency_rupee, size: 16, color: Colors.green),
+            child:
+                const Icon(Icons.currency_rupee, size: 16, color: Colors.green),
           ),
           const SizedBox(width: 12),
           Expanded(

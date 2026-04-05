@@ -42,11 +42,12 @@ class AmbulanceCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   color: Colors.blue[50],
-                  child: const Icon(Icons.airport_shuttle_outlined, color: Colors.blue, size: 30),
+                  child: const Icon(Icons.airport_shuttle_outlined,
+                      color: Colors.blue, size: 30),
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Text Content
               Expanded(
                 child: Column(
@@ -86,12 +87,12 @@ class AmbulanceCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Action Buttons & Price
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                   Row(
+                  Row(
                     children: [
                       _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
                       const SizedBox(width: 8),
@@ -102,7 +103,8 @@ class AmbulanceCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (item.discountPrice > 0 && item.discountPrice < item.price)
+                      if (item.discountPrice > 0 &&
+                          item.discountPrice < item.price)
                         Text(
                           "₹${item.price.toInt()}",
                           style: GoogleFonts.inter(

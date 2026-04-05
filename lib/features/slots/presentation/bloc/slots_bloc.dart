@@ -25,7 +25,8 @@ class SlotsBloc extends Bloc<SlotsEvent, SlotsState> {
     on<UpdateSlotTimingsEvent>((event, emit) async {
       emit(SlotsLoading());
       try {
-        final updatedTiming = await updateSlotTimingsUseCase(event.id, event.entity);
+        final updatedTiming =
+            await updateSlotTimingsUseCase(event.id, event.entity);
         emit(SlotsUpdated(timing: updatedTiming));
         // Refresh the list after update
         add(GetSlotTimingsEvent());

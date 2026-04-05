@@ -22,7 +22,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -53,7 +54,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         if (result['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message'] ?? "Password changed successfully"),
+              content:
+                  Text(result['message'] ?? "Password changed successfully"),
               backgroundColor: Colors.green,
             ),
           );
@@ -143,48 +145,50 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
               _buildPasswordField(
                 label: "Current Password",
                 hint: "Enter current password",
                 controller: _oldPasswordController,
                 isVisible: _isOldPasswordVisible,
-                onToggle: () => setState(() => _isOldPasswordVisible = !_isOldPasswordVisible),
+                onToggle: () => setState(
+                    () => _isOldPasswordVisible = !_isOldPasswordVisible),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return "Current password is required";
+                  if (value == null || value.isEmpty)
+                    return "Current password is required";
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              
               _buildPasswordField(
                 label: "New Password",
                 hint: "Enter new password",
                 controller: _newPasswordController,
                 isVisible: _isNewPasswordVisible,
-                onToggle: () => setState(() => _isNewPasswordVisible = !_isNewPasswordVisible),
+                onToggle: () => setState(
+                    () => _isNewPasswordVisible = !_isNewPasswordVisible),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return "New password is required";
-                  if (value.length < 6) return "Password must be at least 6 characters";
+                  if (value == null || value.isEmpty)
+                    return "New password is required";
+                  if (value.length < 6)
+                    return "Password must be at least 6 characters";
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-
               _buildPasswordField(
                 label: "Confirm New Password",
                 hint: "Re-enter new password",
                 controller: _confirmPasswordController,
                 isVisible: _isConfirmPasswordVisible,
-                onToggle: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                onToggle: () => setState(() =>
+                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
                 validator: (value) {
-                  if (value != _newPasswordController.text) return "Passwords do not match";
+                  if (value != _newPasswordController.text)
+                    return "Passwords do not match";
                   return null;
                 },
               ),
-              
               const SizedBox(height: 48),
-              
               SizedBox(
                 width: double.infinity,
                 height: 54,
@@ -255,11 +259,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20, color: AppColors.primaryDark),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            prefixIcon: const Icon(Icons.lock_outline_rounded,
+                size: 20, color: AppColors.primaryDark),
             suffixIcon: IconButton(
               icon: Icon(
-                isVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                isVisible
+                    ? Icons.visibility_rounded
+                    : Icons.visibility_off_rounded,
                 size: 20,
                 color: Colors.grey[400],
               ),
@@ -275,7 +283,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.5),
+              borderSide:
+                  const BorderSide(color: AppColors.primaryDark, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

@@ -22,9 +22,10 @@ class BranchService {
         'search': search,
       };
 
-      final response = await _apiService.get(ApiEndpoints.branchList, queryParameters: queryParams);
+      final response = await _apiService.get(ApiEndpoints.branchList,
+          queryParameters: queryParams);
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return BranchListResponse.fromJson(body);
       }
@@ -34,29 +35,32 @@ class BranchService {
       throw ServerException(e.toString());
     }
   }
+
   Future<BranchDetailsResponse> getBranchDetails(String id) async {
     try {
       final response = await _apiService.get(ApiEndpoints.branchDetails(id));
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return BranchDetailsResponse.fromJson(body);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch branch details');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch branch details');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
     }
   }
 
-  Future<void> updateBranch(String id, Map<String, dynamic> data, {File? image}) async {
+  Future<void> updateBranch(String id, Map<String, dynamic> data,
+      {File? image}) async {
     try {
       if (image != null) {
         final Map<String, String> fields = {};
         data.forEach((key, value) {
           fields[key] = value.toString();
         });
-        
+
         final response = await _apiService.post(
           ApiEndpoints.updateBranch(id),
           fields: fields,
@@ -67,7 +71,8 @@ class BranchService {
           throw ServerException(body['message'] ?? 'Failed to update branch');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.updateBranch(id), body: data);
+        final response =
+            await _apiService.post(ApiEndpoints.updateBranch(id), body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
           throw ServerException(body['message'] ?? 'Failed to update branch');

@@ -22,7 +22,7 @@ class LabTestPackageCard extends StatelessWidget {
     final String name = package.name;
     final int testsCount = package.products.length;
     final String imageUrl = package.files.isNotEmpty ? package.files.first : "";
-    
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -37,7 +37,8 @@ class LabTestPackageCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // Center vertically since it's more like a list item
+            crossAxisAlignment: CrossAxisAlignment
+                .center, // Center vertically since it's more like a list item
             children: [
               // Package Image
               ClipRRect(
@@ -48,12 +49,13 @@ class LabTestPackageCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => _placeholderImage(),
+                        errorBuilder: (context, error, stackTrace) =>
+                            _placeholderImage(),
                       )
                     : _placeholderImage(),
               ),
               const SizedBox(width: 12),
-              
+
               // Text Content
               Expanded(
                 child: Column(
@@ -78,11 +80,11 @@ class LabTestPackageCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                     _statusBadge(package.status),
+                    _statusBadge(package.status),
                   ],
                 ),
               ),
-              
+
               // Action Buttons & Price
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,

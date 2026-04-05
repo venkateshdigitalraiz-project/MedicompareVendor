@@ -18,7 +18,8 @@ class PincodeDataModel extends PincodeDataEntity {
       pincodeId: json['pincodeId'] ?? '',
       estimatedDelivery: json['estimateddelivery'] ?? '',
       status: json['status'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       pincode: PincodeModel.fromJson(json['pincode'] ?? {}),
     );
   }

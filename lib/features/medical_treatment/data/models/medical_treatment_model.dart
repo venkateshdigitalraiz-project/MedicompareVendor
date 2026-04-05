@@ -88,7 +88,8 @@ class MedicalTreatmentSubcategory {
   final String name;
   final String? description;
 
-  MedicalTreatmentSubcategory({required this.id, required this.name, this.description});
+  MedicalTreatmentSubcategory(
+      {required this.id, required this.name, this.description});
 
   factory MedicalTreatmentSubcategory.fromJson(Map<String, dynamic> json) {
     return MedicalTreatmentSubcategory(

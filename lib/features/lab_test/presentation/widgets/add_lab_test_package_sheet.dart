@@ -13,7 +13,8 @@ class AddLabTestPackageSheet extends StatefulWidget {
   final VoidCallback onSuccess;
   final LabTestPackageItem? editItem;
 
-  const AddLabTestPackageSheet({super.key, required this.onSuccess, this.editItem});
+  const AddLabTestPackageSheet(
+      {super.key, required this.onSuccess, this.editItem});
 
   @override
   State<AddLabTestPackageSheet> createState() => _AddLabTestPackageSheetState();
@@ -21,16 +22,17 @@ class AddLabTestPackageSheet extends StatefulWidget {
 
 class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
   final _formKey = GlobalKey<FormState>();
-  final LabTestService _labTestService = LabTestInjection.provideLabTestService();
+  final LabTestService _labTestService =
+      LabTestInjection.provideLabTestService();
 
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
-  
+
   String _selectedStatus = 'active';
   File? _selectedImage;
-  
+
   List<LabTestDetails> _allLabTests = [];
   List<String> _selectedProductIds = [];
   bool _isLoading = false;
@@ -68,7 +70,9 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         });
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isFetchingTests = false);
     }
@@ -85,7 +89,9 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         });
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isFetchingTemplates = false);
     }
@@ -124,7 +130,8 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedProductIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select at least one lab test')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select at least one lab test')));
       return;
     }
 
@@ -140,16 +147,18 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
       };
 
       if (isEditMode) {
-        await _labTestService.updatePackage(widget.editItem!.id, payload, image: _selectedImage);
+        await _labTestService.updatePackage(widget.editItem!.id, payload,
+            image: _selectedImage);
       } else {
         await _labTestService.createPackage(payload, image: _selectedImage);
       }
-      
+
       widget.onSuccess();
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -172,18 +181,28 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                   Container(
+                  Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.science_outlined, color: AppColors.primary, size: 24),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFF5F3FF),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.science_outlined,
+                        color: AppColors.primary, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(isEditMode ? "Edit Package" : "Add New Package", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-                        Text("Fill in the details to add a lab test package to your system", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
+                        Text(isEditMode ? "Edit Package" : "Add New Package",
+                            style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E1B4B))),
+                        Text(
+                            "Fill in the details to add a lab test package to your system",
+                            style: GoogleFonts.inter(
+                                fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                   ),
@@ -194,11 +213,12 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                 ],
               ),
             ),
-            
+
             // Tabs (Custom vs Admin)
             if (!isEditMode)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
@@ -209,12 +229,14 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: _tabButton("Custom Package", Icons.add, !_isTemplatesMode, () {
+                        child: _tabButton(
+                            "Custom Package", Icons.add, !_isTemplatesMode, () {
                           setState(() => _isTemplatesMode = false);
                         }),
                       ),
                       Expanded(
-                        child: _tabButton("Admin Templates", Icons.science_outlined, _isTemplatesMode, () {
+                        child: _tabButton("Admin Templates",
+                            Icons.science_outlined, _isTemplatesMode, () {
                           setState(() => _isTemplatesMode = true);
                           _fetchAdminTemplates();
                         }),
@@ -224,8 +246,8 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                 ),
               ),
 
-             const Divider(height: 1),
-            
+            const Divider(height: 1),
+
             // Form Content
             Flexible(
               child: SingleChildScrollView(
@@ -243,127 +265,166 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
 
                       Text(
                         "Package Information",
-                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                        style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         "Please provide accurate information for the lab test package",
-                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.grey[500]),
                       ),
                       const SizedBox(height: 20),
 
                       Row(
                         children: [
-                           Expanded(
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 _buildLabel("Package Name", isRequired: true, icon: Icons.science_outlined),
-                                 const SizedBox(height: 8),
-                                 TextFormField(
-                                   controller: _nameController,
-                                   decoration: _inputDecoration(hint: "e.g. Health Checkup"),
-                                   validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
-                                 ),
-                               ],
-                             ),
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 _buildLabel("Price (₹)", isRequired: true, icon: Icons.currency_rupee),
-                                 const SizedBox(height: 8),
-                                 TextFormField(
-                                   controller: _priceController,
-                                   keyboardType: TextInputType.number,
-                                   decoration: _inputDecoration(hint: "0.00"),
-                                   validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
-                                 ),
-                               ],
-                             ),
-                           ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Package Name",
+                                    isRequired: true,
+                                    icon: Icons.science_outlined),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _nameController,
+                                  decoration: _inputDecoration(
+                                      hint: "e.g. Health Checkup"),
+                                  validator: (val) =>
+                                      (val == null || val.isEmpty)
+                                          ? "Required"
+                                          : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Price (₹)",
+                                    isRequired: true,
+                                    icon: Icons.currency_rupee),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _priceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _inputDecoration(hint: "0.00"),
+                                  validator: (val) =>
+                                      (val == null || val.isEmpty)
+                                          ? "Required"
+                                          : null,
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                           Expanded(
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 _buildLabel("Discount Price (₹)", isRequired: true, icon: Icons.currency_rupee),
-                                 const SizedBox(height: 8),
-                                  TextFormField(
-                                    controller: _discountController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: _inputDecoration(hint: "0.00"),
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) return "Required";
-                                      final discount = double.tryParse(val);
-                                      final price = double.tryParse(_priceController.text);
-                                      if (discount != null && price != null && discount > price) {
-                                        return "Must be <= price";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                               ],
-                             ),
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 _buildLabel("Status", isRequired: true, icon: Icons.show_chart),
-                                 const SizedBox(height: 8),
-                                  DropdownButtonFormField<String>(
-                                    value: _selectedStatus,
-                                    isExpanded: true,
-                                    items: [
-                                      DropdownMenuItem(value: 'active', child: Text("Active", style: GoogleFonts.inter(fontSize: 13))),
-                                      DropdownMenuItem(value: 'inactive', child: Text("Inactive", style: GoogleFonts.inter(fontSize: 13))),
-                                    ],
-                                    onChanged: (val) => setState(() => _selectedStatus = val!),
-                                    decoration: _inputDecoration(hint: "Select Status"),
-                                  ),
-                               ],
-                             ),
-                           ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Discount Price (₹)",
+                                    isRequired: true,
+                                    icon: Icons.currency_rupee),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _discountController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _inputDecoration(hint: "0.00"),
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty)
+                                      return "Required";
+                                    final discount = double.tryParse(val);
+                                    final price =
+                                        double.tryParse(_priceController.text);
+                                    if (discount != null &&
+                                        price != null &&
+                                        discount > price) {
+                                      return "Must be <= price";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Status",
+                                    isRequired: true, icon: Icons.show_chart),
+                                const SizedBox(height: 8),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedStatus,
+                                  isExpanded: true,
+                                  items: [
+                                    DropdownMenuItem(
+                                        value: 'active',
+                                        child: Text("Active",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                    DropdownMenuItem(
+                                        value: 'inactive',
+                                        child: Text("Inactive",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                  ],
+                                  onChanged: (val) =>
+                                      setState(() => _selectedStatus = val!),
+                                  decoration:
+                                      _inputDecoration(hint: "Select Status"),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      _buildLabel("Select Lab Tests", isRequired: true, icon: Icons.science_outlined),
+                      _buildLabel("Select Lab Tests",
+                          isRequired: true, icon: Icons.science_outlined),
                       const SizedBox(height: 8),
-                      _isFetchingTests 
-                          ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(strokeWidth: 2)))
+                      _isFetchingTests
+                          ? const Center(
+                              child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2)))
                           : _buildTestSelector(),
-                      
+
                       const SizedBox(height: 16),
-                      _buildLabel("Description", icon: Icons.description_outlined),
+                      _buildLabel("Description",
+                          icon: Icons.description_outlined),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _descriptionController,
                         maxLines: 2,
-                        decoration: _inputDecoration(hint: "Describe the lab test package..."),
+                        decoration: _inputDecoration(
+                            hint: "Describe the lab test package..."),
                       ),
-                      
+
                       const SizedBox(height: 16),
                       _buildLabel("Package Image", icon: Icons.image_outlined),
                       const SizedBox(height: 8),
                       _buildImagePicker(),
-                      
+
                       const SizedBox(height: 40),
                     ],
                   ),
                 ),
               ),
             ),
-            
+
             // Footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -374,23 +435,39 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                    TextButton(
+                  TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel", style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
-                   ),
-                   const SizedBox(width: 12),
-                   ElevatedButton.icon(
+                    child: Text("Cancel",
+                        style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: const Color(0xFF1E1B4B),
+                            fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
                       elevation: 0,
                     ),
                     onPressed: _isLoading ? null : _submit,
-                    icon: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.add, size: 18),
-                    label: Text(_isLoading ? "Saving..." : (isEditMode ? "Update Package" : "Add Package"), style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                   ),
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
+                        : const Icon(Icons.add, size: 18),
+                    label: Text(
+                        _isLoading
+                            ? "Saving..."
+                            : (isEditMode ? "Update Package" : "Add Package"),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                  ),
                 ],
               ),
             ),
@@ -400,7 +477,8 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
     );
   }
 
-  Widget _tabButton(String text, IconData icon, bool isActive, VoidCallback onTap) {
+  Widget _tabButton(
+      String text, IconData icon, bool isActive, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -408,12 +486,21 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         decoration: BoxDecoration(
           color: isActive ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: isActive ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))] : null,
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2))
+                ]
+              : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: isActive ? AppColors.primary : Colors.grey[500]),
+            Icon(icon,
+                size: 16,
+                color: isActive ? AppColors.primary : Colors.grey[500]),
             const SizedBox(width: 8),
             Text(
               text,
@@ -442,17 +529,24 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         children: [
           Row(
             children: [
-              const Icon(Icons.science_outlined, size: 16, color: AppColors.primary),
+              const Icon(Icons.science_outlined,
+                  size: 16, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
                 "Select from Admin Template",
-                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary),
               ),
             ],
           ),
           const SizedBox(height: 12),
           _isFetchingTemplates
-              ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(strokeWidth: 2)))
+              ? const Center(
+                  child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(strokeWidth: 2)))
               : Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
@@ -464,11 +558,16 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                     child: DropdownButton<String>(
                       isExpanded: true,
                       value: _selectedTemplateId,
-                      hint: Text("Choose an admin package", style: GoogleFonts.inter(fontSize: 14, color: Colors.grey)),
-                      items: _adminTemplates.map((t) => DropdownMenuItem(
-                        value: t.id,
-                        child: Text(t.name, style: GoogleFonts.inter(fontSize: 14)),
-                      )).toList(),
+                      hint: Text("Choose an admin package",
+                          style: GoogleFonts.inter(
+                              fontSize: 14, color: Colors.grey)),
+                      items: _adminTemplates
+                          .map((t) => DropdownMenuItem(
+                                value: t.id,
+                                child: Text(t.name,
+                                    style: GoogleFonts.inter(fontSize: 14)),
+                              ))
+                          .toList(),
                       onChanged: _onTemplateSelected,
                     ),
                   ),
@@ -494,64 +593,76 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         children: [
           SizedBox(
             height: 200,
-            child: _allLabTests.isEmpty 
-              ? Center(child: Text("No tests found", style: GoogleFonts.inter(color: Colors.grey)))
-              : ListView.separated(
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: _allLabTests.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final test = _allLabTests[index];
-                    final isSelected = _selectedProductIds.contains(test.id);
-                    return InkWell(
-                      onTap: () {
-                         setState(() {
-                           if (isSelected) {
-                             _selectedProductIds.remove(test.id);
-                           } else {
-                             _selectedProductIds.add(test.id);
-                           }
-                         });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        color: isSelected ? const Color(0xFFF8FAFF) : Colors.transparent,
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: isSelected,
-                              activeColor: AppColors.primary,
-                              onChanged: (val) {
-                                 setState(() {
-                                   if (val == true) {
-                                     _selectedProductIds.add(test.id);
-                                   } else {
-                                     _selectedProductIds.remove(test.id);
-                                   }
-                                 });
-                              },
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(test.name, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-                                  Text(
-                                    "${test.sampleType ?? 'N/A'} • ${test.reportsDuration ?? 'N/A'}",
-                                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
-                                  ),
-                                ],
+            child: _allLabTests.isEmpty
+                ? Center(
+                    child: Text("No tests found",
+                        style: GoogleFonts.inter(color: Colors.grey)))
+                : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _allLabTests.length,
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final test = _allLabTests[index];
+                      final isSelected = _selectedProductIds.contains(test.id);
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            if (isSelected) {
+                              _selectedProductIds.remove(test.id);
+                            } else {
+                              _selectedProductIds.add(test.id);
+                            }
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          color: isSelected
+                              ? const Color(0xFFF8FAFF)
+                              : Colors.transparent,
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: isSelected,
+                                activeColor: AppColors.primary,
+                                onChanged: (val) {
+                                  setState(() {
+                                    if (val == true) {
+                                      _selectedProductIds.add(test.id);
+                                    } else {
+                                      _selectedProductIds.remove(test.id);
+                                    }
+                                  });
+                                },
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4)),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(test.name,
+                                        style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF1E1B4B))),
+                                    Text(
+                                      "${test.sampleType ?? 'N/A'} • ${test.reportsDuration ?? 'N/A'}",
+                                      style: GoogleFonts.inter(
+                                          fontSize: 11,
+                                          color: Colors.grey[500]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -582,9 +693,12 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.upload_file_outlined, color: Colors.grey[400], size: 28),
+                      Icon(Icons.upload_file_outlined,
+                          color: Colors.grey[400], size: 28),
                       const SizedBox(height: 4),
-                      Text("Upload package image", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[400])),
+                      Text("Upload package image",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey[400])),
                     ],
                   ),
                 ),
@@ -605,11 +719,18 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
           child: Text(
             text,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF4B5563)),
+            style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF4B5563)),
           ),
         ),
         if (isRequired)
-          Text(" *", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+          Text(" *",
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -621,10 +742,18 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.primary)),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.red)),
     );
   }
 }

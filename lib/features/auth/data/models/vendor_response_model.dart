@@ -15,7 +15,8 @@ class VendorResponseModel {
     return VendorResponseModel(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: json['data'] != null ? VendorDataModel.fromJson(json['data']) : null,
+      data:
+          json['data'] != null ? VendorDataModel.fromJson(json['data']) : null,
     );
   }
 }
@@ -30,9 +31,11 @@ class VendorDataModel {
   factory VendorDataModel.fromJson(Map<String, dynamic> json) {
     return VendorDataModel(
       token: json['token'] ?? '',
-      user: json['user'] != null 
-          ? UserModel.fromJson(json['user']) 
-          : (json['vendor'] != null ? UserModel.fromJson(json['vendor']) : null),
+      user: json['user'] != null
+          ? UserModel.fromJson(json['user'])
+          : (json['vendor'] != null
+              ? UserModel.fromJson(json['vendor'])
+              : null),
       business: json['business'],
     );
   }
@@ -101,7 +104,9 @@ class UserModel {
       businessMobile: json['businessMobile'],
       altMobile: json['alt_mobile'],
       businessAddress: json['address'],
-      categoryIds: json['categoryIds'] != null ? List<String>.from(json['categoryIds']) : null,
+      categoryIds: json['categoryIds'] != null
+          ? List<String>.from(json['categoryIds'])
+          : null,
     );
   }
 

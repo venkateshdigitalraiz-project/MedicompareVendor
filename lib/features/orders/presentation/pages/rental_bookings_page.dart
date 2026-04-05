@@ -11,14 +11,14 @@ import '../bloc/orders_bloc.dart';
 import '../bloc/orders_event.dart';
 import '../bloc/orders_state.dart';
 
-class OrdersPage extends StatefulWidget {
-  const OrdersPage({super.key});
+class RentalBookingsPage extends StatefulWidget {
+  const RentalBookingsPage({super.key});
 
   @override
-  State<OrdersPage> createState() => _OrdersPageState();
+  State<RentalBookingsPage> createState() => _RentalBookingsPageState();
 }
 
-class _OrdersPageState extends State<OrdersPage> {
+class _RentalBookingsPageState extends State<RentalBookingsPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
   String _selectedDuration = 'No delivery Time';
@@ -41,6 +41,11 @@ class _OrdersPageState extends State<OrdersPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
+    // Initial fetch for rental orders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrdersBloc>().add(const GetOrdersEvent(orderType: 'rental'));
+    });
   }
 
   void _onScroll() {
@@ -55,6 +60,7 @@ class _OrdersPageState extends State<OrdersPage> {
                 status: _selectedStatus,
                 search: _searchQuery,
                 page: _currentPage,
+                orderType: 'rental',
                 isLoadMore: true,
               ));
         }
@@ -73,8 +79,8 @@ class _OrdersPageState extends State<OrdersPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FF),
       appBar: const CustomHomeAppBar(
-        title: "Order Items",
-        subtitle: "Manage and track all your order items",
+        title: "Rental Bookings",
+        subtitle: "Manage and track all your rental bookings",
       ),
       body: Column(
         children: [
@@ -208,6 +214,7 @@ class _OrdersPageState extends State<OrdersPage> {
           status: _selectedStatus,
           search: _searchQuery,
           page: _currentPage,
+          orderType: 'rental',
         ));
   }
 

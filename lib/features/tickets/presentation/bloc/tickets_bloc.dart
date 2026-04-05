@@ -16,10 +16,10 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
       } else {
         emit(TicketsLoading());
       }
-      
+
       try {
         final tickets = await ticketRepository.getTickets();
-        
+
         // Find the selected ticket in the new list to get updated messages
         TicketModel? newSelected;
         if (selectedTicket != null) {
@@ -29,7 +29,7 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
             newSelected = null;
           }
         }
-        
+
         emit(TicketsLoaded(tickets: tickets, selectedTicket: newSelected));
       } catch (e) {
         emit(TicketsError(message: e.toString()));

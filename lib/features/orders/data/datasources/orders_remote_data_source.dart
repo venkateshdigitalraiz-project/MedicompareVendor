@@ -9,9 +9,11 @@ abstract class OrdersRemoteDataSource {
     int limit = 10,
     String status = '',
     String search = '',
+    String orderType = 'normal',
   });
   Future<OrderItemModel> getOrderDetails(String orderId);
-  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload);
+  Future<bool> updateOrderStatus(
+      String orderItemId, Map<String, dynamic> payload);
 }
 
 class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
@@ -25,9 +27,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     int limit = 10,
     String status = '',
     String search = '',
+    String orderType = 'normal',
   }) async {
+    final endpoint = orderType == 'rental'
+        ? ApiEndpoints.rentalOrderList
+        : ApiEndpoints.orderList;
+
     final response = await apiService.get(
-      ApiEndpoints.orderList,
+      endpoint,
       queryParameters: {
         'page': page,
         'limit': limit,
@@ -40,7 +47,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     if (decoded == null || decoded['data'] == null) {
       return const OrdersListModel(
         orderItems: [],
-        pagination: PaginationModel(total: 0, page: 1, limit: 10, totalPages: 1),
+        pagination:
+            PaginationModel(total: 0, page: 1, limit: 10, totalPages: 1),
       );
     }
     return OrdersListModel.fromJson(decoded['data']);
@@ -48,7 +56,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
 
   @override
   Future<OrderItemModel> getOrderDetails(String orderId) async {
-    final response = await apiService.get('${ApiEndpoints.orderDetails}/$orderId');
+    final response =
+        await apiService.get('${ApiEndpoints.orderDetails}/$orderId');
 
     final decoded = json.decode(response.body);
     if (decoded == null ||
@@ -60,7 +69,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   @override
-  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload) async {
+  Future<bool> updateOrderStatus(
+      String orderItemId, Map<String, dynamic> payload) async {
     final response = await apiService.post(
       ApiEndpoints.updateOrderStatus(orderItemId),
       body: payload,

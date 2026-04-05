@@ -25,7 +25,8 @@ class GetLeadsEvent extends LeadsEvent {
   });
 
   @override
-  List<Object?> get props => [page, limit, status, leadStage, search, isLoadMore];
+  List<Object?> get props =>
+      [page, limit, status, leadStage, search, isLoadMore];
 }
 
 class GetLeadDetailsEvent extends LeadsEvent {

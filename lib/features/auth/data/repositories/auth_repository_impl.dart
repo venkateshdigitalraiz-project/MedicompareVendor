@@ -23,7 +23,9 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
 
-    if (responseModel.success && responseModel.data != null && responseModel.data!.user != null) {
+    if (responseModel.success &&
+        responseModel.data != null &&
+        responseModel.data!.user != null) {
       return responseModel.data!.user!.toEntity(responseModel.data!.token);
     } else {
       throw Exception(responseModel.message);

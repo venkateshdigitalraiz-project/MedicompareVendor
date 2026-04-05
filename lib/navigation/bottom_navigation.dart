@@ -53,35 +53,40 @@ class _BottomNavigationState extends State<BottomNavigation> {
       listeners: [
         BlocListener<DashboardBloc, DashboardState>(
           listener: (context, state) {
-            if (state is DashboardError && state.message == 'UNAUTHORIZED_ACCESS_401') {
+            if (state is DashboardError &&
+                state.message == 'UNAUTHORIZED_ACCESS_401') {
               _handleUnauthorized(context);
             }
           },
         ),
         BlocListener<SlotsBloc, SlotsState>(
           listener: (context, state) {
-            if (state is SlotsError && state.message == 'UNAUTHORIZED_ACCESS_401') {
+            if (state is SlotsError &&
+                state.message == 'UNAUTHORIZED_ACCESS_401') {
               _handleUnauthorized(context);
             }
           },
         ),
         BlocListener<PincodesBloc, PincodesState>(
           listener: (context, state) {
-            if (state is PincodesError && state.message == 'UNAUTHORIZED_ACCESS_401') {
+            if (state is PincodesError &&
+                state.message == 'UNAUTHORIZED_ACCESS_401') {
               _handleUnauthorized(context);
             }
           },
         ),
         BlocListener<TicketsBloc, TicketsState>(
           listener: (context, state) {
-            if (state is TicketsError && state.message == 'UNAUTHORIZED_ACCESS_401') {
+            if (state is TicketsError &&
+                state.message == 'UNAUTHORIZED_ACCESS_401') {
               _handleUnauthorized(context);
             }
           },
         ),
         BlocListener<SubscriptionBloc, SubscriptionState>(
           listener: (context, state) {
-            if (state is SubscriptionError && state.message == 'UNAUTHORIZED_ACCESS_401') {
+            if (state is SubscriptionError &&
+                state.message == 'UNAUTHORIZED_ACCESS_401') {
               _handleUnauthorized(context);
             }
           },
@@ -101,53 +106,53 @@ class _BottomNavigationState extends State<BottomNavigation> {
           }
         },
         child: Scaffold(
-        body: _pages[_currentIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() => _currentIndex = index);
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: AppColors.white,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.grey,
-          showUnselectedLabels: true,
-          iconSize: 22,
-          selectedLabelStyle: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+          body: _pages[_currentIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() => _currentIndex = index);
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: AppColors.white,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.grey,
+            showUnselectedLabels: true,
+            iconSize: 22,
+            selectedLabelStyle: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: "Dashboard",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_time_outlined),
+                activeIcon: Icon(Icons.access_time_filled),
+                label: "Slot Timings",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.location_on_outlined),
+                activeIcon: Icon(Icons.location_on),
+                label: "Pincodes",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: "Profile",
+              ),
+            ],
           ),
-          unselectedLabelStyle: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-          ),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard),
-              label: "Dashboard",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.access_time_outlined),
-              activeIcon: Icon(Icons.access_time_filled),
-              label: "Slot Timings",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.location_on_outlined),
-              activeIcon: Icon(Icons.location_on),
-              label: "Pincodes",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: "Profile",
-            ),
-          ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<bool?> _showExitConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
@@ -167,18 +172,21 @@ class _BottomNavigationState extends State<BottomNavigation> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               "Cancel",
-              style: GoogleFonts.inter(color: AppColors.grey, fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(
+                  color: AppColors.grey, fontWeight: FontWeight.w600),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               "Exit",
-              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(
+                  color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
         ],

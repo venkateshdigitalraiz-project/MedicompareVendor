@@ -11,7 +11,8 @@ class DentalServiceService {
 
   Future<List<DentalServiceCategory>> getCategories() async {
     try {
-      final response = await apiService.get(ApiEndpoints.dentalServiceCategories);
+      final response =
+          await apiService.get(ApiEndpoints.dentalServiceCategories);
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
@@ -54,7 +55,8 @@ class DentalServiceService {
 
   Future<DentalServiceItem> getDentalServiceDetails(String id) async {
     try {
-      final response = await apiService.get(ApiEndpoints.dentalServiceDetails(id));
+      final response =
+          await apiService.get(ApiEndpoints.dentalServiceDetails(id));
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return DentalServiceItem.fromJson(body['data']['product']);
@@ -97,10 +99,11 @@ class DentalServiceService {
     }
   }
 
-  Future<void> updateDentalService(String id, Map<String, dynamic> payload) async {
+  Future<void> updateDentalService(
+      String id, Map<String, dynamic> payload) async {
     try {
-      final response = await apiService.post(ApiEndpoints.updateDentalService(id),
-          body: payload);
+      final response = await apiService
+          .post(ApiEndpoints.updateDentalService(id), body: payload);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to update service');
@@ -113,7 +116,8 @@ class DentalServiceService {
 
   Future<void> deleteDentalService(String id) async {
     try {
-      final response = await apiService.post(ApiEndpoints.deleteDentalService(id));
+      final response =
+          await apiService.post(ApiEndpoints.deleteDentalService(id));
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to delete service');

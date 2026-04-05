@@ -13,12 +13,14 @@ class OrdersRepositoryImpl implements OrdersRepository {
     int limit = 10,
     String status = '',
     String search = '',
+    String orderType = 'normal',
   }) async {
     return await remoteDataSource.getOrders(
       page: page,
       limit: limit,
       status: status,
       search: search,
+      orderType: orderType,
     );
   }
 
@@ -28,7 +30,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload) async {
+  Future<bool> updateOrderStatus(
+      String orderItemId, Map<String, dynamic> payload) async {
     return await remoteDataSource.updateOrderStatus(orderItemId, payload);
   }
 }

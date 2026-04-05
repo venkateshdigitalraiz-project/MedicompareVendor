@@ -6,7 +6,9 @@ abstract class OrdersRepository {
     int limit = 10,
     String status = '',
     String search = '',
+    String orderType = 'normal',
   });
   Future<OrderItemEntity> getOrderDetails(String orderId);
-  Future<bool> updateOrderStatus(String orderItemId, Map<String, dynamic> payload);
+  Future<bool> updateOrderStatus(
+      String orderItemId, Map<String, dynamic> payload);
 }

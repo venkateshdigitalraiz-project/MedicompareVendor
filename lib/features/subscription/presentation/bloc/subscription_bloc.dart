@@ -14,7 +14,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
           repository.getSubscriptionHistory(),
           repository.getSubscriptionPlans(),
         ]);
-        
+
         emit(SubscriptionLoaded(
           history: results[0] as dynamic,
           plans: results[1] as dynamic,
@@ -32,7 +32,8 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
           currency: event.currency,
           receipt: event.receipt,
         );
-        emit(OrderCreated(orderId: orderId, amount: event.amount, plan: event.plan));
+        emit(OrderCreated(
+            orderId: orderId, amount: event.amount, plan: event.plan));
       } catch (e) {
         emit(OrderFailure(message: e.toString()));
       }
@@ -50,7 +51,8 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
           emit(PurchaseSuccess(message: "Plan upgraded successfully!"));
           add(LoadSubscriptionDataEvent()); // Refresh data
         } else {
-          emit(SubscriptionError(message: "Failed to verify purchase. Please contact support."));
+          emit(SubscriptionError(
+              message: "Failed to verify purchase. Please contact support."));
         }
       } catch (e) {
         emit(SubscriptionError(message: e.toString()));

@@ -11,8 +11,8 @@ class AddLabTestSheet extends StatefulWidget {
   final List<String> existingIds;
 
   const AddLabTestSheet({
-    super.key, 
-    required this.onSuccess, 
+    super.key,
+    required this.onSuccess,
     this.editItem,
     this.existingIds = const [],
   });
@@ -23,17 +23,18 @@ class AddLabTestSheet extends StatefulWidget {
 
 class _AddLabTestSheetState extends State<AddLabTestSheet> {
   final _formKey = GlobalKey<FormState>();
-  final LabTestService _labTestService = LabTestInjection.provideLabTestService();
+  final LabTestService _labTestService =
+      LabTestInjection.provideLabTestService();
 
   LabTestDropdownItem? _selectedTest;
-  
+
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
-  
+
   final _searchController = TextEditingController();
   List<LabTestDropdownItem> _searchResults = [];
   Timer? _debounce;
-  
+
   bool _isLoading = false;
   bool _isFetchingDetails = false;
   String _selectedStatus = 'active';
@@ -52,8 +53,9 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
     setState(() => _isFetchingDetails = true);
     try {
       // Fetch fresh details for tablet ID
-      final tabletDetails = await _labTestService.getLabTestTabletDetails(widget.editItem!.details.id);
-      
+      final tabletDetails = await _labTestService
+          .getLabTestTabletDetails(widget.editItem!.details.id);
+
       setState(() {
         _selectedTest = LabTestDropdownItem(
           id: tabletDetails.id,
@@ -61,14 +63,16 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
           price: 0, // Not needed here
           subcategoryId: tabletDetails.subcategory?.id ?? '',
         );
-        
+
         _priceController.text = widget.editItem!.price.toString();
         _discountController.text = widget.editItem!.discountPrice.toString();
         _searchController.text = _selectedTest?.name ?? '';
         _selectedStatus = widget.editItem!.status;
       });
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isFetchingDetails = false);
     }
@@ -90,12 +94,14 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
         final results = await _labTestService.searchLabTests(query);
         if (mounted) {
           setState(() {
-            _searchResults = results.map((e) => LabTestDropdownItem(
-              id: e.id,
-              name: e.name,
-              price: 0,
-              subcategoryId: e.subcategory?.id ?? '',
-            )).toList();
+            _searchResults = results
+                .map((e) => LabTestDropdownItem(
+                      id: e.id,
+                      name: e.name,
+                      price: 0,
+                      subcategoryId: e.subcategory?.id ?? '',
+                    ))
+                .toList();
           });
         }
       } catch (_) {}
@@ -105,7 +111,8 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedTest == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a lab test first')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a lab test first')));
       return;
     }
 
@@ -137,21 +144,24 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
       } else {
         await _labTestService.createLabTest(payload);
       }
-      
+
       widget.onSuccess();
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
         Navigator.pop(context);
         messenger.showSnackBar(
           SnackBar(
-            content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+            content: Text(isEditMode
+                ? 'Updated successfully'
+                : 'Product added successfully'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -187,16 +197,26 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: const Color(0xFF7C3AED), borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.science_outlined, color: Colors.white, size: 24),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFF7C3AED),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.science_outlined,
+                        color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(isEditMode ? "Edit Lab Test" : "Add New Lab Test", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-                        Text("Fill in the details to add a lab test to your system", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                        Text(isEditMode ? "Edit Lab Test" : "Add New Lab Test",
+                            style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E1B4B))),
+                        Text(
+                            "Fill in the details to add a lab test to your system",
+                            style: GoogleFonts.poppins(
+                                fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                   ),
@@ -208,7 +228,7 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
               ),
             ),
             const Divider(height: 1),
-            
+
             // Form Content
             Flexible(
               child: SingleChildScrollView(
@@ -218,13 +238,21 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Lab Test Information", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                      Text("Lab Test Information",
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E1B4B))),
                       const SizedBox(height: 4),
-                      Text("Please provide accurate information for the lab test", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                      Text(
+                          "Please provide accurate information for the lab test",
+                          style: GoogleFonts.poppins(
+                              fontSize: 12, color: Colors.grey[600])),
                       const SizedBox(height: 24),
-                      
+
                       // Test Name Input
-                      _buildLabel("Test Name", isRequired: true, icon: Icons.science_outlined),
+                      _buildLabel("Test Name",
+                          isRequired: true, icon: Icons.science_outlined),
                       const SizedBox(height: 8),
                       Column(
                         children: [
@@ -232,18 +260,25 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                             controller: _searchController,
                             style: GoogleFonts.poppins(fontSize: 14),
                             onTap: () {
-                              if (_searchController.text.isEmpty) _onSearchChanged('');
+                              if (_searchController.text.isEmpty)
+                                _onSearchChanged('');
                             },
-                            decoration: _inputDecoration(hint: "Search for lab test...").copyWith(
-                                suffixIcon: const Icon(Icons.keyboard_arrow_down)
-                            ),
+                            decoration: _inputDecoration(
+                                    hint: "Search for lab test...")
+                                .copyWith(
+                                    suffixIcon:
+                                        const Icon(Icons.keyboard_arrow_down)),
                             onChanged: (val) {
-                              setState(() { _selectedTest = null; });
+                              setState(() {
+                                _selectedTest = null;
+                              });
                               _onSearchChanged(val);
                             },
-                            validator: (value) => _selectedTest == null ? "Required" : null,
+                            validator: (value) =>
+                                _selectedTest == null ? "Required" : null,
                           ),
-                          if (_selectedTest == null && _searchResults.isNotEmpty)
+                          if (_selectedTest == null &&
+                              _searchResults.isNotEmpty)
                             Container(
                               constraints: const BoxConstraints(maxHeight: 200),
                               margin: const EdgeInsets.only(top: 4),
@@ -251,7 +286,12 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: Colors.grey[200]!),
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
+                                boxShadow: [
+                                  BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 8)
+                                ],
                               ),
                               child: ListView.builder(
                                 padding: EdgeInsets.zero,
@@ -269,7 +309,9 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.all(16.0),
-                                      child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
+                                      child: Text(option.name,
+                                          style: GoogleFonts.poppins(
+                                              fontSize: 14)),
                                     ),
                                   );
                                 },
@@ -278,8 +320,11 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text("Search and select a test to auto-fill details and price", style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500])),
-                      
+                      Text(
+                          "Search and select a test to auto-fill details and price",
+                          style: GoogleFonts.poppins(
+                              fontSize: 11, color: Colors.grey[500])),
+
                       const SizedBox(height: 20),
                       Row(
                         children: [
@@ -287,13 +332,18 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("Price (₹)", isRequired: true, icon: Icons.currency_rupee),
+                                _buildLabel("Price (₹)",
+                                    isRequired: true,
+                                    icon: Icons.currency_rupee),
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _priceController,
                                   keyboardType: TextInputType.number,
                                   decoration: _inputDecoration(hint: "0.00"),
-                                  validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                  validator: (val) =>
+                                      (val == null || val.isEmpty)
+                                          ? "Required"
+                                          : null,
                                 ),
                                 // const SizedBox(height: 4),
                                 // Text("Auto-filled when test selected, can be edited if needed", style: GoogleFonts.poppins(fontSize: 9, color: Colors.grey[500])),
@@ -305,17 +355,23 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("Discount Price (₹)", isRequired: true, icon: Icons.currency_rupee),
+                                _buildLabel("Discount Price (₹)",
+                                    isRequired: true,
+                                    icon: Icons.currency_rupee),
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _discountController,
                                   keyboardType: TextInputType.number,
                                   decoration: _inputDecoration(hint: "0.00"),
                                   validator: (val) {
-                                    if (val == null || val.isEmpty) return "Required";
+                                    if (val == null || val.isEmpty)
+                                      return "Required";
                                     final discount = double.tryParse(val);
-                                    final price = double.tryParse(_priceController.text);
-                                    if (discount != null && price != null && discount > price) {
+                                    final price =
+                                        double.tryParse(_priceController.text);
+                                    if (discount != null &&
+                                        price != null &&
+                                        discount > price) {
                                       return "Over price";
                                     }
                                     return null;
@@ -328,15 +384,21 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 20),
-                      _buildLabel("Active Status", isRequired: false, icon: Icons.power_settings_new),
+                      _buildLabel("Active Status",
+                          isRequired: false, icon: Icons.power_settings_new),
                       const SizedBox(height: 8),
                       _buildToggleBtn(
-                        _selectedStatus == 'active' ? "Active" : "Inactive", 
-                        Icons.power_settings_new, 
-                        _selectedStatus == 'active' ? const Color(0xFF7C3AED) : Colors.grey,
-                        () => setState(() => _selectedStatus = _selectedStatus == 'active' ? 'inactive' : 'active'),
+                        _selectedStatus == 'active' ? "Active" : "Inactive",
+                        Icons.power_settings_new,
+                        _selectedStatus == 'active'
+                            ? const Color(0xFF7C3AED)
+                            : Colors.grey,
+                        () => setState(() => _selectedStatus =
+                            _selectedStatus == 'active'
+                                ? 'inactive'
+                                : 'active'),
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -344,7 +406,7 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                 ),
               ),
             ),
-            
+
             // Footer
             Container(
               padding: const EdgeInsets.all(20),
@@ -357,20 +419,37 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel", style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
+                    child: Text("Cancel",
+                        style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: const Color(0xFF1E1B4B),
+                            fontWeight: FontWeight.w600)),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7C3AED),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
                     onPressed: _isLoading ? null : _submit,
-                    icon: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.science_outlined, size: 18),
-                    label: Text(_isLoading ? "Saving..." : (isEditMode ? "Update Lab Test" : "Add Lab Test"), style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
+                        : const Icon(Icons.science_outlined, size: 18),
+                    label: Text(
+                        _isLoading
+                            ? "Saving..."
+                            : (isEditMode ? "Update Lab Test" : "Add Lab Test"),
+                        style:
+                            GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -391,10 +470,17 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
         ],
         Text(
           text,
-          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF4B5563)),
+          style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF4B5563)),
         ),
         if (isRequired)
-          Text(" *", style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+          Text(" *",
+              style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -406,14 +492,23 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF7C3AED))),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF7C3AED))),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red)),
     );
   }
 
-  Widget _buildToggleBtn(String label, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildToggleBtn(
+      String label, IconData icon, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -430,7 +525,8 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
             const SizedBox(width: 8),
             Text(
               label,
-              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: color),
+              style: GoogleFonts.poppins(
+                  fontSize: 14, fontWeight: FontWeight.w500, color: color),
             ),
           ],
         ),

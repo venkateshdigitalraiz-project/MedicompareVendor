@@ -11,7 +11,8 @@ class MedicalTreatmentService {
 
   Future<List<MedicalTreatmentCategory>> getCategories() async {
     try {
-      final response = await apiService.get(ApiEndpoints.medicalTreatmentCategories);
+      final response =
+          await apiService.get(ApiEndpoints.medicalTreatmentCategories);
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
@@ -54,7 +55,8 @@ class MedicalTreatmentService {
 
   Future<MedicalTreatmentItem> getDetails(String id) async {
     try {
-      final response = await apiService.get(ApiEndpoints.medicalTreatmentDetails(id));
+      final response =
+          await apiService.get(ApiEndpoints.medicalTreatmentDetails(id));
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return MedicalTreatmentItem.fromJson(body['data']['product']);
@@ -75,7 +77,9 @@ class MedicalTreatmentService {
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List list = body['data']['tablets'] ?? [];
-        return list.map((e) => MedicalTreatmentDropdownItem.fromJson(e)).toList();
+        return list
+            .map((e) => MedicalTreatmentDropdownItem.fromJson(e))
+            .toList();
       }
       return [];
     } catch (e) {
@@ -85,8 +89,8 @@ class MedicalTreatmentService {
 
   Future<void> create(Map<String, dynamic> payload) async {
     try {
-      final response = await apiService.post(ApiEndpoints.createMedicalTreatment,
-          body: payload);
+      final response = await apiService
+          .post(ApiEndpoints.createMedicalTreatment, body: payload);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to create service');
@@ -99,8 +103,8 @@ class MedicalTreatmentService {
 
   Future<void> update(String id, Map<String, dynamic> payload) async {
     try {
-      final response = await apiService.post(ApiEndpoints.updateMedicalTreatment(id),
-          body: payload);
+      final response = await apiService
+          .post(ApiEndpoints.updateMedicalTreatment(id), body: payload);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to update service');
@@ -113,7 +117,8 @@ class MedicalTreatmentService {
 
   Future<void> delete(String id) async {
     try {
-      final response = await apiService.post(ApiEndpoints.deleteMedicalTreatment(id));
+      final response =
+          await apiService.post(ApiEndpoints.deleteMedicalTreatment(id));
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to delete service');

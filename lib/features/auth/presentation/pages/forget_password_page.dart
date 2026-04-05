@@ -142,7 +142,9 @@ class _ForgetPasswordState extends State<ForgetPasswordPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _inputField(hint: "Enter your email", controller: _emailController),
+                      _inputField(
+                          hint: "Enter your email",
+                          controller: _emailController),
                       const SizedBox(height: 32),
                       SizedBox(
                         width: double.infinity,
@@ -160,7 +162,8 @@ class _ForgetPasswordState extends State<ForgetPasswordPage> {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2),
                                 )
                               : Text(
                                   "Send Reset Link",
@@ -207,14 +210,17 @@ class _ForgetPasswordState extends State<ForgetPasswordPage> {
     );
   }
 
-  Widget _inputField({required String hint, required TextEditingController controller}) {
+  Widget _inputField(
+      {required String hint, required TextEditingController controller}) {
     return TextField(
       controller: controller,
       style: GoogleFonts.poppins(fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        hintStyle:
+            GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF94A3B8)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(

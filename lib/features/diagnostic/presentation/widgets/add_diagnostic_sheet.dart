@@ -15,8 +15,8 @@ class AddDiagnosticSheet extends StatefulWidget {
   final List<String> existingIds;
 
   const AddDiagnosticSheet({
-    super.key, 
-    this.editItem, 
+    super.key,
+    this.editItem,
     required this.onSuccess,
     this.existingIds = const [],
   });
@@ -27,7 +27,8 @@ class AddDiagnosticSheet extends StatefulWidget {
 
 class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
   final _formKey = GlobalKey<FormState>();
-  final DiagnosticService _service = DiagnosticInjection.provideDiagnosticService();
+  final DiagnosticService _service =
+      DiagnosticInjection.provideDiagnosticService();
 
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
@@ -57,8 +58,6 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
     }
   }
 
-
-
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -82,7 +81,9 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedTabletId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a diagnostic'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please select a diagnostic'),
+          backgroundColor: Colors.red));
       return;
     }
 
@@ -106,7 +107,8 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
         'status': _selectedStatus,
       };
       if (isEditMode) {
-        await _service.updateDiagnostic(widget.editItem!.id, payload, image: _selectedImage);
+        await _service.updateDiagnostic(widget.editItem!.id, payload,
+            image: _selectedImage);
       } else {
         await _service.createDiagnostic(payload, image: _selectedImage);
       }
@@ -116,13 +118,17 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
         Navigator.pop(context);
         messenger.showSnackBar(
           SnackBar(
-            content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+            content: Text(isEditMode
+                ? 'Updated successfully'
+                : 'Product added successfully'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -152,7 +158,9 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
             margin: const EdgeInsets.only(top: 12),
             width: 40,
             height: 4,
-            decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2)),
           ),
           // Header
           Padding(
@@ -161,8 +169,11 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.biotech_outlined, color: AppColors.primary, size: 24),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF5F3FF),
+                      borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.biotech_outlined,
+                      color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -171,16 +182,22 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                     children: [
                       Text(
                         isEditMode ? 'Edit Diagnostic' : 'Add New Diagnostic',
-                        style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                        style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B)),
                       ),
                       Text(
                         'Fill in the details to ${isEditMode ? 'update' : 'add'} a diagnostic',
-                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.grey[500]),
                       ),
                     ],
                   ),
                 ),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Color(0xFF1E1B4B))),
+                IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: Color(0xFF1E1B4B))),
               ],
             ),
           ),
@@ -194,8 +211,14 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Diagnostic Information", style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-                    Text("Please provide accurate information", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
+                    Text("Diagnostic Information",
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B))),
+                    Text("Please provide accurate information",
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.grey[500])),
                     const SizedBox(height: 20),
 
                     // Row 1: Name + Price
@@ -206,7 +229,9 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Diagnostic Name", isRequired: true, icon: Icons.crop_free_outlined),
+                              _buildLabel("Diagnostic Name",
+                                  isRequired: true,
+                                  icon: Icons.crop_free_outlined),
                               const SizedBox(height: 8),
                               _buildDiagnosticSearchField(),
                             ],
@@ -217,14 +242,17 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Price (₹)", isRequired: true, icon: Icons.currency_rupee),
+                              _buildLabel("Price (₹)",
+                                  isRequired: true, icon: Icons.currency_rupee),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _priceController,
                                 keyboardType: TextInputType.number,
                                 style: GoogleFonts.inter(fontSize: 13),
                                 decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) => (val == null || val.isEmpty)
+                                    ? "Required"
+                                    : null,
                               ),
                             ],
                           ),
@@ -241,7 +269,8 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Discount Price (₹)", isRequired: true, icon: Icons.currency_rupee),
+                              _buildLabel("Discount Price (₹)",
+                                  isRequired: true, icon: Icons.currency_rupee),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _discountController,
@@ -249,10 +278,14 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                                 style: GoogleFonts.inter(fontSize: 13),
                                 decoration: _inputDecoration(hint: "0.00"),
                                 validator: (val) {
-                                  if (val == null || val.isEmpty) return "Required";
+                                  if (val == null || val.isEmpty)
+                                    return "Required";
                                   final discount = double.tryParse(val);
-                                  final price = double.tryParse(_priceController.text);
-                                  if (discount != null && price != null && discount > price) {
+                                  final price =
+                                      double.tryParse(_priceController.text);
+                                  if (discount != null &&
+                                      price != null &&
+                                      discount > price) {
                                     return "Over price";
                                   }
                                   return null;
@@ -266,18 +299,30 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Status", isRequired: true, icon: Icons.show_chart),
+                              _buildLabel("Status",
+                                  isRequired: true, icon: Icons.show_chart),
                               const SizedBox(height: 8),
                               DropdownButtonFormField<String>(
                                 value: _selectedStatus,
                                 isExpanded: true,
-                                decoration: _inputDecoration(hint: "Select Status"),
-                                style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
+                                decoration:
+                                    _inputDecoration(hint: "Select Status"),
+                                style: GoogleFonts.inter(
+                                    fontSize: 13, color: Colors.black87),
                                 items: [
-                                  DropdownMenuItem(value: 'active', child: Text("Active", style: GoogleFonts.inter(fontSize: 13))),
-                                  DropdownMenuItem(value: 'inactive', child: Text("Inactive", style: GoogleFonts.inter(fontSize: 13))),
+                                  DropdownMenuItem(
+                                      value: 'active',
+                                      child: Text("Active",
+                                          style:
+                                              GoogleFonts.inter(fontSize: 13))),
+                                  DropdownMenuItem(
+                                      value: 'inactive',
+                                      child: Text("Inactive",
+                                          style:
+                                              GoogleFonts.inter(fontSize: 13))),
                                 ],
-                                onChanged: (val) => setState(() => _selectedStatus = val!),
+                                onChanged: (val) =>
+                                    setState(() => _selectedStatus = val!),
                               ),
                             ],
                           ),
@@ -299,7 +344,9 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
           // Footer
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Colors.grey[200]!))),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey[200]!))),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -308,7 +355,11 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel", style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
+                      child: Text("Cancel",
+                          style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: const Color(0xFF1E1B4B),
+                              fontWeight: FontWeight.w600)),
                     ),
                     const SizedBox(width: 8),
                     SizedBox(
@@ -316,14 +367,21 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                       child: ElevatedButton.icon(
                         onPressed: _isSubmitting ? null : _submit,
                         icon: _isSubmitting
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white))
                             : const Icon(Icons.crop_free_outlined, size: 16),
-                        label: Text(isEditMode ? "Update" : "Add Diagnostic", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold)),
+                        label: Text(isEditMode ? "Update" : "Add Diagnostic",
+                            style: GoogleFonts.inter(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                         ),
                       ),
@@ -362,9 +420,12 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.upload_file_outlined, color: Colors.grey[400], size: 28),
+                      Icon(Icons.upload_file_outlined,
+                          color: Colors.grey[400], size: 28),
                       const SizedBox(height: 4),
-                      Text("Upload diagnostic image", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[400])),
+                      Text("Upload diagnostic image",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey[400])),
                     ],
                   ),
                 ),
@@ -383,13 +444,17 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
             if (_searchController.text.isEmpty) _onSearchChanged('');
           },
           decoration: _inputDecoration(hint: "Search Diagnostic...").copyWith(
-            suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+            suffixIcon:
+                const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           ),
           onChanged: (q) {
-            setState(() { _selectedTabletId = null; });
+            setState(() {
+              _selectedTabletId = null;
+            });
             _onSearchChanged(q);
           },
-          validator: (_) => _selectedTabletId == null ? "Please select a diagnostic" : null,
+          validator: (_) =>
+              _selectedTabletId == null ? "Please select a diagnostic" : null,
         ),
         if (_selectedTabletId == null && _searchResults.isNotEmpty)
           Container(
@@ -399,14 +464,22 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey[200]!),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)
+              ],
             ),
             child: _isLoading
-                ? const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(strokeWidth: 2)))
+                ? const Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(strokeWidth: 2)))
                 : _searchResults.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Text("No diagnostics found", style: GoogleFonts.inter(color: Colors.grey, fontSize: 13)),
+                        child: Text("No diagnostics found",
+                            style: GoogleFonts.inter(
+                                color: Colors.grey, fontSize: 13)),
                       )
                     : ListView.builder(
                         shrinkWrap: true,
@@ -421,8 +494,12 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                               });
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              child: Text(item.name, style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF1E1B4B))),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
+                              child: Text(item.name,
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      color: const Color(0xFF1E1B4B))),
                             ),
                           );
                         },
@@ -436,15 +513,26 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null) ...[Icon(icon, size: 14, color: Colors.grey[500]), const SizedBox(width: 6)],
+        if (icon != null) ...[
+          Icon(icon, size: 14, color: Colors.grey[500]),
+          const SizedBox(width: 6)
+        ],
         Flexible(
           child: Text(
             text,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF4B5563)),
+            style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF4B5563)),
           ),
         ),
-        if (isRequired) Text(" *", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+        if (isRequired)
+          Text(" *",
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -456,10 +544,18 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.primary)),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.red)),
     );
   }
 }

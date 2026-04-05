@@ -65,7 +65,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
             }
 
             // Parse permissions
-            final permissions = body['data']['permission'] as List<dynamic>? ?? [];
+            final permissions =
+                body['data']['permission'] as List<dynamic>? ?? [];
             _activeModules = permissions
                 .where((p) => p['status'] == 'active')
                 .map((p) => p['module']?.toString() ?? '')
@@ -81,7 +82,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source, imageQuality: 85);
+    final pickedFile =
+        await _picker.pickImage(source: source, imageQuality: 85);
     if (pickedFile != null) {
       final file = File(pickedFile.path);
       setState(() => _profileImage = file);
@@ -122,7 +124,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Upload failed: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -181,7 +184,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fullName = [_firstName, _lastName].where((s) => s.isNotEmpty).join(' ');
+    final fullName =
+        [_firstName, _lastName].where((s) => s.isNotEmpty).join(' ');
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -275,13 +279,21 @@ class _ProfilePageState extends State<MainprofileScreen> {
                                 ),
                               ),
                         const SizedBox(height: 6),
-                        if (_isLoading)
-                          ...[
-                            Container(width: 140, height: 12, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(6))),
-                            const SizedBox(height: 4),
-                            Container(width: 160, height: 12, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(6))),
-                          ]
-                        else ...[
+                        if (_isLoading) ...[
+                          Container(
+                              width: 140,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(6))),
+                          const SizedBox(height: 4),
+                          Container(
+                              width: 160,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(6))),
+                        ] else ...[
                           if (_mobile.isNotEmpty) _infoRow(Icons.call, _mobile),
                           const SizedBox(height: 4),
                           if (_email.isNotEmpty) _infoRow(Icons.mail, _email),
@@ -300,6 +312,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
             }),
             _menuTile("Orders", Icons.shopping_bag_outlined, () {
               context.push('/orders');
+            }),
+            _menuTile("Rental bookings", Icons.calendar_today_outlined, () {
+              context.push('/rental-orders');
             }),
             _menuTile("Leads", Icons.leaderboard_outlined, () {
               context.push('/leads');
@@ -325,11 +340,14 @@ class _ProfilePageState extends State<MainprofileScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ExpansionTile(
-                  leading: const Icon(Icons.science_outlined, color: AppColors.primaryDark),
-                  title: Text("Lab Tests", style: GoogleFonts.inter(fontSize: 14)),
+                  leading: const Icon(Icons.science_outlined,
+                      color: AppColors.primaryDark),
+                  title:
+                      Text("Lab Tests", style: GoogleFonts.inter(fontSize: 14)),
                   shape: const Border(),
                   childrenPadding: const EdgeInsets.only(left: 32),
-                  trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                  trailing: const Icon(Icons.keyboard_arrow_down,
+                      color: AppColors.primaryDark),
                   children: [
                     _menuTile("List", Icons.list_alt_outlined, () {
                       context.push('/lab-test-list');
@@ -345,34 +363,44 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 context.push('/diagnostic-list');
               }),
             if (_hasPermission('home-care'))
-              _menuTile("Home Care Services", Icons.home_repair_service_outlined, () {
+              _menuTile(
+                  "Home Care Services", Icons.home_repair_service_outlined, () {
                 context.push('/homecare-list');
               }),
             if (_hasPermission('nursing-care'))
-              _menuTile("Care Taker Services", Icons.person_search_outlined, () {
+              _menuTile("Care Taker Services", Icons.person_search_outlined,
+                  () {
                 context.push('/nursing-list');
               }),
             if (_hasPermission('dental-service'))
-              _menuTile("Odontogram Services", Icons.sentiment_satisfied_alt_outlined, () {
+              _menuTile(
+                  "Odontogram Services", Icons.sentiment_satisfied_alt_outlined,
+                  () {
                 context.push('/dental-list');
               }),
             if (_hasPermission('medical-treatment'))
-              _menuTile("Medical Treatment Services", Icons.health_and_safety_outlined, () {
+              _menuTile("Medical Treatment Services",
+                  Icons.health_and_safety_outlined, () {
                 context.push('/medical-treatment-list');
               }),
             if (_hasPermission('medical-equipment'))
-              _menuTile("Medical Equipment Services", Icons.medical_services_outlined, () {
+              _menuTile(
+                  "Medical Equipment Services", Icons.medical_services_outlined,
+                  () {
                 context.push('/equipment-list');
               }),
             if (_hasPermission('ambulance-service'))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ExpansionTile(
-                  leading: const Icon(Icons.airport_shuttle_outlined, color: AppColors.primaryDark),
-                  title: Text("Ambulance", style: GoogleFonts.inter(fontSize: 14)),
+                  leading: const Icon(Icons.airport_shuttle_outlined,
+                      color: AppColors.primaryDark),
+                  title:
+                      Text("Ambulance", style: GoogleFonts.inter(fontSize: 14)),
                   shape: const Border(),
                   childrenPadding: const EdgeInsets.only(left: 32),
-                  trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                  trailing: const Icon(Icons.keyboard_arrow_down,
+                      color: AppColors.primaryDark),
                   children: [
                     _menuTile("List", Icons.list_alt_outlined, () {
                       context.push('/ambulance-list');
@@ -390,17 +418,23 @@ class _ProfilePageState extends State<MainprofileScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ExpansionTile(
-                leading: const Icon(Icons.gavel_outlined, color: AppColors.primaryDark),
-                title: Text("Legal Information", style: GoogleFonts.inter(fontSize: 14)),
+                leading: const Icon(Icons.gavel_outlined,
+                    color: AppColors.primaryDark),
+                title: Text("Legal Information",
+                    style: GoogleFonts.inter(fontSize: 14)),
                 shape: const Border(),
                 childrenPadding: const EdgeInsets.only(left: 32),
-                trailing: const Icon(Icons.keyboard_arrow_down, color: AppColors.primaryDark),
+                trailing: const Icon(Icons.keyboard_arrow_down,
+                    color: AppColors.primaryDark),
                 children: [
-                  _menuTile("Terms and Conditions", Icons.description_outlined, () {
-                    _launchURL("https://vendor.medicompares.com/terms-and-conditions");
+                  _menuTile("Terms and Conditions", Icons.description_outlined,
+                      () {
+                    _launchURL(
+                        "https://vendor.medicompares.com/terms-and-conditions");
                   }, isSubTile: true),
                   _menuTile("Privacy Policy", Icons.privacy_tip_outlined, () {
-                    _launchURL("https://vendor.medicompares.com/privacy-policy");
+                    _launchURL(
+                        "https://vendor.medicompares.com/privacy-policy");
                   }, isSubTile: true),
                 ],
               ),
@@ -472,13 +506,19 @@ class _ProfilePageState extends State<MainprofileScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Text("Logout", style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18)),
-          content: Text("Are you sure you want to log out of your account?", style: GoogleFonts.inter(fontSize: 14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Text("Logout",
+              style:
+                  GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18)),
+          content: Text("Are you sure you want to log out of your account?",
+              style: GoogleFonts.inter(fontSize: 14)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancel", style: GoogleFonts.inter(color: AppColors.grey, fontWeight: FontWeight.w500)),
+              child: Text("Cancel",
+                  style: GoogleFonts.inter(
+                      color: AppColors.grey, fontWeight: FontWeight.w500)),
             ),
             TextButton(
               onPressed: () async {
@@ -488,7 +528,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   context.go('/login');
                 }
               },
-              child: Text("Logout", style: GoogleFonts.inter(color: Colors.red, fontWeight: FontWeight.w600)),
+              child: Text("Logout",
+                  style: GoogleFonts.inter(
+                      color: Colors.red, fontWeight: FontWeight.w600)),
             ),
           ],
         );
@@ -496,9 +538,11 @@ class _ProfilePageState extends State<MainprofileScreen> {
     );
   }
 
-  Widget _menuTile(String title, IconData icon, VoidCallback onTap, {bool isSubTile = false}) {
+  Widget _menuTile(String title, IconData icon, VoidCallback onTap,
+      {bool isSubTile = false}) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isSubTile ? 0 : 16, vertical: 6),
+      padding:
+          EdgeInsets.symmetric(horizontal: isSubTile ? 0 : 16, vertical: 6),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -509,10 +553,14 @@ class _ProfilePageState extends State<MainprofileScreen> {
           ),
           child: Row(
             children: [
-              Icon(icon, color: AppColors.primaryDark, size: isSubTile ? 20 : 24),
+              Icon(icon,
+                  color: AppColors.primaryDark, size: isSubTile ? 20 : 24),
               const SizedBox(width: 14),
-              Expanded(child: Text(title, style: GoogleFonts.inter(fontSize: isSubTile ? 13 : 14))),
-              if (!isSubTile) const Icon(Icons.chevron_right, color: AppColors.primaryDark),
+              Expanded(
+                  child: Text(title,
+                      style: GoogleFonts.inter(fontSize: isSubTile ? 13 : 14))),
+              if (!isSubTile)
+                const Icon(Icons.chevron_right, color: AppColors.primaryDark),
             ],
           ),
         ),
@@ -527,7 +575,10 @@ class _ProfilePageState extends State<MainprofileScreen> {
         children: [
           Icon(icon, size: 14, color: AppColors.primaryDark),
           const SizedBox(width: 6),
-          Flexible(child: Text(text, style: GoogleFonts.inter(fontSize: 12), overflow: TextOverflow.ellipsis)),
+          Flexible(
+              child: Text(text,
+                  style: GoogleFonts.inter(fontSize: 12),
+                  overflow: TextOverflow.ellipsis)),
         ],
       ),
     );

@@ -45,20 +45,20 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
         _scrollController.position.maxScrollExtent - 200) {
       if (cached.data.page < cached.data.totalPages) {
         context.read<AmbulanceOrdersBloc>().add(LoadAmbulanceOrdersEvent(
-          page: cached.data.page + 1,
-          status: _selectedStatus,
-          search: _searchController.text,
-          isLoadMore: true,
-        ));
+              page: cached.data.page + 1,
+              status: _selectedStatus,
+              search: _searchController.text,
+              isLoadMore: true,
+            ));
       }
     }
   }
 
   void _reload() {
     context.read<AmbulanceOrdersBloc>().add(LoadAmbulanceOrdersEvent(
-      status: _selectedStatus,
-      search: _searchController.text,
-    ));
+          status: _selectedStatus,
+          search: _searchController.text,
+        ));
   }
 
   @override
@@ -78,7 +78,8 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
         elevation: 0,
         title: Text(
           'Ambulance Orders',
-          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.inter(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: BlocBuilder<AmbulanceOrdersBloc, AmbulanceOrdersState>(
@@ -98,13 +99,15 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                   const SizedBox(height: 12),
                   Text(state.message, textAlign: TextAlign.center),
                   const SizedBox(height: 16),
-                  ElevatedButton(onPressed: _reload, child: const Text('Retry')),
+                  ElevatedButton(
+                      onPressed: _reload, child: const Text('Retry')),
                 ],
               ),
             );
           }
           final displayState = _cachedState;
-          if (displayState == null) return const Center(child: CircularProgressIndicator());
+          if (displayState == null)
+            return const Center(child: CircularProgressIndicator());
 
           return Column(
             children: [
@@ -116,7 +119,8 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                         onRefresh: () async => _reload(),
                         child: ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           itemCount: displayState.isLoadingMore
                               ? displayState.data.orders.length + 1
                               : displayState.data.orders.length,
@@ -124,10 +128,13 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                             if (index >= displayState.data.orders.length) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 20),
-                                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                child: Center(
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2)),
                               );
                             }
-                            return _buildOrderCard(displayState.data.orders[index]);
+                            return _buildOrderCard(
+                                displayState.data.orders[index]);
                           },
                         ),
                       ),
@@ -144,7 +151,12 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2))
+        ],
       ),
       child: Row(
         children: [
@@ -155,14 +167,23 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
               style: GoogleFonts.inter(fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Search by ID, customer...',
-                hintStyle: GoogleFonts.inter(fontSize: 13, color: Colors.grey[400]),
-                prefixIcon: Icon(Icons.search, size: 18, color: Colors.grey[400]),
+                hintStyle:
+                    GoogleFonts.inter(fontSize: 13, color: Colors.grey[400]),
+                prefixIcon:
+                    Icon(Icons.search, size: 18, color: Colors.grey[400]),
                 filled: true,
                 fillColor: const Color(0xFFF8FAFF),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.5)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                        color: AppColors.primaryDark, width: 1.5)),
               ),
             ),
           ),
@@ -179,10 +200,13 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                 style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
                 borderRadius: BorderRadius.circular(10),
                 dropdownColor: Colors.white,
-                items: _statusOptions.map((s) => DropdownMenuItem(
-                  value: s['value'],
-                  child: Text(s['label']!, style: GoogleFonts.inter(fontSize: 13)),
-                )).toList(),
+                items: _statusOptions
+                    .map((s) => DropdownMenuItem(
+                          value: s['value'],
+                          child: Text(s['label']!,
+                              style: GoogleFonts.inter(fontSize: 13)),
+                        ))
+                    .toList(),
                 onChanged: (val) {
                   if (val != null) {
                     setState(() => _selectedStatus = val);
@@ -201,7 +225,8 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
     final customer = order.customer;
     final product = order.product;
     final statusColor = _statusColor(order.bookingStatus);
-    final paymentColor = order.paymentStatus == 'paid' ? Colors.green : Colors.orange;
+    final paymentColor =
+        order.paymentStatus == 'paid' ? Colors.green : Colors.orange;
 
     return GestureDetector(
       onTap: () => context.push('/ambulance-order-details', extra: order),
@@ -210,7 +235,12 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 3))],
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3))
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -222,18 +252,26 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.airport_shuttle, color: AppColors.primaryDark, size: 20),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFF5F3FF),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: const Icon(Icons.airport_shuttle,
+                        color: AppColors.primaryDark, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(order.bookingId, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF1E1B4B))),
+                        Text(order.bookingId,
+                            style: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: const Color(0xFF1E1B4B))),
                         Text(
                           product?.serviceName ?? 'N/A',
-                          style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey[600]),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -257,7 +295,8 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                         ? NetworkImage(customer!.profileImage!) as ImageProvider
                         : null,
                     child: customer?.profileImage == null
-                        ? const Icon(Icons.person, size: 18, color: AppColors.primaryDark)
+                        ? const Icon(Icons.person,
+                            size: 18, color: AppColors.primaryDark)
                         : null,
                   ),
                   const SizedBox(width: 8),
@@ -265,8 +304,12 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(customer?.fullName ?? 'Unknown', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13)),
-                        Text(customer?.phone ?? '', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+                        Text(customer?.fullName ?? 'Unknown',
+                            style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600, fontSize: 13)),
+                        Text(customer?.phone ?? '',
+                            style: GoogleFonts.inter(
+                                fontSize: 11, color: Colors.grey[500])),
                       ],
                     ),
                   ),
@@ -275,14 +318,23 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                     children: [
                       Text(
                         '₹${order.fare.toStringAsFixed(0)}',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.primaryDark),
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: AppColors.primaryDark),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: paymentColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: paymentColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6)),
                         child: Text(
                           order.paymentStatus.toUpperCase(),
-                          style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: paymentColor),
+                          style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: paymentColor),
                         ),
                       ),
                     ],
@@ -292,25 +344,36 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
               const SizedBox(height: 12),
 
               // Locations
-              _locationRow(Icons.circle, Colors.green, 'P:', order.pickupLocation.address),
+              _locationRow(Icons.circle, Colors.green, 'P:',
+                  order.pickupLocation.address),
               const SizedBox(height: 4),
-              _locationRow(Icons.location_on, Colors.red, 'D:', order.dropoffLocation.address),
+              _locationRow(Icons.location_on, Colors.red, 'D:',
+                  order.dropoffLocation.address),
               const SizedBox(height: 10),
 
               // Footer
               Row(
                 children: [
-                  Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[400]),
+                  Icon(Icons.calendar_today_outlined,
+                      size: 12, color: Colors.grey[400]),
                   const SizedBox(width: 4),
-                  Text(DateFormat('MMM d, yyyy').format(order.createdAt), style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+                  Text(DateFormat('MMM d, yyyy').format(order.createdAt),
+                      style: GoogleFonts.inter(
+                          fontSize: 11, color: Colors.grey[500])),
                   const Spacer(),
-                  Icon(Icons.social_distance, size: 12, color: Colors.grey[400]),
+                  Icon(Icons.social_distance,
+                      size: 12, color: Colors.grey[400]),
                   const SizedBox(width: 4),
-                  Text('${order.distance.toStringAsFixed(0)} km', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+                  Text('${order.distance.toStringAsFixed(0)} km',
+                      style: GoogleFonts.inter(
+                          fontSize: 11, color: Colors.grey[500])),
                   const SizedBox(width: 12),
                   Text(
-                    order.paymentMethod == 'cod' ? 'Cash on Delivery' : 'Online',
-                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
+                    order.paymentMethod == 'cod'
+                        ? 'Cash on Delivery'
+                        : 'Online',
+                    style: GoogleFonts.inter(
+                        fontSize: 11, color: Colors.grey[500]),
                   ),
                 ],
               ),
@@ -321,7 +384,8 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
     );
   }
 
-  Widget _locationRow(IconData icon, Color color, String prefix, String address) {
+  Widget _locationRow(
+      IconData icon, Color color, String prefix, String address) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -330,7 +394,11 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
           child: Icon(icon, size: 10, color: color),
         ),
         const SizedBox(width: 6),
-        Text('$prefix ', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[600])),
+        Text('$prefix ',
+            style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600])),
         Expanded(
           child: Text(
             address,
@@ -346,10 +414,13 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
   Widget _statusBadge(String status, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20)),
       child: Text(
         _capitalize(status),
-        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+        style: GoogleFonts.inter(
+            fontSize: 11, fontWeight: FontWeight.bold, color: color),
       ),
     );
   }
@@ -359,9 +430,14 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.airport_shuttle_outlined, size: 80, color: Colors.grey[200]),
+          Icon(Icons.airport_shuttle_outlined,
+              size: 80, color: Colors.grey[200]),
           const SizedBox(height: 16),
-          Text('No ambulance orders found', style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[500], fontWeight: FontWeight.w600)),
+          Text('No ambulance orders found',
+              style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -369,11 +445,16 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'confirmed': return Colors.blue;
-      case 'intransit': return Colors.indigo;
-      case 'completed': return Colors.green;
-      case 'cancelled': return Colors.red;
-      default: return Colors.orange;
+      case 'confirmed':
+        return Colors.blue;
+      case 'intransit':
+        return Colors.indigo;
+      case 'completed':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.orange;
     }
   }
 

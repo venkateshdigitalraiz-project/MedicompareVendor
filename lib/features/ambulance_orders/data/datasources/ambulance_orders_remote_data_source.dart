@@ -25,9 +25,8 @@ class AmbulanceOrdersRemoteDataSource {
     final decoded = json.decode(response.body);
     final data = decoded['data'];
     final pagination = data['pagination'] as Map<String, dynamic>;
-    final list = (data['AmbulanceData'] as List)
-        .map((e) => _parseOrder(e))
-        .toList();
+    final list =
+        (data['AmbulanceData'] as List).map((e) => _parseOrder(e)).toList();
     return AmbulanceOrdersListEntity(
       orders: list,
       total: pagination['total'] ?? 0,
@@ -66,8 +65,7 @@ class AmbulanceOrdersRemoteDataSource {
       );
     }).toList();
 
-    final productList =
-        (e['productdetails'] as List? ?? []).map((p) {
+    final productList = (e['productdetails'] as List? ?? []).map((p) {
       final tablets = (p['tabletdetails'] as List? ?? []);
       final tablet =
           tablets.isNotEmpty ? tablets.first as Map<String, dynamic> : {};
@@ -81,8 +79,7 @@ class AmbulanceOrdersRemoteDataSource {
         ambulanceType: tablet['ambulancetype']?.toString(),
         price: (p['price'] as num?)?.toDouble() ?? 0,
         discountPrice: (p['discountprice'] as num?)?.toDouble() ?? 0,
-        imageUrl:
-            tabletFiles.isNotEmpty ? tabletFiles.first.toString() : null,
+        imageUrl: tabletFiles.isNotEmpty ? tabletFiles.first.toString() : null,
         businessName: biz['name']?.toString(),
         businessPhone: biz['mobile']?.toString(),
         businessEmail: biz['email']?.toString(),
@@ -94,21 +91,15 @@ class AmbulanceOrdersRemoteDataSource {
       id: e['_id']?.toString() ?? '',
       bookingId: e['bookingId']?.toString() ?? '',
       pickupLocation: AmbulanceOrderLocation(
-        lat: pickupCoords.length > 1
-            ? (pickupCoords[1] as num).toDouble()
-            : 0,
-        lng: pickupCoords.isNotEmpty
-            ? (pickupCoords[0] as num).toDouble()
-            : 0,
+        lat: pickupCoords.length > 1 ? (pickupCoords[1] as num).toDouble() : 0,
+        lng: pickupCoords.isNotEmpty ? (pickupCoords[0] as num).toDouble() : 0,
         address: pickup['address']?.toString() ?? '',
       ),
       dropoffLocation: AmbulanceOrderLocation(
-        lat: dropoffCoords.length > 1
-            ? (dropoffCoords[1] as num).toDouble()
-            : 0,
-        lng: dropoffCoords.isNotEmpty
-            ? (dropoffCoords[0] as num).toDouble()
-            : 0,
+        lat:
+            dropoffCoords.length > 1 ? (dropoffCoords[1] as num).toDouble() : 0,
+        lng:
+            dropoffCoords.isNotEmpty ? (dropoffCoords[0] as num).toDouble() : 0,
         address: dropoff['address']?.toString() ?? '',
       ),
       distance: (e['distance'] as num?)?.toDouble() ?? 0,

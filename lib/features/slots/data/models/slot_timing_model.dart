@@ -15,18 +15,21 @@ class SlotTimingModel extends SlotTimingEntity {
       availability: (json['availability'] as List)
           .map((e) => DayAvailabilityModel.fromJson(e))
           .toList(),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'availability': availability.map((e) => {
-        'day': e.day,
-        'isOpen': e.isOpen,
-        'startTime': e.startTime,
-        'endTime': e.endTime,
-      }).toList(),
+      'availability': availability
+          .map((e) => {
+                'day': e.day,
+                'isOpen': e.isOpen,
+                'startTime': e.startTime,
+                'endTime': e.endTime,
+              })
+          .toList(),
     };
   }
 }

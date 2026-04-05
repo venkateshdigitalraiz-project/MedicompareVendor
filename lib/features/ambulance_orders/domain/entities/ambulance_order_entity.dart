@@ -101,8 +101,7 @@ class AmbulanceOrderEntity {
     required this.productDetails,
   });
 
-  AmbulanceOrderUser? get customer =>
-      users.isNotEmpty ? users.first : null;
+  AmbulanceOrderUser? get customer => users.isNotEmpty ? users.first : null;
   AmbulanceOrderProductDetail? get product =>
       productDetails.isNotEmpty ? productDetails.first : null;
 }

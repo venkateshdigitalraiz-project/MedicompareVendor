@@ -4,15 +4,18 @@ import '../../domain/entities/ambulance_order_entity.dart';
 import 'ambulance_orders_event.dart';
 import 'ambulance_orders_state.dart';
 
-class AmbulanceOrdersBloc extends Bloc<AmbulanceOrdersEvent, AmbulanceOrdersState> {
+class AmbulanceOrdersBloc
+    extends Bloc<AmbulanceOrdersEvent, AmbulanceOrdersState> {
   final AmbulanceOrdersRemoteDataSource dataSource;
 
-  AmbulanceOrdersBloc({required this.dataSource}) : super(AmbulanceOrdersInitial()) {
+  AmbulanceOrdersBloc({required this.dataSource})
+      : super(AmbulanceOrdersInitial()) {
     on<LoadAmbulanceOrdersEvent>(_onLoad);
     on<LoadAmbulanceOrderDetailsEvent>(_onLoadDetails);
   }
 
-  Future<void> _onLoad(LoadAmbulanceOrdersEvent event, Emitter<AmbulanceOrdersState> emit) async {
+  Future<void> _onLoad(LoadAmbulanceOrdersEvent event,
+      Emitter<AmbulanceOrdersState> emit) async {
     final currentState = state;
     if (event.isLoadMore && currentState is AmbulanceOrdersLoaded) {
       emit(currentState.copyWith(isLoadingMore: true));
@@ -35,8 +38,7 @@ class AmbulanceOrdersBloc extends Bloc<AmbulanceOrdersEvent, AmbulanceOrdersStat
           totalPages: result.totalPages,
         );
         emit(AmbulanceOrdersLoaded(merged,
-            isLoadingMore: false,
-            selectedStatus: event.status));
+            isLoadingMore: false, selectedStatus: event.status));
       } else {
         emit(AmbulanceOrdersLoaded(result, selectedStatus: event.status));
       }
@@ -45,7 +47,8 @@ class AmbulanceOrdersBloc extends Bloc<AmbulanceOrdersEvent, AmbulanceOrdersStat
     }
   }
 
-  Future<void> _onLoadDetails(LoadAmbulanceOrderDetailsEvent event, Emitter<AmbulanceOrdersState> emit) async {
+  Future<void> _onLoadDetails(LoadAmbulanceOrderDetailsEvent event,
+      Emitter<AmbulanceOrdersState> emit) async {
     emit(AmbulanceOrdersLoading());
     try {
       final order = await dataSource.getBookingDetails(event.id);

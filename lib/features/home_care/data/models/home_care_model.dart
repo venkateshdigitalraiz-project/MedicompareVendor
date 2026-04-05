@@ -101,8 +101,15 @@ class HomeCareDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-        id, name, description, precaution, sideEffects, preparationInstructions,
-        duration, files, subcategory
+        id,
+        name,
+        description,
+        precaution,
+        sideEffects,
+        preparationInstructions,
+        duration,
+        files,
+        subcategory
       ];
 }
 
@@ -111,7 +118,8 @@ class HomeCareSubcategory extends Equatable {
   final String name;
   final String? description;
 
-  const HomeCareSubcategory({required this.id, required this.name, this.description});
+  const HomeCareSubcategory(
+      {required this.id, required this.name, this.description});
 
   factory HomeCareSubcategory.fromJson(Map<String, dynamic> json) {
     return HomeCareSubcategory(
@@ -133,7 +141,9 @@ class HomeCareResponse extends Equatable {
 
   factory HomeCareResponse.fromJson(Map<String, dynamic> json) {
     return HomeCareResponse(
-      list: (json['list'] as List? ?? []).map((i) => HomeCareItem.fromJson(i)).toList(),
+      list: (json['list'] as List? ?? [])
+          .map((i) => HomeCareItem.fromJson(i))
+          .toList(),
       pagination: HomeCarePagination.fromJson(json['pagination'] ?? {}),
     );
   }
@@ -199,5 +209,6 @@ class HomeCareDropdownItem extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, duration, files, subcategory, description];
+  List<Object?> get props =>
+      [id, name, duration, files, subcategory, description];
 }

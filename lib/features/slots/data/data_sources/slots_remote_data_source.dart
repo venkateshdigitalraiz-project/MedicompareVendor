@@ -22,7 +22,8 @@ class SlotsRemoteDataSourceImpl implements SlotsRemoteDataSource {
   }
 
   @override
-  Future<SlotTimingModel> updateSlotTimings(String id, SlotTimingModel model) async {
+  Future<SlotTimingModel> updateSlotTimings(
+      String id, SlotTimingModel model) async {
     final response = await apiService.post(
       ApiEndpoints.updateSlotTimings(id),
       body: model.toJson(),

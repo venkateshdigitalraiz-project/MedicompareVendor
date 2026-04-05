@@ -160,7 +160,8 @@ class FullUserDetailsEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, firstName, lastName, email, phone, age, gender, files];
+  List<Object?> get props =>
+      [id, firstName, lastName, email, phone, age, gender, files];
 }
 
 class AddressDetailsEntity extends Equatable {
@@ -185,7 +186,16 @@ class AddressDetailsEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, houseNo, area, landmark, description, addressType, pincode, fullAddress];
+  List<Object?> get props => [
+        id,
+        houseNo,
+        area,
+        landmark,
+        description,
+        addressType,
+        pincode,
+        fullAddress
+      ];
 }
 
 class ProductDetailsEntity extends Equatable {

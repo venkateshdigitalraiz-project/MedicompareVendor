@@ -9,18 +9,22 @@ class SubscriptionService {
   SubscriptionService({required this.apiService});
 
   Future<SubscriptionHistory> getSubscriptionHistory() async {
-    final response = await apiService.get(ApiEndpoints.leadsSubscriptionHistory);
+    final response =
+        await apiService.get(ApiEndpoints.leadsSubscriptionHistory);
     final decoded = jsonDecode(response.body);
     if (decoded['success'] == true && decoded['data'] != null) {
       return SubscriptionHistory.fromJson(decoded['data']);
     } else if (decoded['success'] == true) {
-      return const SubscriptionHistory(planHistory: []); // Return empty history if data is null
+      return const SubscriptionHistory(
+          planHistory: []); // Return empty history if data is null
     } else {
-      throw Exception(decoded['message'] ?? 'Failed to fetch subscription history');
+      throw Exception(
+          decoded['message'] ?? 'Failed to fetch subscription history');
     }
   }
 
-  Future<SubscriptionListResponse> getSubscriptionPlans({int page = 1, int limit = 10}) async {
+  Future<SubscriptionListResponse> getSubscriptionPlans(
+      {int page = 1, int limit = 10}) async {
     final response = await apiService.get(
       ApiEndpoints.leadsSubscriptionList,
       queryParameters: {
@@ -32,13 +36,25 @@ class SubscriptionService {
     if (decoded['success'] == true && decoded['data'] != null) {
       return SubscriptionListResponse.fromJson(decoded['data']);
     } else if (decoded['success'] == true) {
-      return SubscriptionListResponse(list: const [], pagination: Pagination(total: 0, page: page, limit: limit, totalPages: 0, hasNextPage: false, hasPrevPage: false));
+      return SubscriptionListResponse(
+          list: const [],
+          pagination: Pagination(
+              total: 0,
+              page: page,
+              limit: limit,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false));
     } else {
-      throw Exception(decoded['message'] ?? 'Failed to fetch subscription plans');
+      throw Exception(
+          decoded['message'] ?? 'Failed to fetch subscription plans');
     }
   }
 
-  Future<String> createOrder({required int amount, required String currency, required String receipt}) async {
+  Future<String> createOrder(
+      {required int amount,
+      required String currency,
+      required String receipt}) async {
     final response = await apiService.post(
       ApiEndpoints.leadsSubscriptionCreateOrder,
       body: {
@@ -50,14 +66,18 @@ class SubscriptionService {
     final decoded = jsonDecode(response.body);
     if (decoded['success'] == true) {
       // Use null-safe access to avoid crash if data is null
-      final orderId = (decoded['data'] as Map<String, dynamic>?)?['orderId'] ?? decoded['orderId'];
+      final orderId = (decoded['data'] as Map<String, dynamic>?)?['orderId'] ??
+          decoded['orderId'];
       return orderId?.toString() ?? '';
     } else {
       throw Exception(decoded['message'] ?? 'Failed to create payment order');
     }
   }
 
-  Future<bool> purchasePlan({required String planId, required String razorpayPaymentId, required int amount}) async {
+  Future<bool> purchasePlan(
+      {required String planId,
+      required String razorpayPaymentId,
+      required int amount}) async {
     final response = await apiService.post(
       ApiEndpoints.leadsSubscriptionPurchase,
       body: {

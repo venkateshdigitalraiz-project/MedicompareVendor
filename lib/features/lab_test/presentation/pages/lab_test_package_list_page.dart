@@ -24,7 +24,8 @@ class LabTestPackageListPage extends StatefulWidget {
 class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final LabTestService _labTestService = LabTestInjection.provideLabTestService();
+  final LabTestService _labTestService =
+      LabTestInjection.provideLabTestService();
 
   List<LabTestDetails> _allLabTests = [];
   Timer? _debounce;
@@ -47,15 +48,16 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
   void _onScroll() {
     final state = context.read<LabTestPackageBloc>().state;
     if (state is LabTestPackageLoaded && !state.isLoadingMore) {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         final pagination = state.response.pagination;
         if (pagination.page < pagination.totalPages) {
           context.read<LabTestPackageBloc>().add(LoadLabTestPackagesEvent(
-            page: pagination.page + 1,
-            labTestId: state.selectedLabTestId,
-            search: state.searchQuery,
-            isLoadMore: true,
-          ));
+                page: pagination.page + 1,
+                labTestId: state.selectedLabTestId,
+                search: state.searchQuery,
+                isLoadMore: true,
+              ));
         }
       }
     }
@@ -82,7 +84,8 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
         ),
         title: Text(
           "Lab Test Packages",
-          style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+          style: GoogleFonts.inter(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
           _addPackageButton(),
@@ -91,12 +94,17 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
       ),
       body: BlocBuilder<LabTestPackageBloc, LabTestPackageState>(
         builder: (context, state) {
-          if (state is LabTestPackageInitial || (state is LabTestPackageLoading && context.read<LabTestPackageBloc>().state is! LabTestPackageLoaded)) {
+          if (state is LabTestPackageInitial ||
+              (state is LabTestPackageLoading &&
+                  context.read<LabTestPackageBloc>().state
+                      is! LabTestPackageLoaded)) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (state is LabTestPackageError) {
-            return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+            return Center(
+                child: Text(state.message,
+                    style: const TextStyle(color: Colors.red)));
           }
 
           if (state is LabTestPackageLoaded) {
@@ -109,17 +117,24 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
                       ? _buildEmptyState()
                       : RefreshIndicator(
                           onRefresh: () async {
-                            context.read<LabTestPackageBloc>().add(const LoadLabTestPackagesEvent());
+                            context
+                                .read<LabTestPackageBloc>()
+                                .add(const LoadLabTestPackagesEvent());
                           },
                           child: ListView.builder(
                             controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            itemCount: state.isLoadingMore ? state.response.list.length + 1 : state.response.list.length,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            itemCount: state.isLoadingMore
+                                ? state.response.list.length + 1
+                                : state.response.list.length,
                             itemBuilder: (context, index) {
                               if (index >= state.response.list.length) {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 24.0),
-                                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                  child: Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2)),
                                 );
                               }
                               final item = state.response.list[index];
@@ -147,12 +162,16 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
             builder: (ctx) => Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(ctx).size.height * 0.9),
                 child: AddLabTestPackageSheet(
                   onSuccess: () {
-                    context.read<LabTestPackageBloc>().add(const LoadLabTestPackagesEvent());
+                    context
+                        .read<LabTestPackageBloc>()
+                        .add(const LoadLabTestPackagesEvent());
                   },
                 ),
               ),
@@ -162,7 +181,10 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
         icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
         label: Text(
           "Add Package",
-          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+          style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
@@ -235,13 +257,16 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
             onChanged: (val) {
               _debounce?.cancel();
               _debounce = Timer(const Duration(milliseconds: 500), () {
-                context.read<LabTestPackageBloc>().add(SearchLabTestPackagesEvent(val));
+                context
+                    .read<LabTestPackageBloc>()
+                    .add(SearchLabTestPackagesEvent(val));
               });
             },
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search packages...",
-              hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
+              hintStyle:
+                  GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
               prefixIcon: const Icon(Icons.search, size: 20),
               prefixIconColor: Colors.grey[400],
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -262,7 +287,7 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Lab Test Dropdown Filter
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -276,20 +301,33 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
                 menuMaxHeight: 400,
                 borderRadius: BorderRadius.circular(12),
                 dropdownColor: Colors.white,
-                value: state.selectedLabTestId.isEmpty ? null : state.selectedLabTestId,
-                hint: Text("All Lab Tests", style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600])),
+                value: state.selectedLabTestId.isEmpty
+                    ? null
+                    : state.selectedLabTestId,
+                hint: Text("All Lab Tests",
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: Colors.grey[600])),
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text("All Lab Tests", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    child: Text("All Lab Tests",
+                        style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary)),
                   ),
                   ..._allLabTests.map((t) => DropdownMenuItem(
-                    value: t.id,
-                    child: Text(t.name, style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)),
-                  )),
+                        value: t.id,
+                        child: Text(t.name,
+                            style: GoogleFonts.inter(
+                                fontSize: 13, color: Colors.black87)),
+                      )),
                 ],
                 onChanged: (val) {
-                  if (val != null) context.read<LabTestPackageBloc>().add(SelectLabTestForPackageFilterEvent(val));
+                  if (val != null)
+                    context
+                        .read<LabTestPackageBloc>()
+                        .add(SelectLabTestForPackageFilterEvent(val));
                 },
               ),
             ),
@@ -309,13 +347,17 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (ctx) => Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(ctx).size.height * 0.9),
               child: AddLabTestPackageSheet(
                 editItem: item,
                 onSuccess: () {
-                   context.read<LabTestPackageBloc>().add(const LoadLabTestPackagesEvent());
+                  context
+                      .read<LabTestPackageBloc>()
+                      .add(const LoadLabTestPackagesEvent());
                 },
               ),
             ),
@@ -332,13 +374,19 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Delete Package", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
-        content: Text("Are you sure you want to delete ${item.name}? This action cannot be undone.", style: GoogleFonts.inter(fontSize: 14)),
+        title: Text("Delete Package",
+            style:
+                GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+        content: Text(
+            "Are you sure you want to delete ${item.name}? This action cannot be undone.",
+            style: GoogleFonts.inter(fontSize: 14)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey[600], fontWeight: FontWeight.w600)),
+            child: Text("Cancel",
+                style: GoogleFonts.inter(
+                    color: Colors.grey[600], fontWeight: FontWeight.w600)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -346,26 +394,36 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (c) => const Center(child: CircularProgressIndicator()),
+                builder: (c) =>
+                    const Center(child: CircularProgressIndicator()),
               );
-              
+
               try {
                 final labService = LabTestInjection.provideLabTestService();
                 await labService.deletePackage(item.id);
                 if (mounted) {
                   Navigator.pop(context); // close loading
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Package deleted successfully'), backgroundColor: Colors.green));
-                  context.read<LabTestPackageBloc>().add(const LoadLabTestPackagesEvent());
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Package deleted successfully'),
+                      backgroundColor: Colors.green));
+                  context
+                      .read<LabTestPackageBloc>()
+                      .add(const LoadLabTestPackagesEvent());
                 }
               } catch (e) {
                 if (mounted) {
                   Navigator.pop(context); // close loading
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(e.toString()),
+                      backgroundColor: Colors.red));
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, elevation: 0),
-            child: Text("Delete", style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, elevation: 0),
+            child: Text("Delete",
+                style: GoogleFonts.inter(
+                    color: Colors.white, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -379,7 +437,8 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
         children: [
           Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[200]),
           const SizedBox(height: 16),
-          Text("No packages found", style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400])),
+          Text("No packages found",
+              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400])),
         ],
       ),
     );

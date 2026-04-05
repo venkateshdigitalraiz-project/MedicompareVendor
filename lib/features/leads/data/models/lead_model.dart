@@ -34,8 +34,8 @@ class LeadModel extends LeadEntity {
       serviceType: json['serviceType'] ?? 'Unknown',
       serviceName: sName,
       vendorPermission: json['vendorPermission'] ?? 'pending',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
     );
   }
@@ -98,7 +98,7 @@ class LeadDetailsModel extends LeadDetailsEntity {
   factory LeadDetailsModel.fromJson(Map<String, dynamic> json) {
     final productDetails = json['productdetails'] ?? {};
     final tabletDetailsList = (productDetails['tabletdetails'] as List?) ?? [];
-    
+
     String sName = 'Unknown Service';
     String duration = 'N/A';
     if (tabletDetailsList.isNotEmpty) {
@@ -118,7 +118,9 @@ class LeadDetailsModel extends LeadDetailsEntity {
       vendorAssigned: json['vendorassined'] ?? 'Unknown',
       date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
       leadType: json['leadType'] ?? 'Unknown',
-      age: json['age'] is int ? json['age'] : int.tryParse(json['age']?.toString() ?? '0') ?? 0,
+      age: json['age'] is int
+          ? json['age']
+          : int.tryParse(json['age']?.toString() ?? '0') ?? 0,
       gender: json['gender'] ?? 'Unknown',
       vendorPermission: json['vendorPermission'] ?? 'Unknown',
       price: (productDetails['price'] ?? 0).toDouble(),

@@ -33,7 +33,8 @@ class AmbulanceRepositoryImpl implements AmbulanceRepository {
   }
 
   @override
-  Future<List<AmbulanceNameOptionEntity>> getAmbulanceNames(String query) async {
+  Future<List<AmbulanceNameOptionEntity>> getAmbulanceNames(
+      String query) async {
     return await remoteDataSource.getAmbulanceNames(query);
   }
 

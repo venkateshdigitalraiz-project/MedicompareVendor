@@ -49,18 +49,24 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                                   Text(
                                     order.bookingId,
                                     style: GoogleFonts.poppins(
-                                        fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 2),
                                   Row(
                                     children: [
-                                      const Icon(Icons.calendar_today, size: 11, color: Colors.white70),
+                                      const Icon(Icons.calendar_today,
+                                          size: 11, color: Colors.white70),
                                       const SizedBox(width: 4),
                                       Text(
-                                        DateFormat('MMM d, yyyy • hh:mm a').format(order.createdAt),
-                                        style: GoogleFonts.poppins(fontSize: 11, color: Colors.white70),
+                                        DateFormat('MMM d, yyyy • hh:mm a')
+                                            .format(order.createdAt),
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            color: Colors.white70),
                                       ),
                                     ],
                                   ),
@@ -168,14 +174,19 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
         _statBox(
           icon: Icons.emergency_outlined,
           label: 'Type',
-          value: _capitalize(order.emergencyType.replaceAll('nonemergency', 'Non-Emergency')),
+          value: _capitalize(
+              order.emergencyType.replaceAll('nonemergency', 'Non-Emergency')),
           color: Colors.orange,
         ),
       ],
     );
   }
 
-  Widget _statBox({required IconData icon, required String label, required String value, required Color color}) {
+  Widget _statBox(
+      {required IconData icon,
+      required String label,
+      required String value,
+      required Color color}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
@@ -189,10 +200,13 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
             Icon(icon, color: color, size: 20),
             const SizedBox(height: 4),
             Text(value,
-                style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 12, color: color),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+                style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold, fontSize: 12, color: color),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
             Text(label,
-                style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey[500])),
+                style:
+                    GoogleFonts.poppins(fontSize: 10, color: Colors.grey[500])),
           ],
         ),
       ),
@@ -208,7 +222,9 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: product.imageUrl != null
               ? Image.network(product.imageUrl!,
-                  width: 72, height: 72, fit: BoxFit.cover,
+                  width: 72,
+                  height: 72,
+                  fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => _ambulancePlaceholder())
               : _ambulancePlaceholder(),
         ),
@@ -218,24 +234,34 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(product.serviceName,
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF1E1B4B))),
+                  style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: const Color(0xFF1E1B4B))),
               const SizedBox(height: 4),
               if (product.ambulanceType != null)
-                _pill(_capitalize(product.ambulanceType!), AppColors.primaryDark),
+                _pill(
+                    _capitalize(product.ambulanceType!), AppColors.primaryDark),
               const SizedBox(height: 6),
               if (product.businessName != null)
                 Row(children: [
-                  Icon(Icons.business_center_outlined, size: 12, color: Colors.grey[500]),
+                  Icon(Icons.business_center_outlined,
+                      size: 12, color: Colors.grey[500]),
                   const SizedBox(width: 4),
-                  Expanded(child: Text(product.businessName!,
-                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[600]))),
+                  Expanded(
+                      child: Text(product.businessName!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 11, color: Colors.grey[600]))),
                 ]),
             ],
           ),
         ),
         const SizedBox(width: 8),
         Text('₹${product.discountPrice.toStringAsFixed(0)}',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryDark)),
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: AppColors.primaryDark)),
       ],
     );
   }
@@ -254,7 +280,8 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                   ? NetworkImage(customer.profileImage!) as ImageProvider
                   : null,
               child: customer.profileImage == null
-                  ? const Icon(Icons.person, color: AppColors.primaryDark, size: 26)
+                  ? const Icon(Icons.person,
+                      color: AppColors.primaryDark, size: 26)
                   : null,
             ),
             const SizedBox(width: 12),
@@ -263,14 +290,19 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(customer.fullName,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF1E1B4B))),
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: const Color(0xFF1E1B4B))),
                   if (customer.age != null || customer.gender != null)
                     Text(
                       [
                         if (customer.age != null) 'Age: ${customer.age}',
-                        if (customer.gender != null) _capitalize(customer.gender!),
+                        if (customer.gender != null)
+                          _capitalize(customer.gender!),
                       ].join(' • '),
-                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500]),
+                      style: GoogleFonts.poppins(
+                          fontSize: 11, color: Colors.grey[500]),
                     ),
                 ],
               ),
@@ -278,10 +310,12 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        _contactTile(Icons.phone_outlined, customer.phone, const Color(0xFF0EA5E9)),
+        _contactTile(
+            Icons.phone_outlined, customer.phone, const Color(0xFF0EA5E9)),
         const SizedBox(height: 8),
         _contactTile(Icons.email_outlined, customer.email, Colors.purple),
-        if (customer.medicalConditions != null && customer.medicalConditions!.isNotEmpty) ...[
+        if (customer.medicalConditions != null &&
+            customer.medicalConditions!.isNotEmpty) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -295,15 +329,20 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 14),
+                  const Icon(Icons.warning_amber_rounded,
+                      color: Colors.red, size: 14),
                   const SizedBox(width: 4),
                   Text('MEDICAL CONDITIONS',
-                      style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold,
-                          color: Colors.red, letterSpacing: 0.4)),
+                      style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          letterSpacing: 0.4)),
                 ]),
                 const SizedBox(height: 4),
                 Text(customer.medicalConditions!,
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.red[800])),
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, color: Colors.red[800])),
               ],
             ),
           ),
@@ -345,12 +384,17 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.social_distance_outlined, size: 18, color: AppColors.primaryDark),
+              const Icon(Icons.social_distance_outlined,
+                  size: 18, color: AppColors.primaryDark),
               const SizedBox(width: 8),
               Text('Total Distance: ',
-                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
+                  style: GoogleFonts.poppins(
+                      fontSize: 13, color: Colors.grey[600])),
               Text('${order.distance.toStringAsFixed(0)} km',
-                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
+                  style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark)),
             ],
           ),
         ),
@@ -366,8 +410,11 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Payment Status', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
-            _pill(_capitalize(order.paymentStatus), isPaid ? Colors.green : Colors.orange),
+            Text('Payment Status',
+                style:
+                    GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
+            _pill(_capitalize(order.paymentStatus),
+                isPaid ? Colors.green : Colors.orange),
           ],
         ),
         const SizedBox(height: 10),
@@ -400,13 +447,21 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      order.paymentMethod == 'cod' ? Icons.money_outlined : Icons.credit_card_outlined,
-                      size: 18, color: AppColors.primaryDark,
+                      order.paymentMethod == 'cod'
+                          ? Icons.money_outlined
+                          : Icons.credit_card_outlined,
+                      size: 18,
+                      color: AppColors.primaryDark,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      order.paymentMethod == 'cod' ? 'Cash on Delivery' : 'Online Payment',
-                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF1E1B4B)),
+                      order.paymentMethod == 'cod'
+                          ? 'Cash on Delivery'
+                          : 'Online Payment',
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF1E1B4B)),
                     ),
                   ],
                 ),
@@ -424,17 +479,23 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(product.businessName ?? '',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF1E1B4B))),
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: const Color(0xFF1E1B4B))),
         const SizedBox(height: 12),
         if (product.businessPhone != null)
-          _contactTile(Icons.phone_outlined, product.businessPhone!, Colors.green),
+          _contactTile(
+              Icons.phone_outlined, product.businessPhone!, Colors.green),
         if (product.businessEmail != null) ...[
           const SizedBox(height: 8),
-          _contactTile(Icons.email_outlined, product.businessEmail!, Colors.purple),
+          _contactTile(
+              Icons.email_outlined, product.businessEmail!, Colors.purple),
         ],
         if (product.businessAddress != null) ...[
           const SizedBox(height: 8),
-          _contactTile(Icons.location_on_outlined, product.businessAddress!, Colors.red),
+          _contactTile(
+              Icons.location_on_outlined, product.businessAddress!, Colors.red),
         ],
       ],
     );
@@ -455,7 +516,10 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: Column(
@@ -473,7 +537,10 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(title,
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF1E1B4B))),
+                  style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: const Color(0xFF1E1B4B))),
             ],
           ),
           const SizedBox(height: 14),
@@ -485,20 +552,30 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _tripStop({required Color dotColor, required String label, required String address, required bool isFirst}) {
+  Widget _tripStop(
+      {required Color dotColor,
+      required String label,
+      required String address,
+      required bool isFirst}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
           children: [
             Container(
-              width: 22, height: 22,
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
                 color: dotColor.withOpacity(0.1),
                 shape: BoxShape.circle,
                 border: Border.all(color: dotColor, width: 2),
               ),
-              child: Center(child: Container(width: 8, height: 8, decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle))),
+              child: Center(
+                  child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                          color: dotColor, shape: BoxShape.circle))),
             ),
           ],
         ),
@@ -509,9 +586,18 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500], letterSpacing: 0.5)),
+                Text(label,
+                    style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[500],
+                        letterSpacing: 0.5)),
                 const SizedBox(height: 2),
-                Text(address, style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1E1B4B), height: 1.4)),
+                Text(address,
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: const Color(0xFF1E1B4B),
+                        height: 1.4)),
               ],
             ),
           ),
@@ -526,25 +612,31 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, size: 14, color: color),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Text(text, style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF374151))),
+            child: Text(text,
+                style: GoogleFonts.poppins(
+                    fontSize: 13, color: const Color(0xFF374151))),
           ),
         ),
       ],
     );
   }
 
-  Widget _fareRow(String label, String value, {bool isBold = false, Color? valueColor}) {
+  Widget _fareRow(String label, String value,
+      {bool isBold = false, Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
+        Text(label,
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600])),
         Text(
           value,
           style: GoogleFonts.poppins(
@@ -560,8 +652,12 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
   Widget _pill(String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+      decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20)),
+      child: Text(label,
+          style: GoogleFonts.poppins(
+              fontSize: 11, fontWeight: FontWeight.bold, color: color)),
     );
   }
 
@@ -575,29 +671,38 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
       ),
       child: Text(
         _capitalize(status),
-        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+        style: GoogleFonts.poppins(
+            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }
 
   Widget _ambulancePlaceholder() => Container(
-        width: 72, height: 72,
+        width: 72,
+        height: 72,
         decoration: BoxDecoration(
           color: const Color(0xFFEEF2FF),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.airport_shuttle_rounded, color: AppColors.primaryDark, size: 32),
+        child: const Icon(Icons.airport_shuttle_rounded,
+            color: AppColors.primaryDark, size: 32),
       );
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'confirmed': return Colors.blue;
-      case 'intransit': return Colors.indigo;
-      case 'completed': return Colors.green;
-      case 'cancelled': return Colors.red;
-      default: return Colors.orange;
+      case 'confirmed':
+        return Colors.blue;
+      case 'intransit':
+        return Colors.indigo;
+      case 'completed':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.orange;
     }
   }
 
-  String _capitalize(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }

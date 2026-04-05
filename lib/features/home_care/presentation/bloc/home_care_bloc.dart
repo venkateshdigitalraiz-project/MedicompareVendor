@@ -13,14 +13,16 @@ class HomeCareBloc extends Bloc<HomeCareEvent, HomeCareState> {
     on<SearchHomeCareEvent>(_onSearch);
   }
 
-  Future<void> _onLoadCategories(LoadHomeCareCategoriesEvent event, Emitter<HomeCareState> emit) async {
+  Future<void> _onLoadCategories(
+      LoadHomeCareCategoriesEvent event, Emitter<HomeCareState> emit) async {
     try {
       final categories = await _service.getCategories();
       emit(state.copyWith(categories: categories));
     } catch (_) {}
   }
 
-  Future<void> _onLoadList(LoadHomeCareListEvent event, Emitter<HomeCareState> emit) async {
+  Future<void> _onLoadList(
+      LoadHomeCareListEvent event, Emitter<HomeCareState> emit) async {
     if (event.isRefresh) {
       emit(state.copyWith(status: HomeCareStatus.loading, items: []));
     } else if (state.status == HomeCareStatus.initial) {
@@ -34,7 +36,8 @@ class HomeCareBloc extends Bloc<HomeCareEvent, HomeCareState> {
         search: event.search,
       );
 
-      final newList = event.page == 1 ? response.list : [...state.items, ...response.list];
+      final newList =
+          event.page == 1 ? response.list : [...state.items, ...response.list];
       emit(state.copyWith(
         status: HomeCareStatus.loaded,
         items: newList,
@@ -43,15 +46,23 @@ class HomeCareBloc extends Bloc<HomeCareEvent, HomeCareState> {
         searchQuery: event.search,
       ));
     } catch (e) {
-      emit(state.copyWith(status: HomeCareStatus.error, errorMessage: e.toString()));
+      emit(state.copyWith(
+          status: HomeCareStatus.error, errorMessage: e.toString()));
     }
   }
 
-  void _onSelectCategory(SelectHomeCareCategoryEvent event, Emitter<HomeCareState> emit) {
-    add(LoadHomeCareListEvent(categoryId: event.categoryId, search: state.searchQuery ?? '', page: 1));
+  void _onSelectCategory(
+      SelectHomeCareCategoryEvent event, Emitter<HomeCareState> emit) {
+    add(LoadHomeCareListEvent(
+        categoryId: event.categoryId,
+        search: state.searchQuery ?? '',
+        page: 1));
   }
 
   void _onSearch(SearchHomeCareEvent event, Emitter<HomeCareState> emit) {
-    add(LoadHomeCareListEvent(categoryId: state.selectedCategoryId ?? '', search: event.query, page: 1));
+    add(LoadHomeCareListEvent(
+        categoryId: state.selectedCategoryId ?? '',
+        search: event.query,
+        page: 1));
   }
 }

@@ -4,7 +4,8 @@ import 'medical_treatment_event.dart';
 import 'medical_treatment_state.dart';
 import '../../data/models/medical_treatment_model.dart';
 
-class MedicalTreatmentBloc extends Bloc<MedicalTreatmentEvent, MedicalTreatmentState> {
+class MedicalTreatmentBloc
+    extends Bloc<MedicalTreatmentEvent, MedicalTreatmentState> {
   final MedicalTreatmentService service;
 
   MedicalTreatmentBloc(this.service) : super(MedicalTreatmentInitial()) {
@@ -14,8 +15,8 @@ class MedicalTreatmentBloc extends Bloc<MedicalTreatmentEvent, MedicalTreatmentS
     on<SearchMedicalTreatmentEvent>(_onSearch);
   }
 
-  Future<void> _onLoadCategories(
-      LoadMedicalTreatmentCategoriesEvent event, Emitter<MedicalTreatmentState> emit) async {
+  Future<void> _onLoadCategories(LoadMedicalTreatmentCategoriesEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
     emit(MedicalTreatmentLoading());
     try {
       final categories = await service.getCategories();
@@ -26,8 +27,8 @@ class MedicalTreatmentBloc extends Bloc<MedicalTreatmentEvent, MedicalTreatmentS
     }
   }
 
-  Future<void> _onLoadList(
-      LoadMedicalTreatmentListEvent event, Emitter<MedicalTreatmentState> emit) async {
+  Future<void> _onLoadList(LoadMedicalTreatmentListEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
     final currentState = state;
     if (currentState is MedicalTreatmentLoaded) {
       try {
@@ -54,7 +55,8 @@ class MedicalTreatmentBloc extends Bloc<MedicalTreatmentEvent, MedicalTreatmentS
           );
           emit(currentState.copyWith(
             response: response,
-            selectedCategoryId: event.categoryId ?? currentState.selectedCategoryId,
+            selectedCategoryId:
+                event.categoryId ?? currentState.selectedCategoryId,
             searchQuery: event.search ?? currentState.searchQuery,
           ));
         }
@@ -64,8 +66,8 @@ class MedicalTreatmentBloc extends Bloc<MedicalTreatmentEvent, MedicalTreatmentS
     }
   }
 
-  Future<void> _onSelectCategory(
-      SelectMedicalTreatmentCategoryEvent event, Emitter<MedicalTreatmentState> emit) async {
+  Future<void> _onSelectCategory(SelectMedicalTreatmentCategoryEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
     final currentState = state;
     if (currentState is MedicalTreatmentLoaded) {
       emit(MedicalTreatmentLoading());
@@ -85,7 +87,8 @@ class MedicalTreatmentBloc extends Bloc<MedicalTreatmentEvent, MedicalTreatmentS
     }
   }
 
-  Future<void> _onSearch(SearchMedicalTreatmentEvent event, Emitter<MedicalTreatmentState> emit) async {
+  Future<void> _onSearch(SearchMedicalTreatmentEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
     final currentState = state;
     if (currentState is MedicalTreatmentLoaded) {
       try {

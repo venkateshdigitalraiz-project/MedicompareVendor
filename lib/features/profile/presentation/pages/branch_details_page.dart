@@ -17,7 +17,8 @@ class BranchDetailsPage extends StatefulWidget {
 }
 
 class _BranchDetailsPageState extends State<BranchDetailsPage> {
-  final BranchService _branchService = BranchService(CoreInjection.provideApiService());
+  final BranchService _branchService =
+      BranchService(CoreInjection.provideApiService());
   late Future<BranchDetailsResponse> _branchFuture;
 
   @override
@@ -59,10 +60,13 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
                         branch: snapshot.data!.branch,
                         onSuccess: () {
                           setState(() {
-                            _branchFuture = _branchService.getBranchDetails(widget.branchId);
+                            _branchFuture = _branchService
+                                .getBranchDetails(widget.branchId);
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Branch updated successfully'), backgroundColor: Colors.green),
+                            const SnackBar(
+                                content: Text('Branch updated successfully'),
+                                backgroundColor: Colors.green),
                           );
                         },
                       ),
@@ -97,7 +101,8 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
   Widget _buildContent(Branch branch) {
     final String imageUrl = branch.images.isNotEmpty ? branch.images.first : "";
     final String joinDate = DateFormat('MMMM d, yyyy').format(branch.createdAt);
-    final String updateDate = DateFormat('MMMM d, yyyy').format(branch.updatedAt);
+    final String updateDate =
+        DateFormat('MMMM d, yyyy').format(branch.updatedAt);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -125,7 +130,8 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
                               borderRadius: BorderRadius.circular(12),
                               child: Image.network(imageUrl, fit: BoxFit.cover),
                             )
-                          : const Icon(Icons.business, size: 30, color: Colors.grey),
+                          : const Icon(Icons.business,
+                              size: 30, color: Colors.grey),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -147,13 +153,15 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
                             children: [
                               _statusBadge(branch.status),
                               const SizedBox(width: 6),
-                              Icon(Icons.calendar_today, size: 10, color: Colors.grey[400]),
+                              Icon(Icons.calendar_today,
+                                  size: 10, color: Colors.grey[400]),
                               const SizedBox(width: 4),
                               Text(
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 "Joined $joinDate",
-                                style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
+                                style: GoogleFonts.inter(
+                                    fontSize: 11, color: Colors.grey[500]),
                               ),
                             ],
                           ),
@@ -174,7 +182,8 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _infoField("Street Address", branch.address, Icons.map_outlined),
+                _infoField(
+                    "Street Address", branch.address, Icons.map_outlined),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12.0),
                   child: Divider(height: 1),
@@ -192,9 +201,11 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _contactField("Email Address", branch.email, Icons.email_outlined),
+                _contactField(
+                    "Email Address", branch.email, Icons.email_outlined),
                 const SizedBox(height: 12),
-                _contactField("Phone Number", branch.mobile, Icons.phone_outlined),
+                _contactField(
+                    "Phone Number", branch.mobile, Icons.phone_outlined),
               ],
             ),
           ),
@@ -219,11 +230,15 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
                   children: [
                     Text(
                       "Branch ID:",
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: Colors.grey[500]),
                     ),
                     Text(
                       branch.id,
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[700], fontWeight: FontWeight.w500),
+                      style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -321,7 +336,9 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+                Text(label,
+                    style: GoogleFonts.inter(
+                        fontSize: 11, color: Colors.grey[500])),
                 const SizedBox(height: 2),
                 Text(
                   value,
@@ -354,8 +371,14 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-            Text(date, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
+            Text(label,
+                style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B))),
+            Text(date,
+                style:
+                    GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
           ],
         ),
       ],
@@ -409,7 +432,8 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _branchFuture = _branchService.getBranchDetails(widget.branchId);
+                  _branchFuture =
+                      _branchService.getBranchDetails(widget.branchId);
                 });
               },
               child: const Text("Retry"),

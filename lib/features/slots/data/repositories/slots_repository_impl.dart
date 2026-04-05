@@ -14,7 +14,8 @@ class SlotsRepositoryImpl implements SlotsRepository {
   }
 
   @override
-  Future<SlotTimingEntity> updateSlotTimings(String id, SlotTimingEntity entity) async {
+  Future<SlotTimingEntity> updateSlotTimings(
+      String id, SlotTimingEntity entity) async {
     // Convert entity to model
     final model = SlotTimingModel(
       id: entity.id,

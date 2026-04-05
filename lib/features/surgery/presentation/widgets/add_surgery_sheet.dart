@@ -11,8 +11,8 @@ class AddSurgerySheet extends StatefulWidget {
   final List<String> existingIds;
 
   const AddSurgerySheet({
-    super.key, 
-    required this.onSuccess, 
+    super.key,
+    required this.onSuccess,
     this.editSurgery,
     this.existingIds = const [],
   });
@@ -23,12 +23,13 @@ class AddSurgerySheet extends StatefulWidget {
 
 class _AddSurgerySheetState extends State<AddSurgerySheet> {
   final _formKey = GlobalKey<FormState>();
-  final SurgeryService _surgeryService = SurgeryInjection.provideSurgeryService();
+  final SurgeryService _surgeryService =
+      SurgeryInjection.provideSurgeryService();
 
   SurgeryDropdownItem? _selectedSurgery;
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
-  
+
   bool _isActive = true;
   bool _isLoading = false;
   bool _isFetchingDetails = false;
@@ -68,7 +69,9 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
         _searchController.text = _selectedSurgery?.name ?? '';
       });
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isFetchingDetails = false);
     }
@@ -96,7 +99,8 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedSurgery == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a surgery first')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a surgery first')));
       return;
     }
 
@@ -116,7 +120,8 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
     try {
       final Map<String, dynamic> payload = {
         "name": isEditMode ? widget.editSurgery!.id : _selectedSurgery!.id,
-        "category": _selectedSurgery!.subcategoryId, // Using subcategory ID as 'category' often maps to subcategory in these APIs
+        "category": _selectedSurgery!
+            .subcategoryId, // Using subcategory ID as 'category' often maps to subcategory in these APIs
         "price": double.tryParse(_priceController.text) ?? 0,
         "discount": double.tryParse(_discountController.text) ?? 0,
         "status": _isActive ? "active" : "inactive",
@@ -133,20 +138,24 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
       } else {
         await _surgeryService.createSurgery(payload);
       }
-      
+
       widget.onSuccess();
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
         Navigator.pop(context);
         messenger.showSnackBar(
           SnackBar(
-            content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+            content: Text(isEditMode
+                ? 'Updated successfully'
+                : 'Product added successfully'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -170,30 +179,43 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.show_chart, color: Color(0xFF7C3AED), size: 24),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFF5F3FF),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.show_chart,
+                        color: Color(0xFF7C3AED), size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(isEditMode ? "Edit Surgery" : "Add New Surgery", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-                        Text("Fill in the details to add a surgery to your system", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                        Text(isEditMode ? "Edit Surgery" : "Add New Surgery",
+                            style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E1B4B))),
+                        Text(
+                            "Fill in the details to add a surgery to your system",
+                            style: GoogleFonts.poppins(
+                                fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: _isFetchingDetails 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.close, color: Colors.grey),
+                    icon: _isFetchingDetails
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.close, color: Colors.grey),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
             ),
             const Divider(height: 1),
-            
+
             // Form Content
             Flexible(
               child: SingleChildScrollView(
@@ -203,11 +225,19 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Surgery Information", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                      Text("Surgery Information",
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E1B4B))),
                       const SizedBox(height: 4),
-                      Text(isEditMode ? "Update the surgery details below" : "Please provide accurate information for the surgery", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                      Text(
+                          isEditMode
+                              ? "Update the surgery details below"
+                              : "Please provide accurate information for the surgery",
+                          style: GoogleFonts.poppins(
+                              fontSize: 12, color: Colors.grey[600])),
                       const SizedBox(height: 24),
-                      
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -217,74 +247,114 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("Surgery Name", isRequired: true, icon: Icons.link_outlined),
+                                _buildLabel("Surgery Name",
+                                    isRequired: true,
+                                    icon: Icons.link_outlined),
                                 const SizedBox(height: 8),
                                 if (isEditMode && _selectedSurgery != null) ...[
-                                   Container(
+                                  Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 12),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[50],
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.grey[200]!),
+                                      border:
+                                          Border.all(color: Colors.grey[200]!),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Flexible(
-                                          child: Text(_selectedSurgery!.name, style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF4B5563)), overflow: TextOverflow.ellipsis),
+                                          child: Text(_selectedSurgery!.name,
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  color:
+                                                      const Color(0xFF4B5563)),
+                                              overflow: TextOverflow.ellipsis),
                                         ),
-                                        const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                                        const Icon(Icons.keyboard_arrow_down,
+                                            color: Colors.grey),
                                       ],
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text("Surgery name cannot be changed.", style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[500])),
+                                  Text("Surgery name cannot be changed.",
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          color: Colors.grey[500])),
                                 ] else ...[
                                   Column(
                                     children: [
                                       TextFormField(
                                         controller: _searchController,
-                                        style: GoogleFonts.poppins(fontSize: 14),
+                                        style:
+                                            GoogleFonts.poppins(fontSize: 14),
                                         onTap: () {
-                                          if (_searchController.text.isEmpty) _onSearchChanged('');
+                                          if (_searchController.text.isEmpty)
+                                            _onSearchChanged('');
                                         },
-                                        decoration: _inputDecoration(hint: "Search Surgery...").copyWith(
-                                          suffixIcon: const Icon(Icons.keyboard_arrow_down)
-                                        ),
+                                        decoration: _inputDecoration(
+                                                hint: "Search Surgery...")
+                                            .copyWith(
+                                                suffixIcon: const Icon(
+                                                    Icons.keyboard_arrow_down)),
                                         onChanged: (val) {
-                                          setState(() { _selectedSurgery = null; });
+                                          setState(() {
+                                            _selectedSurgery = null;
+                                          });
                                           _onSearchChanged(val);
                                         },
-                                        validator: (value) => _selectedSurgery == null ? "Required" : null,
+                                        validator: (value) =>
+                                            _selectedSurgery == null
+                                                ? "Required"
+                                                : null,
                                       ),
-                                      if (_selectedSurgery == null && _searchResults.isNotEmpty)
+                                      if (_selectedSurgery == null &&
+                                          _searchResults.isNotEmpty)
                                         Container(
-                                          constraints: const BoxConstraints(maxHeight: 250),
+                                          constraints: const BoxConstraints(
+                                              maxHeight: 250),
                                           margin: const EdgeInsets.only(top: 4),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: Colors.grey[200]!),
-                                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                                color: Colors.grey[200]!),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.05),
+                                                  blurRadius: 8)
+                                            ],
                                           ),
                                           child: ListView.builder(
                                             padding: EdgeInsets.zero,
                                             shrinkWrap: true,
                                             itemCount: _searchResults.length,
                                             itemBuilder: (context, index) {
-                                              final option = _searchResults[index];
+                                              final option =
+                                                  _searchResults[index];
                                               return InkWell(
                                                 onTap: () {
                                                   setState(() {
                                                     _selectedSurgery = option;
-                                                    _searchController.text = option.name;
+                                                    _searchController.text =
+                                                        option.name;
                                                     _searchResults = [];
                                                   });
                                                 },
                                                 child: Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                                  child: Text(option.name, style: GoogleFonts.poppins(fontSize: 14)),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 12),
+                                                  child: Text(option.name,
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontSize: 14)),
                                                 ),
                                               );
                                             },
@@ -292,8 +362,8 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                                         ),
                                     ],
                                   ),
+                                ],
                               ],
-                            ],
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -303,26 +373,39 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("Status", isRequired: true, icon: Icons.show_chart),
+                                _buildLabel("Status",
+                                    isRequired: true, icon: Icons.show_chart),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<bool>(
                                   value: _isActive,
                                   decoration: _inputDecoration(hint: "Active"),
                                   items: [
-                                    DropdownMenuItem(value: true, child: Text("Active", style: GoogleFonts.poppins(fontSize: 14))),
-                                    DropdownMenuItem(value: false, child: Text("Inactive", style: GoogleFonts.poppins(fontSize: 14))),
+                                    DropdownMenuItem(
+                                        value: true,
+                                        child: Text("Active",
+                                            style: GoogleFonts.poppins(
+                                                fontSize: 14))),
+                                    DropdownMenuItem(
+                                        value: false,
+                                        child: Text("Inactive",
+                                            style: GoogleFonts.poppins(
+                                                fontSize: 14))),
                                   ],
-                                  onChanged: (val) => setState(() => _isActive = val ?? true),
+                                  onChanged: (val) =>
+                                      setState(() => _isActive = val ?? true),
                                 ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      
                       if (_selectedSurgery != null) ...[
                         const SizedBox(height: 32),
-                        Text("Surgery Price", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                        Text("Surgery Price",
+                            style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E1B4B))),
                         const SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.all(20),
@@ -334,28 +417,38 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Price (₹)", isRequired: true, icon: Icons.show_chart),
+                              _buildLabel("Price (₹)",
+                                  isRequired: true, icon: Icons.show_chart),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _priceController,
                                 keyboardType: TextInputType.number,
                                 decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) => (val == null || val.isEmpty)
+                                    ? "Required"
+                                    : null,
                               ),
                               const SizedBox(height: 16),
-                              _buildLabel("Discount Price (₹)", isRequired: true, icon: Icons.show_chart),
+                              _buildLabel("Discount Price (₹)",
+                                  isRequired: true, icon: Icons.show_chart),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _discountController,
                                 keyboardType: TextInputType.number,
-                                decoration: _inputDecoration(hint: "0.00").copyWith(
-                                  suffixIcon: const Icon(Icons.unfold_more, size: 18, color: Colors.grey),
+                                decoration:
+                                    _inputDecoration(hint: "0.00").copyWith(
+                                  suffixIcon: const Icon(Icons.unfold_more,
+                                      size: 18, color: Colors.grey),
                                 ),
                                 validator: (val) {
-                                  if (val == null || val.isEmpty) return "Required";
+                                  if (val == null || val.isEmpty)
+                                    return "Required";
                                   final discount = double.tryParse(val);
-                                  final price = double.tryParse(_priceController.text);
-                                  if (discount != null && price != null && discount > price) {
+                                  final price =
+                                      double.tryParse(_priceController.text);
+                                  if (discount != null &&
+                                      price != null &&
+                                      discount > price) {
                                     return "Over price";
                                   }
                                   return null;
@@ -370,7 +463,7 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
             const Divider(height: 1),
             // Footer
@@ -381,22 +474,37 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel", style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
+                    child: Text("Cancel",
+                        style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: const Color(0xFF1E1B4B),
+                            fontWeight: FontWeight.w600)),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7C3AED),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
                     onPressed: _isLoading ? null : _submit,
-                    icon: _isLoading 
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-                      : const Icon(Icons.show_chart, size: 18),
-                    label: Text(_isLoading ? "Saving..." : (isEditMode ? "Update Surgery" : "Add Surgery"), style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
+                        : const Icon(Icons.show_chart, size: 18),
+                    label: Text(
+                        _isLoading
+                            ? "Saving..."
+                            : (isEditMode ? "Update Surgery" : "Add Surgery"),
+                        style:
+                            GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -417,10 +525,17 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
         ],
         Text(
           text,
-          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF4B5563)),
+          style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF4B5563)),
         ),
         if (isRequired)
-          Text(" *", style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+          Text(" *",
+              style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -432,10 +547,18 @@ class _AddSurgerySheetState extends State<AddSurgerySheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF7C3AED))),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF7C3AED))),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red)),
     );
   }
 }

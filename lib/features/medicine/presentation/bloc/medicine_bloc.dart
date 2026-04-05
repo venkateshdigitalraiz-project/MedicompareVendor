@@ -14,7 +14,8 @@ class MedicineBloc extends Bloc<MedicineEvent, MedicineState> {
     on<SearchMedicinesEvent>(_onSearchMedicines);
   }
 
-  Future<void> _onLoadCategories(LoadMedicineCategoriesEvent event, Emitter<MedicineState> emit) async {
+  Future<void> _onLoadCategories(
+      LoadMedicineCategoriesEvent event, Emitter<MedicineState> emit) async {
     emit(MedicineLoading());
     try {
       final categories = await _medicineService.getCategories();
@@ -28,7 +29,8 @@ class MedicineBloc extends Bloc<MedicineEvent, MedicineState> {
     }
   }
 
-  Future<void> _onLoadMedicines(LoadMedicinesEvent event, Emitter<MedicineState> emit) async {
+  Future<void> _onLoadMedicines(
+      LoadMedicinesEvent event, Emitter<MedicineState> emit) async {
     final currentState = state;
     if (currentState is MedicineLoaded) {
       if (event.isLoadMore) {
@@ -43,9 +45,10 @@ class MedicineBloc extends Bloc<MedicineEvent, MedicineState> {
         );
 
         if (event.isLoadMore) {
-          final updatedList = List<MedicineItem>.from(currentState.medicineResponse.list)
-            ..addAll(medicineResponse.list);
-          
+          final updatedList =
+              List<MedicineItem>.from(currentState.medicineResponse.list)
+                ..addAll(medicineResponse.list);
+
           emit(currentState.copyWith(
             isLoadingMore: false,
             medicineResponse: MedicineResponse(
@@ -71,7 +74,8 @@ class MedicineBloc extends Bloc<MedicineEvent, MedicineState> {
     }
   }
 
-  Future<void> _onSelectCategory(SelectCategoryEvent event, Emitter<MedicineState> emit) async {
+  Future<void> _onSelectCategory(
+      SelectCategoryEvent event, Emitter<MedicineState> emit) async {
     final currentState = state;
     if (currentState is MedicineLoaded) {
       add(LoadMedicinesEvent(
@@ -81,7 +85,8 @@ class MedicineBloc extends Bloc<MedicineEvent, MedicineState> {
     }
   }
 
-  Future<void> _onSearchMedicines(SearchMedicinesEvent event, Emitter<MedicineState> emit) async {
+  Future<void> _onSearchMedicines(
+      SearchMedicinesEvent event, Emitter<MedicineState> emit) async {
     final currentState = state;
     if (currentState is MedicineLoaded) {
       add(LoadMedicinesEvent(

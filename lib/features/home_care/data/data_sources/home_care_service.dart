@@ -16,7 +16,9 @@ class HomeCareService {
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
-        return categoriesJson.map((json) => HomeCareCategory.fromJson(json)).toList();
+        return categoriesJson
+            .map((json) => HomeCareCategory.fromJson(json))
+            .toList();
       }
       throw ServerException(body['message'] ?? 'Failed to fetch categories');
     } catch (e) {
@@ -38,12 +40,14 @@ class HomeCareService {
         'categoryId': categoryId,
         'search': search,
       };
-      final response = await _apiService.get(ApiEndpoints.homeCareList, queryParameters: queryParams);
+      final response = await _apiService.get(ApiEndpoints.homeCareList,
+          queryParameters: queryParams);
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return HomeCareResponse.fromJson(body['data']);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch home care services');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch home care services');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
@@ -52,7 +56,8 @@ class HomeCareService {
 
   Future<HomeCareItem> getHomeCareDetails(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.homeCareDetails(id), body: {});
+      final response =
+          await _apiService.post(ApiEndpoints.homeCareDetails(id), body: {});
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return HomeCareItem.fromJson(body['data']['product']);
@@ -64,7 +69,8 @@ class HomeCareService {
     }
   }
 
-  Future<List<HomeCareDropdownItem>> searchHomeCareDropdown(String query) async {
+  Future<List<HomeCareDropdownItem>> searchHomeCareDropdown(
+      String query) async {
     try {
       final response = await _apiService.get(
         ApiEndpoints.commonTablets,
@@ -88,7 +94,8 @@ class HomeCareService {
       if (body['success'] == true) {
         return HomeCareDropdownItem.fromJson(body['data']['tablets']);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch tablet details');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch tablet details');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
@@ -98,7 +105,8 @@ class HomeCareService {
   Future<void> createHomeCare(Map<String, dynamic> data, {File? image}) async {
     try {
       if (image != null) {
-        final fields = data.map((key, value) => MapEntry(key, value.toString()));
+        final fields =
+            data.map((key, value) => MapEntry(key, value.toString()));
         final response = await _apiService.post(
           ApiEndpoints.createHomeCare,
           fields: fields,
@@ -109,7 +117,8 @@ class HomeCareService {
           throw ServerException(body['message'] ?? 'Failed to create service');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.createHomeCare, body: data);
+        final response =
+            await _apiService.post(ApiEndpoints.createHomeCare, body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
           throw ServerException(body['message'] ?? 'Failed to create service');
@@ -121,10 +130,12 @@ class HomeCareService {
     }
   }
 
-  Future<void> updateHomeCare(String id, Map<String, dynamic> data, {File? image}) async {
+  Future<void> updateHomeCare(String id, Map<String, dynamic> data,
+      {File? image}) async {
     try {
       if (image != null) {
-        final fields = data.map((key, value) => MapEntry(key, value.toString()));
+        final fields =
+            data.map((key, value) => MapEntry(key, value.toString()));
         final response = await _apiService.post(
           ApiEndpoints.updateHomeCare(id),
           fields: fields,
@@ -135,7 +146,8 @@ class HomeCareService {
           throw ServerException(body['message'] ?? 'Failed to update service');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.updateHomeCare(id), body: data);
+        final response =
+            await _apiService.post(ApiEndpoints.updateHomeCare(id), body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
           throw ServerException(body['message'] ?? 'Failed to update service');

@@ -221,13 +221,15 @@ class DashboardPage extends StatelessWidget {
             builder: (context, constraints) {
               return Column(
                 children: [
-                  _buildSectionHeader("Top Selling Orders", () => context.push('/orders')),
+                  _buildSectionHeader(
+                      "Top Selling Orders", () => context.push('/orders')),
                   const SizedBox(height: 12),
                   ...dashboard.topProducts
                       .take(5)
                       .map((product) => _buildTopProductItem(product)),
                   const SizedBox(height: 32),
-                  _buildSectionHeader("Recent Leads", () => context.push('/leads')),
+                  _buildSectionHeader(
+                      "Recent Leads", () => context.push('/leads')),
                   const SizedBox(height: 12),
                   ...dashboard.recentLeads
                       .take(5)

@@ -57,7 +57,8 @@ class AmbulanceDetailsPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.blue[100]!),
                         ),
-                        child: const Icon(Icons.airport_shuttle, size: 40, color: Colors.blue),
+                        child: const Icon(Icons.airport_shuttle,
+                            size: 40, color: Colors.blue),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -73,7 +74,11 @@ class AmbulanceDetailsPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            _badge(Icons.category, ambulance.ambulanceType.toUpperCase(), Colors.purple[50]!, Colors.purple),
+                            _badge(
+                                Icons.category,
+                                ambulance.ambulanceType.toUpperCase(),
+                                Colors.purple[50]!,
+                                Colors.purple),
                           ],
                         ),
                       ),
@@ -82,14 +87,25 @@ class AmbulanceDetailsPage extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text(
                     "Pricing Information",
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700]),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _priceInfo("Price Per KM", "₹${ambulance.price.toInt()}/km", Colors.grey[100]!, Colors.grey[700]!),
+                      _priceInfo(
+                          "Price Per KM",
+                          "₹${ambulance.price.toInt()}/km",
+                          Colors.grey[100]!,
+                          Colors.grey[700]!),
                       const SizedBox(width: 12),
-                      _priceInfo("Discount", "₹${(ambulance.discountPrice > 0 ? ambulance.discountPrice : ambulance.price).toInt()}/km", const Color(0xFFF0FDF4), const Color(0xFF15803D)),
+                      _priceInfo(
+                          "Discount",
+                          "₹${(ambulance.discountPrice > 0 ? ambulance.discountPrice : ambulance.price).toInt()}/km",
+                          const Color(0xFFF0FDF4),
+                          const Color(0xFF15803D)),
                     ],
                   ),
                 ],
@@ -107,17 +123,21 @@ class AmbulanceDetailsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Row(
+                  Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.orange[50], borderRadius: BorderRadius.circular(8)),
-                        child: const Icon(Icons.medical_services_outlined, color: Colors.orange, size: 20),
+                        decoration: BoxDecoration(
+                            color: Colors.orange[50],
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.medical_services_outlined,
+                            color: Colors.orange, size: 20),
                       ),
                       const SizedBox(width: 12),
                       Text(
                         "Included Facilities",
-                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -125,22 +145,30 @@ class AmbulanceDetailsPage extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: ambulance.facilities.map((f) => Chip(
-                      label: Text(f.name, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500)),
-                      backgroundColor: Colors.grey[50],
-                      side: BorderSide(color: Colors.grey[200]!),
-                      avatar: const Icon(Icons.check_circle, size: 14, color: Colors.green),
-                    )).toList(),
+                    children: ambulance.facilities
+                        .map((f) => Chip(
+                              label: Text(f.name,
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500)),
+                              backgroundColor: Colors.grey[50],
+                              side: BorderSide(color: Colors.grey[200]!),
+                              avatar: const Icon(Icons.check_circle,
+                                  size: 14, color: Colors.green),
+                            ))
+                        .toList(),
                   ),
                   if (ambulance.facilities.isEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text("No specific facilities listed", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
+                      child: Text("No specific facilities listed",
+                          style: GoogleFonts.poppins(
+                              fontSize: 12, color: Colors.grey)),
                     ),
                 ],
               ),
             ),
-            
+
             // Status Section
             Container(
               margin: const EdgeInsets.all(12),
@@ -152,12 +180,20 @@ class AmbulanceDetailsPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Service Status", style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text("Service Status",
+                      style: GoogleFonts.poppins(
+                          fontSize: 14, fontWeight: FontWeight.bold)),
                   _badge(
-                    ambulance.status.toLowerCase() == 'active' ? Icons.check_circle : Icons.error,
+                    ambulance.status.toLowerCase() == 'active'
+                        ? Icons.check_circle
+                        : Icons.error,
                     ambulance.status.toUpperCase(),
-                    ambulance.status.toLowerCase() == 'active' ? Colors.green[50]! : Colors.orange[50]!,
-                    ambulance.status.toLowerCase() == 'active' ? Colors.green : Colors.orange,
+                    ambulance.status.toLowerCase() == 'active'
+                        ? Colors.green[50]!
+                        : Colors.orange[50]!,
+                    ambulance.status.toLowerCase() == 'active'
+                        ? Colors.green
+                        : Colors.orange,
                   ),
                 ],
               ),
@@ -182,7 +218,8 @@ class AmbulanceDetailsPage extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold, color: text),
+            style: GoogleFonts.poppins(
+                fontSize: 10, fontWeight: FontWeight.bold, color: text),
           ),
         ],
       ),
@@ -202,12 +239,16 @@ class AmbulanceDetailsPage extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: text.withOpacity(0.7)),
+              style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: text.withOpacity(0.7)),
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: text),
+              style: GoogleFonts.poppins(
+                  fontSize: 16, fontWeight: FontWeight.bold, color: text),
             ),
           ],
         ),

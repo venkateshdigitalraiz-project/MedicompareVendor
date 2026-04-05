@@ -37,11 +37,11 @@ class TicketModel extends Equatable {
       subject: json['subject'] ?? '',
       priority: json['priority'] ?? 'medium',
       status: json['status'] ?? 'open',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.parse(json['updatedAt']) 
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
       messages: json['messages'] != null
           ? (json['messages'] as List)
@@ -68,7 +68,8 @@ class TicketModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, ticketNo, subject, status, priority, messages];
+  List<Object?> get props =>
+      [id, ticketNo, subject, status, priority, messages];
 }
 
 class TicketMessage extends Equatable {
@@ -97,11 +98,11 @@ class TicketMessage extends Equatable {
       sendedId: json['sendedId'],
       sender: json['sender'] ?? 'vendor',
       message: json['message'] ?? '',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.parse(json['updatedAt']) 
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
     );
   }

@@ -15,9 +15,12 @@ class SurgeryService {
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
-        return categoriesJson.map((json) => SurgeryCategory.fromJson(json)).toList();
+        return categoriesJson
+            .map((json) => SurgeryCategory.fromJson(json))
+            .toList();
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch surgery categories');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch surgery categories');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
@@ -38,9 +41,10 @@ class SurgeryService {
         'search': search,
       };
 
-      final response = await _apiService.get(ApiEndpoints.surgeryList, queryParameters: queryParams);
+      final response = await _apiService.get(ApiEndpoints.surgeryList,
+          queryParameters: queryParams);
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return SurgeryResponse.fromJson(body['data']);
       }
@@ -53,13 +57,15 @@ class SurgeryService {
 
   Future<SurgeryItem> getSurgeryDetails(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.surgeryDetails(id), body: {});
+      final response =
+          await _apiService.post(ApiEndpoints.surgeryDetails(id), body: {});
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return SurgeryItem.fromJson(body['data']['product']);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch surgery details');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch surgery details');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
@@ -76,13 +82,14 @@ class SurgeryService {
         },
       );
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return (body['data']['tablets'] as List)
             .map((i) => SurgeryDropdownItem.fromJson(i))
             .toList();
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch common surgeries');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch common surgeries');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
@@ -91,13 +98,15 @@ class SurgeryService {
 
   Future<SurgeryDetails> getCommonSurgeryDetails(String id) async {
     try {
-      final response = await _apiService.get(ApiEndpoints.commonSurgeryDetails(id));
+      final response =
+          await _apiService.get(ApiEndpoints.commonSurgeryDetails(id));
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return SurgeryDetails.fromJson(body['data']['tablets']);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch common surgery details');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch common surgery details');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
@@ -106,9 +115,10 @@ class SurgeryService {
 
   Future<void> createSurgery(Map<String, dynamic> data) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.createSurgery, body: data);
+      final response =
+          await _apiService.post(ApiEndpoints.createSurgery, body: data);
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return;
       }
@@ -121,9 +131,10 @@ class SurgeryService {
 
   Future<void> updateSurgery(String id, Map<String, dynamic> data) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.updateSurgery(id), body: data);
+      final response =
+          await _apiService.post(ApiEndpoints.updateSurgery(id), body: data);
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return;
       }
@@ -136,9 +147,10 @@ class SurgeryService {
 
   Future<void> deleteSurgery(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.deleteSurgery(id), body: {});
+      final response =
+          await _apiService.post(ApiEndpoints.deleteSurgery(id), body: {});
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return;
       }

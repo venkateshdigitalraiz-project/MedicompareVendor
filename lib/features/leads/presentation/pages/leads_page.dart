@@ -40,7 +40,8 @@ class _LeadsPageState extends State<LeadsPage> {
 
   void _onScroll() {
     if (_isFetchingMore) return;
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       if (_currentPage < _totalPages) {
         setState(() {
           _currentPage++;
@@ -85,7 +86,8 @@ class _LeadsPageState extends State<LeadsPage> {
                 } else if (state is LeadsLoaded) {
                   _totalPages = state.leadsList.pagination.totalPages;
                   _isFetchingMore = state.isLoadingMore;
-                  return _buildLeadsList(state.leadsList.leads, state.isLoadingMore);
+                  return _buildLeadsList(
+                      state.leadsList.leads, state.isLoadingMore);
                 } else if (state is LeadsError) {
                   return Center(child: Text(state.message));
                 }
@@ -219,7 +221,8 @@ class _LeadsPageState extends State<LeadsPage> {
           context.push('/lead-details/${lead.id}');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Only accepted leads can be viewed in detail.")),
+            const SnackBar(
+                content: Text("Only accepted leads can be viewed in detail.")),
           );
         }
       },
@@ -243,8 +246,11 @@ class _LeadsPageState extends State<LeadsPage> {
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: isAccepted ? Colors.green.withOpacity(0.05) : Colors.orange.withOpacity(0.05),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                color: isAccepted
+                    ? Colors.green.withOpacity(0.05)
+                    : Colors.orange.withOpacity(0.05),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
                 children: [
@@ -254,11 +260,15 @@ class _LeadsPageState extends State<LeadsPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      border: Border.all(color: isAccepted ? Colors.green[200]! : Colors.orange[200]!),
+                      border: Border.all(
+                          color: isAccepted
+                              ? Colors.green[200]!
+                              : Colors.orange[200]!),
                     ),
                     child: Icon(
                       Icons.person_outline,
-                      color: isAccepted ? Colors.green[600] : Colors.orange[600],
+                      color:
+                          isAccepted ? Colors.green[600] : Colors.orange[600],
                       size: 20,
                     ),
                   ),
@@ -291,7 +301,7 @@ class _LeadsPageState extends State<LeadsPage> {
                 ],
               ),
             ),
-            
+
             // Content Section
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -310,7 +320,8 @@ class _LeadsPageState extends State<LeadsPage> {
                       Expanded(
                         child: _buildBeautifulInfoItem(
                           label: "Posted On",
-                          value: DateFormat('MMM d, yyyy').format(lead.createdAt),
+                          value:
+                              DateFormat('MMM d, yyyy').format(lead.createdAt),
                           icon: Icons.calendar_today_outlined,
                           color: Colors.blue,
                         ),
@@ -328,7 +339,8 @@ class _LeadsPageState extends State<LeadsPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                          const Icon(Icons.location_on_outlined,
+                              size: 14, color: Colors.grey),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -353,7 +365,11 @@ class _LeadsPageState extends State<LeadsPage> {
     );
   }
 
-  Widget _buildBeautifulInfoItem({required String label, required String value, required IconData icon, required Color color}) {
+  Widget _buildBeautifulInfoItem(
+      {required String label,
+      required String value,
+      required IconData icon,
+      required Color color}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -397,7 +413,6 @@ class _LeadsPageState extends State<LeadsPage> {
     );
   }
 
-
   Widget _buildPermissionBadge(String permission) {
     Color color;
     switch (permission.toLowerCase()) {
@@ -422,7 +437,11 @@ class _LeadsPageState extends State<LeadsPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            permission.toLowerCase() == 'accepted' ? Icons.check : (permission.toLowerCase() == 'rejected' ? Icons.close : Icons.access_time),
+            permission.toLowerCase() == 'accepted'
+                ? Icons.check
+                : (permission.toLowerCase() == 'rejected'
+                    ? Icons.close
+                    : Icons.access_time),
             size: 12,
             color: color,
           ),

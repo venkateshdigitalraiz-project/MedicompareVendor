@@ -14,7 +14,8 @@ class NursingCareBloc extends Bloc<NursingCareEvent, NursingCareState> {
     on<SearchNursingCareEvent>(_onSearch);
   }
 
-  Future<void> _onLoadCategories(LoadNursingCareCategoriesEvent event, Emitter<NursingCareState> emit) async {
+  Future<void> _onLoadCategories(LoadNursingCareCategoriesEvent event,
+      Emitter<NursingCareState> emit) async {
     emit(NursingCareLoading());
     try {
       final cats = await service.getCategories();
@@ -25,7 +26,8 @@ class NursingCareBloc extends Bloc<NursingCareEvent, NursingCareState> {
     }
   }
 
-  Future<void> _onLoadList(LoadNursingCareListEvent event, Emitter<NursingCareState> emit) async {
+  Future<void> _onLoadList(
+      LoadNursingCareListEvent event, Emitter<NursingCareState> emit) async {
     final s = state;
     if (s is NursingCareLoaded) {
       if (event.isLoadMore) {
@@ -64,17 +66,20 @@ class NursingCareBloc extends Bloc<NursingCareEvent, NursingCareState> {
     }
   }
 
-  void _onSelectCategory(SelectNursingCareCategoryEvent event, Emitter<NursingCareState> emit) {
+  void _onSelectCategory(
+      SelectNursingCareCategoryEvent event, Emitter<NursingCareState> emit) {
     final s = state;
     if (s is NursingCareLoaded) {
-      add(LoadNursingCareListEvent(categoryId: event.categoryId, search: s.searchQuery));
+      add(LoadNursingCareListEvent(
+          categoryId: event.categoryId, search: s.searchQuery));
     }
   }
 
   void _onSearch(SearchNursingCareEvent event, Emitter<NursingCareState> emit) {
     final s = state;
     if (s is NursingCareLoaded) {
-      add(LoadNursingCareListEvent(search: event.query, categoryId: s.selectedCategoryId));
+      add(LoadNursingCareListEvent(
+          search: event.query, categoryId: s.selectedCategoryId));
     }
   }
 }

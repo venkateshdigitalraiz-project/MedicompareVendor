@@ -17,7 +17,9 @@ class LabTestService {
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
-        return categoriesJson.map((json) => LabTestCategory.fromJson(json)).toList();
+        return categoriesJson
+            .map((json) => LabTestCategory.fromJson(json))
+            .toList();
       }
       throw ServerException(body['message'] ?? 'Failed to fetch categories');
     } catch (e) {
@@ -40,9 +42,10 @@ class LabTestService {
         'search': search,
       };
 
-      final response = await _apiService.get(ApiEndpoints.labTestsList, queryParameters: queryParams);
+      final response = await _apiService.get(ApiEndpoints.labTestsList,
+          queryParameters: queryParams);
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return LabTestResponse.fromJson(body['data']);
       }
@@ -55,9 +58,10 @@ class LabTestService {
 
   Future<LabTestItem> getLabTestDetails(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.labTestDetails(id), body: {});
+      final response =
+          await _apiService.post(ApiEndpoints.labTestDetails(id), body: {});
       final body = jsonDecode(response.body);
-      
+
       if (body['success'] == true) {
         return LabTestItem.fromJson(body['data']['product']);
       }
@@ -117,7 +121,8 @@ class LabTestService {
 
   Future<void> createLabTest(Map<String, dynamic> data) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.createLabTest, body: data);
+      final response =
+          await _apiService.post(ApiEndpoints.createLabTest, body: data);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to create lab test');
@@ -129,7 +134,8 @@ class LabTestService {
 
   Future<void> updateLabTest(String id, Map<String, dynamic> data) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.updateLabTest(id), body: data);
+      final response =
+          await _apiService.post(ApiEndpoints.updateLabTest(id), body: data);
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to update lab test');
@@ -167,7 +173,8 @@ class LabTestService {
         'labTest': labTestId,
       };
 
-      final response = await _apiService.get(ApiEndpoints.packageList, queryParameters: queryParams);
+      final response = await _apiService.get(ApiEndpoints.packageList,
+          queryParameters: queryParams);
       final body = jsonDecode(response.body);
 
       if (body['success'] == true) {
@@ -182,7 +189,8 @@ class LabTestService {
   Future<LabTestPackageItem> getPackageDetails(String id) async {
     try {
       // Step 1: Find the package from the list
-      final listResp = await _apiService.get(ApiEndpoints.packageList, queryParameters: {
+      final listResp =
+          await _apiService.get(ApiEndpoints.packageList, queryParameters: {
         'page': '1',
         'limit': '100',
         'search': '',
@@ -190,7 +198,8 @@ class LabTestService {
       final listBody = jsonDecode(listResp.body);
 
       if (listBody['success'] != true) {
-        throw ServerException(listBody['message'] ?? 'Failed to fetch packages');
+        throw ServerException(
+            listBody['message'] ?? 'Failed to fetch packages');
       }
 
       final List items = listBody['data']['list'] ?? [];
@@ -207,7 +216,8 @@ class LabTestService {
       // all-tablets API (type=labtests) by matching products IDs
       if (pkg.tabletsDetails.isEmpty && pkg.products.isNotEmpty) {
         final allTests = await getAllLabTestTablets();
-        final matched = allTests.where((t) => pkg.products.contains(t.id)).toList();
+        final matched =
+            allTests.where((t) => pkg.products.contains(t.id)).toList();
         pkg = LabTestPackageItem(
           id: pkg.id,
           name: pkg.name,
@@ -254,7 +264,8 @@ class LabTestService {
           throw ServerException(body['message'] ?? 'Failed to create package');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.createPackage, body: data);
+        final response =
+            await _apiService.post(ApiEndpoints.createPackage, body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
           throw ServerException(body['message'] ?? 'Failed to create package');
@@ -265,7 +276,8 @@ class LabTestService {
     }
   }
 
-  Future<void> updatePackage(String id, Map<String, dynamic> data, {File? image}) async {
+  Future<void> updatePackage(String id, Map<String, dynamic> data,
+      {File? image}) async {
     try {
       if (image != null) {
         final fields = <String, String>{};
@@ -289,7 +301,8 @@ class LabTestService {
           throw ServerException(body['message'] ?? 'Failed to update package');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.updatePackage(id), body: data);
+        final response =
+            await _apiService.post(ApiEndpoints.updatePackage(id), body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
           throw ServerException(body['message'] ?? 'Failed to update package');
@@ -302,12 +315,14 @@ class LabTestService {
 
   Future<LabTestPackageResponse> getAdminPackageList() async {
     try {
-      final response = await _apiService.get(ApiEndpoints.adminPackageList, queryParameters: {'page': '1', 'limit': '100'});
+      final response = await _apiService.get(ApiEndpoints.adminPackageList,
+          queryParameters: {'page': '1', 'limit': '100'});
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return LabTestPackageResponse.fromJson(body['data']);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch admin packages');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch admin packages');
     } catch (e) {
       throw ServerException(e.toString());
     }

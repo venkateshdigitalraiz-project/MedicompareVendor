@@ -13,17 +13,26 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }
 
   @override
-  Future<SubscriptionListResponse> getSubscriptionPlans({int page = 1, int limit = 10}) {
+  Future<SubscriptionListResponse> getSubscriptionPlans(
+      {int page = 1, int limit = 10}) {
     return service.getSubscriptionPlans(page: page, limit: limit);
   }
 
   @override
-  Future<String> createOrder({required int amount, required String currency, required String receipt}) {
-    return service.createOrder(amount: amount, currency: currency, receipt: receipt);
+  Future<String> createOrder(
+      {required int amount,
+      required String currency,
+      required String receipt}) {
+    return service.createOrder(
+        amount: amount, currency: currency, receipt: receipt);
   }
 
   @override
-  Future<bool> purchasePlan({required String planId, required String razorpayPaymentId, required int amount}) {
-    return service.purchasePlan(planId: planId, razorpayPaymentId: razorpayPaymentId, amount: amount);
+  Future<bool> purchasePlan(
+      {required String planId,
+      required String razorpayPaymentId,
+      required int amount}) {
+    return service.purchasePlan(
+        planId: planId, razorpayPaymentId: razorpayPaymentId, amount: amount);
   }
 }

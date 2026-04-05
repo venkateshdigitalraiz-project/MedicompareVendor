@@ -44,8 +44,13 @@ class AmbulanceLoaded extends AmbulanceState {
   }
 
   @override
-  List<Object?> get props =>
-      [ambulanceList, isLoadingMore, selectedCategoryId, searchQuery, categories];
+  List<Object?> get props => [
+        ambulanceList,
+        isLoadingMore,
+        selectedCategoryId,
+        searchQuery,
+        categories
+      ];
 }
 
 class AmbulanceFormOptionsLoaded extends AmbulanceState {

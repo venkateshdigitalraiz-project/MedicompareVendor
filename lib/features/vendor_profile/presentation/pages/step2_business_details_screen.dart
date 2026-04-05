@@ -12,10 +12,12 @@ class Step2BusinessDetailsScreen extends StatefulWidget {
   const Step2BusinessDetailsScreen({super.key});
 
   @override
-  State<Step2BusinessDetailsScreen> createState() => _Step2BusinessDetailsScreenState();
+  State<Step2BusinessDetailsScreen> createState() =>
+      _Step2BusinessDetailsScreenState();
 }
 
-class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen> {
+class _Step2BusinessDetailsScreenState
+    extends State<Step2BusinessDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController displayNameController = TextEditingController();
   final TextEditingController legalNameController = TextEditingController();
@@ -29,9 +31,17 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
   Country? selectedAltCountry;
 
   final List<String> categories = [
-    'Medicine', 'Surgeries', 'Lab Tests', 'Diagnostics', 'Nursing Care',
-    'Ambulance Service', 'Dental Service', 'Medical Equipment', 'Medical Treatment',
-    'Home Care', 'Homecare Services'
+    'Medicine',
+    'Surgeries',
+    'Lab Tests',
+    'Diagnostics',
+    'Nursing Care',
+    'Ambulance Service',
+    'Dental Service',
+    'Medical Equipment',
+    'Medical Treatment',
+    'Home Care',
+    'Homecare Services'
   ];
   List<String> selectedCategories = [];
 
@@ -186,7 +196,8 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: BackButton(color: Colors.black, onPressed: () => context.pop()),
+        leading:
+            BackButton(color: Colors.black, onPressed: () => context.pop()),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -196,7 +207,8 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
             children: [
               Text(
                 "Complete Your Vendor Profile",
-                style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold),
+                style: GoogleFonts.inter(
+                    fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -222,7 +234,8 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _stepIcon(Icons.check_circle, "Personal\nDetails", true, isCompleted: true),
+          _stepIcon(Icons.check_circle, "Personal\nDetails", true,
+              isCompleted: true),
           _stepLine(true),
           _stepIcon(Icons.apartment, "Business\nDetails", true),
           _stepLine(false),
@@ -238,7 +251,8 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
     );
   }
 
-  Widget _stepIcon(IconData icon, String label, bool isActive, {bool isCompleted = false}) {
+  Widget _stepIcon(IconData icon, String label, bool isActive,
+      {bool isCompleted = false}) {
     return Column(
       children: [
         CircleAvatar(
@@ -289,25 +303,33 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
           children: [
             Text(
               "Business Details",
-              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold),
+              style:
+                  GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             _label("Business Display Name *"),
-            _buildTextField(displayNameController, "e.g. Wane Enterprises", validator: (v) => v!.isEmpty ? "Required" : null),
+            _buildTextField(displayNameController, "e.g. Wane Enterprises",
+                validator: (v) => v!.isEmpty ? "Required" : null),
             const SizedBox(height: 16),
             _label("Business Legal Name *"),
-            _buildTextField(legalNameController, "Enter Business Legal Name", validator: (v) => v!.isEmpty ? "Required" : null),
+            _buildTextField(legalNameController, "Enter Business Legal Name",
+                validator: (v) => v!.isEmpty ? "Required" : null),
             const SizedBox(height: 16),
             _label("Business Email *"),
-            _buildTextField(emailController, "e.g. work@example.com", 
+            _buildTextField(emailController, "e.g. work@example.com",
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => (v == null || !v.contains('@')) ? "Invalid email" : null),
+                validator: (v) =>
+                    (v == null || !v.contains('@')) ? "Invalid email" : null),
             const SizedBox(height: 16),
             _label("Business Mobile Number *"),
-            _buildPhoneField(mobileController, selectedCountry, (c) => setState(() => selectedCountry = c)),
+            _buildPhoneField(mobileController, selectedCountry,
+                (c) => setState(() => selectedCountry = c)),
             const SizedBox(height: 16),
             _label("Alternate Business Mobile Number (Optional)"),
-            _buildPhoneField(altMobileController, selectedAltCountry ?? selectedCountry, (c) => setState(() => selectedAltCountry = c)),
+            _buildPhoneField(
+                altMobileController,
+                selectedAltCountry ?? selectedCountry,
+                (c) => setState(() => selectedAltCountry = c)),
             const SizedBox(height: 16),
             _label("Business Categories *"),
             _buildCategorySelector(),
@@ -315,11 +337,15 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
-                children: selectedCategories.map((cat) => Chip(
-                  label: Text(cat, style: const TextStyle(fontSize: 12)),
-                  deleteIcon: const Icon(Icons.close, size: 14),
-                  onDeleted: () => setState(() => selectedCategories.remove(cat)),
-                )).toList(),
+                children: selectedCategories
+                    .map((cat) => Chip(
+                          label:
+                              Text(cat, style: const TextStyle(fontSize: 12)),
+                          deleteIcon: const Icon(Icons.close, size: 14),
+                          onDeleted: () =>
+                              setState(() => selectedCategories.remove(cat)),
+                        ))
+                    .toList(),
               ),
             ],
             const SizedBox(height: 16),
@@ -327,7 +353,9 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
             _buildAddressSearchField(),
             const SizedBox(height: 16),
             _label("Business Address (Editable) *"),
-            _buildTextField(addressController, "Address will be auto-filled or enter manually", maxLines: 3, validator: (v) => v!.isEmpty ? "Required" : null),
+            _buildTextField(addressController,
+                "Address will be auto-filled or enter manually",
+                maxLines: 3, validator: (v) => v!.isEmpty ? "Required" : null),
             const SizedBox(height: 8),
             Text(
               "This address will be sent to the backend. You can edit it as needed.",
@@ -349,7 +377,10 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, {int maxLines = 1, TextInputType? keyboardType, String? Function(String?)? validator}) {
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {int maxLines = 1,
+      TextInputType? keyboardType,
+      String? Function(String?)? validator}) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -359,14 +390,20 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(fontSize: 13, color: Colors.grey[400]),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!)),
       ),
     );
   }
 
-  Widget _buildPhoneField(TextEditingController controller, Country country, Function(Country) onCountrySelected) {
+  Widget _buildPhoneField(TextEditingController controller, Country country,
+      Function(Country) onCountrySelected) {
     return Row(
       children: [
         GestureDetector(
@@ -385,14 +422,17 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
               children: [
                 Text(country.flagEmoji),
                 const SizedBox(width: 4),
-                Text("+${country.phoneCode}", style: const TextStyle(fontSize: 13)),
+                Text("+${country.phoneCode}",
+                    style: const TextStyle(fontSize: 13)),
                 const Icon(Icons.keyboard_arrow_down, size: 16),
               ],
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(child: _buildTextField(controller, "9876543210", keyboardType: TextInputType.phone)),
+        Expanded(
+            child: _buildTextField(controller, "9876543210",
+                keyboardType: TextInputType.phone)),
       ],
     );
   }
@@ -408,7 +448,8 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text("Select Business Categories", style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                    child: Text("Select Business Categories",
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                   ),
                   Expanded(
                     child: ListView.builder(
@@ -449,8 +490,14 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              selectedCategories.isEmpty ? "Select your business categories" : "${selectedCategories.length} selected",
-              style: TextStyle(fontSize: 13, color: selectedCategories.isEmpty ? Colors.grey[400] : Colors.black),
+              selectedCategories.isEmpty
+                  ? "Select your business categories"
+                  : "${selectedCategories.length} selected",
+              style: TextStyle(
+                  fontSize: 13,
+                  color: selectedCategories.isEmpty
+                      ? Colors.grey[400]
+                      : Colors.black),
             ),
             const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           ],
@@ -469,10 +516,15 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
           decoration: InputDecoration(
             hintText: "Search address with Google Maps...",
             hintStyle: TextStyle(fontSize: 13, color: Colors.grey[400]),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             prefixIcon: const Icon(Icons.search, size: 20),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!)),
           ),
         ),
         if (predictions.isNotEmpty)
@@ -491,8 +543,10 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
               itemBuilder: (context, index) {
                 final prediction = predictions[index];
                 return ListTile(
-                  leading: const Icon(Icons.location_on, size: 18, color: Colors.grey),
-                  title: Text(prediction['description'], style: const TextStyle(fontSize: 12)),
+                  leading: const Icon(Icons.location_on,
+                      size: 18, color: Colors.grey),
+                  title: Text(prediction['description'],
+                      style: const TextStyle(fontSize: 12)),
                   onTap: () => _getPlaceDetails(prediction['place_id']),
                 );
               },
@@ -514,7 +568,8 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
                 label: const Text("Previous"),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ),
@@ -525,16 +580,25 @@ class _Step2BusinessDetailsScreenState extends State<Step2BusinessDetailsScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 child: provider.isLoading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Next", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          const Text("Next",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                          const Icon(Icons.arrow_forward,
+                              color: Colors.white, size: 18),
                         ],
                       ),
               ),

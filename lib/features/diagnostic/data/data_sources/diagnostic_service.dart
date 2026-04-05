@@ -16,7 +16,9 @@ class DiagnosticService {
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
-        return categoriesJson.map((json) => DiagnosticCategory.fromJson(json)).toList();
+        return categoriesJson
+            .map((json) => DiagnosticCategory.fromJson(json))
+            .toList();
       }
       throw ServerException(body['message'] ?? 'Failed to fetch categories');
     } catch (e) {
@@ -38,7 +40,8 @@ class DiagnosticService {
         'categoryId': categoryId,
         'search': search,
       };
-      final response = await _apiService.get(ApiEndpoints.diagnosticList, queryParameters: queryParams);
+      final response = await _apiService.get(ApiEndpoints.diagnosticList,
+          queryParameters: queryParams);
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return DiagnosticResponse.fromJson(body['data']);
@@ -52,7 +55,8 @@ class DiagnosticService {
 
   Future<DiagnosticItem> getDiagnosticDetails(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.diagnosticDetails(id), body: {});
+      final response =
+          await _apiService.post(ApiEndpoints.diagnosticDetails(id), body: {});
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
         return DiagnosticItem.fromJson(body['data']['product']);
@@ -88,17 +92,20 @@ class DiagnosticService {
       if (body['success'] == true) {
         return DiagnosticDropdownItem.fromJson(body['data']['tablets']);
       }
-      throw ServerException(body['message'] ?? 'Failed to fetch tablet details');
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch tablet details');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
     }
   }
 
-  Future<void> createDiagnostic(Map<String, dynamic> data, {File? image}) async {
+  Future<void> createDiagnostic(Map<String, dynamic> data,
+      {File? image}) async {
     try {
       if (image != null) {
-        final fields = data.map((key, value) => MapEntry(key, value.toString()));
+        final fields =
+            data.map((key, value) => MapEntry(key, value.toString()));
         final response = await _apiService.post(
           ApiEndpoints.createDiagnostic,
           fields: fields,
@@ -106,13 +113,16 @@ class DiagnosticService {
         );
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
-          throw ServerException(body['message'] ?? 'Failed to create diagnostic');
+          throw ServerException(
+              body['message'] ?? 'Failed to create diagnostic');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.createDiagnostic, body: data);
+        final response =
+            await _apiService.post(ApiEndpoints.createDiagnostic, body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
-          throw ServerException(body['message'] ?? 'Failed to create diagnostic');
+          throw ServerException(
+              body['message'] ?? 'Failed to create diagnostic');
         }
       }
     } catch (e) {
@@ -121,10 +131,12 @@ class DiagnosticService {
     }
   }
 
-  Future<void> updateDiagnostic(String id, Map<String, dynamic> data, {File? image}) async {
+  Future<void> updateDiagnostic(String id, Map<String, dynamic> data,
+      {File? image}) async {
     try {
       if (image != null) {
-        final fields = data.map((key, value) => MapEntry(key, value.toString()));
+        final fields =
+            data.map((key, value) => MapEntry(key, value.toString()));
         final response = await _apiService.post(
           ApiEndpoints.updateDiagnostic(id),
           fields: fields,
@@ -132,13 +144,16 @@ class DiagnosticService {
         );
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
-          throw ServerException(body['message'] ?? 'Failed to update diagnostic');
+          throw ServerException(
+              body['message'] ?? 'Failed to update diagnostic');
         }
       } else {
-        final response = await _apiService.post(ApiEndpoints.updateDiagnostic(id), body: data);
+        final response = await _apiService
+            .post(ApiEndpoints.updateDiagnostic(id), body: data);
         final body = jsonDecode(response.body);
         if (body['success'] != true) {
-          throw ServerException(body['message'] ?? 'Failed to update diagnostic');
+          throw ServerException(
+              body['message'] ?? 'Failed to update diagnostic');
         }
       }
     } catch (e) {
@@ -149,7 +164,8 @@ class DiagnosticService {
 
   Future<void> deleteDiagnostic(String id) async {
     try {
-      final response = await _apiService.post(ApiEndpoints.deleteDiagnostic(id));
+      final response =
+          await _apiService.post(ApiEndpoints.deleteDiagnostic(id));
       final body = jsonDecode(response.body);
       if (body['success'] != true) {
         throw ServerException(body['message'] ?? 'Failed to delete diagnostic');

@@ -142,8 +142,8 @@ class _BranchListTabState extends State<BranchListTab> {
                   itemBuilder: (context, index) {
                     return BranchCard(
                       branch: _branches[index],
-                      onTap: () =>
-                          context.push('/branch-details/${_branches[index].id}'),
+                      onTap: () => context
+                          .push('/branch-details/${_branches[index].id}'),
                       onEdit: () {
                         showModalBottomSheet(
                           context: context,

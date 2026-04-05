@@ -12,8 +12,8 @@ class AddDentalServiceSheet extends StatefulWidget {
   final List<String> existingIds;
 
   const AddDentalServiceSheet({
-    super.key, 
-    this.editItem, 
+    super.key,
+    this.editItem,
     required this.onSuccess,
     this.existingIds = const [],
   });
@@ -24,7 +24,8 @@ class AddDentalServiceSheet extends StatefulWidget {
 
 class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
   final _formKey = GlobalKey<FormState>();
-  final DentalServiceService _service = DentalServiceInjection.provideDentalServiceService();
+  final DentalServiceService _service =
+      DentalServiceInjection.provideDentalServiceService();
 
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
@@ -67,7 +68,9 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedTabletId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a dental service'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please select a dental service'),
+          backgroundColor: Colors.red));
       return;
     }
 
@@ -104,13 +107,17 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
         Navigator.pop(context);
         messenger.showSnackBar(
           SnackBar(
-            content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+            content: Text(isEditMode
+                ? 'Updated successfully'
+                : 'Product added successfully'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -140,7 +147,9 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
             margin: const EdgeInsets.only(top: 12),
             width: 40,
             height: 4,
-            decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2)),
           ),
           // Header
           Padding(
@@ -149,8 +158,11 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.medical_services_outlined, color: AppColors.primary, size: 24),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF5F3FF),
+                      borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.medical_services_outlined,
+                      color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -158,17 +170,25 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isEditMode ? 'Edit Dental Service' : 'Add New Dental Service',
-                        style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                        isEditMode
+                            ? 'Edit Dental Service'
+                            : 'Add New Dental Service',
+                        style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B)),
                       ),
                       Text(
                         'Fill in the details to ${isEditMode ? 'update' : 'add'} a dental service',
-                        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.grey[500]),
                       ),
                     ],
                   ),
                 ),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Color(0xFF1E1B4B))),
+                IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: Color(0xFF1E1B4B))),
               ],
             ),
           ),
@@ -182,15 +202,26 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Dental Service Information", style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-                    Text("Please provide accurate information for the dental treatment", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
+                    Text("Dental Service Information",
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E1B4B))),
+                    Text(
+                        "Please provide accurate information for the dental treatment",
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.grey[500])),
                     const SizedBox(height: 20),
 
                     // Search Name
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildLabel("Dental Service Name", isRequired: !isEditMode, icon: isEditMode ? Icons.medical_information_outlined : Icons.search),
+                        _buildLabel("Dental Service Name",
+                            isRequired: !isEditMode,
+                            icon: isEditMode
+                                ? Icons.medical_information_outlined
+                                : Icons.search),
                         const SizedBox(height: 8),
                         _buildSearchField(),
                       ],
@@ -204,14 +235,17 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Price (₹)", isRequired: true, icon: Icons.currency_rupee),
+                              _buildLabel("Price (₹)",
+                                  isRequired: true, icon: Icons.currency_rupee),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _priceController,
                                 keyboardType: TextInputType.number,
                                 style: GoogleFonts.inter(fontSize: 13),
                                 decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) => (val == null || val.isEmpty) ? "Required" : null,
+                                validator: (val) => (val == null || val.isEmpty)
+                                    ? "Required"
+                                    : null,
                               ),
                             ],
                           ),
@@ -221,7 +255,9 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("Discount Price (₹)", isRequired: true, icon: Icons.local_offer_outlined),
+                              _buildLabel("Discount Price (₹)",
+                                  isRequired: true,
+                                  icon: Icons.local_offer_outlined),
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: _discountController,
@@ -229,10 +265,14 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                                 style: GoogleFonts.inter(fontSize: 13),
                                 decoration: _inputDecoration(hint: "0.00"),
                                 validator: (val) {
-                                  if (val == null || val.isEmpty) return "Required";
+                                  if (val == null || val.isEmpty)
+                                    return "Required";
                                   final discount = double.tryParse(val);
-                                  final price = double.tryParse(_priceController.text);
-                                  if (discount != null && price != null && discount > price) {
+                                  final price =
+                                      double.tryParse(_priceController.text);
+                                  if (discount != null &&
+                                      price != null &&
+                                      discount > price) {
                                     return "Over price";
                                   }
                                   return null;
@@ -247,28 +287,41 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
 
                     // Status
                     Row(
-                       children: [
-                         Expanded(
-                           child: Column(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                             children: [
-                               _buildLabel("Status", isRequired: true, icon: Icons.check_circle_outline),
-                               const SizedBox(height: 8),
-                               DropdownButtonFormField<String>(
-                                 value: _selectedStatus,
-                                 isExpanded: true,
-                                 decoration: _inputDecoration(hint: "Select Status"),
-                                 style: GoogleFonts.inter(fontSize: 13, color: Colors.black87),
-                                 items: [
-                                   DropdownMenuItem(value: 'active', child: Text("Active", style: GoogleFonts.inter(fontSize: 13))),
-                                   DropdownMenuItem(value: 'inactive', child: Text("Inactive", style: GoogleFonts.inter(fontSize: 13))),
-                                 ],
-                                 onChanged: (val) => setState(() => _selectedStatus = val!),
-                               ),
-                             ],
-                           ),
-                         ),
-                       ],
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel("Status",
+                                  isRequired: true,
+                                  icon: Icons.check_circle_outline),
+                              const SizedBox(height: 8),
+                              DropdownButtonFormField<String>(
+                                value: _selectedStatus,
+                                isExpanded: true,
+                                decoration:
+                                    _inputDecoration(hint: "Select Status"),
+                                style: GoogleFonts.inter(
+                                    fontSize: 13, color: Colors.black87),
+                                items: [
+                                  DropdownMenuItem(
+                                      value: 'active',
+                                      child: Text("Active",
+                                          style:
+                                              GoogleFonts.inter(fontSize: 13))),
+                                  DropdownMenuItem(
+                                      value: 'inactive',
+                                      child: Text("Inactive",
+                                          style:
+                                              GoogleFonts.inter(fontSize: 13))),
+                                ],
+                                onChanged: (val) =>
+                                    setState(() => _selectedStatus = val!),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -279,13 +332,19 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
           // Footer
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Colors.grey[200]!))),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey[200]!))),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text("Cancel", style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
+                  child: Text("Cancel",
+                      style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: const Color(0xFF1E1B4B),
+                          fontWeight: FontWeight.w600)),
                 ),
                 const SizedBox(width: 12),
                 SizedBox(
@@ -293,14 +352,22 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                   child: ElevatedButton.icon(
                     onPressed: _isSubmitting ? null : _submit,
                     icon: _isSubmitting
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
                         : const Icon(Icons.add, size: 16),
-                    label: Text(isEditMode ? "Update Treatment" : "Add Treatment", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold)),
+                    label: Text(
+                        isEditMode ? "Update Treatment" : "Add Treatment",
+                        style: GoogleFonts.inter(
+                            fontSize: 14, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                     ),
                   ),
@@ -319,21 +386,30 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
         TextFormField(
           controller: _searchController,
           enabled: !isEditMode,
-          style: GoogleFonts.inter(fontSize: 13, color: isEditMode ? Colors.grey[600] : Colors.black87),
+          style: GoogleFonts.inter(
+              fontSize: 13,
+              color: isEditMode ? Colors.grey[600] : Colors.black87),
           onTap: () {
-            if (!isEditMode && _searchController.text.isEmpty) _onSearchChanged('');
+            if (!isEditMode && _searchController.text.isEmpty)
+              _onSearchChanged('');
           },
           decoration: _inputDecoration(hint: "Select Treatment...").copyWith(
-            suffixIcon: isEditMode ? null : const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+            suffixIcon: isEditMode
+                ? null
+                : const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
             fillColor: isEditMode ? Colors.grey[50] : Colors.white,
           ),
           onChanged: (q) {
-            setState(() { _selectedTabletId = null; });
+            setState(() {
+              _selectedTabletId = null;
+            });
             _onSearchChanged(q);
           },
           validator: (_) => _selectedTabletId == null ? "Required" : null,
         ),
-        if (!isEditMode && _searchResults.isNotEmpty && _selectedTabletId == null)
+        if (!isEditMode &&
+            _searchResults.isNotEmpty &&
+            _selectedTabletId == null)
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
             margin: const EdgeInsets.only(top: 4),
@@ -341,7 +417,9 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey[200]!),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)],
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+              ],
             ),
             child: ListView.builder(
               shrinkWrap: true,
@@ -358,8 +436,11 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
                     });
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    child: Text(item.name, style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF1E1B4B))),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    child: Text(item.name,
+                        style: GoogleFonts.inter(
+                            fontSize: 13, color: const Color(0xFF1E1B4B))),
                   ),
                 );
               },
@@ -373,15 +454,26 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null) ...[Icon(icon, size: 14, color: Colors.grey[500]), const SizedBox(width: 6)],
+        if (icon != null) ...[
+          Icon(icon, size: 14, color: Colors.grey[500]),
+          const SizedBox(width: 6)
+        ],
         Flexible(
           child: Text(
             text,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF1E1B4B)),
+            style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF1E1B4B)),
           ),
         ),
-        if (isRequired) Text(" *", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
+        if (isRequired)
+          Text(" *",
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -393,10 +485,18 @@ class _AddDentalServiceSheetState extends State<AddDentalServiceSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.primary)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[200]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.primary)),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.red)),
     );
   }
 }

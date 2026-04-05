@@ -39,11 +39,14 @@ class LeadPlanHistoryPage extends StatelessWidget {
             final currentPack = state.history.currentPack;
             return RefreshIndicator(
               onRefresh: () async {
-                context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
+                context
+                    .read<SubscriptionBloc>()
+                    .add(LoadSubscriptionDataEvent());
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -55,9 +58,10 @@ class LeadPlanHistoryPage extends StatelessWidget {
                     ],
                     _buildPreviousPlansHeader(),
                     const SizedBox(height: 16),
-                    ...state.history.planHistory.map((history) => _buildPreviousPlanCard(history)).toList(),
-                    if (state.history.planHistory.isEmpty)
-                      _buildEmptyHistory(),
+                    ...state.history.planHistory
+                        .map((history) => _buildPreviousPlanCard(history))
+                        .toList(),
+                    if (state.history.planHistory.isEmpty) _buildEmptyHistory(),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -70,12 +74,15 @@ class LeadPlanHistoryPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent()),
+                      onPressed: () => context
+                          .read<SubscriptionBloc>()
+                          .add(LoadSubscriptionDataEvent()),
                       child: const Text("Retry"),
                     ),
                   ],
@@ -134,7 +141,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
     final int usage = pack.usage ?? 0;
     final double progress = (usage / limit).clamp(0.0, 1.0);
     final String startDate = DateFormat('dd MMM, yyyy').format(pack.createdAt);
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -154,7 +161,8 @@ class LeadPlanHistoryPage extends StatelessWidget {
                   color: AppColors.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.stars_rounded, color: AppColors.primary, size: 20),
+                child: const Icon(Icons.stars_rounded,
+                    color: AppColors.primary, size: 20),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -171,7 +179,8 @@ class LeadPlanHistoryPage extends StatelessWidget {
                     ),
                     Text(
                       "Active since $startDate",
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -180,13 +189,10 @@ class LeadPlanHistoryPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 28),
-          
           _buildUsageBar(usage, limit, progress),
-          
           const SizedBox(height: 28),
           const Divider(height: 1),
           const SizedBox(height: 24),
-          
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -337,7 +343,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
     final date = DateFormat('dd MMM, yyyy').format(item.createdAt);
     final month = DateFormat('MMMM yyyy').format(item.createdAt);
     final String invNo = item.id.substring(item.id.length - 6).toUpperCase();
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -365,7 +371,8 @@ class LeadPlanHistoryPage extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     "Invoice #INV-$invNo",
-                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
+                    style: GoogleFonts.inter(
+                        fontSize: 11, color: Colors.grey[500]),
                   ),
                 ],
               ),
@@ -389,12 +396,14 @@ class LeadPlanHistoryPage extends StatelessWidget {
             child: TextButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.file_download_outlined, size: 18),
-              label: Text("Download Invoice", style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+              label: Text("Download Invoice",
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 backgroundColor: AppColors.primary.withOpacity(0.05),
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
             ),
           ),
@@ -409,12 +418,18 @@ class LeadPlanHistoryPage extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey[400]),
+          style: GoogleFonts.inter(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[400]),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF374151)),
+          style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF374151)),
         ),
       ],
     );

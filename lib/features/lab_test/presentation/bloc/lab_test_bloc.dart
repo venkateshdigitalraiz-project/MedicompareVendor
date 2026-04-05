@@ -14,7 +14,8 @@ class LabTestBloc extends Bloc<LabTestEvent, LabTestState> {
     on<SearchLabTestsEvent>(_onSearchLabTests);
   }
 
-  Future<void> _onLoadCategories(LoadLabTestCategoriesEvent event, Emitter<LabTestState> emit) async {
+  Future<void> _onLoadCategories(
+      LoadLabTestCategoriesEvent event, Emitter<LabTestState> emit) async {
     emit(LabTestLoading());
     try {
       final categories = await _labTestService.getCategories();
@@ -25,7 +26,8 @@ class LabTestBloc extends Bloc<LabTestEvent, LabTestState> {
     }
   }
 
-  Future<void> _onLoadLabTests(LoadLabTestsEvent event, Emitter<LabTestState> emit) async {
+  Future<void> _onLoadLabTests(
+      LoadLabTestsEvent event, Emitter<LabTestState> emit) async {
     final currentState = state;
     if (currentState is LabTestLoaded) {
       if (event.isLoadMore) {
@@ -40,9 +42,12 @@ class LabTestBloc extends Bloc<LabTestEvent, LabTestState> {
         );
 
         if (event.isLoadMore) {
-          final newList = List<LabTestItem>.from(currentState.labTestResponse.list)..addAll(response.list);
+          final newList =
+              List<LabTestItem>.from(currentState.labTestResponse.list)
+                ..addAll(response.list);
           emit(currentState.copyWith(
-            labTestResponse: LabTestResponse(list: newList, pagination: response.pagination),
+            labTestResponse:
+                LabTestResponse(list: newList, pagination: response.pagination),
             isLoadingMore: false,
             selectedCategoryId: event.categoryId,
             searchQuery: event.search,
@@ -64,17 +69,21 @@ class LabTestBloc extends Bloc<LabTestEvent, LabTestState> {
     }
   }
 
-  Future<void> _onSelectCategory(SelectLabTestCategoryEvent event, Emitter<LabTestState> emit) async {
+  Future<void> _onSelectCategory(
+      SelectLabTestCategoryEvent event, Emitter<LabTestState> emit) async {
     final currentState = state;
     if (currentState is LabTestLoaded) {
-      add(LoadLabTestsEvent(categoryId: event.categoryId, search: currentState.searchQuery));
+      add(LoadLabTestsEvent(
+          categoryId: event.categoryId, search: currentState.searchQuery));
     }
   }
 
-  Future<void> _onSearchLabTests(SearchLabTestsEvent event, Emitter<LabTestState> emit) async {
+  Future<void> _onSearchLabTests(
+      SearchLabTestsEvent event, Emitter<LabTestState> emit) async {
     final currentState = state;
     if (currentState is LabTestLoaded) {
-      add(LoadLabTestsEvent(categoryId: currentState.selectedCategoryId, search: event.query));
+      add(LoadLabTestsEvent(
+          categoryId: currentState.selectedCategoryId, search: event.query));
     }
   }
 }

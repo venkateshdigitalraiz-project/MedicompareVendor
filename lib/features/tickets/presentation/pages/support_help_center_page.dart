@@ -52,8 +52,8 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             final state = context.read<TicketsBloc>().state;
-            if (state is TicketsLoaded && 
-                state.selectedTicket != null && 
+            if (state is TicketsLoaded &&
+                state.selectedTicket != null &&
                 MediaQuery.of(context).size.width <= 700) {
               context.read<TicketsBloc>().add(SelectTicketEvent(null));
             } else {
@@ -87,9 +87,12 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
             padding: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
             child: ElevatedButton.icon(
               onPressed: _showCreateTicket,
-              icon: const Icon(Icons.add, size: 18, color: AppColors.primaryDark),
-              label: Text("New Ticket", 
-                style: GoogleFonts.inter(color: AppColors.primaryDark, fontWeight: FontWeight.w600)),
+              icon:
+                  const Icon(Icons.add, size: 18, color: AppColors.primaryDark),
+              label: Text("New Ticket",
+                  style: GoogleFonts.inter(
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
@@ -190,17 +193,19 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
           ),
         ),
         Expanded(
-          child: state.tickets.isEmpty 
-            ? Center(child: Text("No tickets found", style: GoogleFonts.inter(color: Colors.grey)))
-            : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: state.tickets.length,
-                itemBuilder: (context, index) {
-                  final ticket = state.tickets[index];
-                  final isSelected = state.selectedTicket?.id == ticket.id;
-                  return _buildTicketCard(ticket, isSelected);
-                },
-              ),
+          child: state.tickets.isEmpty
+              ? Center(
+                  child: Text("No tickets found",
+                      style: GoogleFonts.inter(color: Colors.grey)))
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: state.tickets.length,
+                  itemBuilder: (context, index) {
+                    final ticket = state.tickets[index];
+                    final isSelected = state.selectedTicket?.id == ticket.id;
+                    return _buildTicketCard(ticket, isSelected);
+                  },
+                ),
         ),
       ],
     );
@@ -218,7 +223,8 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF8B5CF6) : const Color(0xFFE5E7EB),
+            color:
+                isSelected ? const Color(0xFF8B5CF6) : const Color(0xFFE5E7EB),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -263,14 +269,16 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
               children: [
                 _buildBadge(ticket.status, _getStatusColor(ticket.status)),
                 const SizedBox(width: 8),
-                _buildBadge(ticket.priority, _getPriorityColor(ticket.priority), isLight: true),
+                _buildBadge(ticket.priority, _getPriorityColor(ticket.priority),
+                    isLight: true),
               ],
             ),
             if (ticket.messages != null && ticket.messages!.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
                 ticket.messages!.last.message,
-                style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF4B5563)),
+                style: GoogleFonts.inter(
+                    fontSize: 12, color: const Color(0xFF4B5563)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -330,7 +338,6 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                   children: [
                     Row(
                       children: [
-
                         Text(
                           ticket.subject,
                           maxLines: 2,
@@ -342,15 +349,19 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        _buildBadge(ticket.status, _getStatusColor(ticket.status)),
+                        _buildBadge(
+                            ticket.status, _getStatusColor(ticket.status)),
                         const SizedBox(width: 8),
-                        _buildBadge(ticket.priority, _getPriorityColor(ticket.priority), isLight: true),
+                        _buildBadge(
+                            ticket.priority, _getPriorityColor(ticket.priority),
+                            isLight: true),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       "Ticket ID: ${ticket.ticketNo}",
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                      style:
+                          GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -417,7 +428,8 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                  child: const Icon(Icons.send_rounded,
+                      color: Colors.white, size: 20),
                 ),
               ),
             ],
@@ -438,7 +450,8 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
-        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -448,15 +461,19 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                 const CircleAvatar(
                   radius: 14,
                   backgroundColor: Color(0xFFF3E8FF),
-                  child: Icon(Icons.support_agent, size: 16, color: Color(0xFF8B5CF6)),
+                  child: Icon(Icons.support_agent,
+                      size: 16, color: Color(0xFF8B5CF6)),
                 ),
                 const SizedBox(width: 8),
               ],
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF7C3AED) : const Color(0xFFF3F4F6),
+                    color: isMe
+                        ? const Color(0xFF7C3AED)
+                        : const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -478,7 +495,8 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                 const CircleAvatar(
                   radius: 14,
                   backgroundColor: Color(0xFFF3E8FF),
-                  child: Icon(Icons.person_outline, size: 16, color: Color(0xFF8B5CF6)),
+                  child: Icon(Icons.person_outline,
+                      size: 16, color: Color(0xFF8B5CF6)),
                 ),
               ],
             ],
@@ -500,9 +518,9 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
   void _handleSend(String ticketId) {
     if (_messageController.text.trim().isNotEmpty) {
       context.read<TicketsBloc>().add(SendMessageEvent(
-        ticketId: ticketId,
-        message: _messageController.text.trim(),
-      ));
+            ticketId: ticketId,
+            message: _messageController.text.trim(),
+          ));
       _messageController.clear();
       FocusScope.of(context).unfocus();
     }
@@ -510,20 +528,29 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'open': return Colors.blue;
-      case 'closed': return Colors.green;
-      case 'resolved': return Colors.green;
-      case 'pending': return Colors.orange;
-      default: return Colors.blue;
+      case 'open':
+        return Colors.blue;
+      case 'closed':
+        return Colors.green;
+      case 'resolved':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      default:
+        return Colors.blue;
     }
   }
 
   Color _getPriorityColor(String priority) {
     switch (priority.toLowerCase()) {
-      case 'high': return Colors.red;
-      case 'medium': return Colors.orange;
-      case 'low': return Colors.green;
-      default: return Colors.blue;
+      case 'high':
+        return Colors.red;
+      case 'medium':
+        return Colors.orange;
+      case 'low':
+        return Colors.green;
+      default:
+        return Colors.blue;
     }
   }
 }

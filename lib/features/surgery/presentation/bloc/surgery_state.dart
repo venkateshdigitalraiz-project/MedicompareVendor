@@ -44,7 +44,13 @@ class SurgeryLoaded extends SurgeryState {
   }
 
   @override
-  List<Object?> get props => [categories, surgeryResponse, selectedCategoryId, searchQuery, isLoadingMore];
+  List<Object?> get props => [
+        categories,
+        surgeryResponse,
+        selectedCategoryId,
+        searchQuery,
+        isLoadingMore
+      ];
 }
 
 class SurgeryError extends SurgeryState {

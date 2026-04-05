@@ -12,8 +12,8 @@ class AddAmbulanceSheet extends StatefulWidget {
   final List<String> existingIds;
 
   const AddAmbulanceSheet({
-    super.key, 
-    required this.onSuccess, 
+    super.key,
+    required this.onSuccess,
     this.editAmbulance,
     this.existingIds = const [],
   });
@@ -24,14 +24,14 @@ class AddAmbulanceSheet extends StatefulWidget {
 
 class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
   final _formKey = GlobalKey<FormState>();
-  
+
   AmbulanceNameOptionEntity? _selectedAmbulance;
   List<String> _selectedFacilities = [];
   List<AmbulanceFacilityEntity> _availableFacilities = []; // cached locally
 
   final _priceController = TextEditingController();
   final _discountPriceController = TextEditingController();
-  
+
   String _status = "active";
   bool _isLoading = false;
 
@@ -49,9 +49,9 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
   void _loadEditData() {
     final amb = widget.editAmbulance!;
     _selectedAmbulance = AmbulanceNameOptionEntity(
-      id: amb.tabletId, 
+      id: amb.tabletId,
       name: amb.name,
-      categoryId: '', 
+      categoryId: '',
     );
     _priceController.text = amb.price.toString();
     _discountPriceController.text = amb.discountPrice.toString();
@@ -69,7 +69,8 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAmbulance == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select an ambulance service name')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please select an ambulance service name')));
       return;
     }
 
@@ -86,7 +87,8 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     }
 
     final payload = {
-      "name": isEditMode ? widget.editAmbulance!.tabletId : _selectedAmbulance!.id,
+      "name":
+          isEditMode ? widget.editAmbulance!.tabletId : _selectedAmbulance!.id,
       "price": double.tryParse(_priceController.text) ?? 0,
       "discount": double.tryParse(_discountPriceController.text) ?? 0,
       "facilities": _selectedFacilities,
@@ -94,11 +96,13 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     };
 
     if (!isEditMode) {
-       payload["categoryId"] = _selectedAmbulance!.categoryId;
+      payload["categoryId"] = _selectedAmbulance!.categoryId;
     }
 
     if (isEditMode) {
-      context.read<AmbulanceBloc>().add(UpdateAmbulanceEvent(widget.editAmbulance!.id, payload));
+      context
+          .read<AmbulanceBloc>()
+          .add(UpdateAmbulanceEvent(widget.editAmbulance!.id, payload));
     } else {
       context.read<AmbulanceBloc>().add(CreateAmbulanceEvent(payload));
     }
@@ -115,7 +119,9 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
           Navigator.pop(context);
           messenger.showSnackBar(
             SnackBar(
-              content: Text(isEditMode ? 'Updated successfully' : 'Product added successfully'),
+              content: Text(isEditMode
+                  ? 'Updated successfully'
+                  : 'Product added successfully'),
               backgroundColor: Colors.green,
             ),
           );
@@ -150,28 +156,44 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                         children: [
                           Text(
                             "Ambulance Information",
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                            style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E1B4B)),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            isEditMode ? "Update the ambulance details below" : "Please provide accurate information for the ambulance service",
-                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                            isEditMode
+                                ? "Update the ambulance details below"
+                                : "Please provide accurate information for the ambulance service",
+                            style: GoogleFonts.poppins(
+                                fontSize: 12, color: Colors.grey[600]),
                           ),
                           const SizedBox(height: 24),
-                          
                           _buildNameSearchField(),
                           const SizedBox(height: 20),
-                          
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(child: _buildTextField("Price per KM", _priceController, hint: "0.00", icon: Icons.currency_rupee)),
+                              Expanded(
+                                  child: _buildTextField(
+                                      "Price per KM", _priceController,
+                                      hint: "0.00",
+                                      icon: Icons.currency_rupee)),
                               const SizedBox(width: 16),
-                              Expanded(child: _buildTextField("Discount Price", _discountPriceController, hint: "0.00", icon: Icons.currency_rupee, validator: (val) {
-                                if (val == null || val.isEmpty) return "Required";
+                              Expanded(
+                                  child: _buildTextField("Discount Price",
+                                      _discountPriceController,
+                                      hint: "0.00", icon: Icons.currency_rupee,
+                                      validator: (val) {
+                                if (val == null || val.isEmpty)
+                                  return "Required";
                                 final discount = double.tryParse(val);
-                                final price = double.tryParse(_priceController.text);
-                                if (discount != null && price != null && discount > price) {
+                                final price =
+                                    double.tryParse(_priceController.text);
+                                if (discount != null &&
+                                    price != null &&
+                                    discount > price) {
                                   return "Over price";
                                 }
                                 return null;
@@ -179,10 +201,8 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          
                           _buildStatusDropdown(),
                           const SizedBox(height: 20),
-                          
                           _buildFacilitiesDropdown(_availableFacilities),
                           const SizedBox(height: 24),
                         ],
@@ -206,8 +226,11 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.airport_shuttle, color: Color(0xFF7C3AED), size: 24),
+            decoration: BoxDecoration(
+                color: const Color(0xFFF5F3FF),
+                borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.airport_shuttle,
+                color: Color(0xFF7C3AED), size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -215,12 +238,16 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isEditMode ? "Edit Ambulance Service" : "Add New Ambulance", 
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+                  isEditMode ? "Edit Ambulance Service" : "Add New Ambulance",
+                  style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E1B4B)),
                 ),
                 Text(
-                  "Fill in the details for ambulance service", 
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                  "Fill in the details for ambulance service",
+                  style: GoogleFonts.poppins(
+                      fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -238,10 +265,11 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel("Ambulance Service Name", isRequired: true, icon: Icons.airport_shuttle_outlined),
+        _buildLabel("Ambulance Service Name",
+            isRequired: true, icon: Icons.airport_shuttle_outlined),
         const SizedBox(height: 8),
         if (isEditMode)
-           _buildDisabledField(_selectedAmbulance?.name ?? "")
+          _buildDisabledField(_selectedAmbulance?.name ?? "")
         else
           GestureDetector(
             onTap: _showAmbulanceNamePicker,
@@ -257,7 +285,11 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                   Expanded(
                     child: Text(
                       _selectedAmbulance?.name ?? "Search Ambulance Service...",
-                      style: GoogleFonts.poppins(fontSize: 14, color: _selectedAmbulance == null ? Colors.grey[400] : Colors.black),
+                      style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: _selectedAmbulance == null
+                              ? Colors.grey[400]
+                              : Colors.black),
                     ),
                   ),
                   const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
@@ -272,7 +304,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
   void _showAmbulanceNamePicker() {
     // Initial fetch for the names
     context.read<AmbulanceBloc>().add(const SearchAmbulanceNamesEvent(""));
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -285,7 +317,9 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
           initialChildSize: 0.6,
           maxChildSize: 0.9,
           builder: (_, controller) => Container(
-            decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+            decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
             child: Column(
               children: [
                 Padding(
@@ -293,16 +327,23 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Select Ambulance", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-                      IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                      Text("Select Ambulance",
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(ctx)),
                     ],
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextField(
-                    onChanged: (val) => context.read<AmbulanceBloc>().add(SearchAmbulanceNamesEvent(val)),
-                    decoration: _inputDecoration(hint: "Search...").copyWith(prefixIcon: const Icon(Icons.search)),
+                    onChanged: (val) => context
+                        .read<AmbulanceBloc>()
+                        .add(SearchAmbulanceNamesEvent(val)),
+                    decoration: _inputDecoration(hint: "Search...")
+                        .copyWith(prefixIcon: const Icon(Icons.search)),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -314,21 +355,27 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                       }
                       if (state is AmbulanceNamesSearched) {
                         if (state.names.isEmpty) {
-                          return Center(child: Text("No ambulance services found", style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey)));
+                          return Center(
+                              child: Text("No ambulance services found",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 14, color: Colors.grey)));
                         }
                         return ListView.builder(
                           controller: controller,
                           itemCount: state.names.length,
                           itemBuilder: (ctx, i) => ListTile(
-                            title: Text(state.names[i].name, style: GoogleFonts.poppins(fontSize: 14)),
+                            title: Text(state.names[i].name,
+                                style: GoogleFonts.poppins(fontSize: 14)),
                             onTap: () {
-                              setState(() => _selectedAmbulance = state.names[i]);
+                              setState(
+                                  () => _selectedAmbulance = state.names[i]);
                               Navigator.pop(ctx);
                             },
                           ),
                         );
                       }
-                      return const Center(child: Text("Search for ambulance services"));
+                      return const Center(
+                          child: Text("Search for ambulance services"));
                     },
                   ),
                 ),
@@ -340,7 +387,10 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {required String hint, required IconData icon, String? Function(String?)? validator}) {
+  Widget _buildTextField(String label, TextEditingController controller,
+      {required String hint,
+      required IconData icon,
+      String? Function(String?)? validator}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -351,7 +401,8 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
           keyboardType: TextInputType.number,
           style: GoogleFonts.poppins(fontSize: 14),
           decoration: _inputDecoration(hint: hint),
-          validator: validator ?? (val) => (val == null || val.isEmpty) ? "Required" : null,
+          validator: validator ??
+              (val) => (val == null || val.isEmpty) ? "Required" : null,
         ),
       ],
     );
@@ -396,8 +447,14 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
               children: [
                 Expanded(
                   child: Text(
-                    _selectedFacilities.isEmpty ? "Select facilities..." : "${_selectedFacilities.length} facilities selected",
-                    style: GoogleFonts.poppins(fontSize: 14, color: _selectedFacilities.isEmpty ? Colors.grey[400] : Colors.black),
+                    _selectedFacilities.isEmpty
+                        ? "Select facilities..."
+                        : "${_selectedFacilities.length} facilities selected",
+                    style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: _selectedFacilities.isEmpty
+                            ? Colors.grey[400]
+                            : Colors.black),
                   ),
                 ),
                 const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
@@ -419,7 +476,9 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
           initialChildSize: 0.6,
           maxChildSize: 0.9,
           builder: (_, controller) => Container(
-            decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+            decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
             child: Column(
               children: [
                 Padding(
@@ -427,8 +486,12 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Select Facilities", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-                      IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                      Text("Select Facilities",
+                          style: GoogleFonts.poppins(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(ctx)),
                     ],
                   ),
                 ),
@@ -440,7 +503,8 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                       final f = facilities[i];
                       final isSelected = _selectedFacilities.contains(f.id);
                       return CheckboxListTile(
-                        title: Text(f.name, style: GoogleFonts.poppins(fontSize: 14)),
+                        title: Text(f.name,
+                            style: GoogleFonts.poppins(fontSize: 14)),
                         value: isSelected,
                         onChanged: (val) {
                           setModalState(() {
@@ -464,7 +528,8 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
   }
 
-  Widget _buildLabel(String text, {bool isRequired = false, required IconData icon}) {
+  Widget _buildLabel(String text,
+      {bool isRequired = false, required IconData icon}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -474,11 +539,18 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
           child: Text(
             text,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF4B5563)),
+            style: GoogleFonts.poppins(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF4B5563)),
           ),
         ),
         if (isRequired)
-          Text(" *", style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red)),
+          Text(" *",
+              style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red)),
       ],
     );
   }
@@ -490,10 +562,18 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!)),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5)),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red)),
     );
   }
 
@@ -501,21 +581,31 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[300]!)),
-      child: Text(value, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700])),
+      decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[300]!)),
+      child: Text(value,
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700])),
     );
   }
 
   Widget _buildFooter() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Colors.grey[100]!))),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Colors.grey[100]!))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel", style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1E1B4B), fontWeight: FontWeight.w600)),
+            child: Text("Cancel",
+                style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: const Color(0xFF1E1B4B),
+                    fontWeight: FontWeight.w600)),
           ),
           const SizedBox(width: 8),
           ElevatedButton.icon(
@@ -524,13 +614,19 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
               backgroundColor: const Color(0xFF7C3AED),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
               elevation: 0,
             ),
-            icon: _isLoading 
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-              : const Icon(Icons.airport_shuttle, size: 16),
-            label: Text(isEditMode ? "Update Service" : "Add Service", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2))
+                : const Icon(Icons.airport_shuttle, size: 16),
+            label: Text(isEditMode ? "Update Service" : "Add Service",
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
           ),
         ],
       ),

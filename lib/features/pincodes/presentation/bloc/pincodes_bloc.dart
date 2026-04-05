@@ -25,7 +25,8 @@ class PincodesBloc extends Bloc<PincodesEvent, PincodesState> {
         final pincodes = await getPincodesUseCase();
         emit(PincodesLoaded(pincodes: pincodes));
       } catch (e) {
-        emit(PincodesError(message: e.toString().replaceAll('Exception: ', '')));
+        emit(
+            PincodesError(message: e.toString().replaceAll('Exception: ', '')));
       }
     });
 
@@ -45,7 +46,8 @@ class PincodesBloc extends Bloc<PincodesEvent, PincodesState> {
         emit(PincodeCreated());
         add(GetPincodesEvent());
       } catch (e) {
-        emit(PincodeOperationError(message: e.toString().replaceAll('Exception: ', '')));
+        emit(PincodeOperationError(
+            message: e.toString().replaceAll('Exception: ', '')));
         if (currentPincodes.isNotEmpty) {
           emit(PincodesLoaded(pincodes: currentPincodes));
         }
@@ -69,7 +71,8 @@ class PincodesBloc extends Bloc<PincodesEvent, PincodesState> {
         emit(PincodeUpdated());
         add(GetPincodesEvent());
       } catch (e) {
-        emit(PincodeOperationError(message: e.toString().replaceAll('Exception: ', '')));
+        emit(PincodeOperationError(
+            message: e.toString().replaceAll('Exception: ', '')));
         if (currentPincodes.isNotEmpty) {
           emit(PincodesLoaded(pincodes: currentPincodes));
         }
@@ -88,7 +91,8 @@ class PincodesBloc extends Bloc<PincodesEvent, PincodesState> {
         emit(PincodeDeleted());
         add(GetPincodesEvent());
       } catch (e) {
-        emit(PincodeOperationError(message: e.toString().replaceAll('Exception: ', '')));
+        emit(PincodeOperationError(
+            message: e.toString().replaceAll('Exception: ', '')));
         if (currentPincodes.isNotEmpty) {
           emit(PincodesLoaded(pincodes: currentPincodes));
         }

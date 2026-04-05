@@ -20,7 +20,7 @@ class LeadsBloc extends Bloc<LeadsEvent, LeadsState> {
       } else {
         emit(LeadsLoading());
       }
-      
+
       try {
         final result = await getLeadsUseCase.call(
           page: event.page,
@@ -29,7 +29,7 @@ class LeadsBloc extends Bloc<LeadsEvent, LeadsState> {
           leadStage: event.leadStage,
           search: event.search,
         );
-        
+
         if (event.isLoadMore && currentState is LeadsLoaded) {
           final updatedLeads = currentState.leadsList.leads + result.leads;
           emit(LeadsLoaded(

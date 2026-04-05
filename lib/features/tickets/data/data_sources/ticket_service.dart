@@ -21,7 +21,7 @@ class TicketService {
         'message': message,
       },
     );
-    
+
     final decoded = jsonDecode(response.body);
     if (decoded['success'] == true) {
       return TicketModel.fromJson(decoded['data']['tickets']);
@@ -52,7 +52,7 @@ class TicketService {
         'message': message,
       },
     );
-    
+
     final decoded = jsonDecode(response.body);
     if (decoded['success'] == true) {
       // API returns data: null on success as per provided reference

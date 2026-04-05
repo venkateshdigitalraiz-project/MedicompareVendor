@@ -32,15 +32,16 @@ class _MedicineListPageState extends State<MedicineListPage> {
   void _onScroll() {
     final state = context.read<MedicineBloc>().state;
     if (state is MedicineLoaded && !state.isLoadingMore) {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         final pagination = state.medicineResponse.pagination;
         if (pagination.page < pagination.totalPages) {
           context.read<MedicineBloc>().add(LoadMedicinesEvent(
-            page: pagination.page + 1,
-            categoryId: state.selectedCategoryId,
-            search: state.searchQuery,
-            isLoadMore: true,
-          ));
+                page: pagination.page + 1,
+                categoryId: state.selectedCategoryId,
+                search: state.searchQuery,
+                isLoadMore: true,
+              ));
         }
       }
     }
@@ -81,16 +82,22 @@ class _MedicineListPageState extends State<MedicineListPage> {
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   builder: (ctx) => Padding(
-                    padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(ctx).viewInsets.bottom),
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
+                      constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(ctx).size.height * 0.9),
                       child: AddMedicineSheet(
-                        existingIds: (context.read<MedicineBloc>().state as MedicineLoaded)
-                            .medicineResponse.list
+                        existingIds: (context.read<MedicineBloc>().state
+                                as MedicineLoaded)
+                            .medicineResponse
+                            .list
                             .map((m) => m.details.id)
                             .toList(),
                         onSuccess: () {
-                          context.read<MedicineBloc>().add(LoadMedicineCategoriesEvent());
+                          context
+                              .read<MedicineBloc>()
+                              .add(LoadMedicineCategoriesEvent());
                         },
                       ),
                     ),
@@ -98,11 +105,14 @@ class _MedicineListPageState extends State<MedicineListPage> {
                 );
               },
               icon: const Icon(Icons.add, size: 18),
-              label: Text("Add Medicine", style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+              label: Text("Add Medicine",
+                  style: GoogleFonts.inter(
+                      fontSize: 12, fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppColors.primaryDark,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),
             ),
@@ -120,12 +130,15 @@ class _MedicineListPageState extends State<MedicineListPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => context.read<MedicineBloc>().add(LoadMedicineCategoriesEvent()),
+                      onPressed: () => context
+                          .read<MedicineBloc>()
+                          .add(LoadMedicineCategoriesEvent()),
                       child: const Text("Retry"),
                     ),
                   ],
@@ -142,40 +155,58 @@ class _MedicineListPageState extends State<MedicineListPage> {
                       ? _buildEmptyState()
                       : RefreshIndicator(
                           onRefresh: () async {
-                             context.read<MedicineBloc>().add(LoadMedicineCategoriesEvent());
+                            context
+                                .read<MedicineBloc>()
+                                .add(LoadMedicineCategoriesEvent());
                           },
                           child: ListView.builder(
                             controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            itemCount: state.isLoadingMore ? medicines.length + 1 : medicines.length,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            itemCount: state.isLoadingMore
+                                ? medicines.length + 1
+                                : medicines.length,
                             itemBuilder: (context, index) {
                               if (index >= medicines.length) {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 24.0),
-                                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                  child: Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2)),
                                 );
                               }
                               final medicine = medicines[index];
                               return MedicineCard(
                                 item: medicine,
-                                onTap: () => context.push('/medicine-details', extra: medicine),
+                                onTap: () => context.push('/medicine-details',
+                                    extra: medicine),
                                 onEdit: () {
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
                                     backgroundColor: Colors.transparent,
                                     builder: (ctx) => Padding(
-                                      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+                                      padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(ctx)
+                                              .viewInsets
+                                              .bottom),
                                       child: ConstrainedBox(
-                                        constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.9),
+                                        constraints: BoxConstraints(
+                                            maxHeight:
+                                                MediaQuery.of(ctx).size.height *
+                                                    0.9),
                                         child: AddMedicineSheet(
                                           editMedicine: medicine,
-                                          existingIds: (context.read<MedicineBloc>().state as MedicineLoaded)
-                                              .medicineResponse.list
+                                          existingIds: (context
+                                                  .read<MedicineBloc>()
+                                                  .state as MedicineLoaded)
+                                              .medicineResponse
+                                              .list
                                               .map((m) => m.details.id)
                                               .toList(),
                                           onSuccess: () {
-                                            context.read<MedicineBloc>().add(const LoadMedicinesEvent());
+                                            context.read<MedicineBloc>().add(
+                                                const LoadMedicinesEvent());
                                           },
                                         ),
                                       ),
@@ -186,13 +217,24 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                   showDialog(
                                     context: context,
                                     builder: (ctx) => AlertDialog(
-                                      title: Text("Delete Medicine", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
-                                      content: Text("Are you sure you want to delete ${medicine.details.name}? This action cannot be undone.", style: GoogleFonts.inter(fontSize: 14)),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      title: Text("Delete Medicine",
+                                          style: GoogleFonts.inter(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16)),
+                                      content: Text(
+                                          "Are you sure you want to delete ${medicine.details.name}? This action cannot be undone.",
+                                          style:
+                                              GoogleFonts.inter(fontSize: 14)),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16)),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(ctx),
-                                          child: Text("Cancel", style: GoogleFonts.inter(color: Colors.grey[600], fontWeight: FontWeight.w600)),
+                                          child: Text("Cancel",
+                                              style: GoogleFonts.inter(
+                                                  color: Colors.grey[600],
+                                                  fontWeight: FontWeight.w600)),
                                         ),
                                         ElevatedButton(
                                           onPressed: () async {
@@ -201,26 +243,49 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                             showDialog(
                                               context: context,
                                               barrierDismissible: false,
-                                              builder: (c) => const Center(child: CircularProgressIndicator()),
+                                              builder: (c) => const Center(
+                                                  child:
+                                                      CircularProgressIndicator()),
                                             );
-                                            
+
                                             try {
-                                              final medicineService = MedicineInjection.provideMedicineService();
-                                              await medicineService.deleteMedicine(medicine.id);
+                                              final medicineService =
+                                                  MedicineInjection
+                                                      .provideMedicineService();
+                                              await medicineService
+                                                  .deleteMedicine(medicine.id);
                                               if (context.mounted) {
-                                                Navigator.pop(context); // close loading
-                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medicine deleted successfully'), backgroundColor: Colors.green));
-                                                context.read<MedicineBloc>().add(LoadMedicineCategoriesEvent());
+                                                Navigator.pop(
+                                                    context); // close loading
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'Medicine deleted successfully'),
+                                                        backgroundColor:
+                                                            Colors.green));
+                                                context.read<MedicineBloc>().add(
+                                                    LoadMedicineCategoriesEvent());
                                               }
                                             } catch (e) {
                                               if (context.mounted) {
-                                                Navigator.pop(context); // close loading
-                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                                                Navigator.pop(
+                                                    context); // close loading
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                        content:
+                                                            Text(e.toString()),
+                                                        backgroundColor:
+                                                            Colors.red));
                                               }
                                             }
                                           },
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red, elevation: 0),
-                                          child: Text("Delete", style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600)),
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              elevation: 0),
+                                          child: Text("Delete",
+                                              style: GoogleFonts.inter(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600)),
                                         ),
                                       ],
                                     ),
@@ -267,7 +332,8 @@ class _MedicineListPageState extends State<MedicineListPage> {
             style: GoogleFonts.inter(fontSize: 14),
             decoration: InputDecoration(
               hintText: "Search medicines...",
-              hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
+              hintStyle:
+                  GoogleFonts.inter(fontSize: 14, color: Colors.grey[400]),
               prefixIcon: const Icon(Icons.search, size: 20),
               prefixIconColor: Colors.grey[400],
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -283,12 +349,13 @@ class _MedicineListPageState extends State<MedicineListPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide:
+                    const BorderSide(color: AppColors.primary, width: 1.5),
               ),
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Category Dropdown
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -303,16 +370,27 @@ class _MedicineListPageState extends State<MedicineListPage> {
                 menuMaxHeight: 400,
                 borderRadius: BorderRadius.circular(12),
                 dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty ? null : state.selectedCategoryId,
-                hint: Text("All Categories", style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600])),
+                value: state.selectedCategoryId.isEmpty
+                    ? null
+                    : state.selectedCategoryId,
+                hint: Text("All Categories",
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: Colors.grey[600])),
                 selectedItemBuilder: (BuildContext context) {
                   // This builds the selected item displayed when menu is CLOSED
                   return [
-                    DropdownMenuItem(value: '', child: Text("All Categories", style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500))),
+                    DropdownMenuItem(
+                        value: '',
+                        child: Text("All Categories",
+                            style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w500))),
                     ...state.categories.map((c) => DropdownMenuItem(
-                      value: c.id, 
-                      child: Text(c.name.replaceAll('|', ', '), maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500))
-                    )),
+                        value: c.id,
+                        child: Text(c.name.replaceAll('|', ', '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w500)))),
                   ].map((e) {
                     return Container(
                       alignment: Alignment.centerLeft,
@@ -326,8 +404,14 @@ class _MedicineListPageState extends State<MedicineListPage> {
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[100]!))),
-                      child: Text("All Categories", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(color: Colors.grey[100]!))),
+                      child: Text("All Categories",
+                          style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryDark)),
                     ),
                   ),
                   ...state.categories.map((c) {
@@ -336,10 +420,13 @@ class _MedicineListPageState extends State<MedicineListPage> {
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[100]!))),
+                        decoration: BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(color: Colors.grey[100]!))),
                         child: Text(
-                          c.name.replaceAll('|', ', '), 
-                          style: GoogleFonts.inter(fontSize: 13, color: Colors.black87, height: 1.4),
+                          c.name.replaceAll('|', ', '),
+                          style: GoogleFonts.inter(
+                              fontSize: 13, color: Colors.black87, height: 1.4),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -369,7 +456,10 @@ class _MedicineListPageState extends State<MedicineListPage> {
           const SizedBox(height: 16),
           Text(
             "No medicines found",
-            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[300]),
+            style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[300]),
           ),
         ],
       ),

@@ -26,8 +26,8 @@ class DentalServiceBloc extends Bloc<DentalServiceEvent, DentalServiceState> {
     }
   }
 
-  Future<void> _onLoadList(
-      LoadDentalServiceListEvent event, Emitter<DentalServiceState> emit) async {
+  Future<void> _onLoadList(LoadDentalServiceListEvent event,
+      Emitter<DentalServiceState> emit) async {
     final s = state;
     if (s is DentalServiceLoaded) {
       if (event.isLoadMore) {
@@ -66,8 +66,8 @@ class DentalServiceBloc extends Bloc<DentalServiceEvent, DentalServiceState> {
     }
   }
 
-  void _onSelectCategory(
-      SelectDentalServiceCategoryEvent event, Emitter<DentalServiceState> emit) {
+  void _onSelectCategory(SelectDentalServiceCategoryEvent event,
+      Emitter<DentalServiceState> emit) {
     final s = state;
     if (s is DentalServiceLoaded) {
       add(LoadDentalServiceListEvent(
@@ -75,7 +75,8 @@ class DentalServiceBloc extends Bloc<DentalServiceEvent, DentalServiceState> {
     }
   }
 
-  void _onSearch(SearchDentalServiceEvent event, Emitter<DentalServiceState> emit) {
+  void _onSearch(
+      SearchDentalServiceEvent event, Emitter<DentalServiceState> emit) {
     final s = state;
     if (s is DentalServiceLoaded) {
       add(LoadDentalServiceListEvent(

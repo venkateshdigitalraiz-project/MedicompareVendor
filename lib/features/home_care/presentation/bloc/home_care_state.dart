@@ -43,5 +43,13 @@ class HomeCareState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, categories, items, pagination, selectedCategoryId, searchQuery, errorMessage];
+  List<Object?> get props => [
+        status,
+        categories,
+        items,
+        pagination,
+        selectedCategoryId,
+        searchQuery,
+        errorMessage
+      ];
 }

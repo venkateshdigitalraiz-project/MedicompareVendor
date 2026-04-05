@@ -22,7 +22,7 @@ class MedicalEquipmentCard extends StatelessWidget {
     final details = item.details;
     final String name = details.name;
     final String category = details.subcategory?.name ?? "No Category";
-    
+
     const baseUrl = 'https://api.medicompares.com';
     String imageUrl = "";
     if (details.files.isNotEmpty) {
@@ -32,7 +32,7 @@ class MedicalEquipmentCard extends StatelessWidget {
       }
       imageUrl = Uri.encodeFull(imageUrl);
     }
-    
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -58,12 +58,13 @@ class MedicalEquipmentCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => _placeholderImage(),
+                        errorBuilder: (context, error, stackTrace) =>
+                            _placeholderImage(),
                       )
                     : _placeholderImage(),
               ),
               const SizedBox(width: 12),
-              
+
               // Text Content
               Expanded(
                 child: Column(
@@ -94,7 +95,7 @@ class MedicalEquipmentCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Action Buttons & Price
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,7 +138,8 @@ class MedicalEquipmentCard extends StatelessWidget {
       width: 60,
       height: 60,
       color: Colors.grey[100],
-      child: const Icon(Icons.medical_services_outlined, color: Colors.grey, size: 24),
+      child: const Icon(Icons.medical_services_outlined,
+          color: Colors.grey, size: 24),
     );
   }
 

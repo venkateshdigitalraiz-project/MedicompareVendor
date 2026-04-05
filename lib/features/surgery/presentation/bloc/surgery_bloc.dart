@@ -14,7 +14,8 @@ class SurgeryBloc extends Bloc<SurgeryEvent, SurgeryState> {
     on<SearchSurgeriesEvent>(_onSearchSurgeries);
   }
 
-  Future<void> _onLoadCategories(LoadSurgeryCategoriesEvent event, Emitter<SurgeryState> emit) async {
+  Future<void> _onLoadCategories(
+      LoadSurgeryCategoriesEvent event, Emitter<SurgeryState> emit) async {
     emit(SurgeryLoading());
     try {
       final categories = await _surgeryService.getCategories();
@@ -28,7 +29,8 @@ class SurgeryBloc extends Bloc<SurgeryEvent, SurgeryState> {
     }
   }
 
-  Future<void> _onLoadSurgeries(LoadSurgeriesEvent event, Emitter<SurgeryState> emit) async {
+  Future<void> _onLoadSurgeries(
+      LoadSurgeriesEvent event, Emitter<SurgeryState> emit) async {
     final currentState = state;
     if (currentState is SurgeryLoaded) {
       if (event.isLoadMore) {
@@ -43,9 +45,10 @@ class SurgeryBloc extends Bloc<SurgeryEvent, SurgeryState> {
         );
 
         if (event.isLoadMore) {
-          final updatedList = List<SurgeryItem>.from(currentState.surgeryResponse.list)
-            ..addAll(surgeryResponse.list);
-          
+          final updatedList =
+              List<SurgeryItem>.from(currentState.surgeryResponse.list)
+                ..addAll(surgeryResponse.list);
+
           emit(currentState.copyWith(
             isLoadingMore: false,
             surgeryResponse: SurgeryResponse(
@@ -71,7 +74,8 @@ class SurgeryBloc extends Bloc<SurgeryEvent, SurgeryState> {
     }
   }
 
-  Future<void> _onSelectCategory(SelectSurgeryCategoryEvent event, Emitter<SurgeryState> emit) async {
+  Future<void> _onSelectCategory(
+      SelectSurgeryCategoryEvent event, Emitter<SurgeryState> emit) async {
     final currentState = state;
     if (currentState is SurgeryLoaded) {
       add(LoadSurgeriesEvent(
@@ -81,7 +85,8 @@ class SurgeryBloc extends Bloc<SurgeryEvent, SurgeryState> {
     }
   }
 
-  Future<void> _onSearchSurgeries(SearchSurgeriesEvent event, Emitter<SurgeryState> emit) async {
+  Future<void> _onSearchSurgeries(
+      SearchSurgeriesEvent event, Emitter<SurgeryState> emit) async {
     final currentState = state;
     if (currentState is SurgeryLoaded) {
       add(LoadSurgeriesEvent(

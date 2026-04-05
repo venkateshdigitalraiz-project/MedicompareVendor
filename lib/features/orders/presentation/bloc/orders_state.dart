@@ -55,7 +55,8 @@ class OrderActionLoading extends OrdersState {}
 class OrderStatusUpdated extends OrdersState {
   final String message;
 
-  const OrderStatusUpdated({this.message = 'Order status updated successfully'});
+  const OrderStatusUpdated(
+      {this.message = 'Order status updated successfully'});
 
   @override
   List<Object?> get props => [message];

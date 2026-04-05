@@ -36,7 +36,8 @@ class OrderCreated extends SubscriptionState {
   final int amount;
   final dynamic plan;
 
-  OrderCreated({required this.orderId, required this.amount, required this.plan});
+  OrderCreated(
+      {required this.orderId, required this.amount, required this.plan});
 
   @override
   List<Object?> get props => [orderId, amount, plan];

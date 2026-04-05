@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class AmbulanceEntity extends Equatable {
   final String id;
   final String tabletId;
-  final String name; 
+  final String name;
   final String ambulanceType;
   final double price; // Price per km
   final double discountPrice; // Discount Price per km

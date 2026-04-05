@@ -69,8 +69,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildCompactActionButton("Reject", Colors.red, () => _handleUpdateStatus('cancelled')),
-                      _buildCompactActionButton("Accept", AppColors.primary, () => _handleUpdateStatus('confirmed')),
+                      _buildCompactActionButton("Reject", Colors.red,
+                          () => _handleUpdateStatus('cancelled')),
+                      _buildCompactActionButton("Accept", AppColors.primary,
+                          () => _handleUpdateStatus('confirmed')),
                     ],
                   );
                 }
@@ -85,12 +87,16 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         listener: (context, state) {
           if (state is OrderStatusUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.green),
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.green),
             );
-            context.read<OrdersBloc>().add(GetOrderDetailsEvent(widget.orderId));
+            context
+                .read<OrdersBloc>()
+                .add(GetOrderDetailsEvent(widget.orderId));
           } else if (state is OrdersError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.red),
             );
           }
         },
@@ -120,7 +126,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
             );
           } else if (state is OrdersError) {
-            return Center(child: Text(state.message, style: const TextStyle(fontSize: 12)));
+            return Center(
+                child:
+                    Text(state.message, style: const TextStyle(fontSize: 12)));
           }
           return const Center(child: Text("Preparing details..."));
         },
@@ -150,7 +158,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     }
   }
 
-  Widget _buildCompactActionButton(String label, Color color, VoidCallback onTap) {
+  Widget _buildCompactActionButton(
+      String label, Color color, VoidCallback onTap) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: ElevatedButton(
@@ -160,10 +169,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           minimumSize: const Size(60, 32),
         ),
-        child: Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+        child: Text(label,
+            style:
+                GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -196,7 +208,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Icons.account_balance_wallet_outlined,
           Colors.green,
           isStatus: true,
-          statusColor: order.paymentStatus.toLowerCase() == 'unpaid' ? Colors.red : Colors.green,
+          statusColor: order.paymentStatus.toLowerCase() == 'unpaid'
+              ? Colors.red
+              : Colors.green,
         ),
         _buildInfoCard(
           "Order Date",
@@ -227,7 +241,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.inter(fontSize: 9, color: Colors.grey[600]),
+                  style:
+                      GoogleFonts.inter(fontSize: 9, color: Colors.grey[600]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -279,11 +294,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         children: [
           Row(
             children: [
-              const Icon(Icons.local_shipping_outlined, color: AppColors.primary, size: 18),
+              const Icon(Icons.local_shipping_outlined,
+                  color: AppColors.primary, size: 18),
               const SizedBox(width: 8),
               Text(
                 "Prefer Delivery Partner",
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+                style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ],
           ),
@@ -307,11 +324,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.access_time, color: AppColors.primary, size: 18),
+                const Icon(Icons.access_time,
+                    color: AppColors.primary, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   "Parcel Ready Time",
-                  style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+                  style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ],
             ),
@@ -335,7 +354,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         decoration: BoxDecoration(
                           color: isSelected ? AppColors.primary : Colors.white,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: isSelected ? AppColors.primary : Colors.grey[200]!),
+                          border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : Colors.grey[200]!),
                         ),
                         alignment: Alignment.center,
                         child: Text(
@@ -385,7 +407,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               child: Radio<String>(
                 value: id,
                 groupValue: _selectedDeliveryPartner,
-                onChanged: (val) => setState(() => _selectedDeliveryPartner = val!),
+                onChanged: (val) =>
+                    setState(() => _selectedDeliveryPartner = val!),
                 activeColor: AppColors.primary,
               ),
             ),
@@ -396,7 +419,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+                    style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                   Text(
                     subtitle,
@@ -415,7 +439,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget _buildOrderItems(OrderItemEntity order) {
     final product = order.productDetails;
     final tablet = product.tabletDetails;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -445,7 +469,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Icon(Icons.image_outlined, color: Colors.grey, size: 24),
+                  child: const Icon(Icons.image_outlined,
+                      color: Colors.grey, size: 24),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -453,19 +478,24 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        tablet != null ? tablet['name'] ?? product.name : product.name,
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+                        tablet != null
+                            ? tablet['name'] ?? product.name
+                            : product.name,
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold, fontSize: 12),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         "ID: ${order.orderItemId}",
-                        style: GoogleFonts.inter(fontSize: 9, color: Colors.grey),
+                        style:
+                            GoogleFonts.inter(fontSize: 9, color: Colors.grey),
                       ),
                       Text(
                         "${order.type.toUpperCase()} • ${order.bookingType.toUpperCase()}",
-                        style: GoogleFonts.inter(fontSize: 9, color: Colors.grey[600]),
+                        style: GoogleFonts.inter(
+                            fontSize: 9, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -475,7 +505,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   children: [
                     Text(
                       "Qty: ${order.quantity}",
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -519,7 +550,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               CircleAvatar(
                 radius: 18,
                 backgroundColor: AppColors.primary.withOpacity(0.1),
-                child: const Icon(Icons.person, color: AppColors.primary, size: 18),
+                child: const Icon(Icons.person,
+                    color: AppColors.primary, size: 18),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -528,15 +560,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   children: [
                     Text(
                       "${user.firstName} ${user.lastName}",
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                     Text(
                       user.email,
-                      style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600]),
+                      style: GoogleFonts.inter(
+                          fontSize: 10, color: Colors.grey[600]),
                     ),
                     Text(
                       user.phone,
-                      style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600]),
+                      style: GoogleFonts.inter(
+                          fontSize: 10, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -566,8 +601,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("$label: ", style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600])),
-          Text(value, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+          Text("$label: ",
+              style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600])),
+          Text(value,
+              style:
+                  GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -576,14 +614,17 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget _buildAddressSection(OrderItemEntity order) {
     return Column(
       children: [
-        _buildCompactAddressCard("Shipping Address", order.shippingAddressDetails, Icons.local_shipping_outlined),
+        _buildCompactAddressCard("Shipping Address",
+            order.shippingAddressDetails, Icons.local_shipping_outlined),
         const SizedBox(height: 8),
-        _buildCompactAddressCard("Billing Address", order.billingAddressDetails, Icons.receipt_long_outlined),
+        _buildCompactAddressCard("Billing Address", order.billingAddressDetails,
+            Icons.receipt_long_outlined),
       ],
     );
   }
 
-  Widget _buildCompactAddressCard(String title, AddressDetailsEntity? adr, IconData icon) {
+  Widget _buildCompactAddressCard(
+      String title, AddressDetailsEntity? adr, IconData icon) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -600,36 +641,50 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+                style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ],
           ),
           const SizedBox(height: 10),
           if (adr != null) ...[
-            Text("${adr.houseNo}, ${adr.area}", style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500)),
+            Text("${adr.houseNo}, ${adr.area}",
+                style: GoogleFonts.inter(
+                    fontSize: 11, fontWeight: FontWeight.w500)),
             if (adr.landmark.isNotEmpty)
-              Text("Landmark: ${adr.landmark}", style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600])),
-            Text(adr.fullAddress, style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600])),
+              Text("Landmark: ${adr.landmark}",
+                  style:
+                      GoogleFonts.inter(fontSize: 10, color: Colors.grey[600])),
+            Text(adr.fullAddress,
+                style:
+                    GoogleFonts.inter(fontSize: 10, color: Colors.grey[600])),
             const SizedBox(height: 6),
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     adr.addressType.toUpperCase(),
-                    style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700]),
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text("Pincode: ${adr.pincode}", style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[700])),
+                Text("Pincode: ${adr.pincode}",
+                    style: GoogleFonts.inter(
+                        fontSize: 10, color: Colors.grey[700])),
               ],
             ),
           ] else
-            const Text("Not available", style: TextStyle(fontSize: 10, color: Colors.grey)),
+            const Text("Not available",
+                style: TextStyle(fontSize: 10, color: Colors.grey)),
         ],
       ),
     );
@@ -653,7 +708,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           const SizedBox(height: 12),
           _buildCompactSummaryRow("Subtotal", details.subtotal),
           _buildCompactSummaryRow("Shipping", details.shipping),
-          _buildCompactSummaryRow("Discount", -details.discount, isDiscount: true),
+          _buildCompactSummaryRow("Discount", -details.discount,
+              isDiscount: true),
           _buildCompactSummaryRow("CGST", details.cgst),
           _buildCompactSummaryRow("SGST", details.sgst),
           const Divider(height: 24),
@@ -662,7 +718,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             children: [
               Text(
                 "Total Amount",
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15),
+                style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Text(
                 "₹${details.total.toStringAsFixed(2)}",
@@ -681,7 +738,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               const SizedBox(width: 4),
               Text(
                 "Payment: ${details.paymentMethod.toUpperCase()}",
-                style: GoogleFonts.inter(fontSize: 9, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                style: GoogleFonts.inter(
+                    fontSize: 9,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -690,13 +750,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  Widget _buildCompactSummaryRow(String label, double amount, {bool isDiscount = false}) {
+  Widget _buildCompactSummaryRow(String label, double amount,
+      {bool isDiscount = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11)),
+          Text(label,
+              style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11)),
           Text(
             "${amount < 0 ? '-' : ''} ₹${amount.abs().toStringAsFixed(2)}",
             style: GoogleFonts.inter(

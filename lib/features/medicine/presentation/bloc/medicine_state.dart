@@ -44,7 +44,13 @@ class MedicineLoaded extends MedicineState {
   }
 
   @override
-  List<Object?> get props => [categories, medicineResponse, selectedCategoryId, searchQuery, isLoadingMore];
+  List<Object?> get props => [
+        categories,
+        medicineResponse,
+        selectedCategoryId,
+        searchQuery,
+        isLoadingMore
+      ];
 }
 
 class MedicineError extends MedicineState {

@@ -8,6 +8,7 @@ abstract class NursingCareState extends Equatable {
 }
 
 class NursingCareInitial extends NursingCareState {}
+
 class NursingCareLoading extends NursingCareState {}
 
 class NursingCareLoaded extends NursingCareState {
@@ -26,7 +27,8 @@ class NursingCareLoaded extends NursingCareState {
   });
 
   @override
-  List<Object?> get props => [categories, response, selectedCategoryId, searchQuery, isLoadingMore];
+  List<Object?> get props =>
+      [categories, response, selectedCategoryId, searchQuery, isLoadingMore];
 
   NursingCareLoaded copyWith({
     List<NursingCareCategory>? categories,

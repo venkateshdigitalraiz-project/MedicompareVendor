@@ -22,10 +22,10 @@ class MedicineCard extends StatelessWidget {
     final details = item.details;
     final String name = details.name;
     final String category = details.subcategory?.name ?? "No Category";
-    final String imageUrl = details.imageUrl.isNotEmpty 
-        ? details.imageUrl.first 
+    final String imageUrl = details.imageUrl.isNotEmpty
+        ? details.imageUrl.first
         : (details.tabletImageUrl ?? "");
-    
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -51,12 +51,13 @@ class MedicineCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => _placeholderImage(),
+                        errorBuilder: (context, error, stackTrace) =>
+                            _placeholderImage(),
                       )
                     : _placeholderImage(),
               ),
               const SizedBox(width: 12),
-              
+
               // Text Content
               Expanded(
                 child: Column(
@@ -95,7 +96,7 @@ class MedicineCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Action Buttons
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

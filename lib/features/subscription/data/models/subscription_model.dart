@@ -38,13 +38,18 @@ class SubscriptionPlan extends Equatable {
       status: json['status'] ?? '',
       features: List<String>.from(json['features'] ?? []),
       description: json['description'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 
   @override
-  List<Object?> get props => [id, name, limit, price, billingCycle, status, features];
+  List<Object?> get props =>
+      [id, name, limit, price, billingCycle, status, features];
 }
 
 class CurrentPack extends Equatable {
@@ -87,14 +92,20 @@ class CurrentPack extends Equatable {
       paymentStatus: json['paymentStatus'] ?? '',
       amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0,
       usage: json['usage']?.toInt() ?? 0,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
-      plan: json['plan'] != null ? SubscriptionPlan.fromJson(json['plan']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
+      plan:
+          json['plan'] != null ? SubscriptionPlan.fromJson(json['plan']) : null,
     );
   }
 
   @override
-  List<Object?> get props => [id, planId, vendorId, paymentStatus, amount, usage, plan];
+  List<Object?> get props =>
+      [id, planId, vendorId, paymentStatus, amount, usage, plan];
 }
 
 class SubscriptionHistory extends Equatable {
@@ -108,7 +119,9 @@ class SubscriptionHistory extends Equatable {
 
   factory SubscriptionHistory.fromJson(Map<String, dynamic> json) {
     return SubscriptionHistory(
-      currentPack: json['currentPack'] != null ? CurrentPack.fromJson(json['currentPack']) : null,
+      currentPack: json['currentPack'] != null
+          ? CurrentPack.fromJson(json['currentPack'])
+          : null,
       planHistory: (json['planHistory'] as List?)
               ?.map((e) => CurrentPack.fromJson(e))
               .toList() ??
@@ -172,5 +185,6 @@ class Pagination extends Equatable {
   }
 
   @override
-  List<Object?> get props => [total, page, limit, totalPages, hasNextPage, hasPrevPage];
+  List<Object?> get props =>
+      [total, page, limit, totalPages, hasNextPage, hasPrevPage];
 }

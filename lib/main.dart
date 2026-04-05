@@ -96,59 +96,76 @@ class _MyAppState extends State<MyApp> {
             ..add(GetDashboardEvent()),
         ),
         BlocProvider(
-          create: (_) => SlotsInjection.provideSlotsBloc()..add(GetSlotTimingsEvent()),
+          create: (_) =>
+              SlotsInjection.provideSlotsBloc()..add(GetSlotTimingsEvent()),
         ),
         BlocProvider(
-          create: (_) => PincodesInjection.providePincodesBloc()..add(GetPincodesEvent()),
+          create: (_) =>
+              PincodesInjection.providePincodesBloc()..add(GetPincodesEvent()),
         ),
         BlocProvider(
-          create: (_) => OrdersInjection.provideOrdersBloc()..add(const GetOrdersEvent()),
+          create: (_) =>
+              OrdersInjection.provideOrdersBloc()..add(const GetOrdersEvent()),
         ),
         BlocProvider(
-          create: (_) => LeadsInjection.provideLeadsBloc()..add(const GetLeadsEvent()),
+          create: (_) =>
+              LeadsInjection.provideLeadsBloc()..add(const GetLeadsEvent()),
         ),
         BlocProvider(
           create: (_) =>
               TicketsInjection.provideTicketsBloc()..add(LoadTicketsEvent()),
         ),
         BlocProvider(
-          create: (_) => SubscriptionInjection.provideBloc()..add(LoadSubscriptionDataEvent()),
+          create: (_) => SubscriptionInjection.provideBloc()
+            ..add(LoadSubscriptionDataEvent()),
         ),
         BlocProvider(
-          create: (_) => MedicineInjection.provideMedicineBloc()..add(LoadMedicineCategoriesEvent()),
+          create: (_) => MedicineInjection.provideMedicineBloc()
+            ..add(LoadMedicineCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => SurgeryInjection.provideSurgeryBloc()..add(LoadSurgeryCategoriesEvent()),
+          create: (_) => SurgeryInjection.provideSurgeryBloc()
+            ..add(LoadSurgeryCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => LabTestInjection.provideLabTestBloc()..add(LoadLabTestCategoriesEvent()),
+          create: (_) => LabTestInjection.provideLabTestBloc()
+            ..add(LoadLabTestCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => LabTestInjection.provideLabTestPackageBloc()..add(const LoadLabTestPackagesEvent()),
+          create: (_) => LabTestInjection.provideLabTestPackageBloc()
+            ..add(const LoadLabTestPackagesEvent()),
         ),
         BlocProvider(
-          create: (_) => DiagnosticInjection.provideDiagnosticBloc()..add(const LoadDiagnosticCategoriesEvent()),
+          create: (_) => DiagnosticInjection.provideDiagnosticBloc()
+            ..add(const LoadDiagnosticCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => HomeCareInjection.provideHomeCareBloc()..add(const LoadHomeCareCategoriesEvent()),
+          create: (_) => HomeCareInjection.provideHomeCareBloc()
+            ..add(const LoadHomeCareCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => NursingCareInjection.provideNursingCareBloc()..add(const LoadNursingCareCategoriesEvent()),
+          create: (_) => NursingCareInjection.provideNursingCareBloc()
+            ..add(const LoadNursingCareCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => DentalServiceInjection.provideDentalServiceBloc()..add(const LoadDentalServiceCategoriesEvent()),
+          create: (_) => DentalServiceInjection.provideDentalServiceBloc()
+            ..add(const LoadDentalServiceCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => MedicalTreatmentInjection.provideMedicalTreatmentBloc()..add(const LoadMedicalTreatmentCategoriesEvent()),
+          create: (_) => MedicalTreatmentInjection.provideMedicalTreatmentBloc()
+            ..add(const LoadMedicalTreatmentCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => MedicalEquipmentInjection.provideMedicalEquipmentBloc()..add(const LoadMedicalEquipmentCategoriesEvent()),
+          create: (_) => MedicalEquipmentInjection.provideMedicalEquipmentBloc()
+            ..add(const LoadMedicalEquipmentCategoriesEvent()),
         ),
         BlocProvider(
-          create: (_) => AmbulanceInjection.provideAmbulanceBloc()..add(const GetAmbulanceListEvent()),
+          create: (_) => AmbulanceInjection.provideAmbulanceBloc()
+            ..add(const GetAmbulanceListEvent()),
         ),
         BlocProvider(
-          create: (_) => NotificationsInjection.provideNotificationsBloc()..add(LoadNotificationsEvent(refresh: true)),
+          create: (_) => NotificationsInjection.provideNotificationsBloc()
+            ..add(LoadNotificationsEvent(refresh: true)),
         ),
       ],
       child: MaterialApp.router(

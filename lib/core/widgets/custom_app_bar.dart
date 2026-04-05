@@ -23,7 +23,6 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return AppBar(
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
@@ -65,7 +64,8 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               icon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  const Icon(Icons.notifications_none_outlined, color: Colors.white, size: 24),
+                  const Icon(Icons.notifications_none_outlined,
+                      color: Colors.white, size: 24),
                   if (unreadCount > 0)
                     Positioned(
                       right: -4,
@@ -105,11 +105,15 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: CircleAvatar(
               radius: 18,
               backgroundColor: Colors.white.withOpacity(0.2),
-              backgroundImage: userImageUrl != null ? NetworkImage(userImageUrl!) : null,
+              backgroundImage:
+                  userImageUrl != null ? NetworkImage(userImageUrl!) : null,
               child: userImageUrl == null
                   ? Text(
-                      userName?.isNotEmpty == true ? userName![0].toUpperCase() : 'U',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      userName?.isNotEmpty == true
+                          ? userName![0].toUpperCase()
+                          : 'U',
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     )
                   : null,
             ),

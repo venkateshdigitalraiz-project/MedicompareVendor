@@ -80,7 +80,8 @@ class MedicineItem extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, price, discountPrice, status, details, isStock, stock];
+  List<Object?> get props =>
+      [id, price, discountPrice, status, details, isStock, stock];
 }
 
 class MedicineDetails extends Equatable {
@@ -125,19 +126,24 @@ class MedicineDetails extends Equatable {
       imageUrl: List<String>.from(json['imageUrl'] ?? []),
       tabletImageUrl: json['tabletImage']?['url'],
       composition: json['compositions']?['name'],
-      subcategory: json['subcategory'] != null 
-          ? MedicineSubcategory.fromJson(json['subcategory']) 
-          : (json['subcategorys'] != null ? MedicineSubcategory.fromJson(json['subcategorys']) : null),
+      subcategory: json['subcategory'] != null
+          ? MedicineSubcategory.fromJson(json['subcategory'])
+          : (json['subcategorys'] != null
+              ? MedicineSubcategory.fromJson(json['subcategorys'])
+              : null),
       manufacture: json['manufacture'] != null
           ? Manufacture.fromJson(json['manufacture'])
           : null,
       prescriptionRequired: json['prescriptionRequired'] ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
     );
   }
 
   @override
-  List<Object?> get props => [id, name, slug, description, form, imageUrl, subcategory, createdAt];
+  List<Object?> get props =>
+      [id, name, slug, description, form, imageUrl, subcategory, createdAt];
 }
 
 class MedicineSubcategory extends Equatable {
@@ -145,7 +151,8 @@ class MedicineSubcategory extends Equatable {
   final String name;
   final String? description;
 
-  const MedicineSubcategory({required this.id, required this.name, this.description});
+  const MedicineSubcategory(
+      {required this.id, required this.name, this.description});
 
   factory MedicineSubcategory.fromJson(Map<String, dynamic> json) {
     return MedicineSubcategory(

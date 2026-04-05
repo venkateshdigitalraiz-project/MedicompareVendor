@@ -43,7 +43,13 @@ class DiagnosticLoaded extends DiagnosticState {
   }
 
   @override
-  List<Object?> get props => [categories, diagnosticResponse, selectedCategoryId, searchQuery, isLoadingMore];
+  List<Object?> get props => [
+        categories,
+        diagnosticResponse,
+        selectedCategoryId,
+        searchQuery,
+        isLoadingMore
+      ];
 }
 
 class DiagnosticError extends DiagnosticState {

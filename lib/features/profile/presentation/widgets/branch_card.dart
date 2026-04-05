@@ -85,7 +85,8 @@ class BranchCard extends StatelessWidget {
                                 children: [
                                   if (onEdit != null)
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                                      icon: const Icon(Icons.edit_outlined,
+                                          size: 18, color: Colors.blue),
                                       onPressed: onEdit,
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(),
@@ -94,7 +95,8 @@ class BranchCard extends StatelessWidget {
                                     const SizedBox(width: 8),
                                   if (onDelete != null)
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                      icon: const Icon(Icons.delete_outline,
+                                          size: 18, color: Colors.red),
                                       onPressed: onDelete,
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(),
@@ -129,14 +131,15 @@ class BranchCard extends StatelessWidget {
       width: 50,
       height: 50,
       color: const Color(0xFFF3F6FF),
-      child: const Icon(Icons.business_outlined, color: AppColors.primary, size: 24),
+      child: const Icon(Icons.business_outlined,
+          color: AppColors.primary, size: 24),
     );
   }
 
   Widget _statusBadge(String status) {
     final bool isActive = status.toLowerCase() == 'active';
     final Color color = isActive ? Colors.green : Colors.red;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

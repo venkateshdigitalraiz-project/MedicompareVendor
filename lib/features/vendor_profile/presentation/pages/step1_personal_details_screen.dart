@@ -8,15 +8,16 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/vendor_profile_provider.dart';
 
-
 class Step1PersonalDetailsScreen extends StatefulWidget {
   const Step1PersonalDetailsScreen({super.key});
 
   @override
-  State<Step1PersonalDetailsScreen> createState() => _Step1PersonalDetailsScreenState();
+  State<Step1PersonalDetailsScreen> createState() =>
+      _Step1PersonalDetailsScreenState();
 }
 
-class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen> {
+class _Step1PersonalDetailsScreenState
+    extends State<Step1PersonalDetailsScreen> {
   String? selectedIdProofType;
   final List<String> idProofTypes = [
     'Aadhaar',
@@ -85,19 +86,20 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
         backFile == null ||
         addressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields and upload images')),
+        const SnackBar(
+            content: Text('Please fill all fields and upload images')),
       );
       return;
     }
 
     final provider = Provider.of<VendorProfileProvider>(context, listen: false);
 
-    final frontXFile = frontFile!.path != null 
-        ? XFile(frontFile!.path!) 
+    final frontXFile = frontFile!.path != null
+        ? XFile(frontFile!.path!)
         : XFile.fromData(frontFile!.bytes!, name: frontFile!.name);
-    
-    final backXFile = backFile!.path != null 
-        ? XFile(backFile!.path!) 
+
+    final backXFile = backFile!.path != null
+        ? XFile(backFile!.path!)
         : XFile.fromData(backFile!.bytes!, name: backFile!.name);
 
     final success = await provider.updateStepOne(
@@ -192,7 +194,8 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
         CircleAvatar(
           radius: 20,
           backgroundColor: isActive ? AppColors.primary : Colors.grey[200],
-          child: Icon(icon, color: isActive ? Colors.white : Colors.grey, size: 20),
+          child: Icon(icon,
+              color: isActive ? Colors.white : Colors.grey, size: 20),
         ),
         const SizedBox(height: 8),
         Text(
@@ -231,10 +234,12 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
           children: [
             Text(
               "Personal Details",
-              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold),
+              style:
+                  GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Text("Identity Verification:", style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+            Text("Identity Verification:",
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -285,7 +290,9 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
             ),
             const SizedBox(height: 24),
             _label("Residential Address *"),
-            _buildTextField(addressController, "Enter your complete residential address", maxLines: 3),
+            _buildTextField(
+                addressController, "Enter your complete residential address",
+                maxLines: 3),
           ],
         ),
       ),
@@ -312,10 +319,13 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           isExpanded: true,
-          hint: Text("Select ID Proof Type", style: TextStyle(fontSize: 13, color: Colors.grey[400])),
+          hint: Text("Select ID Proof Type",
+              style: TextStyle(fontSize: 13, color: Colors.grey[400])),
           value: selectedIdProofType,
           items: idProofTypes.map((type) {
-            return DropdownMenuItem(value: type, child: Text(type, style: const TextStyle(fontSize: 13)));
+            return DropdownMenuItem(
+                value: type,
+                child: Text(type, style: const TextStyle(fontSize: 13)));
           }).toList(),
           onChanged: (value) => setState(() => selectedIdProofType = value),
         ),
@@ -323,7 +333,8 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, {int maxLines = 1}) {
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {int maxLines = 1}) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
@@ -331,9 +342,14 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(fontSize: 13, color: Colors.grey[400]),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!)),
       ),
     );
   }
@@ -361,19 +377,23 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            file.extension == 'pdf' ? Icons.picture_as_pdf : Icons.description,
+                            file.extension == 'pdf'
+                                ? Icons.picture_as_pdf
+                                : Icons.description,
                             color: AppColors.primary,
                             size: 32,
                           ),
                           const SizedBox(height: 8),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
                               file.name,
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[800]),
+                              style: GoogleFonts.inter(
+                                  fontSize: 10, color: Colors.grey[800]),
                             ),
                           ),
                         ],
@@ -382,8 +402,13 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
                         right: 4,
                         top: 4,
                         child: GestureDetector(
-                          onTap: () => setState(() => isFront ? frontFile = null : backFile = null),
-                          child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, size: 14, color: Colors.white)),
+                          onTap: () => setState(() =>
+                              isFront ? frontFile = null : backFile = null),
+                          child: const CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.red,
+                              child: Icon(Icons.close,
+                                  size: 14, color: Colors.white)),
                         ),
                       ),
                     ],
@@ -391,16 +416,21 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.upload_file, color: AppColors.primary, size: 24),
+                      const Icon(Icons.upload_file,
+                          color: AppColors.primary, size: 24),
                       const SizedBox(height: 8),
                       Text(
-                        isFront ? "Click to upload front doc" : "Click to upload back doc",
+                        isFront
+                            ? "Click to upload front doc"
+                            : "Click to upload back doc",
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[600]),
+                        style: GoogleFonts.inter(
+                            fontSize: 10, color: Colors.grey[600]),
                       ),
                       Text(
                         "(PDF, Word, Excel)",
-                        style: GoogleFonts.inter(fontSize: 8, color: Colors.grey[400]),
+                        style: GoogleFonts.inter(
+                            fontSize: 8, color: Colors.grey[400]),
                       ),
                     ],
                   ),
@@ -422,7 +452,8 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
                 label: const Text("Previous"),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ),
@@ -433,16 +464,25 @@ class _Step1PersonalDetailsScreenState extends State<Step1PersonalDetailsScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 child: provider.isLoading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Next", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          const Text("Next",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                          const Icon(Icons.arrow_forward,
+                              color: Colors.white, size: 18),
                         ],
                       ),
               ),

@@ -101,7 +101,7 @@ class SurgeryDetails extends Equatable {
       sideEffects: json['sideeffects'],
       files: List<String>.from(json['files'] ?? []),
       subcategory: json['subcategory'] != null && json['subcategory'] is Map
-          ? SurgerySubcategory.fromJson(json['subcategory']) 
+          ? SurgerySubcategory.fromJson(json['subcategory'])
           : (json['subcategorys'] != null && json['subcategorys'] is Map)
               ? SurgerySubcategory.fromJson(json['subcategorys'])
               : null,
@@ -110,9 +110,19 @@ class SurgeryDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, name, complexity, duration, recoveryTime, procedureType, 
-    description, directionOfUse, precaution, sideEffects, files, subcategory
-  ];
+        id,
+        name,
+        complexity,
+        duration,
+        recoveryTime,
+        procedureType,
+        description,
+        directionOfUse,
+        precaution,
+        sideEffects,
+        files,
+        subcategory
+      ];
 }
 
 class SurgerySubcategory extends Equatable {
@@ -120,7 +130,8 @@ class SurgerySubcategory extends Equatable {
   final String name;
   final List<String> files;
 
-  const SurgerySubcategory({required this.id, required this.name, required this.files});
+  const SurgerySubcategory(
+      {required this.id, required this.name, required this.files});
 
   factory SurgerySubcategory.fromJson(Map<String, dynamic> json) {
     return SurgerySubcategory(
@@ -221,5 +232,6 @@ class SurgeryDropdownItem extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, subcategoryId, complexity, duration, description];
+  List<Object?> get props =>
+      [id, name, subcategoryId, complexity, duration, description];
 }

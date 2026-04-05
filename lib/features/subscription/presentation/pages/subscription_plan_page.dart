@@ -34,7 +34,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
     super.dispose();
   }
 
-
   void _handlePaymentError(PaymentFailureResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Payment failed: ${response.message}")),
@@ -43,7 +42,8 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("External wallet selected: ${response.walletName}")),
+      SnackBar(
+          content: Text("External wallet selected: ${response.walletName}")),
     );
   }
 
@@ -76,15 +76,19 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
     return BlocListener<SubscriptionBloc, SubscriptionState>(
       listener: (context, state) {
         if (state is OrderCreated) {
-          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          if (Navigator.of(context).canPop())
+            Navigator.of(context).pop(); // Close loading dialog
           _openCheckout(state.orderId, state.amount, state.plan.name);
         } else if (state is OrderFailure) {
-          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          if (Navigator.of(context).canPop())
+            Navigator.of(context).pop(); // Close loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to initiate payment: ${state.message}")),
+            SnackBar(
+                content: Text("Failed to initiate payment: ${state.message}")),
           );
         } else if (state is PurchaseSuccess) {
-          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          if (Navigator.of(context).canPop())
+            Navigator.of(context).pop(); // Close loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Plan upgraded successfully!")),
           );
@@ -92,10 +96,12 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => const Center(child: CircularProgressIndicator()),
+            builder: (context) =>
+                const Center(child: CircularProgressIndicator()),
           );
         } else if (state is SubscriptionError) {
-          if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
+          if (Navigator.of(context).canPop())
+            Navigator.of(context).pop(); // Close loading dialog
         }
       },
       child: Scaffold(
@@ -117,17 +123,19 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           ),
         ),
         body: BlocBuilder<SubscriptionBloc, SubscriptionState>(
-          buildWhen: (previous, current) => 
-            current is SubscriptionLoading || 
-            current is SubscriptionLoaded || 
-            current is SubscriptionError,
+          buildWhen: (previous, current) =>
+              current is SubscriptionLoading ||
+              current is SubscriptionLoaded ||
+              current is SubscriptionError,
           builder: (context, state) {
             if (state is SubscriptionLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is SubscriptionLoaded) {
               return RefreshIndicator(
                 onRefresh: () async {
-                  context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
+                  context
+                      .read<SubscriptionBloc>()
+                      .add(LoadSubscriptionDataEvent());
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -147,7 +155,8 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                       ),
                       const SizedBox(height: 16),
                       ...state.plans.list.map((plan) {
-                        final isCurrentPlan = state.history.currentPack?.planId == plan.id;
+                        final isCurrentPlan =
+                            state.history.currentPack?.planId == plan.id;
                         return _buildPlanCard(plan, isCurrentPlan);
                       }).toList(),
                       const SizedBox(height: 32),
@@ -161,7 +170,9 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        ...state.history.planHistory.map((history) => _buildHistoryItem(history)).toList(),
+                        ...state.history.planHistory
+                            .map((history) => _buildHistoryItem(history))
+                            .toList(),
                       ],
                     ],
                   ),
@@ -172,13 +183,16 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(state.message),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
+                        context
+                            .read<SubscriptionBloc>()
+                            .add(LoadSubscriptionDataEvent());
                       },
                       child: const Text("Retry"),
                     ),
@@ -199,10 +213,10 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     if (_selectedPlan != null && response.paymentId != null) {
       context.read<SubscriptionBloc>().add(PurchasePlanEvent(
-        planId: _selectedPlan.id,
-        razorpayPaymentId: response.paymentId!,
-        amount: _selectedPlan.price.toInt(),
-      ));
+            planId: _selectedPlan.id,
+            razorpayPaymentId: response.paymentId!,
+            amount: _selectedPlan.price.toInt(),
+          ));
     }
   }
 
@@ -252,8 +266,8 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: isCurrentPlan 
-            ? Border.all(color: AppColors.primary, width: 2) 
+        border: isCurrentPlan
+            ? Border.all(color: AppColors.primary, width: 2)
             : Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
@@ -279,7 +293,8 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
               ),
               if (isCurrentPlan)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -331,38 +346,46 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          ...plan.features.map((feature) => Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.check_circle_outline, size: 18, color: Color(0xFF8B5CF6)),
-                const SizedBox(width: 8),
-                Text(
-                  feature,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: const Color(0xFF374151),
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+          ...plan.features
+              .map((feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_outline,
+                            size: 18, color: Color(0xFF8B5CF6)),
+                        const SizedBox(width: 8),
+                        Text(
+                          feature,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: const Color(0xFF374151),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))
+              .toList(),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: isCurrentPlan ? null : () {
-                _selectedPlan = plan;
-                context.read<SubscriptionBloc>().add(CreateOrderEvent(
-                  amount: plan.price.toInt(),
-                  currency: "INR",
-                  receipt: "plan_${DateTime.now().millisecondsSinceEpoch}",
-                  plan: plan,
-                ));
-              },
+              onPressed: isCurrentPlan
+                  ? null
+                  : () {
+                      _selectedPlan = plan;
+                      context.read<SubscriptionBloc>().add(CreateOrderEvent(
+                            amount: plan.price.toInt(),
+                            currency: "INR",
+                            receipt:
+                                "plan_${DateTime.now().millisecondsSinceEpoch}",
+                            plan: plan,
+                          ));
+                    },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isCurrentPlan ? const Color(0xFFE5E7EB) : AppColors.primary,
-                foregroundColor: isCurrentPlan ? Colors.grey[600] : Colors.white,
+                backgroundColor:
+                    isCurrentPlan ? const Color(0xFFE5E7EB) : AppColors.primary,
+                foregroundColor:
+                    isCurrentPlan ? Colors.grey[600] : Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -401,7 +424,8 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
               color: const Color(0xFFF3F6FF),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.history, color: Color(0xFF8B5CF6), size: 24),
+            child:
+                const Icon(Icons.history, color: Color(0xFF8B5CF6), size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -420,7 +444,9 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                   "Status: ${history.paymentStatus}",
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: history.paymentStatus == 'completed' ? Colors.green : Colors.orange,
+                    color: history.paymentStatus == 'completed'
+                        ? Colors.green
+                        : Colors.orange,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

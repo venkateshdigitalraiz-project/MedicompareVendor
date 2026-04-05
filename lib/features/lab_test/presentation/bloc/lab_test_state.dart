@@ -27,7 +27,13 @@ class LabTestLoaded extends LabTestState {
   });
 
   @override
-  List<Object?> get props => [categories, labTestResponse, selectedCategoryId, searchQuery, isLoadingMore];
+  List<Object?> get props => [
+        categories,
+        labTestResponse,
+        selectedCategoryId,
+        searchQuery,
+        isLoadingMore
+      ];
 
   LabTestLoaded copyWith({
     List<LabTestCategory>? categories,

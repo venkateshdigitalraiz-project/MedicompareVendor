@@ -46,12 +46,11 @@ class AppText {
   );
 
   /// Medium section text (used in cards, quick actions)
-static final TextStyle section = GoogleFonts.inter(
-  fontSize: 16,
-  fontWeight: FontWeight.w600,
-  color: AppColors.black,
-);
-
+  static final TextStyle section = GoogleFonts.inter(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: AppColors.black,
+  );
 
   /// ===== BUTTON / ACTION TEXT =====
 

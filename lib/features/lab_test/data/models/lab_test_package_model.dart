@@ -41,8 +41,12 @@ class LabTestPackageItem extends Equatable {
       tabletsDetails: (json['tabletsdetails'] as List? ?? [])
           .map((i) => LabTestDetails.fromJson(i))
           .toList(),
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
     );
   }
 

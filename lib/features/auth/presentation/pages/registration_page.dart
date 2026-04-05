@@ -81,7 +81,8 @@ class _RegisterationPageState extends State<RegistrationPage> {
 
       if (mounted) {
         // Sync vendor to VendorProfileProvider
-        Provider.of<VendorProfileProvider>(context, listen: false).setVendor(vendor);
+        Provider.of<VendorProfileProvider>(context, listen: false)
+            .setVendor(vendor);
 
         setState(() {
           isLoading = false;

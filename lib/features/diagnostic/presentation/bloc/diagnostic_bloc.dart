@@ -14,18 +14,21 @@ class DiagnosticBloc extends Bloc<DiagnosticEvent, DiagnosticState> {
     on<SearchDiagnosticsEvent>(_onSearch);
   }
 
-  Future<void> _onLoadCategories(LoadDiagnosticCategoriesEvent event, Emitter<DiagnosticState> emit) async {
+  Future<void> _onLoadCategories(LoadDiagnosticCategoriesEvent event,
+      Emitter<DiagnosticState> emit) async {
     emit(DiagnosticLoading());
     try {
       final categories = await _service.getCategories();
       final response = await _service.getDiagnosticList();
-      emit(DiagnosticLoaded(categories: categories, diagnosticResponse: response));
+      emit(DiagnosticLoaded(
+          categories: categories, diagnosticResponse: response));
     } catch (e) {
       emit(DiagnosticError(e.toString()));
     }
   }
 
-  Future<void> _onLoadDiagnostics(LoadDiagnosticsEvent event, Emitter<DiagnosticState> emit) async {
+  Future<void> _onLoadDiagnostics(
+      LoadDiagnosticsEvent event, Emitter<DiagnosticState> emit) async {
     final current = state;
     if (current is DiagnosticLoaded) {
       if (event.isLoadMore) emit(current.copyWith(isLoadingMore: true));
@@ -36,10 +39,13 @@ class DiagnosticBloc extends Bloc<DiagnosticEvent, DiagnosticState> {
           search: event.search,
         );
         if (event.isLoadMore) {
-          final updatedList = List<DiagnosticItem>.from(current.diagnosticResponse.list)..addAll(response.list);
+          final updatedList =
+              List<DiagnosticItem>.from(current.diagnosticResponse.list)
+                ..addAll(response.list);
           emit(current.copyWith(
             isLoadingMore: false,
-            diagnosticResponse: DiagnosticResponse(list: updatedList, pagination: response.pagination),
+            diagnosticResponse: DiagnosticResponse(
+                list: updatedList, pagination: response.pagination),
           ));
         } else {
           emit(current.copyWith(
@@ -59,17 +65,21 @@ class DiagnosticBloc extends Bloc<DiagnosticEvent, DiagnosticState> {
     }
   }
 
-  Future<void> _onSelectCategory(SelectDiagnosticCategoryEvent event, Emitter<DiagnosticState> emit) async {
+  Future<void> _onSelectCategory(SelectDiagnosticCategoryEvent event,
+      Emitter<DiagnosticState> emit) async {
     final current = state;
     if (current is DiagnosticLoaded) {
-      add(LoadDiagnosticsEvent(categoryId: event.categoryId, search: current.searchQuery));
+      add(LoadDiagnosticsEvent(
+          categoryId: event.categoryId, search: current.searchQuery));
     }
   }
 
-  Future<void> _onSearch(SearchDiagnosticsEvent event, Emitter<DiagnosticState> emit) async {
+  Future<void> _onSearch(
+      SearchDiagnosticsEvent event, Emitter<DiagnosticState> emit) async {
     final current = state;
     if (current is DiagnosticLoaded) {
-      add(LoadDiagnosticsEvent(categoryId: current.selectedCategoryId, search: event.query));
+      add(LoadDiagnosticsEvent(
+          categoryId: current.selectedCategoryId, search: event.query));
     }
   }
 }

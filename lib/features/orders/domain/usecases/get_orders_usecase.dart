@@ -11,12 +11,14 @@ class GetOrdersUseCase {
     int limit = 10,
     String status = '',
     String search = '',
+    String orderType = 'normal',
   }) async {
     final result = await repository.getOrders(
       page: page,
       limit: limit,
       status: status,
       search: search,
+      orderType: orderType,
     );
     return result;
   }

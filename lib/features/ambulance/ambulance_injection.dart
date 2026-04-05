@@ -15,7 +15,8 @@ import 'presentation/bloc/ambulance_bloc.dart';
 class AmbulanceInjection {
   static AmbulanceRepository _provideAmbulanceRepository() {
     final apiService = CoreInjection.provideApiService();
-    final remoteDataSource = AmbulanceRemoteDataSourceImpl(apiService: apiService);
+    final remoteDataSource =
+        AmbulanceRemoteDataSourceImpl(apiService: apiService);
     return AmbulanceRepositoryImpl(remoteDataSource: remoteDataSource);
   }
 
