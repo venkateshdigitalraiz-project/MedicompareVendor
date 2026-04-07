@@ -20,9 +20,9 @@ class MedicineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final details = item.details;
-    final String name = details.name;
+    final String name = details.name ?? "Unknown Medicine";
     final String category = details.subcategory?.name ?? "No Category";
-    final String imageUrl = details.imageUrl.isNotEmpty
+    final String imageUrl = (details.imageUrl != null && details.imageUrl.isNotEmpty)
         ? details.imageUrl.first
         : (details.tabletImageUrl ?? "");
 
@@ -51,6 +51,8 @@ class MedicineCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
+                        cacheWidth: 150, // Optimize memory by resizing image at decode time
+                        cacheHeight: 150,
                         errorBuilder: (context, error, stackTrace) =>
                             _placeholderImage(),
                       )
@@ -86,8 +88,8 @@ class MedicineCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _statusBadge(item.status),
-                        if (!item.isStock) ...[
+                        _statusBadge(item.status ?? 'inactive'),
+                        if (!(item.isStock ?? true)) ...[
                           const SizedBox(width: 8),
                           _outOfStockBadge(),
                         ],
@@ -111,13 +113,27 @@ class MedicineCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    "₹${item.discountPrice}",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (item.discountPrice > 0)
+                        Text(
+                          "₹${item.price.toStringAsFixed(0)}",
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      Text(
+                        "₹${_calculateFinalPrice().toStringAsFixed(0)}",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -126,6 +142,14 @@ class MedicineCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double _calculateFinalPrice() {
+    if (item.discountType == 'percentage') {
+      return item.price - (item.price * item.discountPrice / 100);
+    }
+    // If type is 'price', the discountPrice field actually represents the final selling price
+    return item.discountPrice;
   }
 
   Widget _placeholderImage() {

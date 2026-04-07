@@ -17,6 +17,14 @@ class MedicineDetailsPage extends StatefulWidget {
 class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
   bool isExpanded = false;
 
+  double _calculateFinalPrice() {
+    final item = widget.medicine;
+    if (item.discountType == 'percentage') {
+      return item.price - (item.price * item.discountPrice / 100);
+    }
+    return item.discountPrice;
+  }
+
   @override
   Widget build(BuildContext context) {
     final details = widget.medicine.details;
@@ -109,14 +117,24 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        "Discount: ",
+                                        "Selling Price: ",
                                         style: GoogleFonts.poppins(
                                             fontSize: 9,
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFF166534)),
                                       ),
+                                      if (widget.medicine.discountPrice > 0) ...[
+                                        Text(
+                                          "₹${widget.medicine.price.toStringAsFixed(0)}",
+                                          style: GoogleFonts.poppins(
+                                              fontSize: 11,
+                                              decoration: TextDecoration.lineThrough,
+                                              color: const Color(0xFF166534).withOpacity(0.5)),
+                                        ),
+                                        const SizedBox(width: 4),
+                                      ],
                                       Text(
-                                        "₹${widget.medicine.discountPrice}",
+                                        "₹${_calculateFinalPrice().toStringAsFixed(0)}",
                                         style: GoogleFonts.poppins(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,

@@ -27,13 +27,18 @@ class _MedicineListPageState extends State<MedicineListPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    
+    // REQUIREMENT 2: Initialize data properly when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MedicineBloc>().add(LoadMedicineCategoriesEvent());
+    });
   }
 
   void _onScroll() {
     final state = context.read<MedicineBloc>().state;
     if (state is MedicineLoaded && !state.isLoadingMore) {
       if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
+          _scrollController.position.maxScrollExtent - 400) {
         final pagination = state.medicineResponse.pagination;
         if (pagination.page < pagination.totalPages) {
           context.read<MedicineBloc>().add(LoadMedicinesEvent(
@@ -45,6 +50,14 @@ class _MedicineListPageState extends State<MedicineListPage> {
         }
       }
     }
+  }
+
+  // REQUIREMENT 3: Helper for safe ID extraction
+  List<String> _getExistingIds(MedicineState state) {
+    if (state is MedicineLoaded) {
+      return state.medicineResponse.list.map((m) => m.details.id).toList();
+    }
+    return [];
   }
 
   @override
@@ -77,6 +90,7 @@ class _MedicineListPageState extends State<MedicineListPage> {
             padding: const EdgeInsets.only(right: 16.0),
             child: ElevatedButton.icon(
               onPressed: () {
+                final currentState = context.read<MedicineBloc>().state;
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
@@ -88,12 +102,8 @@ class _MedicineListPageState extends State<MedicineListPage> {
                       constraints: BoxConstraints(
                           maxHeight: MediaQuery.of(ctx).size.height * 0.9),
                       child: AddMedicineSheet(
-                        existingIds: (context.read<MedicineBloc>().state
-                                as MedicineLoaded)
-                            .medicineResponse
-                            .list
-                            .map((m) => m.details.id)
-                            .toList(),
+                        // REQUIREMENT 1 & 3: Safe Extraction
+                        existingIds: _getExistingIds(currentState),
                         onSuccess: () {
                           context
                               .read<MedicineBloc>()
@@ -147,6 +157,11 @@ class _MedicineListPageState extends State<MedicineListPage> {
             );
           } else if (state is MedicineLoaded) {
             final medicines = state.medicineResponse.list;
+            // REQUIREMENT 6: Proper checking before accessing list
+            if (medicines.isEmpty && !state.isLoadingMore && state.searchQuery.isEmpty) {
+               return _buildEmptyState();
+            }
+            
             return Column(
               children: [
                 _buildFilters(state),
@@ -178,9 +193,14 @@ class _MedicineListPageState extends State<MedicineListPage> {
                               final medicine = medicines[index];
                               return MedicineCard(
                                 item: medicine,
-                                onTap: () => context.push('/medicine-details',
-                                    extra: medicine),
+                                // REQUIREMENT 4: Safely push with non-null check
+                                onTap: () {
+                                  if (medicine.id.isNotEmpty) {
+                                    context.push('/medicine-details', extra: medicine);
+                                  }
+                                },
                                 onEdit: () {
+                                  final innerState = context.read<MedicineBloc>().state;
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
@@ -197,13 +217,8 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                                     0.9),
                                         child: AddMedicineSheet(
                                           editMedicine: medicine,
-                                          existingIds: (context
-                                                  .read<MedicineBloc>()
-                                                  .state as MedicineLoaded)
-                                              .medicineResponse
-                                              .list
-                                              .map((m) => m.details.id)
-                                              .toList(),
+                                          // REQUIREMENT 1 & 3: Safe Extraction
+                                          existingIds: _getExistingIds(innerState),
                                           onSuccess: () {
                                             context.read<MedicineBloc>().add(
                                                 const LoadMedicinesEvent());
@@ -221,8 +236,9 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                           style: GoogleFonts.inter(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 16)),
+                                      // REQUIREMENT 5: added null safety ?? ''
                                       content: Text(
-                                          "Are you sure you want to delete ${medicine.details.name}? This action cannot be undone.",
+                                          "Are you sure you want to delete ${medicine.details.name ?? 'this medicine'}? This action cannot be undone.",
                                           style:
                                               GoogleFonts.inter(fontSize: 14)),
                                       shape: RoundedRectangleBorder(
@@ -239,7 +255,6 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                         ElevatedButton(
                                           onPressed: () async {
                                             Navigator.pop(ctx);
-                                            // Show loading indicator
                                             showDialog(
                                               context: context,
                                               barrierDismissible: false,
@@ -255,8 +270,7 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                               await medicineService
                                                   .deleteMedicine(medicine.id);
                                               if (context.mounted) {
-                                                Navigator.pop(
-                                                    context); // close loading
+                                                Navigator.pop(context);
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(const SnackBar(
                                                         content: Text(
@@ -268,8 +282,7 @@ class _MedicineListPageState extends State<MedicineListPage> {
                                               }
                                             } catch (e) {
                                               if (context.mounted) {
-                                                Navigator.pop(
-                                                    context); // close loading
+                                                Navigator.pop(context);
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(SnackBar(
                                                         content:
@@ -320,7 +333,6 @@ class _MedicineListPageState extends State<MedicineListPage> {
       ),
       child: Column(
         children: [
-          // Search Bar
           TextField(
             controller: _searchController,
             onChanged: (val) {
@@ -355,95 +367,147 @@ class _MedicineListPageState extends State<MedicineListPage> {
             ),
           ),
           const SizedBox(height: 12),
-
-          // Category Dropdown
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                itemHeight: null, // Allow expanding for multiple lines
-                menuMaxHeight: 400,
+          GestureDetector(
+            onTap: () => _showCategoryPicker(state),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFF),
                 borderRadius: BorderRadius.circular(12),
-                dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty
-                    ? null
-                    : state.selectedCategoryId,
-                hint: Text("All Categories",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                selectedItemBuilder: (BuildContext context) {
-                  // This builds the selected item displayed when menu is CLOSED
-                  return [
-                    DropdownMenuItem(
-                        value: '',
-                        child: Text("All Categories",
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500))),
-                    ...state.categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name.replaceAll('|', ', '),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500)))),
-                  ].map((e) {
-                    return Container(
-                      alignment: Alignment.centerLeft,
-                      child: e.child,
-                    );
-                  }).toList();
-                },
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(color: Colors.grey[100]!))),
-                      child: Text("All Categories",
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryDark)),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      state.selectedCategoryId.isEmpty
+                          ? "All Categories"
+                          : (state.categories
+                                      .where((c) => c.id == state.selectedCategoryId)
+                                      .firstOrNull
+                                      ?.name ??
+                                  "Selected Category")
+                              .replaceAll('|', ', '),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: state.selectedCategoryId.isEmpty
+                            ? Colors.grey[600]
+                            : Colors.black87,
+                        fontWeight: state.selectedCategoryId.isEmpty
+                            ? FontWeight.normal
+                            : FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  ...state.categories.map((c) {
-                    return DropdownMenuItem(
-                      value: c.id,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(color: Colors.grey[100]!))),
-                        child: Text(
-                          c.name.replaceAll('|', ', '),
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: Colors.black87, height: 1.4),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    );
-                  }),
+                  const Icon(Icons.keyboard_arrow_down,
+                      size: 20, color: Colors.grey),
                 ],
-                onChanged: (val) {
-                  if (val != null) {
-                    context.read<MedicineBloc>().add(SelectCategoryEvent(val));
-                  }
-                },
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showCategoryPicker(MedicineLoaded state) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        String sheetSearch = '';
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final filtered = state.categories.where((c) => 
+              (c.name ?? '').toLowerCase().contains(sheetSearch.toLowerCase())
+            ).toList();
+
+            return Container(
+              padding: const EdgeInsets.only(top: 8),
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Select Category",
+                            style: GoogleFonts.inter(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextField(
+                      onChanged: (val) => setSheetState(() => sheetSearch = val),
+                      decoration: InputDecoration(
+                        hintText: "Search categories...",
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filtered.length + 1,
+                      itemBuilder: (ctx, index) {
+                        if (index == 0) {
+                          return ListTile(
+                            title: const Text("All Categories", 
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                            onTap: () {
+                              context.read<MedicineBloc>().add(const SelectCategoryEvent(''));
+                              Navigator.pop(context);
+                            },
+                          );
+                        }
+                        final cat = filtered[index - 1];
+                        return ListTile(
+                          title: Text((cat.name ?? '').replaceAll('|', ', ')),
+                          trailing: state.selectedCategoryId == cat.id 
+                            ? const Icon(Icons.check, color: AppColors.primary)
+                            : null,
+                          onTap: () {
+                            context.read<MedicineBloc>().add(SelectCategoryEvent(cat.id));
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        );
+      },
     );
   }
 

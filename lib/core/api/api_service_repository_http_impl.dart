@@ -50,11 +50,12 @@ BODY: $bodyStr
     required int statusCode,
     required String body,
   }) {
+    final displayBody = body.length > 1000 ? '${body.substring(0, 1000)}... [truncated]' : body;
     log('''
 📥 API RESPONSE
 URL: ${uri.toString()}
 STATUS: $statusCode
-BODY: $body
+BODY: $displayBody
 ''', name: "API");
   }
 

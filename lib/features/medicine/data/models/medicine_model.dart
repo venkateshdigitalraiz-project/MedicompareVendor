@@ -52,6 +52,7 @@ class MedicineItem extends Equatable {
   final String id;
   final double price;
   final double discountPrice;
+  final String discountType;
   final String status;
   final MedicineDetails details;
   final bool isStock;
@@ -61,6 +62,7 @@ class MedicineItem extends Equatable {
     required this.id,
     required this.price,
     required this.discountPrice,
+    required this.discountType,
     required this.status,
     required this.details,
     this.isStock = true,
@@ -71,7 +73,8 @@ class MedicineItem extends Equatable {
     return MedicineItem(
       id: json['_id'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      discountPrice: (json['discountprice'] ?? json['discount'] ?? 0).toDouble(),
+      discountType: json['discountType'] ?? 'price',
       status: json['status'] ?? 'inactive',
       details: MedicineDetails.fromJson(json['tablets'] ?? {}),
       isStock: json['isStock'] ?? true,
@@ -81,7 +84,7 @@ class MedicineItem extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, price, discountPrice, status, details, isStock, stock];
+      [id, price, discountPrice, discountType, status, details, isStock, stock];
 }
 
 class MedicineDetails extends Equatable {

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
 import '../../../../core/error/exceptions.dart';
@@ -12,16 +13,20 @@ class MedicineService {
   Future<List<MedicineCategory>> getCategories() async {
     try {
       final response = await _apiService.get(ApiEndpoints.medicineCategories);
-      final body = jsonDecode(response.body);
-      if (body['success'] == true) {
-        final List categories = body['data']['allcategory'] ?? [];
-        return categories.map((c) => MedicineCategory.fromJson(c)).toList();
-      } else {
-        throw ServerException(body['message'] ?? 'Failed to fetch categories');
-      }
+      return compute(_parseCategories, response.body);
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
+    }
+  }
+
+  static List<MedicineCategory> _parseCategories(String body) {
+    final decoded = jsonDecode(body);
+    if (decoded['success'] == true) {
+      final List categories = decoded['data']['allcategory'] ?? [];
+      return categories.map((c) => MedicineCategory.fromJson(c)).toList();
+    } else {
+      throw ServerException(decoded['message'] ?? 'Failed to fetch categories');
     }
   }
 
@@ -35,16 +40,20 @@ class MedicineService {
       final String endpoint =
           "${ApiEndpoints.medicineList}?page=$page&limit=$limit&categoryId=$categoryId&search=$search";
       final response = await _apiService.get(endpoint);
-      final body = jsonDecode(response.body);
-      if (body['success'] == true) {
-        return MedicineResponse.fromJson(body['data']);
-      } else {
-        throw ServerException(
-            body['message'] ?? 'Failed to fetch medicine list');
-      }
+      return compute(_parseMedicineResponse, response.body);
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());
+    }
+  }
+
+  static MedicineResponse _parseMedicineResponse(String body) {
+    final decoded = jsonDecode(body);
+    if (decoded['success'] == true) {
+      return MedicineResponse.fromJson(decoded['data']);
+    } else {
+      throw ServerException(
+          decoded['message'] ?? 'Failed to fetch medicine list');
     }
   }
 

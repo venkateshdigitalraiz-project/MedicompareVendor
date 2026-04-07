@@ -35,6 +35,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
   final _percentagePerUnitController = TextEditingController();
 
   String? _selectedReturnPolicy;
+  String _discountType = 'price';
   bool _isInStock = true;
   bool _isActive = true;
   bool _isLoading = false;
@@ -81,6 +82,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
         _searchController.text = _selectedTablet!.name;
 
         _selectedReturnPolicy = data['returnDetails']?.toString();
+        _discountType = data['discountType']?.toString() ?? 'price';
         _mrpPriceController.text = (data['price'] ?? 0).toString();
         _discountController.text =
             (data['discountprice'] ?? data['discount'] ?? 0).toString();
@@ -93,9 +95,10 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
         _isActive = data['status'] == 'active';
       });
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     } finally {
       if (mounted) setState(() => _isFetchingDetails = false);
     }
@@ -118,7 +121,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     _debounce = Timer(const Duration(milliseconds: 400), () async {
       try {
         final results = await _medicineService.searchMedicineDropdown(query);
-        if (mounted) setState(() => _searchResults = results);
+        if (mounted) setState(() => _searchResults = results.take(20).toList());
       } catch (_) {}
     });
   }
@@ -148,7 +151,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
       final Map<String, dynamic> payload = {
         "name": isEditMode ? widget.editMedicine!.id : _selectedTablet!.id,
         "price": double.tryParse(_mrpPriceController.text) ?? 0,
+        "discountprice": double.tryParse(_discountController.text) ?? 0,
         "discount": double.tryParse(_discountController.text) ?? 0,
+        "discountType": _discountType,
         "returnDetails": int.tryParse(_selectedReturnPolicy ?? '0') ?? 0,
         "variants": [],
         "quantity": int.tryParse(_quantityController.text) ?? 0,
@@ -319,8 +324,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                               controller: _searchController,
                               style: GoogleFonts.poppins(fontSize: 14),
                               onTap: () {
-                                if (_searchController.text.isEmpty)
+                                if (_searchController.text.isEmpty) {
                                   _onSearchChanged('');
+                                }
                               },
                               decoration: _inputDecoration(
                                       hint: "e.g., Paracetamol, Ibuprofen...")
@@ -349,7 +355,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                   boxShadow: [
                                     BoxShadow(
                                         color: Colors.black
-                                            .withValues(alpha: 0.05),
+                                            .withOpacity(0.05),
                                         blurRadius: 8)
                                   ],
                                 ),
@@ -430,48 +436,80 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                       child: _buildTextField(
-                                          "MRP Price (₹)", _mrpPriceController,
+                                          "Price (₹)", _mrpPriceController,
                                           hint: "0.00",
                                           icon: Icons.currency_rupee)),
                                 ],
                               ),
                               const SizedBox(height: 16),
+                              _buildLabel("Discount Type", icon: Icons.percent),
+                              const SizedBox(height: 8),
                               Row(
                                 children: [
                                   Expanded(
-                                      child: _buildTextField("Vendor Price (₹)",
-                                          _discountController,
-                                          hint: "0.00",
-                                          icon: Icons.currency_rupee,
-                                          validator: (val) {
-                                    if (val == null || val.isEmpty)
-                                      return "Required";
-                                    final discount = double.tryParse(val);
-                                    final mrp = double.tryParse(
-                                        _mrpPriceController.text);
-                                    if (discount != null &&
-                                        mrp != null &&
-                                        discount > mrp) return "Over MRP";
-                                    return null;
-                                  })),
-                                  const SizedBox(width: 12),
+                                    child: _buildDiscountTypeBtn(
+                                      "₹ Price",
+                                      'price',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _buildDiscountTypeBtn(
+                                      "% Percentage",
+                                      'percentage',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                  _discountType == 'price'
+                                      ? "Discount Price (₹)"
+                                      : "Discount Percentage (%)",
+                                  _discountController,
+                                  hint: _discountType == 'price'
+                                      ? "e.g., 50"
+                                      : "e.g., 10",
+                                  icon: _discountType == 'price'
+                                      ? Icons.currency_rupee
+                                      : Icons.percent, validator: (val) {
+                                if (val == null || val.isEmpty) {
+                                  return "Required";
+                                }
+                                final discount = double.tryParse(val);
+                                final mrp =
+                                    double.tryParse(_mrpPriceController.text);
+                                if (discount != null && mrp != null) {
+                                  if (_discountType == 'price' &&
+                                      discount > mrp) {
+                                    return "Over MRP";
+                                  } else if (_discountType == 'percentage' &&
+                                      discount > 100) {
+                                    return "Invalid %";
+                                  }
+                                }
+                                return null;
+                              }),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
                                   Expanded(
                                       child: _buildTextField(
                                           "Quantity", _quantityController,
                                           hint: "0",
                                           icon: Icons.inventory_2_outlined)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
+                                  const SizedBox(width: 12),
                                   Expanded(
                                       child: _buildTextField("Price/Units",
                                           _pricePerUnitController,
                                           hint: "e.g., ₹10/tab",
                                           icon: Icons.currency_rupee,
                                           isRequired: false)),
-                                  const SizedBox(width: 12),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
                                   Expanded(
                                       child: _buildTextField("Percentage/Unit",
                                           _percentagePerUnitController,
@@ -641,7 +679,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           borderSide: BorderSide(color: Colors.grey[300]!)),
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!)),
+          borderSide: BorderSide(color: Colors.grey[300]!),),
       focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFF7C3AED))),
@@ -691,8 +729,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           decoration: _inputDecoration(hint: hint),
           validator: validator ??
               (val) {
-                if (isRequired && (val == null || val.isEmpty))
+                if (isRequired && (val == null || val.isEmpty)) {
                   return "Required";
+                }
                 return null;
               },
         ),
@@ -707,8 +746,8 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.05),
-          border: Border.all(color: color.withOpacity(0.5)),
+          color: color.withValues(alpha: 0.05),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -725,6 +764,41 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiscountTypeBtn(String label, String type) {
+    final isSelected = _discountType == type;
+    return GestureDetector(
+      onTap: () => setState(() => _discountType = type),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF7C3AED) : Colors.transparent,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? const Color(0xFF7C3AED) : Colors.grey[600],
+          ),
         ),
       ),
     );
