@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/utils/invoice_generator.dart';
 
 class LeadPlanHistoryPage extends StatelessWidget {
   const LeadPlanHistoryPage({super.key});
@@ -394,7 +395,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: TextButton.icon(
-              onPressed: () {},
+              onPressed: () => InvoiceGenerator.generateAndDownloadInvoice(item),
               icon: const Icon(Icons.file_download_outlined, size: 18),
               label: Text("Download Invoice",
                   style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
