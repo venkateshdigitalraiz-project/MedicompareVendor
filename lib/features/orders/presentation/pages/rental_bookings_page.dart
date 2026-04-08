@@ -129,7 +129,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                     _onFilterChanged();
                   },
                   decoration: InputDecoration(
-                    hintText: "Search by order item ID, customer name...",
+                    hintText: "Search by order item Name...",
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -139,19 +139,19 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: _buildDropdown(
-                  value: _durations.contains(_selectedDuration)
-                      ? _selectedDuration
-                      : _durations.first,
-                  items: _durations,
-                  onChanged: (val) {
-                    setState(() => _selectedDuration = val!);
-                  },
-                ),
-              ),
+              // const SizedBox(width: 8),
+              // Expanded(
+              //   flex: 2,
+              //   child: _buildDropdown(
+              //     value: _durations.contains(_selectedDuration)
+              //         ? _selectedDuration
+              //         : _durations.first,
+              //     items: _durations,
+              //     onChanged: (val) {
+              //       setState(() => _selectedDuration = val!);
+              //     },
+              //   ),
+              // ),
             ],
           ),
           const SizedBox(height: 12),

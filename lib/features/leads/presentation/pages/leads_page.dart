@@ -58,13 +58,17 @@ class _LeadsPageState extends State<LeadsPage> {
     }
   }
 
-  final List<Map<String, String>> _stages = [
+  final List<Map<String, String>> _statusFilters = [
     {'label': 'All Status', 'value': ''},
-    {'label': 'New', 'value': 'new'},
-    {'label': 'Contacted', 'value': 'contacted'},
-    {'label': 'Qualified', 'value': 'qualified'},
-    {'label': 'Converted', 'value': 'converted'},
-    {'label': 'Lost', 'value': 'lost'},
+    {'label': 'Pending', 'value': 'pending'},
+    {'label': 'Approved', 'value': 'accepted'},
+    {'label': 'Rejected', 'value': 'rejected'},
+  ];
+
+  final List<Map<String, String>> _statusOptions = [
+    {'label': 'Pending', 'value': 'pending'},
+    {'label': 'Approved', 'value': 'accepted'},
+    {'label': 'Rejected', 'value': 'rejected'},
   ];
 
   @override
@@ -79,20 +83,43 @@ class _LeadsPageState extends State<LeadsPage> {
         children: [
           _buildFilters(),
           Expanded(
-            child: BlocBuilder<LeadsBloc, LeadsState>(
-              builder: (context, state) {
-                if (state is LeadsLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is LeadsLoaded) {
-                  _totalPages = state.leadsList.pagination.totalPages;
-                  _isFetchingMore = state.isLoadingMore;
-                  return _buildLeadsList(
-                      state.leadsList.leads, state.isLoadingMore);
+            child: BlocListener<LeadsBloc, LeadsState>(
+              listener: (context, state) {
+                if (state is UpdateLeadStatusSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 } else if (state is LeadsError) {
-                  return Center(child: Text(state.message));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 }
-                return const Center(child: Text('No leads found.'));
               },
+              child: BlocBuilder<LeadsBloc, LeadsState>(
+                builder: (context, state) {
+                  if (state is LeadsLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is LeadsLoaded) {
+                    _totalPages = state.leadsList.pagination.totalPages;
+                    _isFetchingMore = state.isLoadingMore;
+                    return _buildLeadsList(
+                        state.leadsList.leads, state.isLoadingMore);
+                  } else if (state is LeadDetailsLoaded) {
+                    // This state is shared, we might need a better way to handle 
+                    // list view when details are loaded if navigation doesn't happen
+                    return const SizedBox.shrink();
+                  }
+                  return const Center(child: Text('No leads found.'));
+                },
+              ),
             ),
           ),
         ],
@@ -134,8 +161,8 @@ class _LeadsPageState extends State<LeadsPage> {
                 flex: 2,
                 child: _buildDropdown(
                   value: _selectedStage,
-                  items: _stages.map((s) => s['value']!).toList(),
-                  labels: _stages.map((s) => s['label']!).toList(),
+                  items: _statusFilters.map((s) => s['value']!).toList(),
+                  labels: _statusFilters.map((s) => s['label']!).toList(),
                   onChanged: (val) {
                     setState(() {
                       _selectedStage = val!;
@@ -185,7 +212,7 @@ class _LeadsPageState extends State<LeadsPage> {
 
   void _onFilterChanged() {
     context.read<LeadsBloc>().add(GetLeadsEvent(
-          leadStage: _selectedStage,
+          status: _selectedStage,
           search: _searchQuery,
           page: _currentPage,
         ));
@@ -297,7 +324,7 @@ class _LeadsPageState extends State<LeadsPage> {
                       ],
                     ),
                   ),
-                  _buildPermissionBadge(lead.vendorPermission),
+                  _buildStatusDropdown(lead),
                 ],
               ),
             ),
@@ -413,48 +440,156 @@ class _LeadsPageState extends State<LeadsPage> {
     );
   }
 
-  Widget _buildPermissionBadge(String permission) {
-    Color color;
-    switch (permission.toLowerCase()) {
-      case 'accepted':
-        color = Colors.green;
-        break;
-      case 'rejected':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.orange;
+  Widget _buildStatusDropdown(LeadEntity lead) {
+    final String currentStatus = lead.vendorPermission.toLowerCase();
+
+    Color getStatusColor(String status) {
+      switch (status) {
+        case 'accepted':
+          return Colors.green;
+        case 'rejected':
+          return Colors.red;
+        default:
+          return Colors.orange;
+      }
     }
 
+    final Color color = getStatusColor(currentStatus);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: 36,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            permission.toLowerCase() == 'accepted'
-                ? Icons.check
-                : (permission.toLowerCase() == 'rejected'
-                    ? Icons.close
-                    : Icons.access_time),
-            size: 12,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _statusOptions.any((s) => s['value'] == currentStatus)
+              ? currentStatus
+              : 'pending',
+          icon: Icon(Icons.keyboard_arrow_down, size: 18, color: color),
+          style: GoogleFonts.inter(
             color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(width: 4),
-          Text(
-            permission.toUpperCase(),
-            style: GoogleFonts.inter(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+          borderRadius: BorderRadius.circular(12),
+          items: _statusOptions.map((status) {
+            return DropdownMenuItem(
+              value: status['value'],
+              child: Text(
+                status['label']!.toUpperCase(),
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (newValue) {
+            if (newValue != null && newValue != currentStatus) {
+              _showUpdateStatusDialog(lead, newValue);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateStatusDialog(LeadEntity lead, String newStatus) {
+    final String statusLabel =
+        _statusOptions.firstWhere((s) => s['value'] == newStatus)['label']!;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Confirm Status Update",
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Are you sure you want to ${statusLabel.toLowerCase()} this lead? This action will notify the Admin about the status change.",
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: GoogleFonts.inter(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<LeadsBloc>().add(
+                            UpdateLeadStatusEvent(id: lead.id, status: newStatus),
+                          );
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: newStatus == 'accepted'
+                          ? Colors.green
+                          : (newStatus == 'rejected'
+                              ? Colors.red
+                              : Colors.orange),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                    ),
+                    child: Text(
+                      "Confirm ${statusLabel.toLowerCase()}",
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

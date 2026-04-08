@@ -37,3 +37,13 @@ class GetLeadDetailsEvent extends LeadsEvent {
   @override
   List<Object?> get props => [leadId];
 }
+
+class UpdateLeadStatusEvent extends LeadsEvent {
+  final String id;
+  final String status;
+
+  const UpdateLeadStatusEvent({required this.id, required this.status});
+
+  @override
+  List<Object?> get props => [id, status];
+}

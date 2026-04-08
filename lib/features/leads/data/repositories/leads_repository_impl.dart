@@ -28,4 +28,9 @@ class LeadsRepositoryImpl implements LeadsRepository {
   Future<LeadDetailsEntity> getLeadDetails(String id) async {
     return await remoteDataSource.getLeadDetails(id);
   }
+
+  @override
+  Future<void> updateLeadStatus(String id, String status) async {
+    await remoteDataSource.updateLeadStatus(id, status);
+  }
 }

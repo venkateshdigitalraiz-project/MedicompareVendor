@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
 import '../models/lead_model.dart';
@@ -12,6 +13,7 @@ abstract class LeadsRemoteDataSource {
     String search = '',
   });
   Future<LeadDetailsModel> getLeadDetails(String id);
+  Future<void> updateLeadStatus(String id, String status);
 }
 
 class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
@@ -65,5 +67,13 @@ class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
     }
 
     return LeadDetailsModel.fromJson(decoded['data']['lead']);
+  }
+
+  @override
+  Future<void> updateLeadStatus(String id, String status) async {
+    await apiService.post(
+      ApiEndpoints.updateLeadApprovalStatus(id),
+      body: {'status': status},
+    );
   }
 }

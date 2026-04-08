@@ -9,4 +9,5 @@ abstract class LeadsRepository {
     String search = '',
   });
   Future<LeadDetailsEntity> getLeadDetails(String id);
+  Future<void> updateLeadStatus(String id, String status);
 }

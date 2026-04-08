@@ -133,7 +133,7 @@ class DashboardPage extends StatelessWidget {
             children: [
               _buildStatCard(
                 "Total Balance",
-                "₹${dashboard.revenue.totalAmount.toStringAsFixed(2)}",
+                _formatLargeAmount(dashboard.revenue.totalAmount),
                 Icons.attach_money,
                 Colors.blue,
               ),
@@ -189,7 +189,7 @@ class DashboardPage extends StatelessWidget {
                 ),
                 _buildComparisonCard(
                   "This Month Revenue",
-                  "₹${dashboard.revenue.currentMonthAmount.toStringAsFixed(2)}",
+                  _formatLargeAmount(dashboard.revenue.currentMonthAmount),
                   dashboard.revenue.amountPercentageChange,
                   dashboard.revenue.amountStatus,
                   Icons.attach_money,
@@ -562,5 +562,13 @@ class DashboardPage extends StatelessWidget {
     if (diff.inHours > 0) return "${diff.inHours} hrs ago";
     if (diff.inMinutes > 0) return "${diff.inMinutes} mins ago";
     return "just now";
+  }
+
+  String _formatLargeAmount(double amount) {
+    if (amount >= 100000) {
+      double lakhs = amount / 100000;
+      return "₹${lakhs.toStringAsFixed(1)}L";
+    }
+    return "₹${amount.toStringAsFixed(2)}";
   }
 }

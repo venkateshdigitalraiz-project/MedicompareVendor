@@ -4,6 +4,7 @@ import 'data/repositories/leads_repository_impl.dart';
 import 'domain/repositories/leads_repository.dart';
 import 'domain/usecases/get_lead_details_usecase.dart';
 import 'domain/usecases/get_leads_usecase.dart';
+import 'domain/usecases/update_lead_status_usecase.dart';
 import 'presentation/bloc/leads_bloc.dart';
 
 class LeadsInjection {
@@ -11,6 +12,7 @@ class LeadsInjection {
     return LeadsBloc(
       getLeadsUseCase: provideGetLeadsUseCase(),
       getLeadDetailsUseCase: provideGetLeadDetailsUseCase(),
+      updateLeadStatusUseCase: provideUpdateLeadStatusUseCase(),
     );
   }
 
@@ -20,6 +22,10 @@ class LeadsInjection {
 
   static GetLeadDetailsUseCase provideGetLeadDetailsUseCase() {
     return GetLeadDetailsUseCase(provideLeadsRepository());
+  }
+
+  static UpdateLeadStatusUseCase provideUpdateLeadStatusUseCase() {
+    return UpdateLeadStatusUseCase(repository: provideLeadsRepository());
   }
 
   static LeadsRepository provideLeadsRepository() {

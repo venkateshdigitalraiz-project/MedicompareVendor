@@ -49,3 +49,12 @@ class LeadDetailsLoaded extends LeadsState {
   @override
   List<Object?> get props => [leadDetails];
 }
+
+class UpdateLeadStatusSuccess extends LeadsState {
+  final String message;
+
+  const UpdateLeadStatusSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
