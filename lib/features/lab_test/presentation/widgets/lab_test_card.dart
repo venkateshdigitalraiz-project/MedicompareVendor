@@ -25,7 +25,9 @@ class LabTestCard extends StatelessWidget {
     final String category = details.subcategory?.name ?? "No Category";
     final isFasting = details.isFasting?.toLowerCase() == 'yes';
     final String imageUrl = details.files.isNotEmpty
-        ? "https://api.medicompares.com${details.files.first}"
+        ? details.files.first.startsWith('http')
+            ? details.files.first
+            : "https://api.medicompares.com${details.files.first}"
         : "";
 
     return Card(

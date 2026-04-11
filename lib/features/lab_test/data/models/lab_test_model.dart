@@ -24,7 +24,9 @@ class LabTestCategory extends Equatable {
       description: json['description'],
       slug: json['slug'] ?? '',
       status: json['status'] ?? '',
-      files: List<String>.from(json['files'] ?? []),
+      files: (json['files'] != null && (json['files'] as List).isNotEmpty)
+          ? List<String>.from(json['files'])
+          : List<String>.from(json['imageUrl'] ?? []),
     );
   }
 
@@ -101,7 +103,9 @@ class LabTestDetails extends Equatable {
       isFasting: json['isFasting'],
       gender: json['gender'],
       reportsDuration: json['reportsDuration'],
-      files: List<String>.from(json['files'] ?? []),
+      files: (json['files'] != null && (json['files'] as List).isNotEmpty)
+          ? List<String>.from(json['files'])
+          : List<String>.from(json['imageUrl'] ?? []),
       parameters: (json['parameterss'] as List? ?? [])
           .map((i) => LabTestParameter.fromJson(i))
           .toList(),

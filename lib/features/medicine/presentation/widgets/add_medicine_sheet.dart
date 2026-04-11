@@ -5,6 +5,49 @@ import 'package:MediCompare/features/medicine/medicine_injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class MedicineVariantFormData {
+  final String? id;
+  final String variantId;
+  final String name;
+  final TextEditingController price;
+  final TextEditingController discount;
+  final TextEditingController quantity;
+  final TextEditingController perUnit;
+  final TextEditingController perUnitPercent;
+  String discountType;
+  bool isInStock;
+  bool isActive;
+
+  MedicineVariantFormData({
+    this.id,
+    required this.variantId,
+    required this.name,
+    required String defaultPrice,
+    String defaultPerUnit = '',
+    String defaultDiscount = '',
+    String defaultStock = '0',
+    String defaultDiscountType = 'price',
+    bool defaultIsInStock = true,
+    bool defaultIsActive = true,
+  })  : price = TextEditingController(text: defaultPrice),
+        discount = TextEditingController(text: defaultDiscount),
+        quantity = TextEditingController(text: defaultStock),
+        perUnit = TextEditingController(text: defaultPerUnit),
+        perUnitPercent = TextEditingController(),
+        discountType = defaultDiscountType,
+        isInStock = defaultIsInStock,
+        isActive = defaultIsActive;
+
+  void dispose() {
+    price.dispose();
+    discount.dispose();
+    quantity.dispose();
+    perUnit.dispose();
+    perUnitPercent.dispose();
+  }
+}
+
+
 class AddMedicineSheet extends StatefulWidget {
   final VoidCallback onSuccess;
   final MedicineItem? editMedicine;
@@ -40,6 +83,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
   bool _isActive = true;
   bool _isLoading = false;
   bool _isFetchingDetails = false;
+  List<MedicineVariantFormData> _variants = [];
 
   final _searchController = TextEditingController();
   List<MedicineDropdownItem> _searchResults = [];
@@ -93,6 +137,30 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
 
         _isInStock = data['isStock'] ?? true;
         _isActive = data['status'] == 'active';
+
+        // Load variants
+        final List variantDetailsJson = data['variantdetails'] ?? [];
+        final tabletVariantsJson = tabletData['tabletvariant'] ??
+            tabletData['tabletvariants'] ??
+            [];
+
+        _variants = variantDetailsJson.map((vd) {
+          final tvMatch = (tabletData['tabletvariant'] as List?)?.firstWhere(
+              (tv) => tv['_id'] == vd['variantId'] || tv['_id'] == vd['varantId'],
+              orElse: () => null);
+          return MedicineVariantFormData(
+            id: vd['_id'],
+            variantId: vd['variantId'] ?? vd['varantId'],
+            name: tvMatch != null ? tvMatch['name'] : 'Unknown Variant',
+            defaultPrice: (vd['price'] ?? 0).toString(),
+            defaultDiscount: (vd['discountprice'] ?? 0).toString(),
+            defaultStock: (vd['stock'] ?? 0).toString(),
+            defaultPerUnit: (vd['pricePerUnit'] ?? '').toString(),
+            defaultDiscountType: vd['discountType'] ?? 'price',
+            defaultIsInStock: vd['isStock'] ?? true,
+            defaultIsActive: vd['status'] == 'active',
+          );
+        }).toList();
       });
     } catch (e) {
       if (mounted) {
@@ -112,6 +180,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     _pricePerUnitController.dispose();
     _percentagePerUnitController.dispose();
     _searchController.dispose();
+    for (var v in _variants) {
+      v.dispose();
+    }
     _debounce?.cancel();
     super.dispose();
   }
@@ -146,16 +217,37 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
       return;
     }
 
+    final firstVariant = _variants.isNotEmpty ? _variants.first : null;
+    final double topPrice = double.tryParse(_mrpPriceController.text) ?? 
+        (firstVariant != null ? (double.tryParse(firstVariant.price.text) ?? 0) : 0);
+    final double topDiscount = double.tryParse(_discountController.text) ??
+        (firstVariant != null ? (double.tryParse(firstVariant.discount.text) ?? 0) : 0);
+
     setState(() => _isLoading = true);
     try {
       final Map<String, dynamic> payload = {
         "name": isEditMode ? widget.editMedicine!.id : _selectedTablet!.id,
-        "price": double.tryParse(_mrpPriceController.text) ?? 0,
-        "discountprice": double.tryParse(_discountController.text) ?? 0,
-        "discount": double.tryParse(_discountController.text) ?? 0,
+        "price": topPrice,
+        "discountprice": topDiscount,
+        "discount": topDiscount,
         "discountType": _discountType,
         "returnDetails": int.tryParse(_selectedReturnPolicy ?? '0') ?? 0,
-        "variants": [],
+        "variants": _variants.map((v) => {
+          if (v.id != null) "_id": v.id,
+          "variantId": v.variantId,
+          "varantId": v.variantId, // Support internal typo in backend for updates
+          "name": v.name,
+          "price": double.tryParse(v.price.text) ?? 0,
+          "discount": double.tryParse(v.discount.text) ?? 0,
+          "discountprice": double.tryParse(v.discount.text) ?? 0,
+          "discountType": v.discountType,
+          "stock": int.tryParse(v.quantity.text) ?? 0,
+          "quantity": int.tryParse(v.quantity.text) ?? 0,
+          "isStock": v.isInStock,
+          "status": v.isActive ? "active" : "inactive",
+          "pricePerUnit": v.perUnit.text,
+          "removeImage": false,
+        }).toList(),
         "quantity": int.tryParse(_quantityController.text) ?? 0,
         "pricePerUnit": double.tryParse(_pricePerUnitController.text) ?? 0,
         "isStock": _isInStock,
@@ -373,6 +465,23 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                           _mrpPriceController.text =
                                               option.price.toString();
                                           _searchResults = [];
+
+                                          // Populate variants from selection
+                                          for (var v in _variants) {
+                                            v.dispose();
+                                          }
+                                          _variants = option.tabletVariants
+                                              .map((tv) =>
+                                                  MedicineVariantFormData(
+                                                    variantId: tv.id,
+                                                    name: tv.name,
+                                                    defaultPrice:
+                                                        tv.price.toString(),
+                                                    defaultPerUnit: tv
+                                                            .pricePerUnit ??
+                                                        '',
+                                                  ))
+                                              .toList();
                                         });
                                       },
                                       child: Padding(
@@ -412,165 +521,185 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
 
                       if (_selectedTablet != null) ...[
                         const SizedBox(height: 32),
-                        Text("Medicine Details",
-                            style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E1B4B))),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey[200]!),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: _buildStaticField("Medicine Name",
-                                          _selectedTablet!.name, Icons.link)),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                      child: _buildTextField(
-                                          "Price (₹)", _mrpPriceController,
-                                          hint: "0.00",
-                                          icon: Icons.currency_rupee)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              _buildLabel("Discount Type", icon: Icons.percent),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildDiscountTypeBtn(
-                                      "₹ Price",
-                                      'price',
+                        if (_variants.isEmpty) ...[
+                          Text("Medicine Details",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1E1B4B))),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey[200]!),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: _buildStaticField("Medicine Name",
+                                            _selectedTablet!.name, Icons.link)),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                        child: _buildTextField(
+                                            "Price (₹)", _mrpPriceController,
+                                            hint: "0.00",
+                                            icon: Icons.currency_rupee)),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _buildLabel("Discount Type", icon: Icons.percent),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildDiscountTypeBtn(
+                                        "₹ Price",
+                                        'price',
+                                        _discountType,
+                                        (val) =>
+                                            setState(() => _discountType = val),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: _buildDiscountTypeBtn(
-                                      "% Percentage",
-                                      'percentage',
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: _buildDiscountTypeBtn(
+                                        "% Percentage",
+                                        'percentage',
+                                        _discountType,
+                                        (val) =>
+                                            setState(() => _discountType = val),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                  _discountType == 'price'
-                                      ? "Discount Price (₹)"
-                                      : "Discount Percentage (%)",
-                                  _discountController,
-                                  hint: _discountType == 'price'
-                                      ? "e.g., 50"
-                                      : "e.g., 10",
-                                  icon: _discountType == 'price'
-                                      ? Icons.currency_rupee
-                                      : Icons.percent, validator: (val) {
-                                if (val == null || val.isEmpty) {
-                                  return "Required";
-                                }
-                                final discount = double.tryParse(val);
-                                final mrp =
-                                    double.tryParse(_mrpPriceController.text);
-                                if (discount != null && mrp != null) {
-                                  if (_discountType == 'price' &&
-                                      discount > mrp) {
-                                    return "Over MRP";
-                                  } else if (_discountType == 'percentage' &&
-                                      discount > 100) {
-                                    return "Invalid %";
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _buildTextField(
+                                    _discountType == 'price'
+                                        ? "Discount Price (₹)"
+                                        : "Discount Percentage (%)",
+                                    _discountController,
+                                    hint: _discountType == 'price'
+                                        ? "e.g., 50"
+                                        : "e.g., 10",
+                                    icon: _discountType == 'price'
+                                        ? Icons.currency_rupee
+                                        : Icons.percent, validator: (val) {
+                                  if (val == null || val.isEmpty) {
+                                    return "Required";
                                   }
-                                }
-                                return null;
-                              }),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: _buildTextField(
-                                          "Quantity", _quantityController,
-                                          hint: "0",
-                                          icon: Icons.inventory_2_outlined)),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                      child: _buildTextField("Price/Units",
-                                          _pricePerUnitController,
-                                          hint: "e.g., ₹10/tab",
-                                          icon: Icons.currency_rupee,
-                                          isRequired: false)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: _buildTextField("Percentage/Unit",
-                                          _percentagePerUnitController,
-                                          hint: "e.g., 10%",
-                                          icon: Icons.percent,
-                                          isRequired: false)),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _buildLabel("Stock Status",
-                                            isRequired: false),
-                                        const SizedBox(height: 8),
-                                        _buildToggleBtn(
-                                          _isInStock
-                                              ? "In Stock"
-                                              : "Out of Stock",
-                                          _isInStock
-                                              ? Icons.check_circle_outline
-                                              : Icons.cancel_outlined,
-                                          _isInStock
-                                              ? Colors.green
-                                              : Colors.red,
-                                          () => setState(
-                                              () => _isInStock = !_isInStock),
-                                        ),
-                                      ],
+                                  final discount = double.tryParse(val);
+                                  final mrp =
+                                      double.tryParse(_mrpPriceController.text);
+                                  if (discount != null && mrp != null) {
+                                    if (_discountType == 'price' &&
+                                        discount > mrp) {
+                                      return "Over MRP";
+                                    } else if (_discountType == 'percentage' &&
+                                        discount > 100) {
+                                      return "Invalid %";
+                                    }
+                                  }
+                                  return null;
+                                }),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: _buildTextField(
+                                            "Quantity", _quantityController,
+                                            hint: "0",
+                                            icon: Icons.inventory_2_outlined)),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                        child: _buildTextField("Price/Units",
+                                            _pricePerUnitController,
+                                            hint: "e.g., ₹10/tab",
+                                            icon: Icons.currency_rupee,
+                                            isRequired: false)),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: _buildTextField("Percentage/Unit",
+                                            _percentagePerUnitController,
+                                            hint: "e.g., 10%",
+                                            icon: Icons.percent,
+                                            isRequired: false)),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          _buildLabel("Stock Status",
+                                              isRequired: false),
+                                          const SizedBox(height: 8),
+                                          _buildToggleBtn(
+                                            _isInStock
+                                                ? "In Stock"
+                                                : "Out of Stock",
+                                            _isInStock
+                                                ? Icons.check_circle_outline
+                                                : Icons.cancel_outlined,
+                                            _isInStock
+                                                ? Colors.green
+                                                : Colors.red,
+                                            () => setState(
+                                                () => _isInStock = !_isInStock),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _buildLabel("Active Status",
-                                            isRequired: false),
-                                        const SizedBox(height: 8),
-                                        _buildToggleBtn(
-                                          _isActive ? "Active" : "Inactive",
-                                          Icons.power_settings_new,
-                                          _isActive
-                                              ? const Color(0xFF506CCF)
-                                              : Colors.grey,
-                                          () => setState(
-                                              () => _isActive = !_isActive),
-                                        ),
-                                      ],
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          _buildLabel("Active Status",
+                                              isRequired: false),
+                                          const SizedBox(height: 8),
+                                          _buildToggleBtn(
+                                            _isActive ? "Active" : "Inactive",
+                                            Icons.power_settings_new,
+                                            _isActive
+                                                ? const Color(0xFF506CCF)
+                                                : Colors.grey,
+                                            () => setState(
+                                                () => _isActive = !_isActive),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ] else ...[
+                          Text("Variants",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1E1B4B))),
+                          const SizedBox(height: 16),
+                          ..._variants
+                              .asMap()
+                              .entries
+                              .map((e) => _buildVariantSection(e.value, e.key))
+                              .toList(),
+                        ],
                       ],
                     ],
                   ),
@@ -746,8 +875,8 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.05),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
+          color: color.withOpacity(0.05),
+          border: Border.all(color: color.withOpacity(0.5)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -769,10 +898,152 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     );
   }
 
-  Widget _buildDiscountTypeBtn(String label, String type) {
-    final isSelected = _discountType == type;
+  Widget _buildVariantSection(MedicineVariantFormData v, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Variant ${index + 1}",
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800])),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                  child: _buildStaticField(
+                      "Variant Name", v.name, Icons.link)),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: _buildTextField("Price (₹)", v.price,
+                      hint: "0.00", icon: Icons.currency_rupee)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildLabel("Discount Type", icon: Icons.percent),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDiscountTypeBtn(
+                  "₹ Price",
+                  'price',
+                  v.discountType,
+                  (val) => setState(() => v.discountType = val),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildDiscountTypeBtn(
+                  "% Percentage",
+                  'percentage',
+                  v.discountType,
+                  (val) => setState(() => v.discountType = val),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+              v.discountType == 'price'
+                  ? "Discount Price (₹)"
+                  : "Discount Percentage (%)",
+              v.discount,
+              hint: v.discountType == 'price' ? "e.g., 50" : "e.g., 10",
+              icon: v.discountType == 'price' ? Icons.currency_rupee : Icons.percent,
+              validator: (val) {
+            if (val == null || val.isEmpty) {
+              return null; // Allowed to be empty maybe? Or from screenshot it has a label
+            }
+            final discount = double.tryParse(val);
+            final mrp = double.tryParse(v.price.text);
+            if (discount != null && mrp != null) {
+              if (v.discountType == 'price' && discount > mrp) {
+                return "Over MRP";
+              } else if (v.discountType == 'percentage' && discount > 100) {
+                return "Invalid %";
+              }
+            }
+            return null;
+          }),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                  child: _buildTextField("Quantity", v.quantity,
+                      hint: "0", icon: Icons.inventory_2_outlined)),
+              const SizedBox(width: 12),
+              Expanded(
+                  child: _buildTextField("Price/Units", v.perUnit,
+                      hint: "e.g., ₹10/tab",
+                      icon: Icons.currency_rupee,
+                      isRequired: false)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                  child: _buildTextField("Percentage/Unit", v.perUnitPercent,
+                      hint: "e.g., 10%", icon: Icons.percent, isRequired: false)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabel("Stock Status", isRequired: false),
+                    const SizedBox(height: 8),
+                    _buildToggleBtn(
+                      v.isInStock ? "In Stock" : "Out of Stock",
+                      v.isInStock
+                          ? Icons.check_circle_outline
+                          : Icons.cancel_outlined,
+                      v.isInStock ? Colors.green : Colors.red,
+                      () => setState(() => v.isInStock = !v.isInStock),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabel("Active Status", isRequired: false),
+                    const SizedBox(height: 8),
+                    _buildToggleBtn(
+                      v.isActive ? "Active" : "Inactive",
+                      Icons.power_settings_new,
+                      v.isActive ? const Color(0xFF506CCF) : Colors.grey,
+                      () => setState(() => v.isActive = !v.isActive),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiscountTypeBtn(
+      String label, String type, String currentType, Function(String) onSelect) {
+    final isSelected = currentType == type;
     return GestureDetector(
-      onTap: () => setState(() => _discountType = type),
+      onTap: () => onSelect(type),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         alignment: Alignment.center,
@@ -785,7 +1056,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   )

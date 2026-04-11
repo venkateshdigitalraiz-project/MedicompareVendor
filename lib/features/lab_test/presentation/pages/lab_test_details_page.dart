@@ -123,7 +123,9 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                     borderRadius: BorderRadius.circular(12),
                     child: details.files.isNotEmpty
                         ? Image.network(
-                            "https://api.medicompares.com${details.files.first}",
+                            details.files.first.startsWith('http')
+                                ? details.files.first
+                                : "https://api.medicompares.com${details.files.first}",
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,

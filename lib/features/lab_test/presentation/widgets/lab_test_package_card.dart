@@ -21,7 +21,11 @@ class LabTestPackageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final String name = package.name;
     final int testsCount = package.products.length;
-    final String imageUrl = package.files.isNotEmpty ? package.files.first : "";
+    final String imageUrl = package.files.isNotEmpty
+        ? package.files.first.startsWith('http')
+            ? package.files.first
+            : "https://api.medicompares.com${package.files.first}"
+        : "";
 
     return Card(
       color: Colors.white,

@@ -57,6 +57,8 @@ class MedicineItem extends Equatable {
   final MedicineDetails details;
   final bool isStock;
   final int stock;
+  final String? returnDetails;
+  final List<VariantDetail> variantDetails;
 
   const MedicineItem({
     required this.id,
@@ -67,24 +69,45 @@ class MedicineItem extends Equatable {
     required this.details,
     this.isStock = true,
     this.stock = 0,
+    this.returnDetails,
+    this.variantDetails = const [],
   });
 
   factory MedicineItem.fromJson(Map<String, dynamic> json) {
     return MedicineItem(
       id: json['_id'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? json['discount'] ?? 0).toDouble(),
+      discountPrice:
+          (json['discountprice'] ?? json['discount'] ?? 0).toDouble(),
       discountType: json['discountType'] ?? 'price',
       status: json['status'] ?? 'inactive',
-      details: MedicineDetails.fromJson(json['tablets'] ?? {}),
+      details: (json['tablets'] != null && json['tablets'] is Map)
+          ? MedicineDetails.fromJson(json['tablets'])
+          : MedicineDetails.fromJson({}),
       isStock: json['isStock'] ?? true,
       stock: json['stock'] ?? 0,
+      returnDetails: json['returnDetails']?.toString(),
+      variantDetails: (json['variantdetails'] as List? ??
+              json['variantdetail'] as List? ??
+              [])
+          .where((i) => i is Map<String, dynamic>)
+          .map((i) => VariantDetail.fromJson(i))
+          .toList(),
     );
   }
 
   @override
-  List<Object?> get props =>
-      [id, price, discountPrice, discountType, status, details, isStock, stock];
+  List<Object?> get props => [
+        id,
+        price,
+        discountPrice,
+        discountType,
+        status,
+        details,
+        isStock,
+        stock,
+        variantDetails
+      ];
 }
 
 class MedicineDetails extends Equatable {
@@ -93,6 +116,7 @@ class MedicineDetails extends Equatable {
   final String? slug;
   final String? description;
   final String? form;
+  final String? strength;
   final String? brand;
   final List<String> imageUrl;
   final String? tabletImageUrl;
@@ -100,6 +124,7 @@ class MedicineDetails extends Equatable {
   final MedicineSubcategory? subcategory;
   final Manufacture? manufacture;
   final bool prescriptionRequired;
+  final List<TabletVariant> tabletVariants;
   final DateTime? createdAt;
 
   const MedicineDetails({
@@ -108,6 +133,7 @@ class MedicineDetails extends Equatable {
     this.slug,
     this.description,
     this.form,
+    this.strength,
     this.brand,
     required this.imageUrl,
     this.tabletImageUrl,
@@ -115,6 +141,7 @@ class MedicineDetails extends Equatable {
     this.subcategory,
     this.manufacture,
     this.prescriptionRequired = false,
+    this.tabletVariants = const [],
     this.createdAt,
   });
 
@@ -125,28 +152,44 @@ class MedicineDetails extends Equatable {
       slug: json['slug'],
       description: json['description'],
       form: json['form'],
+      strength: json['strength'],
       brand: json['brand'],
       imageUrl: List<String>.from(json['imageUrl'] ?? []),
       tabletImageUrl: json['tabletImage']?['url'],
       composition: json['compositions']?['name'],
-      subcategory: json['subcategory'] != null
+      subcategory: (json['subcategory'] != null && json['subcategory'] is Map)
           ? MedicineSubcategory.fromJson(json['subcategory'])
-          : (json['subcategorys'] != null
+          : (json['subcategorys'] != null && json['subcategorys'] is Map
               ? MedicineSubcategory.fromJson(json['subcategorys'])
               : null),
-      manufacture: json['manufacture'] != null
+      manufacture: (json['manufacture'] != null && json['manufacture'] is Map)
           ? Manufacture.fromJson(json['manufacture'])
           : null,
       prescriptionRequired: json['prescriptionRequired'] ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : null,
+      tabletVariants: (json['tabletvariants'] as List? ??
+              json['tabletvariant'] as List? ??
+              [])
+          .where((i) => i is Map<String, dynamic>)
+          .map((i) => TabletVariant.fromJson(i))
+          .toList(),
     );
   }
 
   @override
-  List<Object?> get props =>
-      [id, name, slug, description, form, imageUrl, subcategory, createdAt];
+  List<Object?> get props => [
+        id,
+        name,
+        slug,
+        description,
+        form,
+        strength,
+        imageUrl,
+        subcategory,
+        createdAt
+      ];
 }
 
 class MedicineSubcategory extends Equatable {
@@ -217,12 +260,14 @@ class MedicineDropdownItem extends Equatable {
   final String name;
   final double price;
   final String subcategoryId;
+  final List<TabletVariant> tabletVariants;
 
   const MedicineDropdownItem({
     required this.id,
     required this.name,
     required this.price,
     required this.subcategoryId,
+    this.tabletVariants = const [],
   });
 
   factory MedicineDropdownItem.fromJson(Map<String, dynamic> json) {
@@ -244,9 +289,101 @@ class MedicineDropdownItem extends Equatable {
       name: json['name'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       subcategoryId: subCatId,
+      tabletVariants: (json['tabletvariants'] as List? ??
+              json['tabletvariant'] as List? ??
+              [])
+          .map((i) => TabletVariant.fromJson(i))
+          .toList(),
     );
   }
 
   @override
-  List<Object?> get props => [id, name, price, subcategoryId];
+  List<Object?> get props => [id, name, price, subcategoryId, tabletVariants];
+}
+
+class TabletVariant extends Equatable {
+  final String id;
+  final String tabletId;
+  final String name;
+  final double price;
+  final String? pricePerUnit;
+  final List<String> files;
+
+  const TabletVariant({
+    required this.id,
+    required this.tabletId,
+    required this.name,
+    required this.price,
+    this.pricePerUnit,
+    required this.files,
+  });
+
+  factory TabletVariant.fromJson(Map<String, dynamic> json) {
+    return TabletVariant(
+      id: json['_id'] ?? '',
+      tabletId: json['tabletId'] ?? '',
+      name: json['name'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      pricePerUnit: json['pricePerUnit']?.toString(),
+      files: List<String>.from(json['files'] ?? json['frontImage'] ?? []),
+    );
+  }
+
+  @override
+  List<Object?> get props => [id, tabletId, name, price, pricePerUnit, files];
+}
+
+class VariantDetail extends Equatable {
+  final String id;
+  final String productId;
+  final String variantId;
+  final double price;
+  final double discountPrice;
+  final String discountType;
+  final int stock;
+  final bool isStock;
+  final String status;
+  final String? pricePerUnit;
+
+  const VariantDetail({
+    required this.id,
+    required this.productId,
+    required this.variantId,
+    required this.price,
+    required this.discountPrice,
+    required this.discountType,
+    required this.stock,
+    required this.isStock,
+    required this.status,
+    this.pricePerUnit,
+  });
+
+  factory VariantDetail.fromJson(Map<String, dynamic> json) {
+    return VariantDetail(
+      id: json['_id'] ?? '',
+      productId: json['productId'] ?? '',
+      variantId: json['variantId'] ?? json['varantId'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      discountType: json['discountType'] ?? 'price',
+      stock: json['stock'] ?? 0,
+      isStock: json['isStock'] ?? true,
+      status: json['status'] ?? 'active',
+      pricePerUnit: json['pricePerUnit']?.toString(),
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        productId,
+        variantId,
+        price,
+        discountPrice,
+        discountType,
+        stock,
+        isStock,
+        status,
+        pricePerUnit
+      ];
 }

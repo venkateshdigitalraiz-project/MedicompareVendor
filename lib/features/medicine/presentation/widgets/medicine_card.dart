@@ -22,9 +22,13 @@ class MedicineCard extends StatelessWidget {
     final details = item.details;
     final String name = details.name ?? "Unknown Medicine";
     final String category = details.subcategory?.name ?? "No Category";
-    final String imageUrl = (details.imageUrl != null && details.imageUrl.isNotEmpty)
-        ? details.imageUrl.first
-        : (details.tabletImageUrl ?? "");
+    final String rawImageUrl = (details.tabletVariants.isNotEmpty &&
+            details.tabletVariants.first.files.isNotEmpty)
+        ? details.tabletVariants.first.files.first
+        : ((details.imageUrl != null && details.imageUrl.isNotEmpty)
+            ? details.imageUrl.first
+            : (details.tabletImageUrl ?? ""));
+    final String imageUrl = _getImageUrl(rawImageUrl);
 
     return Card(
       color: Colors.white,
@@ -116,9 +120,10 @@ class MedicineCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (item.discountPrice > 0)
+                      if (_calculateFinalPrice() < _calculateOriginalPrice() &&
+                          _calculateOriginalPrice() > 0)
                         Text(
-                          "₹${item.price.toStringAsFixed(0)}",
+                          "₹${_calculateOriginalPrice().toStringAsFixed(0)}",
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             decoration: TextDecoration.lineThrough,
@@ -145,11 +150,37 @@ class MedicineCard extends StatelessWidget {
   }
 
   double _calculateFinalPrice() {
-    if (item.discountType == 'percentage') {
-      return item.price - (item.price * item.discountPrice / 100);
+    double price = item.price;
+    double discount = item.discountPrice;
+    String type = item.discountType;
+
+    // 1st Priority: Vendor specific variants
+    if (price == 0 && item.variantDetails.isNotEmpty) {
+      final v = item.variantDetails.first;
+      price = v.price;
+      discount = v.discountPrice;
+      type = v.discountType;
     }
-    // If type is 'price', the discountPrice field actually represents the final selling price
-    return item.discountPrice;
+    // 2nd Priority: Base variants (common in list responses)
+    else if (price == 0 && item.details.tabletVariants.isNotEmpty) {
+      price = item.details.tabletVariants.first.price;
+      discount = 0; // Usually base variants don't have discount info
+    }
+
+    if (type == 'percentage') {
+      return price - (price * discount / 100);
+    }
+    return discount > 0 ? discount : price;
+  }
+
+  double _calculateOriginalPrice() {
+    double price = item.price;
+    if (price == 0 && item.variantDetails.isNotEmpty) {
+      price = item.variantDetails.first.price;
+    } else if (price == 0 && item.details.tabletVariants.isNotEmpty) {
+      price = item.details.tabletVariants.first.price;
+    }
+    return price;
   }
 
   Widget _placeholderImage() {
@@ -222,5 +253,12 @@ class MedicineCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getImageUrl(String url) {
+    if (url.isEmpty) return "";
+    if (url.startsWith('http')) return url;
+    final cleanPath = url.startsWith('/') ? url : '/$url';
+    return "https://api.medicompares.com$cleanPath";
   }
 }

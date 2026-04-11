@@ -36,7 +36,9 @@ class LabTestPackageItem extends Equatable {
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
       status: json['status'] ?? 'inactive',
-      files: List<String>.from(json['files'] ?? []),
+      files: (json['files'] != null && (json['files'] as List).isNotEmpty)
+          ? List<String>.from(json['files'])
+          : List<String>.from(json['imageUrl'] ?? []),
       products: List<String>.from(json['products'] ?? []),
       tabletsDetails: (json['tabletsdetails'] as List? ?? [])
           .map((i) => LabTestDetails.fromJson(i))

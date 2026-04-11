@@ -146,8 +146,9 @@ class _LabTestPackageDetailsPageState extends State<LabTestPackageDetailsPage> {
                     borderRadius: BorderRadius.circular(12),
                     child: package.files.isNotEmpty
                         ? Image.network(
-                            package.files
-                                .first, // Package API gives full URL usually or check
+                            package.files.first.startsWith('http')
+                                ? package.files.first
+                                : "https://api.medicompares.com${package.files.first}",
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
