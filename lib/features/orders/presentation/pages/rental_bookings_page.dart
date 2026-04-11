@@ -29,11 +29,11 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
     {'label': 'New', 'value': 'new'},
-    {'label': 'Pending', 'value': 'pending'},
+    // {'label': 'Pending', 'value': 'pending'},
     {'label': 'Confirmed', 'value': 'confirmed'},
-    {'label': 'Processing', 'value': 'processing'},
-    {'label': 'Shipped', 'value': 'shipped'},
-    {'label': 'Delivered', 'value': 'delivered'},
+    // {'label': 'Processing', 'value': 'processing'},
+    // {'label': 'Shipped', 'value': 'shipped'},
+    // {'label': 'Delivered', 'value': 'delivered'},
     {'label': 'Cancelled', 'value': 'cancelled'},
   ];
 
@@ -345,7 +345,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                             fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       Text(
-                        "₹${item.price.toStringAsFixed(2)}",
+                        "₹${item.totalPrice.toStringAsFixed(2)}",
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -358,7 +358,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                               size: 12, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            DateFormat('MMM d, yyyy').format(item.createdAt),
+                            DateFormat('MMM d, yyyy').format(item.createdAt.toLocal()),
                             style: GoogleFonts.inter(
                                 fontSize: 12, color: Colors.grey),
                           ),

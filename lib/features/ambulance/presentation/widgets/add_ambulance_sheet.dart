@@ -201,8 +201,10 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          _buildStatusDropdown(),
-                          const SizedBox(height: 20),
+                           if (isEditMode) ...[
+                            _buildStatusDropdown(),
+                            const SizedBox(height: 20),
+                          ],
                           _buildFacilitiesDropdown(_availableFacilities),
                           const SizedBox(height: 24),
                         ],

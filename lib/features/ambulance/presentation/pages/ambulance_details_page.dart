@@ -57,8 +57,19 @@ class AmbulanceDetailsPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.blue[100]!),
                         ),
-                        child: const Icon(Icons.airport_shuttle,
-                            size: 40, color: Colors.blue),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: ambulance.files.isNotEmpty
+                              ? Image.network(
+                                  _getAmbulanceImageUrl(ambulance.files.first),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.airport_shuttle,
+                                          size: 40, color: Colors.blue),
+                                )
+                              : const Icon(Icons.airport_shuttle,
+                                  size: 40, color: Colors.blue),
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -254,5 +265,12 @@ class AmbulanceDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getAmbulanceImageUrl(String url) {
+    if (url.isEmpty) return "";
+    if (url.startsWith('http')) return url;
+    final cleanPath = url.startsWith('/') ? url : '/$url';
+    return "https://api.medicompares.com$cleanPath";
   }
 }

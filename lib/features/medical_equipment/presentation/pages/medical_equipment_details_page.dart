@@ -240,15 +240,25 @@ class _MedicalEquipmentDetailsPageState
             _infoItem("FIXED DEPOSIT", "₹${item.fixedDeposit?.toInt() ?? 0}",
                 Icons.savings_outlined, Colors.orange),
             const SizedBox(width: 12),
-            _infoItem("RETURN CHARGE", "₹${item.returnCharge?.toInt() ?? 0}",
-                Icons.replay_outlined, Colors.blue),
+            _infoItem("PER DAY RENT", "₹${item.perDayRent?.toInt() ?? 0}",
+                Icons.calendar_today_outlined, Colors.purple),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
+            _infoItem("RETURN CHARGE", "₹${item.returnCharge?.toInt() ?? 0}",
+                Icons.replay_outlined, Colors.blue),
+            const SizedBox(width: 12),
             _infoItem("SERVICE CHARGE", "₹${item.serviceCharges?.toInt() ?? 0}",
                 Icons.design_services_outlined, Colors.green),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _infoItem("INTEREST (%)", "${item.interest?.toInt() ?? 0}%",
+                Icons.percent_outlined, Colors.red),
             const SizedBox(width: 12),
             _infoItem("STATUS", item.status.toUpperCase(),
                 Icons.check_circle_outline, Colors.teal),

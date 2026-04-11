@@ -283,44 +283,44 @@ class _AddNursingCareSheetState extends State<AddNursingCareSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Status
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel("Status",
-                                  isRequired: true,
-                                  icon: Icons.check_circle_outline),
-                              const SizedBox(height: 8),
-                              DropdownButtonFormField<String>(
-                                value: _selectedStatus,
-                                isExpanded: true,
-                                decoration:
-                                    _inputDecoration(hint: "Select Status"),
-                                style: GoogleFonts.inter(
-                                    fontSize: 13, color: Colors.black87),
-                                items: [
-                                  DropdownMenuItem(
-                                      value: 'active',
-                                      child: Text("Active",
-                                          style:
-                                              GoogleFonts.inter(fontSize: 13))),
-                                  DropdownMenuItem(
-                                      value: 'inactive',
-                                      child: Text("Inactive",
-                                          style:
-                                              GoogleFonts.inter(fontSize: 13))),
-                                ],
-                                onChanged: (val) =>
-                                    setState(() => _selectedStatus = val!),
-                              ),
-                            ],
+                    if (isEditMode)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Status",
+                                    isRequired: true,
+                                    icon: Icons.check_circle_outline),
+                                const SizedBox(height: 8),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedStatus,
+                                  isExpanded: true,
+                                  decoration:
+                                      _inputDecoration(hint: "Select Status"),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13, color: Colors.black87),
+                                  items: [
+                                    DropdownMenuItem(
+                                        value: 'active',
+                                        child: Text("Active",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                    DropdownMenuItem(
+                                        value: 'inactive',
+                                        child: Text("Inactive",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                  ],
+                                  onChanged: (val) =>
+                                      setState(() => _selectedStatus = val!),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                     const SizedBox(height: 24),
                   ],
                 ),

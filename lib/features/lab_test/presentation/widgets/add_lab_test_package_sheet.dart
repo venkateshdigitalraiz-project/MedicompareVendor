@@ -357,6 +357,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                             ),
                           ),
                           const SizedBox(width: 12),
+                        if (isEditMode)
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

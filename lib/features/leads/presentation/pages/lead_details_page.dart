@@ -110,8 +110,20 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child:
-                const Icon(Icons.person_outline, color: Colors.white, size: 30),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: (lead.userDetails?.files.isNotEmpty ?? false)
+                  ? Image.network(
+                      lead.userDetails!.files.first,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.person_outline,
+                          color: Colors.white,
+                          size: 30),
+                    )
+                  : const Icon(Icons.person_outline,
+                      color: Colors.white, size: 30),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -209,7 +221,7 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
             if (lead.date != null)
               _buildInfoCard(
                   "Preferred Date",
-                  DateFormat('MMM d, yyyy').format(lead.date!),
+                  DateFormat('MMM d, yyyy').format(lead.date!.toLocal()),
                   Icons.date_range_outlined,
                   AppColors.primary),
             if (lead.address != null && lead.address!.isNotEmpty)
@@ -234,18 +246,27 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
           childAspectRatio: 2.2,
           children: [
             _buildPriceCard(lead),
-            _buildInfoCard("Service Name", lead.serviceName,
-                Icons.medical_services_outlined, Colors.indigo),
             _buildInfoCard(
-                "Duration", lead.duration, Icons.timer_outlined, Colors.blue),
+              "Service Name",
+              lead.serviceName,
+              Icons.medical_services_outlined,
+              Colors.indigo,
+              imageUrl: lead.serviceImage,
+            ),
+            _buildInfoCard(
+              "Duration",
+              lead.duration,
+              Icons.timer_outlined,
+              Colors.blue,
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildInfoCard(
-      String title, String value, IconData icon, Color iconBgColor) {
+  Widget _buildInfoCard(String title, String value, IconData icon,
+      Color iconBgColor, {String? imageUrl}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -263,12 +284,23 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: iconBgColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: iconBgColor),
+            child: imageUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(icon, size: 16, color: iconBgColor),
+                    ),
+                  )
+                : Icon(icon, size: 16, color: iconBgColor),
           ),
           const SizedBox(width: 12),
           Expanded(

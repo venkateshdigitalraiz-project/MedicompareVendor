@@ -35,6 +35,8 @@ class SurgeryItem extends Equatable {
   final double discountPrice;
   final String status;
   final SurgeryDetails details;
+  final String? discountType;
+  final List<SurgeryVariantDetail> variantDetails;
 
   const SurgeryItem({
     required this.id,
@@ -42,6 +44,8 @@ class SurgeryItem extends Equatable {
     required this.discountPrice,
     required this.status,
     required this.details,
+    this.discountType,
+    this.variantDetails = const [],
   });
 
   factory SurgeryItem.fromJson(Map<String, dynamic> json) {
@@ -49,13 +53,21 @@ class SurgeryItem extends Equatable {
       id: json['_id'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      discountType: json['discountType'],
       status: json['status'] ?? 'inactive',
       details: SurgeryDetails.fromJson(json['tablets'] ?? {}),
+      variantDetails: (json['variantdetails'] as List? ??
+              json['variantdetail'] as List? ??
+              [])
+          .where((i) => i is Map<String, dynamic>)
+          .map((i) => SurgeryVariantDetail.fromJson(i))
+          .toList(),
     );
   }
 
   @override
-  List<Object?> get props => [id, price, discountPrice, status, details];
+  List<Object?> get props =>
+      [id, price, discountPrice, status, details, variantDetails];
 }
 
 class SurgeryDetails extends Equatable {
@@ -72,6 +84,8 @@ class SurgeryDetails extends Equatable {
   final List<String> files;
   final SurgerySubcategory? subcategory;
 
+  final List<SurgeryTabletVariant> tabletVariants;
+
   const SurgeryDetails({
     required this.id,
     required this.name,
@@ -85,6 +99,7 @@ class SurgeryDetails extends Equatable {
     this.sideEffects,
     required this.files,
     this.subcategory,
+    this.tabletVariants = const [],
   });
 
   factory SurgeryDetails.fromJson(Map<String, dynamic> json) {
@@ -105,6 +120,12 @@ class SurgeryDetails extends Equatable {
           : (json['subcategorys'] != null && json['subcategorys'] is Map)
               ? SurgerySubcategory.fromJson(json['subcategorys'])
               : null,
+      tabletVariants: (json['tabletvariants'] as List? ??
+              json['tabletvariant'] as List? ??
+              [])
+          .where((i) => i is Map<String, dynamic>)
+          .map((i) => SurgeryTabletVariant.fromJson(i))
+          .toList(),
     );
   }
 
@@ -143,6 +164,74 @@ class SurgerySubcategory extends Equatable {
 
   @override
   List<Object?> get props => [id, name, files];
+}
+
+class SurgeryVariantDetail extends Equatable {
+  final String id;
+  final String productId;
+  final String variantId;
+  final double price;
+  final double discountPrice;
+  final String discountType;
+  final int stock;
+  final String status;
+
+  const SurgeryVariantDetail({
+    required this.id,
+    required this.productId,
+    required this.variantId,
+    required this.price,
+    required this.discountPrice,
+    required this.discountType,
+    required this.stock,
+    required this.status,
+  });
+
+  factory SurgeryVariantDetail.fromJson(Map<String, dynamic> json) {
+    return SurgeryVariantDetail(
+      id: json['_id'] ?? '',
+      productId: json['productId'] ?? '',
+      variantId: json['variantId'] ?? json['varantId'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      discountType: json['discountType'] ?? 'price',
+      stock: json['stock'] ?? 0,
+      status: json['status'] ?? 'inactive',
+    );
+  }
+
+  @override
+  List<Object?> get props =>
+      [id, productId, variantId, price, discountPrice, discountType, stock, status];
+}
+
+class SurgeryTabletVariant extends Equatable {
+  final String id;
+  final String tabletId;
+  final String name;
+  final double price;
+  final List<String> files;
+
+  const SurgeryTabletVariant({
+    required this.id,
+    required this.tabletId,
+    required this.name,
+    required this.price,
+    required this.files,
+  });
+
+  factory SurgeryTabletVariant.fromJson(Map<String, dynamic> json) {
+    return SurgeryTabletVariant(
+      id: json['_id'] ?? '',
+      tabletId: json['tabletId'] ?? '',
+      name: json['name'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      files: List<String>.from(json['files'] ?? []),
+    );
+  }
+
+  @override
+  List<Object?> get props => [id, tabletId, name, price, files];
 }
 
 class SurgeryPagination extends Equatable {

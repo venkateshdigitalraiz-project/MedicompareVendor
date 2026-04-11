@@ -662,26 +662,27 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                       ),
                                     ),
                                     const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          _buildLabel("Active Status",
-                                              isRequired: false),
-                                          const SizedBox(height: 8),
-                                          _buildToggleBtn(
-                                            _isActive ? "Active" : "Inactive",
-                                            Icons.power_settings_new,
-                                            _isActive
-                                                ? const Color(0xFF506CCF)
-                                                : Colors.grey,
-                                            () => setState(
-                                                () => _isActive = !_isActive),
-                                          ),
-                                        ],
+                                    if (isEditMode)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel("Active Status",
+                                                isRequired: false),
+                                            const SizedBox(height: 8),
+                                            _buildToggleBtn(
+                                              _isActive ? "Active" : "Inactive",
+                                              Icons.power_settings_new,
+                                              _isActive
+                                                  ? const Color(0xFF506CCF)
+                                                  : Colors.grey,
+                                              () => setState(
+                                                  () => _isActive = !_isActive),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ],
@@ -1017,21 +1018,22 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildLabel("Active Status", isRequired: false),
-                    const SizedBox(height: 8),
-                    _buildToggleBtn(
-                      v.isActive ? "Active" : "Inactive",
-                      Icons.power_settings_new,
-                      v.isActive ? const Color(0xFF506CCF) : Colors.grey,
-                      () => setState(() => v.isActive = !v.isActive),
-                    ),
-                  ],
+              if (isEditMode)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel("Active Status", isRequired: false),
+                      const SizedBox(height: 8),
+                      _buildToggleBtn(
+                        v.isActive ? "Active" : "Inactive",
+                        Icons.power_settings_new,
+                        v.isActive ? const Color(0xFF506CCF) : Colors.grey,
+                        () => setState(() => v.isActive = !v.isActive),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ],

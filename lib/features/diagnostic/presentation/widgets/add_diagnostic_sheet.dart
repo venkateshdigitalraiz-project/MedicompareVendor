@@ -295,38 +295,39 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel("Status",
-                                  isRequired: true, icon: Icons.show_chart),
-                              const SizedBox(height: 8),
-                              DropdownButtonFormField<String>(
-                                value: _selectedStatus,
-                                isExpanded: true,
-                                decoration:
-                                    _inputDecoration(hint: "Select Status"),
-                                style: GoogleFonts.inter(
-                                    fontSize: 13, color: Colors.black87),
-                                items: [
-                                  DropdownMenuItem(
-                                      value: 'active',
-                                      child: Text("Active",
-                                          style:
-                                              GoogleFonts.inter(fontSize: 13))),
-                                  DropdownMenuItem(
-                                      value: 'inactive',
-                                      child: Text("Inactive",
-                                          style:
-                                              GoogleFonts.inter(fontSize: 13))),
-                                ],
-                                onChanged: (val) =>
-                                    setState(() => _selectedStatus = val!),
-                              ),
-                            ],
+                        if (isEditMode)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Status",
+                                    isRequired: true, icon: Icons.show_chart),
+                                const SizedBox(height: 8),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedStatus,
+                                  isExpanded: true,
+                                  decoration:
+                                      _inputDecoration(hint: "Select Status"),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13, color: Colors.black87),
+                                  items: [
+                                    DropdownMenuItem(
+                                        value: 'active',
+                                        child: Text("Active",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                    DropdownMenuItem(
+                                        value: 'inactive',
+                                        child: Text("Inactive",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                  ],
+                                  onChanged: (val) =>
+                                      setState(() => _selectedStatus = val!),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 16),

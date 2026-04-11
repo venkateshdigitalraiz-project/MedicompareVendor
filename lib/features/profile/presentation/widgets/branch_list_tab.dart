@@ -35,16 +35,29 @@ class _BranchListTabState extends State<BranchListTab> {
   }
 
   Future<void> _fetchBranches({String search = ''}) async {
+    final trimmedSearch = search.trim();
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
     try {
-      final response = await _branchService.getBranchList(search: search);
+      final response = await _branchService.getBranchList(search: trimmedSearch);
       if (mounted) {
         setState(() {
-          _branches = response.data.list;
+          List<Branch> fetchedItems = response.data.list;
+
+          // Apply local filtering as a fallback if backend loosely filters
+          if (trimmedSearch.isNotEmpty) {
+            fetchedItems = fetchedItems.where((branch) {
+              final searchLower = trimmedSearch.toLowerCase();
+              return branch.name.toLowerCase().contains(searchLower) ||
+                  branch.address.toLowerCase().contains(searchLower) ||
+                  branch.email.toLowerCase().contains(searchLower);
+            }).toList();
+          }
+
+          _branches = fetchedItems;
           _isLoading = false;
         });
       }
@@ -89,6 +102,15 @@ class _BranchListTabState extends State<BranchListTab> {
               hintStyle:
                   GoogleFonts.inter(color: Colors.grey[400], fontSize: 14),
               prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear, color: Colors.grey[400], size: 20),
+                      onPressed: () {
+                        _searchController.clear();
+                        _onSearchChanged('');
+                      },
+                    )
+                  : null,
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(

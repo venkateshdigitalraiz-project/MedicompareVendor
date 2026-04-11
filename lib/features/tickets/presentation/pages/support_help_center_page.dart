@@ -386,62 +386,85 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
           ),
         ),
         // Input Area
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                  ),
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: "Type your message...",
-                      hintStyle: GoogleFonts.inter(color: Colors.grey),
-                      border: InputBorder.none,
+        if (ticket.status.toLowerCase() != 'closed')
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
                     ),
-                    onSubmitted: (_) => _handleSend(ticket.id),
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        hintText: "Type your message...",
+                        hintStyle: GoogleFonts.inter(color: Colors.grey),
+                        border: InputBorder.none,
+                      ),
+                      onSubmitted: (_) => _handleSend(ticket.id),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              GestureDetector(
-                onTap: () => _handleSend(ticket.id),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => _handleSend(ticket.id),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.send_rounded,
+                        color: Colors.white, size: 20),
                   ),
-                  child: const Icon(Icons.send_rounded,
-                      color: Colors.white, size: 20),
                 ),
-              ),
-            ],
+              ],
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            color: Colors.red.withOpacity(0.05),
+            child: Column(
+              children: [
+                const Icon(Icons.lock_outline, color: Colors.red, size: 24),
+                const SizedBox(height: 8),
+                Text(
+                  "This ticket is closed. You can no longer send messages.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.red[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            "Press Enter to send",
-            style: GoogleFonts.inter(fontSize: 10, color: Colors.grey),
-          ),
-        )
+        if (ticket.status.toLowerCase() != 'closed')
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "Press Enter to send",
+              style: GoogleFonts.inter(fontSize: 10, color: Colors.grey),
+            ),
+          )
       ],
     );
   }

@@ -76,8 +76,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildCompactActionButton("Reject", Colors.red,
-                          () => _handleUpdateStatus('cancelled')),
+                      _buildCompactActionButton(
+                          "Reject", Colors.red, () => _showRejectionDialog()),
                       _buildCompactActionButton("Accept", AppColors.primary,
                           () => _handleUpdateStatus('confirmed')),
                     ],
@@ -119,8 +119,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 children: [
                   _buildStatusGrid(order),
                   const SizedBox(height: 16),
-                  _buildDeliverySettings(),
-                  const SizedBox(height: 16),
                   _buildOrderItems(order),
                   const SizedBox(height: 16),
                   _buildCustomerInformation(order),
@@ -143,7 +141,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  void _handleUpdateStatus(String status) {
+  void _handleUpdateStatus(String status, {String? rejectionReason}) {
     final state = context.read<OrdersBloc>().state;
     if (state is OrderDetailsLoaded) {
       final order = state.order;
@@ -155,7 +153,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         "packageIds": [],
         "deliveryPartner": _selectedDeliveryPartner,
         "readyTime": _selectedParcelTime.toString(),
-        "assignedPartnerId": null
+        "assignedPartnerId": null,
+        if (rejectionReason != null) "rejectionReason": rejectionReason,
       };
 
       context.read<OrdersBloc>().add(UpdateOrderStatusEvent(
@@ -163,6 +162,78 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             payload: payload,
           ));
     }
+  }
+
+  void _showRejectionDialog() {
+    final TextEditingController reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Reject Order",
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Please provide a reason for rejecting this order.",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: "Enter rejection reason...",
+                hintStyle: GoogleFonts.inter(fontSize: 13),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              style: GoogleFonts.inter(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.inter(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (reasonController.text.trim().isNotEmpty) {
+                Navigator.pop(context);
+                _handleUpdateStatus('cancelled',
+                    rejectionReason: reasonController.text.trim());
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter a reason for rejection"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              "Reject",
+              style: GoogleFonts.inter(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildCompactActionButton(
@@ -221,7 +292,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         ),
         _buildInfoCard(
           "Order Date",
-          DateFormat('MMM d, hh:mm a').format(order.createdAt),
+          DateFormat('dd-MM-yyyy, hh:mm a').format(order.createdAt.toLocal()),
           Icons.calendar_today_outlined,
           Colors.blue,
         ),
@@ -476,8 +547,21 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Icon(Icons.image_outlined,
-                      color: Colors.grey, size: 24),
+                  child: (tablet != null &&
+                          tablet['files'] != null &&
+                          (tablet['files'] as List).isNotEmpty)
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.network(
+                            tablet['files'][0],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.image_outlined,
+                                    color: Colors.grey, size: 24),
+                          ),
+                        )
+                      : const Icon(Icons.image_outlined,
+                          color: Colors.grey, size: 24),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -517,7 +601,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "₹${order.discountPrice.toStringAsFixed(2)}",
+                      "₹${order.totalPrice.toStringAsFixed(2)}",
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
@@ -570,16 +654,16 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                       style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold, fontSize: 12),
                     ),
-                    Text(
-                      user.email,
-                      style: GoogleFonts.inter(
-                          fontSize: 10, color: Colors.grey[600]),
-                    ),
-                    Text(
-                      user.phone,
-                      style: GoogleFonts.inter(
-                          fontSize: 10, color: Colors.grey[600]),
-                    ),
+                    // Text(
+                    //   user.email,
+                    //   style: GoogleFonts.inter(
+                    //       fontSize: 10, color: Colors.grey[600]),
+                    // ),
+                    // Text(
+                    //   user.phone,
+                    //   style: GoogleFonts.inter(
+                    //       fontSize: 10, color: Colors.grey[600]),
+                    // ),
                   ],
                 ),
               ),
@@ -762,7 +846,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ],
             if (details.startDate != null && details.endDate != null)
               _buildCompactTextRow("Rental Period",
-                  "${DateFormat('M/d/yyyy').format(details.startDate!)} - ${DateFormat('M/d/yyyy').format(details.endDate!)}"),
+                  "${DateFormat('dd-MM-yyyy').format(details.startDate!.toLocal())} - ${DateFormat('dd-MM-yyyy').format(details.endDate!.toLocal())}"),
           ] else ...[
             const SizedBox(height: 6),
             Row(

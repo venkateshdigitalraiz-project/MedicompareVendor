@@ -385,22 +385,23 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                         ],
                       ),
 
-                      const SizedBox(height: 20),
-                      _buildLabel("Active Status",
-                          isRequired: false, icon: Icons.power_settings_new),
-                      const SizedBox(height: 8),
-                      _buildToggleBtn(
-                        _selectedStatus == 'active' ? "Active" : "Inactive",
-                        Icons.power_settings_new,
-                        _selectedStatus == 'active'
-                            ? const Color(0xFF7C3AED)
-                            : Colors.grey,
-                        () => setState(() => _selectedStatus =
-                            _selectedStatus == 'active'
-                                ? 'inactive'
-                                : 'active'),
-                      ),
-                      const SizedBox(height: 20),
+                      if (isEditMode) ...[
+                        _buildLabel("Active Status",
+                            isRequired: false, icon: Icons.power_settings_new),
+                        const SizedBox(height: 8),
+                        _buildToggleBtn(
+                          _selectedStatus == 'active' ? "Active" : "Inactive",
+                          Icons.power_settings_new,
+                          _selectedStatus == 'active'
+                              ? const Color(0xFF7C3AED)
+                              : Colors.grey,
+                          () => setState(() => _selectedStatus =
+                              _selectedStatus == 'active'
+                                  ? 'inactive'
+                                  : 'active'),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                     ],
                   ),
                 ),

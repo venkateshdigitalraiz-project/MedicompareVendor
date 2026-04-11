@@ -9,6 +9,7 @@ class AmbulanceEntity extends Equatable {
   final double discountPrice; // Discount Price per km
   final String status;
   final List<AmbulanceFacilityEntity> facilities;
+  final List<String> files;
 
   const AmbulanceEntity({
     required this.id,
@@ -19,6 +20,7 @@ class AmbulanceEntity extends Equatable {
     required this.discountPrice,
     required this.status,
     required this.facilities,
+    required this.files,
   });
 
   @override
@@ -31,6 +33,7 @@ class AmbulanceEntity extends Equatable {
         discountPrice,
         status,
         facilities,
+        files,
       ];
 }
 

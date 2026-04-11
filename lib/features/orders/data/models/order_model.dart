@@ -13,6 +13,7 @@ class OrderItemModel extends OrderItemEntity {
     required super.paymentStatus,
     required super.price,
     required super.discountPrice,
+    required super.totalPrice,
     required super.createdAt,
     required super.orderDetails,
     required super.productDetails,
@@ -34,6 +35,7 @@ class OrderItemModel extends OrderItemEntity {
       paymentStatus: json['paymentStatus']?.toString() ?? '',
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      totalPrice: (json['totalPrice'] ?? 0).toDouble(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),

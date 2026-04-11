@@ -38,13 +38,16 @@ class AmbulanceCard extends StatelessWidget {
               // Ambulance Icon Placeholder or Image if available
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  color: Colors.blue[50],
-                  child: const Icon(Icons.airport_shuttle_outlined,
-                      color: Colors.blue, size: 30),
-                ),
+                child: item.files.isNotEmpty
+                    ? Image.network(
+                        _getAmbulanceImageUrl(item.files.first),
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _placeholderImage(),
+                      )
+                    : _placeholderImage(),
               ),
               const SizedBox(width: 12),
 
@@ -174,5 +177,22 @@ class AmbulanceCard extends StatelessWidget {
         child: Icon(icon, color: color, size: 16),
       ),
     );
+  }
+
+  Widget _placeholderImage() {
+    return Container(
+      width: 60,
+      height: 60,
+      color: Colors.blue[50],
+      child: const Icon(Icons.airport_shuttle_outlined,
+          color: Colors.blue, size: 30),
+    );
+  }
+
+  String _getAmbulanceImageUrl(String url) {
+    if (url.isEmpty) return "";
+    if (url.startsWith('http')) return url;
+    final cleanPath = url.startsWith('/') ? url : '/$url';
+    return "https://api.medicompares.com$cleanPath";
   }
 }

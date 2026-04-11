@@ -351,7 +351,7 @@ class _OrdersPageState extends State<OrdersPage> {
                               size: 12, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            DateFormat('MMM d, yyyy').format(item.createdAt),
+                            DateFormat('MMM d, yyyy').format(item.createdAt.toLocal()),
                             style: GoogleFonts.inter(
                                 fontSize: 12, color: Colors.grey),
                           ),

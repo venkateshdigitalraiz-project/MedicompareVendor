@@ -72,6 +72,23 @@ class SurgeryService {
     }
   }
 
+  Future<Map<String, dynamic>> getSurgeryFullDetails(String id) async {
+    try {
+      final response =
+          await _apiService.post(ApiEndpoints.surgeryDetails(id), body: {});
+      final body = jsonDecode(response.body);
+
+      if (body['success'] == true) {
+        return body['data']['product'];
+      }
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch surgery details');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<List<SurgeryDropdownItem>> getCommonSurgeries(String search) async {
     try {
       final response = await _apiService.get(

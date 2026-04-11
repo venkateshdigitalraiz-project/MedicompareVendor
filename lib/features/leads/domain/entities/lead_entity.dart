@@ -91,6 +91,8 @@ class LeadDetailsEntity extends Equatable {
   final double discountPrice;
   final String serviceName;
   final String duration;
+  final String? serviceImage;
+  final UserDetailsEntity? userDetails;
 
   const LeadDetailsEntity({
     required this.id,
@@ -110,6 +112,8 @@ class LeadDetailsEntity extends Equatable {
     required this.discountPrice,
     required this.serviceName,
     required this.duration,
+    this.serviceImage,
+    this.userDetails,
   });
 
   @override
@@ -131,5 +135,30 @@ class LeadDetailsEntity extends Equatable {
         discountPrice,
         serviceName,
         duration,
+        serviceImage,
+        userDetails,
       ];
+}
+
+class UserDetailsEntity extends Equatable {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String phone;
+  final List<String> files;
+
+  const UserDetailsEntity({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.phone,
+    required this.files,
+  });
+
+  String get fullName => "$firstName $lastName";
+
+  @override
+  List<Object?> get props => [id, firstName, lastName, email, phone, files];
 }

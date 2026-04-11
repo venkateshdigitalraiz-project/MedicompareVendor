@@ -298,17 +298,36 @@ class AddEditPincodeDialog extends StatefulWidget {
 
 class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
   late TextEditingController _pincodeController;
-  late TextEditingController _deliveryController;
   late String _status;
+  String? _selectedDelivery;
+
+  final List<String> _deliveryOptions = [
+    "1 Hour",
+    "1-2 Hours",
+    "2-4 Hours",
+    "4-6 Hours",
+    "12-24 Hours",
+    "Same Day Delivery",
+    "1-2 Days",
+    "2-3 Days",
+    "3-5 Days",
+    "5-7 Days",
+    "1 Week+"
+  ];
 
   @override
   void initState() {
     super.initState();
     _pincodeController =
         TextEditingController(text: widget.pincode?.pincode.name ?? '');
-    _deliveryController =
-        TextEditingController(text: widget.pincode?.estimatedDelivery ?? '');
     _status = widget.pincode?.status ?? 'active';
+
+    if (widget.pincode != null) {
+      final currentDelivery = widget.pincode!.estimatedDelivery;
+      if (_deliveryOptions.contains(currentDelivery)) {
+        _selectedDelivery = currentDelivery;
+      }
+    }
   }
 
   @override
@@ -347,11 +366,13 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
             _buildFieldLabel(
                 "Estimated Delivery *", Icons.local_shipping_outlined),
             const SizedBox(height: 8),
-            _buildTextField(_deliveryController, "e.g. Within 2 Days"),
-            const SizedBox(height: 16),
-            _buildFieldLabel("Status *", Icons.check_circle_outline),
-            const SizedBox(height: 8),
-            _buildStatusDropdown(),
+            _buildDeliveryDropdown(),
+            if (isEdit) ...[
+              const SizedBox(height: 16),
+              _buildFieldLabel("Status *", Icons.check_circle_outline),
+              const SizedBox(height: 8),
+              _buildStatusDropdown(),
+            ],
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -367,13 +388,13 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
                 ElevatedButton(
                   onPressed: () {
                     if (_pincodeController.text.isNotEmpty &&
-                        _deliveryController.text.isNotEmpty) {
+                        _selectedDelivery != null) {
                       if (isEdit) {
                         context.read<PincodesBloc>().add(
                               UpdatePincodeEvent(
                                 id: widget.pincode!.id,
                                 pincode: _pincodeController.text,
-                                estimatedDelivery: _deliveryController.text,
+                                estimatedDelivery: _selectedDelivery!,
                                 status: _status,
                               ),
                             );
@@ -381,12 +402,18 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
                         context.read<PincodesBloc>().add(
                               CreatePincodeEvent(
                                 pincode: _pincodeController.text,
-                                estimatedDelivery: _deliveryController.text,
+                                estimatedDelivery: _selectedDelivery!,
                                 status: _status,
                               ),
                             );
                       }
                       Navigator.pop(context);
+                    } else if (_selectedDelivery == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Please select estimated delivery"),
+                            backgroundColor: Colors.red),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -404,6 +431,33 @@ class _AddEditPincodeDialogState extends State<AddEditPincodeDialog> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeliveryDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedDelivery,
+          isExpanded: true,
+          hint: Text("Select Estimated Delivery",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[400])),
+          items: _deliveryOptions.map((option) {
+            return DropdownMenuItem(value: option, child: Text(option));
+          }).toList(),
+          onChanged: (val) {
+            setState(() {
+              _selectedDelivery = val;
+            });
+          },
+          style: GoogleFonts.inter(fontSize: 14, color: Colors.black),
         ),
       ),
     );

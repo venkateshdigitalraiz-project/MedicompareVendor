@@ -400,7 +400,7 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                     borderRadius: BorderRadius.circular(8),
                     child: details.files.isNotEmpty
                         ? Image.network(
-                            "https://api.medicompares.com${details.files.first}",
+                            _getSurgeryImageUrl(details.files.first),
                             width: 48,
                             height: 48,
                             fit: BoxFit.cover,
@@ -536,6 +536,13 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
         child: Icon(icon, color: color, size: 16),
       ),
     );
+  }
+
+  String _getSurgeryImageUrl(String url) {
+    if (url.isEmpty) return "";
+    if (url.startsWith('http')) return url;
+    final cleanPath = url.startsWith('/') ? url : '/$url';
+    return "https://api.medicompares.com$cleanPath";
   }
 
   Widget _infoChip(String label, String value, IconData icon) {

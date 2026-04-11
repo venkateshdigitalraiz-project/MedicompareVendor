@@ -47,11 +47,39 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
     }
   }
 
+  double _calculateFinalPrice() {
+    final item = _currentSurgery;
+    double price = item.price;
+    double discount = item.discountPrice;
+    String type = item.discountType ?? 'price';
+
+    if (price == 0 && item.variantDetails.isNotEmpty) {
+      final v = item.variantDetails.first;
+      price = v.price;
+      discount = v.discountPrice;
+      type = v.discountType;
+    }
+
+    if (type == 'percentage') {
+      return price - (price * discount / 100);
+    }
+    return discount > 0 ? discount : price;
+  }
+
+  double _calculateOriginalPrice() {
+    final item = _currentSurgery;
+    double price = item.price;
+    if (price == 0 && item.variantDetails.isNotEmpty) {
+      price = item.variantDetails.first.price;
+    }
+    return price;
+  }
+
   @override
   Widget build(BuildContext context) {
     final details = _currentSurgery.details;
     final imageUrl = details.files.isNotEmpty
-        ? "https://api.medicompares.com${details.files.first}"
+        ? _getSurgeryImageUrl(details.files.first)
         : "";
 
     return Scaffold(
@@ -140,6 +168,14 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
+                                      if (_calculateFinalPrice() < _calculateOriginalPrice())
+                                        Text(
+                                          "MRP: ₹${_calculateOriginalPrice().toStringAsFixed(0)}",
+                                          style: GoogleFonts.poppins(
+                                              fontSize: 10,
+                                              decoration: TextDecoration.lineThrough,
+                                              color: Colors.grey[500]),
+                                        ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 4),
@@ -152,7 +188,7 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              "Discount: ",
+                                              _calculateOriginalPrice() == 0 ? "From " : "Selling Price: ",
                                               style: GoogleFonts.poppins(
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.w600,
@@ -160,7 +196,7 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                                       const Color(0xFF166534)),
                                             ),
                                             Text(
-                                              "₹${_currentSurgery.discountPrice}",
+                                              "₹${_calculateFinalPrice().toStringAsFixed(0)}",
                                               style: GoogleFonts.poppins(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
@@ -232,6 +268,10 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                         ),
                       ),
 
+                      const SizedBox(height: 8),
+
+                      _buildVariantsTable(),
+
                       // Detail Sections
                       if (details.description != null &&
                           details.description!.isNotEmpty)
@@ -277,6 +317,138 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                     ],
                   ),
                 ),
+    );
+  }
+
+  Widget _buildVariantsTable() {
+    final variants = _currentSurgery.variantDetails;
+    if (variants.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    color: const Color(0xFFF3E8FF),
+                    borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.list_alt,
+                    color: Color(0xFF9333EA), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Surgery Variants",
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text("Available options and pricing",
+                      style: GoogleFonts.poppins(
+                          fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columnSpacing: 24,
+              horizontalMargin: 0,
+              headingRowHeight: 40,
+              dataRowMinHeight: 48,
+              dataRowMaxHeight: 56,
+              columns: [
+                DataColumn(label: _tableHeader("VARIANT NAME")),
+                DataColumn(label: _tableHeader("PRICE")),
+                DataColumn(label: _tableHeader("SELLING PRICE")),
+                DataColumn(label: _tableHeader("STATUS")),
+              ],
+              rows: variants.map((v) {
+                final tvMatch =
+                    _currentSurgery.details.tabletVariants.firstWhere(
+                  (tv) => tv.id == v.variantId,
+                  orElse: () => SurgeryTabletVariant(
+                      id: v.variantId, tabletId: '', name: 'Option', price: v.price, files: const []),
+                );
+
+                double sellingPrice = v.discountPrice;
+                if (v.discountType == 'percentage') {
+                  sellingPrice = v.price - (v.price * v.discountPrice / 100);
+                } else if (v.discountPrice <= 0) {
+                  sellingPrice = v.price;
+                }
+
+                return DataRow(cells: [
+                  DataCell(Text(tvMatch.name,
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF1F2937)))),
+                  DataCell(Text("₹${v.price.toStringAsFixed(0)}",
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF374151)))),
+                  DataCell(Text("₹${sellingPrice.toStringAsFixed(0)}",
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF15803D)))),
+                  DataCell(_tableStatusBadge(v.status)),
+                ]);
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tableHeader(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF9CA3AF),
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _tableStatusBadge(String status) {
+    final isActive = status.toLowerCase() == 'active';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: (isActive ? Colors.green : Colors.grey).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        isActive ? 'active' : 'inactive',
+        style: GoogleFonts.inter(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: isActive ? const Color(0xFF16A34A) : Colors.grey[600],
+        ),
+      ),
     );
   }
 
@@ -345,6 +517,13 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
         ),
       ),
     );
+  }
+
+  String _getSurgeryImageUrl(String url) {
+    if (url.isEmpty) return "";
+    if (url.startsWith('http')) return url;
+    final cleanPath = url.startsWith('/') ? url : '/$url';
+    return "https://api.medicompares.com$cleanPath";
   }
 }
 

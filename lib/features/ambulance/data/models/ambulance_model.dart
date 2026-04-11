@@ -10,17 +10,23 @@ class AmbulanceModel extends AmbulanceEntity {
     required super.discountPrice,
     required super.status,
     required super.facilities,
+    required super.files,
   });
 
   factory AmbulanceModel.fromJson(Map<String, dynamic> json) {
     String parsedName = 'Unknown';
     String parsedAmbulanceType = 'Unknown';
     String parsedTabletId = '';
+    List<String> files = [];
 
     if (json['tablets'] is Map<String, dynamic>) {
       parsedName = json['tablets']['name'] ?? 'Unknown';
       parsedAmbulanceType = json['tablets']['ambulancetype'] ?? 'Unknown';
       parsedTabletId = json['tablets']['_id'] ?? '';
+      files = (json['tablets']['files'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [];
     } else if (json['tablets'] is List &&
         (json['tablets'] as List).isNotEmpty) {
       final tList = json['tablets'] as List;
@@ -28,6 +34,8 @@ class AmbulanceModel extends AmbulanceEntity {
         parsedName = tList[0]['name'] ?? 'Unknown';
         parsedAmbulanceType = tList[0]['ambulancetype'] ?? 'Unknown';
         parsedTabletId = tList[0]['_id'] ?? '';
+        files = (tList[0]['files'] as List?)?.map((e) => e.toString()).toList() ??
+            [];
       }
     }
 
@@ -47,6 +55,7 @@ class AmbulanceModel extends AmbulanceEntity {
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
       status: json['status'] ?? 'pending',
       facilities: facilitiesList,
+      files: files,
     );
   }
 }

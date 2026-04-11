@@ -33,6 +33,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
   final _depositController = TextEditingController();
   final _returnChargeController = TextEditingController();
   final _serviceChargeController = TextEditingController();
+  final _rentController = TextEditingController();
   final _searchController = TextEditingController();
 
   String _selectedStatus = 'active';
@@ -57,6 +58,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
           item.returnCharge?.toInt().toString() ?? "0";
       _serviceChargeController.text =
           item.serviceCharges?.toInt().toString() ?? "0";
+      _rentController.text = item.perDayRent?.toInt().toString() ?? "0";
       _selectedStatus = item.status;
       _selectedTabletId = item.details.id;
       _searchController.text = item.details.name;
@@ -105,6 +107,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
         'fixedDeposit': double.tryParse(_depositController.text) ?? 0,
         'returnCharge': double.tryParse(_returnChargeController.text) ?? 0,
         'serviceCharges': double.tryParse(_serviceChargeController.text) ?? 0,
+        'perDayRent': double.tryParse(_rentController.text) ?? 0,
         'status': _selectedStatus,
         'brand': '',
         'model': '',
@@ -146,6 +149,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
     _depositController.dispose();
     _returnChargeController.dispose();
     _serviceChargeController.dispose();
+    _rentController.dispose();
     _searchController.dispose();
     _debounce?.cancel();
     super.dispose();
@@ -290,39 +294,49 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
                                 Icons.design_services_outlined)),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel("Status",
-                                  isRequired: true,
-                                  icon: Icons.check_circle_outline),
-                              const SizedBox(height: 8),
-                              DropdownButtonFormField<String>(
-                                value: _selectedStatus,
-                                isExpanded: true,
-                                decoration: _inputDecoration(hint: "Status"),
-                                style: GoogleFonts.inter(
-                                    fontSize: 13, color: Colors.black87),
-                                items: [
-                                  DropdownMenuItem(
-                                      value: 'active',
-                                      child: Text("Active",
-                                          style:
-                                              GoogleFonts.inter(fontSize: 13))),
-                                  DropdownMenuItem(
-                                      value: 'inactive',
-                                      child: Text("Inactive",
-                                          style:
-                                              GoogleFonts.inter(fontSize: 13))),
-                                ],
-                                onChanged: (val) =>
-                                    setState(() => _selectedStatus = val!),
-                              ),
-                            ],
-                          ),
-                        ),
+                            child: _buildInputField("Per Day Rent (₹)",
+                                _rentController, Icons.calendar_today_outlined)),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    if (isEditMode)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Status",
+                                    isRequired: true,
+                                    icon: Icons.check_circle_outline),
+                                const SizedBox(height: 8),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedStatus,
+                                  isExpanded: true,
+                                  decoration: _inputDecoration(hint: "Status"),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13, color: Colors.black87),
+                                  items: [
+                                    DropdownMenuItem(
+                                        value: 'active',
+                                        child: Text("Active",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                    DropdownMenuItem(
+                                        value: 'inactive',
+                                        child: Text("Inactive",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13))),
+                                  ],
+                                  onChanged: (val) =>
+                                      setState(() => _selectedStatus = val!),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(), // Keep the grid balanced
+                        ],
+                      ),
                     const SizedBox(height: 24),
                   ],
                 ),

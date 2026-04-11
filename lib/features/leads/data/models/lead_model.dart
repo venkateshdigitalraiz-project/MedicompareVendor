@@ -93,6 +93,8 @@ class LeadDetailsModel extends LeadDetailsEntity {
     required super.discountPrice,
     required super.serviceName,
     required super.duration,
+    super.serviceImage,
+    super.userDetails,
   });
 
   factory LeadDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -101,10 +103,22 @@ class LeadDetailsModel extends LeadDetailsEntity {
 
     String sName = 'Unknown Service';
     String duration = 'N/A';
+    String? serviceImg;
     if (tabletDetailsList.isNotEmpty) {
       final tDetails = tabletDetailsList[0];
       sName = tDetails['name'] ?? 'Unknown Service';
       duration = tDetails['duration']?.toString() ?? 'N/A';
+      if (tDetails['files'] != null && (tDetails['files'] as List).isNotEmpty) {
+        serviceImg = tDetails['files'][0];
+        if (serviceImg != null && !serviceImg.startsWith('http')) {
+          serviceImg = "https://api.medicompares.com$serviceImg";
+        }
+      }
+    }
+
+    UserDetailsModel? uDetails;
+    if (json['userDetails'] != null) {
+      uDetails = UserDetailsModel.fromJson(json['userDetails']);
     }
 
     return LeadDetailsModel(
@@ -127,6 +141,30 @@ class LeadDetailsModel extends LeadDetailsEntity {
       discountPrice: (productDetails['discountprice'] ?? 0).toDouble(),
       serviceName: sName,
       duration: duration,
+      serviceImage: serviceImg,
+      userDetails: uDetails,
+    );
+  }
+}
+
+class UserDetailsModel extends UserDetailsEntity {
+  const UserDetailsModel({
+    required super.id,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.phone,
+    required super.files,
+  });
+
+  factory UserDetailsModel.fromJson(Map<String, dynamic> json) {
+    return UserDetailsModel(
+      id: json['_id'] ?? '',
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone']?.toString() ?? '',
+      files: (json['files'] as List?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
 }

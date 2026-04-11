@@ -24,6 +24,7 @@ class MedicalEquipmentItem {
   final double? returnCharge;
   final double? serviceCharges;
   final double? interest;
+  final double? perDayRent;
   final MedicalEquipmentDetails details;
 
   MedicalEquipmentItem({
@@ -35,6 +36,7 @@ class MedicalEquipmentItem {
     this.returnCharge,
     this.serviceCharges,
     this.interest,
+    this.perDayRent,
     required this.details,
   });
 
@@ -48,6 +50,7 @@ class MedicalEquipmentItem {
       returnCharge: (json['returnCharge'] ?? 0).toDouble(),
       serviceCharges: (json['serviceCharges'] ?? 0).toDouble(),
       interest: (json['interest'] ?? 0).toDouble(),
+      perDayRent: (json['perDayRent'] ?? 0).toDouble(),
       details: MedicalEquipmentDetails.fromJson(json['tablets'] ?? {}),
     );
   }

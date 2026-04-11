@@ -348,7 +348,7 @@ class _LeadsPageState extends State<LeadsPage> {
                         child: _buildBeautifulInfoItem(
                           label: "Posted On",
                           value:
-                              DateFormat('MMM d, yyyy').format(lead.createdAt),
+                              DateFormat('MMM d, yyyy').format(lead.createdAt.toLocal()),
                           icon: Icons.calendar_today_outlined,
                           color: Colors.blue,
                         ),
