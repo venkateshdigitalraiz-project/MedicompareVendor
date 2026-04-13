@@ -8,9 +8,10 @@ import '../bloc/lab_test_bloc.dart';
 import '../bloc/lab_test_event.dart';
 import '../bloc/lab_test_state.dart';
 import '../../data/models/lab_test_model.dart';
-import '../widgets/lab_test_card.dart';
 import '../widgets/add_lab_test_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../lab_test_injection.dart';
+import '../widgets/lab_test_card.dart';
 
 class LabTestListPage extends StatefulWidget {
   const LabTestListPage({super.key});
@@ -74,7 +75,8 @@ class _LabTestListPageState extends State<LabTestListPage> {
               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
-          _addLabTestButton(),
+          if (PermissionHandler().hasPermission('lab-tests', 'add'))
+            _addLabTestButton(),
           const SizedBox(width: 8),
         ],
       ),
@@ -184,50 +186,6 @@ class _LabTestListPageState extends State<LabTestListPage> {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(LabTestLoaded state) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.biotech_outlined,
-                    color: AppColors.primary, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Lab Tests",
-                    style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E1B4B)),
-                  ),
-                  Text(
-                    "Manage laboratory tests and vendors",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

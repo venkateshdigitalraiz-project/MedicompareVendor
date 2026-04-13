@@ -1,7 +1,8 @@
-import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../data/models/medical_treatment_model.dart';
+import 'package:MediCompare/core/constants/app_colors.dart';
 
 class MedicalTreatmentCard extends StatelessWidget {
   final MedicalTreatmentItem item;
@@ -103,8 +104,11 @@ class MedicalTreatmentCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
-                      const SizedBox(width: 4),
+                      if (PermissionHandler()
+                          .hasPermission('medical-treatment', 'edit')) ...[
+                        _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
+                        const SizedBox(width: 4),
+                      ],
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),

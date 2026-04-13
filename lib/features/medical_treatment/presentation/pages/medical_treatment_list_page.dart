@@ -10,6 +10,7 @@ import '../bloc/medical_treatment_state.dart';
 import '../../data/models/medical_treatment_model.dart';
 import '../widgets/medical_treatment_card.dart';
 import '../widgets/add_medical_treatment_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class MedicalTreatmentListPage extends StatefulWidget {
   const MedicalTreatmentListPage({super.key});
@@ -101,24 +102,25 @@ class _MedicalTreatmentListPageState extends State<MedicalTreatmentListPage> {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton.icon(
-              onPressed: () => _showAddEditSheet(),
-              icon: const Icon(Icons.add, size: 16),
-              label: Text("Add Treatment",
-                  style: GoogleFonts.inter(
-                      fontSize: 12, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primaryDark,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+          if (PermissionHandler().hasPermission('medical-treatment', 'add'))
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: ElevatedButton.icon(
+                onPressed: () => _showAddEditSheet(),
+                icon: const Icon(Icons.add, size: 16),
+                label: Text("Add Treatment",
+                    style: GoogleFonts.inter(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primaryDark,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<MedicalTreatmentBloc, MedicalTreatmentState>(

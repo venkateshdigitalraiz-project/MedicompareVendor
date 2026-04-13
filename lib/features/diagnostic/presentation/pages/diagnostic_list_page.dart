@@ -11,6 +11,7 @@ import '../bloc/diagnostic_state.dart';
 import '../../data/models/diagnostic_model.dart';
 import '../widgets/diagnostic_card.dart';
 import '../widgets/add_diagnostic_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class DiagnosticListPage extends StatefulWidget {
   const DiagnosticListPage({super.key});
@@ -102,26 +103,27 @@ class _DiagnosticListPageState extends State<DiagnosticListPage> {
                 fontWeight: FontWeight.bold,
                 fontSize: 18)),
         actions: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: ElevatedButton.icon(
-              onPressed: _showAddSheet,
-              icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
-              label: Text("Add Diagnostic",
-                  style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+          if (PermissionHandler().hasPermission('diagnostics', 'add'))
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+              child: ElevatedButton.icon(
+                onPressed: _showAddSheet,
+                icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
+                label: Text("Add Diagnostic",
+                    style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<DiagnosticBloc, DiagnosticState>(

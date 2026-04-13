@@ -10,6 +10,7 @@ import 'package:MediCompare/features/home_care/presentation/widgets/add_home_car
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeCareListPage extends StatefulWidget {
@@ -140,20 +141,21 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
           ],
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text("Add Service"),
-              onPressed: () => _showAddEditSheet(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.white,
-                foregroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+          if (PermissionHandler().hasPermission('home-care', 'add'))
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text("Add Service"),
+                onPressed: () => _showAddEditSheet(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.white,
+                  foregroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<HomeCareBloc, HomeCareState>(

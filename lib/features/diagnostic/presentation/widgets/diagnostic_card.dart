@@ -1,6 +1,7 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 import '../../data/models/diagnostic_model.dart';
 
@@ -138,9 +139,12 @@ class DiagnosticCard extends StatelessWidget {
                       // Actions
                       Row(
                         children: [
-                          _actionBtn(
-                              Icons.edit_outlined, AppColors.primary, onEdit),
-                          const SizedBox(width: 8),
+                          if (PermissionHandler()
+                              .hasPermission('diagnostics', 'edit')) ...[
+                            _actionBtn(
+                                Icons.edit_outlined, AppColors.primary, onEdit),
+                            const SizedBox(width: 8),
+                          ],
                           _actionBtn(
                               Icons.delete_outline, Colors.red, onDelete),
                         ],

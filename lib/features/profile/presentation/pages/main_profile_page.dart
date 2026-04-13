@@ -9,6 +9,8 @@ import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:MediCompare/core/utils/core_injection.dart';
 import 'package:MediCompare/core/api/api_endpoints.dart';
+import 'package:MediCompare/core/models/permission_model.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MainprofileScreen extends StatefulWidget {
@@ -65,11 +67,17 @@ class _ProfilePageState extends State<MainprofileScreen> {
             }
 
             // Parse permissions
-            final permissions =
+            final permissionsData =
                 body['data']['permission'] as List<dynamic>? ?? [];
+            final List<PermissionModel> permissions = permissionsData
+                .map((p) => PermissionModel.fromJson(p))
+                .toList();
+            
+            PermissionHandler().setPermissions(permissions);
+
             _activeModules = permissions
-                .where((p) => p['status'] == 'active')
-                .map((p) => p['module']?.toString() ?? '')
+                .where((p) => p.status == 'active' && p.hasAction('view'))
+                .map((p) => p.module)
                 .toList();
 
             _isLoading = false;
@@ -166,9 +174,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
     );
   }
 
-  bool _hasPermission(String module) {
+  bool _hasPermission(String module, {String action = 'view'}) {
     if (_isLoading) return true;
-    return _activeModules.contains(module);
+    return PermissionHandler().hasPermission(module, action);
   }
 
   Future<void> _launchURL(String url) async {
@@ -372,7 +380,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   () {
                 context.push('/nursing-list');
               }),
-            if (_hasPermission('dental-service'))
+            if (_hasPermission('dental'))
               _menuTile(
                   "Odontogram Services", Icons.sentiment_satisfied_alt_outlined,
                   () {
@@ -389,7 +397,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   () {
                 context.push('/equipment-list');
               }),
-            if (_hasPermission('ambulance-service'))
+            if (_hasPermission('ambulance'))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ExpansionTile(

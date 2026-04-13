@@ -11,6 +11,7 @@ import '../bloc/surgery_bloc.dart';
 import '../bloc/surgery_event.dart';
 import '../bloc/surgery_state.dart';
 import '../widgets/add_surgery_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class SurgeryListPage extends StatefulWidget {
   const SurgeryListPage({super.key});
@@ -73,7 +74,8 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
-          _addSurgeryButton(),
+          if (PermissionHandler().hasPermission('surgeries', 'add'))
+            _addSurgeryButton(),
           const SizedBox(width: 8),
         ],
       ),
@@ -438,39 +440,42 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                       // _actionIcon(Icons.visibility_outlined, Colors.blue, () {
                       //   context.push('/surgery-details', extra: item);
                       // }),
-                      const SizedBox(width: 6),
-                      _actionIcon(Icons.edit_outlined, Colors.indigo, () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => Padding(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(context).viewInsets.bottom),
-                            child: AddSurgerySheet(
-                              editSurgery: item,
-                              existingIds: (context.read<SurgeryBloc>().state
-                                      as SurgeryLoaded)
-                                  .surgeryResponse
-                                  .list
-                                  .map((m) => m.details.id)
-                                  .toList(),
-                              onSuccess: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Surgery updated successfully'),
-                                      backgroundColor: Colors.green),
-                                );
-                                context
-                                    .read<SurgeryBloc>()
-                                    .add(LoadSurgeryCategoriesEvent());
-                              },
+                      if (PermissionHandler()
+                          .hasPermission('surgeries', 'edit')) ...[
+                        const SizedBox(width: 6),
+                        _actionIcon(Icons.edit_outlined, Colors.indigo, () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => Padding(
+                              padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              child: AddSurgerySheet(
+                                editSurgery: item,
+                                existingIds: (context.read<SurgeryBloc>().state
+                                        as SurgeryLoaded)
+                                    .surgeryResponse
+                                    .list
+                                    .map((m) => m.details.id)
+                                    .toList(),
+                                onSuccess: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Surgery updated successfully'),
+                                        backgroundColor: Colors.green),
+                                  );
+                                  context
+                                      .read<SurgeryBloc>()
+                                      .add(LoadSurgeryCategoriesEvent());
+                                },
+                              ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
+                      ],
                       const SizedBox(width: 6),
                       _actionIcon(Icons.delete_outline, Colors.red,
                           () => _showDeleteDialog(item)),

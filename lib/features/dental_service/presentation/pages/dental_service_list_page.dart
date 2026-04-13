@@ -11,6 +11,7 @@ import '../bloc/dental_service_state.dart';
 import '../../data/models/dental_service_model.dart';
 import '../widgets/dental_service_card.dart';
 import '../widgets/add_dental_service_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class DentalServiceListPage extends StatefulWidget {
   const DentalServiceListPage({super.key});
@@ -101,24 +102,25 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton.icon(
-              onPressed: () => _showAddEditSheet(),
-              icon: const Icon(Icons.add, size: 16),
-              label: Text("Add Treatment",
-                  style: GoogleFonts.inter(
-                      fontSize: 12, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primaryDark,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+          if (PermissionHandler().hasPermission('dental', 'add'))
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: ElevatedButton.icon(
+                onPressed: () => _showAddEditSheet(),
+                icon: const Icon(Icons.add, size: 16),
+                label: Text("Add Treatment",
+                    style: GoogleFonts.inter(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primaryDark,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<DentalServiceBloc, DentalServiceState>(

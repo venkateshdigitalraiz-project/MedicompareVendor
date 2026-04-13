@@ -10,6 +10,7 @@ import '../bloc/medical_equipment_state.dart';
 import '../../data/models/medical_equipment_model.dart';
 import '../widgets/medical_equipment_card.dart';
 import '../widgets/add_medical_equipment_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class MedicalEquipmentListPage extends StatefulWidget {
   const MedicalEquipmentListPage({super.key});
@@ -101,24 +102,25 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton.icon(
-              onPressed: () => _showAddEditSheet(),
-              icon: const Icon(Icons.add_shopping_cart, size: 16),
-              label: Text("Add Equipment",
-                  style: GoogleFonts.inter(
-                      fontSize: 12, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primaryDark,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+          if (PermissionHandler().hasPermission('medical-equipment', 'add'))
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: ElevatedButton.icon(
+                onPressed: () => _showAddEditSheet(),
+                icon: const Icon(Icons.add_shopping_cart, size: 16),
+                label: Text("Add Equipment",
+                    style: GoogleFonts.inter(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primaryDark,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<MedicalEquipmentBloc, MedicalEquipmentState>(

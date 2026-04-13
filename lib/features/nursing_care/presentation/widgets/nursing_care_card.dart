@@ -1,7 +1,8 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
-import 'package:MediCompare/features/nursing_care/data/models/nursing_care_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
+import 'package:MediCompare/features/nursing_care/data/models/nursing_care_model.dart';
 
 class NursingCareCard extends StatelessWidget {
   final NursingCareItem item;
@@ -107,8 +108,11 @@ class NursingCareCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
-                      const SizedBox(width: 4),
+                      if (PermissionHandler()
+                          .hasPermission('nursing-care', 'edit')) ...[
+                        _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
+                        const SizedBox(width: 4),
+                      ],
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),

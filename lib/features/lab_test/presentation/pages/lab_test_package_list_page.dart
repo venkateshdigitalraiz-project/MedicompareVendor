@@ -12,6 +12,7 @@ import '../../data/models/lab_test_package_model.dart';
 import '../../data/data_sources/lab_test_service.dart';
 import '../widgets/lab_test_package_card.dart';
 import '../widgets/add_lab_test_package_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../lab_test_injection.dart';
 
 class LabTestPackageListPage extends StatefulWidget {
@@ -88,7 +89,8 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
-          _addPackageButton(),
+          if (PermissionHandler().hasPermission('lab-tests', 'add'))
+            _addPackageButton(),
           const SizedBox(width: 8),
         ],
       ),

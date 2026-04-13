@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/medicine_card.dart';
 import '../widgets/add_medicine_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../medicine_injection.dart';
 
 class MedicineListPage extends StatefulWidget {
@@ -86,47 +87,48 @@ class _MedicineListPageState extends State<MedicineListPage> {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final currentState = context.read<MedicineBloc>().state;
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (ctx) => Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(ctx).viewInsets.bottom),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(ctx).size.height * 0.9),
-                      child: AddMedicineSheet(
-                        // REQUIREMENT 1 & 3: Safe Extraction
-                        existingIds: _getExistingIds(currentState),
-                        onSuccess: () {
-                          context
-                              .read<MedicineBloc>()
-                              .add(LoadMedicineCategoriesEvent());
-                        },
+          if (PermissionHandler().hasPermission('medicine', 'add'))
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final currentState = context.read<MedicineBloc>().state;
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (ctx) => Padding(
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(ctx).viewInsets.bottom),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(ctx).size.height * 0.9),
+                        child: AddMedicineSheet(
+                          // REQUIREMENT 1 & 3: Safe Extraction
+                          existingIds: _getExistingIds(currentState),
+                          onSuccess: () {
+                            context
+                                .read<MedicineBloc>()
+                                .add(LoadMedicineCategoriesEvent());
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add, size: 18),
-              label: Text("Add Medicine",
-                  style: GoogleFonts.inter(
-                      fontSize: 12, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primaryDark,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
+                  );
+                },
+                icon: const Icon(Icons.add, size: 18),
+                label: Text("Add Medicine",
+                    style: GoogleFonts.inter(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primaryDark,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<MedicineBloc, MedicineState>(

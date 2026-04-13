@@ -11,6 +11,7 @@ import '../bloc/nursing_care_state.dart';
 import '../../data/models/nursing_care_model.dart';
 import '../widgets/nursing_care_card.dart';
 import '../widgets/add_nursing_care_sheet.dart';
+import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class NursingCareListPage extends StatefulWidget {
   const NursingCareListPage({super.key});
@@ -103,23 +104,24 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
           ],
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
-            child: ElevatedButton.icon(
-              onPressed: () => _showAddEditSheet(),
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text("Add Service",
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+          if (PermissionHandler().hasPermission('nursing-care', 'add'))
+            Padding(
+              padding: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
+              child: ElevatedButton.icon(
+                onPressed: () => _showAddEditSheet(),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text("Add Service",
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: BlocBuilder<NursingCareBloc, NursingCareState>(
