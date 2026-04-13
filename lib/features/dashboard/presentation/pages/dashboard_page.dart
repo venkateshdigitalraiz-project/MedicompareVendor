@@ -46,7 +46,12 @@ class DashboardPage extends StatelessWidget {
               userName: state.dashboard.user.firstName,
               userImageUrl: state.dashboard.user.profileImageUrl,
             ),
-            body: _buildDashboardContent(context, state.dashboard),
+            body: RefreshIndicator(
+              onRefresh: () async {
+                context.read<DashboardBloc>().add(GetDashboardEvent());
+              },
+              child: _buildDashboardContent(context, state.dashboard),
+            ),
           );
         } else if (state is DashboardError) {
           final isAuthError = state.message == 'UNAUTHORIZED_ACCESS_401';
@@ -116,6 +121,7 @@ class DashboardPage extends StatelessWidget {
   Widget _buildDashboardContent(
       BuildContext context, DashboardEntity dashboard) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -804,6 +804,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               isDiscount: true),
           _buildCompactSummaryRow("CGST", details.cgst),
           _buildCompactSummaryRow("SGST", details.sgst),
+          if (order.vendorCommissionAmount > 0)
+            _buildCompactSummaryRow(
+                isRental ? "Vendor Commission" : "Admin Commission",
+                -order.vendorCommissionAmount,
+                isDiscount: true),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -814,7 +819,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Text(
-                "₹${details.total.toStringAsFixed(2)}",
+                "₹${(details.total - order.vendorCommissionAmount).toStringAsFixed(2)}",
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

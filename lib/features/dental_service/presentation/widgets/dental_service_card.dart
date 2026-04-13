@@ -105,7 +105,7 @@ class DentalServiceCard extends StatelessWidget {
                   Row(
                     children: [
                       if (PermissionHandler()
-                          .hasPermission('dental', 'edit')) ...[
+                          .hasPermission('dental-service', 'edit')) ...[
                         _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
                         const SizedBox(width: 4),
                       ],

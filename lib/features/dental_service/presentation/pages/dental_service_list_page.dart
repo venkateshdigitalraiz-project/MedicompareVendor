@@ -102,7 +102,7 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
           ),
         ),
         actions: [
-          if (PermissionHandler().hasPermission('dental', 'add'))
+          if (PermissionHandler().hasPermission('dental-service', 'add'))
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: ElevatedButton.icon(

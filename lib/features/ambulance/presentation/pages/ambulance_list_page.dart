@@ -137,7 +137,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
           ),
         ),
         actions: [
-          if (PermissionHandler().hasPermission('ambulance', 'add'))
+          if (PermissionHandler().hasPermission('ambulance-service', 'add'))
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: ElevatedButton.icon(
@@ -308,97 +308,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
 
-          // Category dropdown
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                menuMaxHeight: 400,
-                borderRadius: BorderRadius.circular(12),
-                dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty
-                    ? null
-                    : state.selectedCategoryId,
-                hint: Text("All Categories",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                selectedItemBuilder: (BuildContext context) {
-                  return [
-                    DropdownMenuItem(
-                        value: '',
-                        child: Text("All Categories",
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500))),
-                    ...state.categories.map((c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(c.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
-                                  fontSize: 13, fontWeight: FontWeight.w500)),
-                        )),
-                  ].map((e) {
-                    return Container(
-                      alignment: Alignment.centerLeft,
-                      child: e.child,
-                    );
-                  }).toList();
-                },
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(color: Colors.grey[100]!))),
-                      child: Text(
-                        "All Categories",
-                        style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark),
-                      ),
-                    ),
-                  ),
-                  ...state.categories.map((c) {
-                    return DropdownMenuItem(
-                      value: c.id,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(color: Colors.grey[100]!))),
-                        child: Text(
-                          c.name,
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: Colors.black87, height: 1.4),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    context
-                        .read<AmbulanceBloc>()
-                        .add(SelectAmbulanceCategoryEvent(val));
-                  }
-                },
-              ),
-            ),
-          ),
         ],
       ),
     );

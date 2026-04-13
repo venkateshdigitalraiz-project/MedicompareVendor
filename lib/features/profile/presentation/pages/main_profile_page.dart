@@ -79,6 +79,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 .where((p) => p.status == 'active' && p.hasAction('view'))
                 .map((p) => p.module)
                 .toList();
+                
+            // debugPrint('VENDOR_PERMISSIONS_MODULES: $_activeModules');
 
             _isLoading = false;
           });
@@ -380,7 +382,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   () {
                 context.push('/nursing-list');
               }),
-            if (_hasPermission('dental'))
+            if (_hasPermission('dental-service'))
               _menuTile(
                   "Odontogram Services", Icons.sentiment_satisfied_alt_outlined,
                   () {
@@ -397,7 +399,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   () {
                 context.push('/equipment-list');
               }),
-            if (_hasPermission('ambulance'))
+            if (_hasPermission('ambulance-service'))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ExpansionTile(

@@ -13,6 +13,7 @@ class OrderItemEntity extends Equatable {
   final double price;
   final double discountPrice;
   final double totalPrice;
+  final double vendorCommissionAmount;
   final DateTime createdAt;
   final OrderDetailsEntity orderDetails;
   final ProductDetailsEntity productDetails;
@@ -33,6 +34,7 @@ class OrderItemEntity extends Equatable {
     required this.price,
     required this.discountPrice,
     required this.totalPrice,
+    required this.vendorCommissionAmount,
     required this.createdAt,
     required this.orderDetails,
     required this.productDetails,
@@ -55,6 +57,7 @@ class OrderItemEntity extends Equatable {
         price,
         discountPrice,
         totalPrice,
+        vendorCommissionAmount,
         createdAt,
         orderDetails,
         productDetails,

@@ -99,7 +99,7 @@ class AmbulanceCard extends StatelessWidget {
                   Row(
                     children: [
                       if (PermissionHandler()
-                          .hasPermission('ambulance', 'edit')) ...[
+                          .hasPermission('ambulance-service', 'edit')) ...[
                         _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
                         const SizedBox(width: 8),
                       ],
