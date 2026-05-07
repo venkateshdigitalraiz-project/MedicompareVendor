@@ -307,6 +307,7 @@ class TabletVariant extends Equatable {
   final String name;
   final double price;
   final String? pricePerUnit;
+  final int? stock;
   final List<String> files;
 
   const TabletVariant({
@@ -315,6 +316,7 @@ class TabletVariant extends Equatable {
     required this.name,
     required this.price,
     this.pricePerUnit,
+    this.stock,
     required this.files,
   });
 
@@ -325,12 +327,13 @@ class TabletVariant extends Equatable {
       name: json['name'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       pricePerUnit: json['pricePerUnit']?.toString(),
+      stock: json['stock'] != null ? (int.tryParse(json['stock'].toString()) ?? 0) : null,
       files: List<String>.from(json['files'] ?? json['frontImage'] ?? []),
     );
   }
 
   @override
-  List<Object?> get props => [id, tabletId, name, price, pricePerUnit, files];
+  List<Object?> get props => [id, tabletId, name, price, pricePerUnit, stock, files];
 }
 
 class VariantDetail extends Equatable {

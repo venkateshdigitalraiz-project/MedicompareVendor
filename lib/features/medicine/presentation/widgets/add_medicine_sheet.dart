@@ -218,10 +218,15 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     }
 
     final firstVariant = _variants.isNotEmpty ? _variants.first : null;
-    final double topPrice = double.tryParse(_mrpPriceController.text) ?? 
-        (firstVariant != null ? (double.tryParse(firstVariant.price.text) ?? 0) : 0);
-    final double topDiscount = double.tryParse(_discountController.text) ??
-        (firstVariant != null ? (double.tryParse(firstVariant.discount.text) ?? 0) : 0);
+    final double? topLevelPrice = double.tryParse(_mrpPriceController.text);
+    final double topPrice = (topLevelPrice != null && topLevelPrice > 0)
+        ? topLevelPrice
+        : (firstVariant != null ? (double.tryParse(firstVariant.price.text) ?? 0) : 0);
+
+    final double? topLevelDiscount = double.tryParse(_discountController.text);
+    final double topDiscount = (topLevelDiscount != null && topLevelDiscount > 0)
+        ? topLevelDiscount
+        : (firstVariant != null ? (double.tryParse(firstVariant.discount.text) ?? 0) : 0);
 
     setState(() => _isLoading = true);
     try {
@@ -458,31 +463,43 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                   itemBuilder: (context, index) {
                                     final option = _searchResults[index];
                                     return InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedTablet = option;
-                                          _searchController.text = option.name;
-                                          _mrpPriceController.text =
-                                              option.price.toString();
-                                          _searchResults = [];
+                                      onTap: () async {
+                                        setState(() => _isFetchingDetails = true);
+                                        try {
+                                          final fullDetails = await _medicineService.getMedicineDetails(option.id);
+                                          setState(() {
+                                            _selectedTablet = fullDetails;
+                                            _searchController.text = fullDetails.name;
+                                            _mrpPriceController.text = fullDetails.price.toString();
+                                            _searchResults = [];
 
-                                          // Populate variants from selection
-                                          for (var v in _variants) {
-                                            v.dispose();
+                                            // Populate variants from selection
+                                            for (var v in _variants) {
+                                              v.dispose();
+                                            }
+                                            _variants = fullDetails.tabletVariants
+                                                .map((tv) =>
+                                                    MedicineVariantFormData(
+                                                      variantId: tv.id,
+                                                      name: tv.name,
+                                                      defaultPrice:
+                                                          tv.price.toString(),
+                                                      defaultPerUnit: tv
+                                                              .pricePerUnit ??
+                                                          '',
+                                                      defaultStock: tv.stock?.toString() ?? '0',
+                                                    ))
+                                                .toList();
+                                          });
+                                        } catch (e) {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Error fetching details: $e'))
+                                            );
                                           }
-                                          _variants = option.tabletVariants
-                                              .map((tv) =>
-                                                  MedicineVariantFormData(
-                                                    variantId: tv.id,
-                                                    name: tv.name,
-                                                    defaultPrice:
-                                                        tv.price.toString(),
-                                                    defaultPerUnit: tv
-                                                            .pricePerUnit ??
-                                                        '',
-                                                  ))
-                                              .toList();
-                                        });
+                                        } finally {
+                                          if (mounted) setState(() => _isFetchingDetails = false);
+                                        }
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.all(16.0),
