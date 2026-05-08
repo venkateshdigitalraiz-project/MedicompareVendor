@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- The method for signing: app-store, ad-hoc, enterprise, development -->
+    <key>method</key>
+    <string>app-store</string>
+
+    <!-- Your Apple Team ID -->
+    <key>teamID</key>
+    <string>4TQ64Q9ASA</string>
+
+    <!-- Your app's bundle identifier -->
+    <key>bundleIdentifier</key>
+    <string>com.medicompare.vendor</string>
+
+    <!-- Name of the provisioning profile to use (must match the one you uploaded to GitHub Secrets) -->
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.medicompare.vendor</key>
+        <string>Medicompare_vendor_profile</string>
+    </dict>
+
+    <!-- Enable bitcode (set to false for Flutter) -->
+    <key>uploadBitcode</key>
+    <false/>
+
+    <!-- Upload symbols for crash reporting -->
+    <key>uploadSymbols</key>
+    <true/>
+
+    <!-- Compile Bitcode (set to false for Flutter) -->
+    <key>compileBitcode</key>
+    <false/>
+</dict>
+</plist>
