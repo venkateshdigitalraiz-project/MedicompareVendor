@@ -70,15 +70,14 @@ jobs:
         run: |
           # Add ProvisioningStyle = Manual to Runner target attributes
           sed -i '' 's/97C146ED1CF9000F007C117D = {/97C146ED1CF9000F007C117D = { DevelopmentTeam = 4TQ64Q9ASA; ProvisioningStyle = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-
+          
           # Replace ALL Automatic signing with Manual
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-
-          # Add DEVELOPMENT_TEAM and other settings to build settings
-          sed -i '' '/buildSettings = {/a\
-				DEVELOPMENT_TEAM = 4TQ64Q9ASA;\
-				PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile";\
-				CODE_SIGN_IDENTITY = "iPhone Distribution";' ios/Runner.xcodeproj/project.pbxproj
+          
+          # Add build settings
+          sed -i '' '/buildSettings = {/a\				DEVELOPMENT_TEAM = 4TQ64Q9ASA;' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' '/buildSettings = {/a\				PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile";' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' '/buildSettings = {/a\				CODE_SIGN_IDENTITY = "iPhone Distribution";' ios/Runner.xcodeproj/project.pbxproj
 
       - name: Verify Certificate and Profile
         run: |
