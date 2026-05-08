@@ -12,12 +12,12 @@
 
     <!-- Your app's bundle identifier -->
     <key>bundleIdentifier</key>
-    <string>com.medicompare.vendor</string>
+    <string>com.medicompares.vendor</string>
 
     <!-- Name of the provisioning profile to use (must match the one you uploaded to GitHub Secrets) -->
     <key>provisioningProfiles</key>
     <dict>
-        <key>com.medicompare.vendor</key>
+        <key>com.medicompares.vendor</key>
         <string>Medicompare_vendor_profile</string>
     </dict>
 
