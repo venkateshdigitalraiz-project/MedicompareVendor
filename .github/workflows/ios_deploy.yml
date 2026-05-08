@@ -68,21 +68,22 @@ jobs:
 
       - name: Configure Manual Signing
         run: |
-          # Use plutil to modify project file directly
-          plutil -replace -key "buildSettings" -value "{
-            DEVELOPMENT_TEAM = 4TQ64Q9ASA;
-            CODE_SIGN_STYLE = Manual;
-            PROVISIONING_PROFILE_SPECIFIER = \"Medicompare_vendor_profile\";
-            CODE_SIGN_IDENTITY = \"Apple Distribution\";
-          }" ios/Runner.xcodeproj/project.pbxproj
-          
-          # Set ProvisioningStyle to Manual
-          plutil -replace -key "attributes" -value "{
-            TargetAttributes = {
-              DevelopmentTeam = 4TQ64Q9ASA;
-              ProvisioningStyle = Manual;
-            };
-          }" ios/Runner.xcodeproj/project.pbxproj
+          PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
+
+          # Remove any conflicting lines
+          sed -i '' '/CODE_SIGN_STYLE/d' "$PBXPROJ"
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' "$PBXPROJ"
+          sed -i '' '/CODE_SIGN_IDENTITY/d' "$PBXPROJ"
+
+          # Inject correct signing settings after every DEVELOPMENT_TEAM line
+          sed -i '' '/DEVELOPMENT_TEAM = 4TQ64Q9ASA;/a\
+          				CODE_SIGN_IDENTITY = "Apple Distribution";\
+          				CODE_SIGN_STYLE = Manual;\
+          				PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile";
+          ' "$PBXPROJ"
+
+          echo "=== Signing config after update ==="
+          grep -n "CODE_SIGN\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE" "$PBXPROJ"
 
       - name: Verify Certificate and Profile
         run: |
@@ -91,7 +92,7 @@ jobs:
           echo "Checking provisioning profiles..."
           ls "$HOME/Library/MobileDevice/Provisioning Profiles/"
           echo "Checking project configuration..."
-          grep -n "DEVELOPMENT_TEAM\|CODE_SIGN_STYLE\|PROVISIONING_PROFILE_SPECIFIER" ios/Runner.xcodeproj/project.pbxproj || true
+          grep -n "DEVELOPMENT_TEAM\|CODE_SIGN_STYLE\|PROVISIONING_PROFILE_SPECIFIER\|CODE_SIGN_IDENTITY" ios/Runner.xcodeproj/project.pbxproj || true
 
       - name: Build Flutter IPA
         run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
@@ -104,7 +105,11 @@ jobs:
         run: |
           mkdir -p ~/private_keys
           echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode -o ~/private_keys/AuthKey_"$APP_STORE_CONNECT_API_KEY_ID".p8
-          xcrun altool --upload-app --type ios --file "$(find build/ios/ipa -name '*.ipa' | head -1)" --apiKey "$APP_STORE_CONNECT_API_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" --verbose
+          xcrun altool --upload-app --type ios \
+            --file "$(find build/ios/ipa -name '*.ipa' | head -1)" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --verbose
 
       - name: Cleanup keychain and provisioning profile
         if: always()
