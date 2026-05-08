@@ -70,19 +70,20 @@ jobs:
         run: |
           PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
 
-          # Remove any conflicting lines
+          # Remove old signing lines
+          sed -i '' '/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
           sed -i '' '/CODE_SIGN_STYLE/d' "$PBXPROJ"
           sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' "$PBXPROJ"
-          sed -i '' '/CODE_SIGN_IDENTITY/d' "$PBXPROJ"
+          sed -i '' '/DEVELOPMENT_TEAM/d' "$PBXPROJ"
 
-          # Inject correct signing settings after every DEVELOPMENT_TEAM line
-          sed -i '' '/DEVELOPMENT_TEAM = 4TQ64Q9ASA;/a\
-          				CODE_SIGN_IDENTITY = "Apple Distribution";\
+          # Add correct signing into every buildSettings block
+          sed -i '' 's/buildSettings = {/buildSettings = {\
+          				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";\
           				CODE_SIGN_STYLE = Manual;\
-          				PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile";
-          ' "$PBXPROJ"
+          				DEVELOPMENT_TEAM = 4TQ64Q9ASA;\
+          				PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile";/g' "$PBXPROJ"
 
-          echo "=== Signing config after update ==="
+          echo "=== Result ==="
           grep -n "CODE_SIGN\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE" "$PBXPROJ"
 
       - name: Verify Certificate and Profile
