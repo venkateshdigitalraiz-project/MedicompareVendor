@@ -43,6 +43,14 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Verify Version
+        run: |
+          echo "App version from pubspec.yaml:"
+          grep "version:" pubspec.yaml
+          echo "Flutter build version:"
+          flutter --version
+          echo "Building IPA with version..."
+
       - name: Install Apple Certificate
         env:
           CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
@@ -110,6 +118,7 @@ jobs:
             --file "$(find build/ios/ipa -name '*.ipa' | head -1)" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --upload-for-testflight \
             --verbose
 
       - name: Cleanup keychain and provisioning profile
