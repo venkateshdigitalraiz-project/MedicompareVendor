@@ -86,11 +86,21 @@ jobs:
           echo "=== Result ==="
           grep -n "CODE_SIGN\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE" "$PBXPROJ"
 
-      - name: Set Build Number
+      - name: Set Version and Build Number
         run: |
+          # Get version and build number from pubspec.yaml
+          VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
           BUILD_NUMBER=$(grep "^version:" pubspec.yaml | sed 's/.*+//')
+
+          echo "Version: $VERSION"
           echo "Build number: $BUILD_NUMBER"
+
+          # Update BOTH version name and build number in Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/Runner/Info.plist
+
+          echo "=== Info.plist after update ==="
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ios/Runner/Info.plist
 
       - name: Verify Certificate and Profile
