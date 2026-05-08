@@ -73,7 +73,7 @@ jobs:
 
           # Add PROVISIONING_PROFILE_SPECIFIER and CODE_SIGN_STYLE to Runner target build settings
           # (Runner target doesn't have these lines, so we add them after DEVELOPMENT_TEAM)
-          sed -i '' 's/DEVELOPMENT_TEAM = 4TQ64Q9ASA;/DEVELOPMENT_TEAM = 4TQ64Q9ASA; CODE_SIGN_STYLE = Manual; PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile"; CODE_SIGN_IDENTITY = "Apple Distribution";/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/DEVELOPMENT_TEAM = 4TQ64Q9ASA;/DEVELOPMENT_TEAM = 4TQ64Q9ASA; CODE_SIGN_STYLE = Manual; PROVISIONING_PROFILE_SPECIFIER = "Medicompare_vendor_profile"; CODE_SIGN_IDENTITY = "iPhone Distribution";/g' ios/Runner.xcodeproj/project.pbxproj
 
           # Also update RunnerTests to use manual signing
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
