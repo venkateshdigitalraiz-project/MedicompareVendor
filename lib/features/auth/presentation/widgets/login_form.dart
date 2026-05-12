@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../../features/dashboard/presentation/bloc/dashboard_event.dart';
 
@@ -265,13 +264,11 @@ class _LoginFormState extends State<LoginForm> {
                       fontWeight: FontWeight.bold,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () async {
-                        final url = Uri.parse(
-                            'https://vendor.medicompares.com/register');
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url,
-                              mode: LaunchMode.externalApplication);
-                        }
+                      ..onTap = () {
+                        context.push(
+                          '/registration-webview',
+                          extra: 'https://vendor.medicompares.com/register',
+                        );
                       },
                   ),
                 ],

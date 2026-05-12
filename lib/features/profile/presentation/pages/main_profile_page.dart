@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -333,7 +334,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
               context.push('/branches');
             }),
             _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
-              context.push('/subscription-plan');
+              _showSubscriptionUpgradeDialog();
             }),
             _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
               context.push('/lead-plan-history');
@@ -475,6 +476,25 @@ class _ProfilePageState extends State<MainprofileScreen> {
               ),
             ),
 
+            const SizedBox(height: 12),
+
+            /// DELETE ACCOUNT BUTTON
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextButton(
+                onPressed: _showDeleteAccountDialog,
+                child: Text(
+                  "Delete Account",
+                  style: GoogleFonts.inter(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 20),
 
             Center(
@@ -548,6 +568,52 @@ class _ProfilePageState extends State<MainprofileScreen> {
     );
   }
 
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Text("Delete Account",
+              style:
+                  GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18)),
+          content: Text(
+              "Are you sure you want to delete your account? Your account will be permanently deleted within 30 days. This action cannot be undone.",
+              style: GoogleFonts.inter(fontSize: 14)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel",
+                  style: GoogleFonts.inter(
+                      color: AppColors.grey, fontWeight: FontWeight.w500)),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Perform logout as requested
+                await TokenStorage.clearAll();
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  context.go('/login');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Your account deletion request has been submitted.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: Text("Delete",
+                  style: GoogleFonts.inter(
+                      color: Colors.red, fontWeight: FontWeight.w600)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _menuTile(String title, IconData icon, VoidCallback onTap,
       {bool isSubTile = false}) {
     return Padding(
@@ -575,6 +641,100 @@ class _ProfilePageState extends State<MainprofileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showSubscriptionUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Text(
+            "Subscription Upgrade",
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+                  children: [
+                    const TextSpan(text: "Please visit our "),
+                    TextSpan(
+                      text: "website",
+                      style: GoogleFonts.inter(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.pop(context);
+                          context.push(
+                            '/webview',
+                            extra: {
+                              'url': 'https://vendor.medicompares.com/lead-subscription-plan',
+                              'title': 'Subscription Plans'
+                            },
+                          );
+                        },
+                    ),
+                    const TextSpan(
+                        text:
+                            " or contact support to upgrade your plan."),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryDark,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.push('/support-ticket');
+                    },
+                    child: Text(
+                      "Contact Support",
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Close",
+                      style: GoogleFonts.inter(
+                        color: AppColors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 

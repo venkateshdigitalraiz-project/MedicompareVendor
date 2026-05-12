@@ -5,6 +5,7 @@ import 'package:MediCompare/features/auth/presentation/pages/documents_upload.da
 import 'package:MediCompare/features/auth/presentation/pages/forget_password_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/login_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/registration_page.dart';
+import 'package:MediCompare/features/auth/presentation/pages/app_webview_screen.dart';
 import 'package:MediCompare/features/auth/presentation/pages/vendor_onboarding_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/change_password_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
@@ -83,6 +84,22 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/forgot-password',
           builder: (_, __) => const ForgetPasswordPage(),
+        ),
+        GoRoute(
+          path: '/registration-webview',
+          builder: (context, state) {
+            final url = state.extra as String? ?? 'https://vendor.medicompares.com/register';
+            return AppWebViewScreen(url: url, title: 'Registration', enableSuccessDetection: true);
+          },
+        ),
+        GoRoute(
+          path: '/webview',
+          builder: (context, state) {
+            final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+            final url = extras['url'] as String;
+            final title = extras['title'] as String;
+            return AppWebViewScreen(url: url, title: title);
+          },
         ),
         GoRoute(
           path: '/vendor-onboarding',
