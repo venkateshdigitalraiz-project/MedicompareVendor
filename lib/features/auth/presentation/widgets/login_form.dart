@@ -248,6 +248,7 @@ class _LoginFormState extends State<LoginForm> {
             const SizedBox(height: 32),
 
             /// REGISTER
+            /*
             RichText(
               text: TextSpan(
                 text: "Want to become a member? ",
@@ -274,6 +275,7 @@ class _LoginFormState extends State<LoginForm> {
                 ],
               ),
             ),
+            */
             const SizedBox(height: 20),
           ],
         ),

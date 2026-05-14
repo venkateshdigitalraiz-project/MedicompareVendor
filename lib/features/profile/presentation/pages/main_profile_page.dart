@@ -440,12 +440,22 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 children: [
                   _menuTile("Terms and Conditions", Icons.description_outlined,
                       () {
-                    _launchURL(
-                        "https://vendor.medicompares.com/terms-and-conditions");
+                    context.push(
+                      '/webview',
+                      extra: {
+                        'url': 'https://vendor.medicompares.com/terms-and-conditions',
+                        'title': 'Terms and Conditions'
+                      },
+                    );
                   }, isSubTile: true),
                   _menuTile("Privacy Policy", Icons.privacy_tip_outlined, () {
-                    _launchURL(
-                        "https://vendor.medicompares.com/privacy-policy");
+                    context.push(
+                      '/webview',
+                      extra: {
+                        'url': 'https://vendor.medicompares.com/privacy-policy',
+                        'title': 'Privacy Policy'
+                      },
+                    );
                   }, isSubTile: true),
                 ],
               ),
@@ -655,41 +665,10 @@ class _ProfilePageState extends State<MainprofileScreen> {
             "Subscription Upgrade",
             style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-                  children: [
-                    const TextSpan(text: "Please visit our "),
-                    TextSpan(
-                      text: "website",
-                      style: GoogleFonts.inter(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.underline,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.pop(context);
-                          context.push(
-                            '/webview',
-                            extra: {
-                              'url': 'https://vendor.medicompares.com/lead-subscription-plan',
-                              'title': 'Subscription Plans'
-                            },
-                          );
-                        },
-                    ),
-                    const TextSpan(
-                        text:
-                            " or contact support to upgrade your plan."),
-                  ],
-                ),
-              ),
-            ],
+          content: Text(
+            "To upgrade your plan and unlock additional features, please contact our support team.",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
           ),
           actions: [
             Column(
