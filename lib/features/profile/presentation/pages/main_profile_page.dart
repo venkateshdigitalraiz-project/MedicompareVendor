@@ -333,9 +333,11 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Branches", Icons.business_outlined, () {
               context.push('/branches');
             }),
-            _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
-              _showSubscriptionUpgradeDialog();
-            }),
+            if (!Platform.isIOS)
+              _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
+                context.push('/subscription-plan');
+              // howSubscriptionUpgradeDialog();
+              }),
             _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
               context.push('/lead-plan-history');
             }),
