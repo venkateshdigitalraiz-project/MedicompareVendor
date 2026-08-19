@@ -2,6 +2,8 @@ import '../datasources/orders_remote_data_source.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/orders_repository.dart';
 
+import '../../domain/entities/order_details_response_entity.dart';
+
 class OrdersRepositoryImpl implements OrdersRepository {
   final OrdersRemoteDataSource remoteDataSource;
 
@@ -25,10 +27,9 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<OrderItemEntity> getOrderDetails(String orderId,
+  Future<OrderDetailsResponseEntity> getOrderDetails(String orderId,
       {String orderType = 'normal'}) async {
-    return await remoteDataSource.getOrderDetails(orderId,
-        orderType: orderType);
+    return await remoteDataSource.getOrderDetails(orderId, orderType: orderType);
   }
 
   @override

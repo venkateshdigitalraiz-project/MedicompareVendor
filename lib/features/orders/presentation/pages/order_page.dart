@@ -21,11 +21,11 @@ class OrdersPage extends StatefulWidget {
 class _OrdersPageState extends State<OrdersPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
-  String _selectedDuration = 'No delivery Time';
+  // String _selectedDuration = 'No delivery Time';
   int _currentPage = 1;
   final ScrollController _scrollController = ScrollController();
 
-  final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
+  // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
     {'label': 'New', 'value': 'new'},
@@ -215,14 +215,24 @@ class _OrdersPageState extends State<OrdersPage> {
     if (orders.isEmpty) {
       return const Center(child: Text("No orders matching filters."));
     }
+
+    final Map<String, List<OrderItemEntity>> groupedOrders = {};
+    for (var item in orders) {
+      if (!groupedOrders.containsKey(item.orderItemId)) {
+        groupedOrders[item.orderItemId] = [];
+      }
+      groupedOrders[item.orderItemId]!.add(item);
+    }
+    final uniqueOrders = groupedOrders.values.toList();
+
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: isLoadingMore ? orders.length + 1 : orders.length,
+      itemCount: isLoadingMore ? uniqueOrders.length + 1 : uniqueOrders.length,
       itemBuilder: (context, index) {
-        if (index < orders.length) {
-          final order = orders[index];
-          return _buildOrderItemCard(order);
+        if (index < uniqueOrders.length) {
+          final orderGroup = uniqueOrders[index];
+          return _buildOrderItemCard(orderGroup);
         } else {
           return const Center(
             child: Padding(
@@ -235,13 +245,20 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  Widget _buildOrderItemCard(OrderItemEntity item) {
+  //orderItemId
+//item.orderDetails.orderRef
+  Widget _buildOrderItemCard(List<OrderItemEntity> orderItems) {
+    final item = orderItems.first;
     final user = item.orderDetails.userDetails;
-    final product = item.productDetails;
+
+    final totalQuantity = orderItems.fold<int>(
+      0,
+      (sum, element) => sum + element.quantity,
+    );
 
     return GestureDetector(
       onTap: () {
-        context.push('/order-details/${item.id}').then((_) {
+        context.push('/order-details/${item.orderId}').then((_) {
           _onFilterChanged(); // Refresh the list when coming back
         });
       },
@@ -265,34 +282,43 @@ class _OrdersPageState extends State<OrdersPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.orderItemId,
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.black87,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.orderItemId,
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        product.tabletDetails != null
-                            ? product.tabletDetails['name']
-                            : product.name,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                        const SizedBox(height: 4),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: orderItems.map((element) {
+                            final product = element.productDetails;
+                            final productName = product.tabletDetails != null
+                                ? product.tabletDetails['name']
+                                : product.name;
+                            return Text(
+                              productName,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            );
+                          }).toList(),
                         ),
-                      ),
-                      Text(
-                        "Type: ${item.type} • ${item.bookingType}",
-                        style:
-                            GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
+                        Text(
+                          "Type: ${item.type} • ${item.bookingType}",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
                   _buildStatusBadge(item.orderStatus),
                 ],
@@ -333,12 +359,14 @@ class _OrdersPageState extends State<OrdersPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "Qty: ${item.quantity}",
+                        orderItems.length > 1
+                            ? "$totalQuantity Items"
+                            : "Qty: $totalQuantity",
                         style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       Text(
-                        "₹${item.price.toStringAsFixed(2)}",
+                        "₹${item.totalPrice.toStringAsFixed(2)}",
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -351,7 +379,8 @@ class _OrdersPageState extends State<OrdersPage> {
                               size: 12, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            DateFormat('MMM d, yyyy').format(item.createdAt.toLocal()),
+                            DateFormat('MMM d, yyyy')
+                                .format(item.createdAt.toLocal()),
                             style: GoogleFonts.inter(
                                 fontSize: 12, color: Colors.grey),
                           ),

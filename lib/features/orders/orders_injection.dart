@@ -6,11 +6,17 @@ import 'domain/usecases/get_orders_usecase.dart';
 import 'domain/usecases/get_order_details_usecase.dart';
 import 'domain/usecases/update_order_status_usecase.dart';
 import 'presentation/bloc/orders_bloc.dart';
+import 'presentation/bloc/order_details_bloc.dart';
 
 class OrdersInjection {
   static OrdersBloc provideOrdersBloc() {
     return OrdersBloc(
       getOrdersUseCase: provideGetOrdersUseCase(),
+    );
+  }
+
+  static OrderDetailsBloc provideOrderDetailsBloc() {
+    return OrderDetailsBloc(
       getOrderDetailsUseCase: provideGetOrderDetailsUseCase(),
       updateOrderStatusUseCase: provideUpdateOrderStatusUseCase(),
     );

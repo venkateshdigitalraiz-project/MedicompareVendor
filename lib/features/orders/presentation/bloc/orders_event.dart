@@ -29,25 +29,3 @@ class GetOrdersEvent extends OrdersEvent {
       [page, limit, status, search, orderType, isLoadMore];
 }
 
-class GetOrderDetailsEvent extends OrdersEvent {
-  final String orderId;
-  final String orderType;
-
-  const GetOrderDetailsEvent(this.orderId, {this.orderType = 'normal'});
-
-  @override
-  List<Object?> get props => [orderId, orderType];
-}
-
-class UpdateOrderStatusEvent extends OrdersEvent {
-  final String orderItemId;
-  final Map<String, dynamic> payload;
-
-  const UpdateOrderStatusEvent({
-    required this.orderItemId,
-    required this.payload,
-  });
-
-  @override
-  List<Object?> get props => [orderItemId, payload];
-}

@@ -1,4 +1,5 @@
 import '../entities/order_entity.dart';
+import '../entities/order_details_response_entity.dart';
 import '../repositories/orders_repository.dart';
 
 class GetOrderDetailsUseCase {
@@ -6,7 +7,7 @@ class GetOrderDetailsUseCase {
 
   GetOrderDetailsUseCase(this.repository);
 
-  Future<OrderItemEntity> call(String orderId,
+  Future<OrderDetailsResponseEntity> call(String orderId,
       {String orderType = 'normal'}) async {
     return await repository.getOrderDetails(orderId, orderType: orderType);
   }

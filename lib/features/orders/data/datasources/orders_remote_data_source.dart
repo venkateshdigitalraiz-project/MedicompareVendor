@@ -3,6 +3,8 @@ import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
 import '../models/order_model.dart';
 
+import '../models/order_details_response_model.dart';
+
 abstract class OrdersRemoteDataSource {
   Future<OrdersListModel> getOrders({
     int page = 1,
@@ -11,7 +13,7 @@ abstract class OrdersRemoteDataSource {
     String search = '',
     String orderType = 'normal',
   });
-  Future<OrderItemModel> getOrderDetails(String orderId,
+  Future<OrderDetailsResponseModel> getOrderDetails(String orderId,
       {String orderType = 'normal'});
   Future<bool> updateOrderStatus(
       String orderItemId, Map<String, dynamic> payload);
@@ -56,7 +58,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   @override
-  Future<OrderItemModel> getOrderDetails(String orderId,
+  Future<OrderDetailsResponseModel> getOrderDetails(String orderId,
       {String orderType = 'normal'}) async {
     final endpoint = orderType == 'rental'
         ? ApiEndpoints.rentalOrderDetails
@@ -69,7 +71,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         decoded['data']['Order'] == null) {
       throw Exception('Order details not found');
     }
-    return OrderItemModel.fromJson(decoded['data']['Order']);
+    
+    return OrderDetailsResponseModel.fromJson(decoded['data']['Order']);
   }
 
   @override

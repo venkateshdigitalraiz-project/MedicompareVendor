@@ -211,10 +211,22 @@ class _LeadsPageState extends State<LeadsPage> {
   }
 
   void _onFilterChanged() {
+    // Reset pagination and scroll when filter changes
+    setState(() {
+      _currentPage = 1;
+      _isFetchingMore = false;
+    });
+    // Scroll to top to avoid showing old items while loading new ones
+    _scrollController.jumpTo(0);
+    // For status filtering we use only the leadStage parameter.
+    // The API expects `leadStage` to filter leads; `status` is left empty.
     context.read<LeadsBloc>().add(GetLeadsEvent(
-          status: _selectedStage,
+          status: '', // leave status empty
+          leadStage: _selectedStage,
           search: _searchQuery,
           page: _currentPage,
+          limit: 10,
+          isLoadMore: false,
         ));
   }
 

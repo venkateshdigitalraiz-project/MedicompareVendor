@@ -66,6 +66,7 @@ import 'package:MediCompare/features/notifications/presentation/pages/notificati
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:MediCompare/features/orders/presentation/bloc/order_details_bloc.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -208,7 +209,7 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             return BlocProvider(
-              create: (_) => OrdersInjection.provideOrdersBloc(),
+              create: (_) => OrdersInjection.provideOrderDetailsBloc(),
               child: OrderDetailPage(orderId: id),
             );
           },
@@ -218,7 +219,7 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             return BlocProvider(
-              create: (_) => OrdersInjection.provideOrdersBloc(),
+              create: (_) => OrdersInjection.provideOrderDetailsBloc(),
               child: OrderDetailPage(orderId: id, orderType: 'rental'),
             );
           },

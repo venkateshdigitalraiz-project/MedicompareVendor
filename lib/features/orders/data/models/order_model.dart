@@ -35,15 +35,31 @@ class OrderItemModel extends OrderItemEntity {
       orderStatus: json['orderStatus']?.toString() ?? '',
       paymentStatus: json['paymentStatus']?.toString() ?? '',
       price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? 0).toDouble(),
-      totalPrice: (json['totalPrice'] ?? 0).toDouble(),
-      vendorCommissionAmount: (json['vendorCommissionAmount'] ?? 0).toDouble(),
+      // API may use camelCase or snake_case for discount price
+      discountPrice:
+          (json['discountPrice'] ?? json['discountprice'] ?? 0).toDouble(),
+      // API may use camelCase or snake_case for total price
+      totalPrice: (() {
+        final billing = json['billingSummary'] ?? {};
+        final unitPrice = billing['unitPrice'];
+        if (unitPrice != null && unitPrice != 0)
+          return (unitPrice as num).toDouble();
+        return ((json['total'] ?? json['totalPrice'] ?? json['totalprice'] ?? 0)
+                as num)
+            .toDouble();
+      })(),
+      // API may use camelCase or snake_case for vendor commission amount
+      vendorCommissionAmount: (json['vendorCommissionAmount'] ??
+              json['vendorcommissionamount'] ??
+              0)
+          .toDouble(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
-      orderDetails: OrderDetailsModel.fromJson(json['orderDetails'] ?? {}),
-      productDetails:
-          ProductDetailsModel.fromJson(json['productDetails'] ?? {}),
+      orderDetails: OrderDetailsModel.fromJson(
+          json['orderDetails'] ?? <String, dynamic>{}),
+      productDetails: ProductDetailsModel.fromJson(
+          json['productDetails'] ?? <String, dynamic>{}),
       userDetails: json['userDetails'] != null
           ? FullUserDetailsModel.fromJson(json['userDetails'])
           : null,
@@ -89,7 +105,9 @@ class OrderDetailsModel extends OrderDetailsEntity {
       id: json['_id']?.toString() ?? '',
       orderId: json['orderId']?.toString() ?? '',
       userId: json['userId']?.toString() ?? '',
-      paymentMethod: json['paymentmethod']?.toString() ?? '',
+      paymentMethod: json['paymentmethod']?.toString() ??
+          json['paymentMethod']?.toString() ??
+          '',
       paymentStatus: json['paymentStatus']?.toString() ?? '',
       orderStatus: json['orderStatus']?.toString() ?? '',
       subtotal: (json['subtotal'] ?? 0).toDouble(),
@@ -116,6 +134,7 @@ class OrderDetailsModel extends OrderDetailsEntity {
   }
 }
 
+// Simple user details model used in OrderDetailsEntity
 class UserDetailsModel extends UserDetailsEntity {
   const UserDetailsModel({
     required super.id,
@@ -126,10 +145,22 @@ class UserDetailsModel extends UserDetailsEntity {
   });
 
   factory UserDetailsModel.fromJson(Map<String, dynamic> json) {
+    // Handle combined name if first/last are missing
+    String firstName = json['first_name']?.toString() ?? '';
+    String lastName = json['last_name']?.toString() ?? '';
+    if ((firstName.isEmpty && lastName.isEmpty) && json['name'] != null) {
+      final parts = json['name'].toString().split(' ');
+      if (parts.isNotEmpty) {
+        firstName = parts.first;
+        if (parts.length > 1) {
+          lastName = parts.sublist(1).join(' ');
+        }
+      }
+    }
     return UserDetailsModel(
       id: json['_id']?.toString() ?? '',
-      firstName: json['first_name']?.toString() ?? '',
-      lastName: json['last_name']?.toString() ?? '',
+      firstName: firstName,
+      lastName: lastName,
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
     );
@@ -149,10 +180,23 @@ class FullUserDetailsModel extends FullUserDetailsEntity {
   });
 
   factory FullUserDetailsModel.fromJson(Map<String, dynamic> json) {
+    // Handle combined name if first/last not present
+    String firstName = json['first_name']?.toString() ?? '';
+    String lastName = json['last_name']?.toString() ?? '';
+    if ((firstName.isEmpty && lastName.isEmpty) && json['name'] != null) {
+      final fullName = json['name'].toString();
+      final parts = fullName.split(' ');
+      if (parts.isNotEmpty) {
+        firstName = parts.first;
+        if (parts.length > 1) {
+          lastName = parts.sublist(1).join(' ');
+        }
+      }
+    }
     return FullUserDetailsModel(
       id: json['_id']?.toString() ?? '',
-      firstName: json['first_name']?.toString() ?? '',
-      lastName: json['last_name']?.toString() ?? '',
+      firstName: firstName,
+      lastName: lastName,
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
       age: json['age'] ?? 0,
@@ -200,7 +244,7 @@ class ProductDetailsModel extends ProductDetailsEntity {
     return ProductDetailsModel(
       id: json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      tabletDetails: json['tabletdetails'],
+      tabletDetails: json['tabletDetails'] ?? json['tabletdetails'],
     );
   }
 }
@@ -230,11 +274,85 @@ class OrdersListModel extends OrdersListEntity {
   });
 
   factory OrdersListModel.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> orderItemsJson = json['orderitems'] ?? [];
+    // API may return orders under different keys (e.g., 'orderitems' or 'orders').
+    final List<dynamic> ordersJson = json['orderitems'] ?? json['orders'] ?? [];
+    final List<dynamic> flattenedItems = [];
+    for (var order in ordersJson) {
+      final String orderId = order['_id']?.toString() ?? '';
+      final String orderRef = order['orderRef']?.toString() ?? '';
+      final String orderStatus = order['orderStatus']?.toString() ?? '';
+      final String paymentStatus = order['paymentStatus']?.toString() ?? '';
+      final String bookingType = order['bookingType']?.toString() ?? '';
+      final DateTime createdAt = order['createdAt'] != null
+          ? DateTime.parse(order['createdAt'])
+          : DateTime.now();
+
+      // The API doesn't send a nested "orderDetails" object — it puts those
+      // fields directly on the order. Build that object here from the
+      // order-level fields so OrderDetailsModel.fromJson actually has data
+      // to parse instead of silently defaulting everything to empty/zero.
+      final Map<String, dynamic> orderDetailsJson = {
+        '_id': orderId,
+        'orderId': orderId,
+        'userId': order['userDetails']?['_id']?.toString() ?? '',
+        'paymentmethod': order['paymentMethod'] ?? order['paymentmethod'],
+        'paymentStatus': paymentStatus,
+        'orderStatus': orderStatus,
+        'subtotal': order['subtotal'] ?? 0,
+        'total': order['total'] ?? 0,
+        'shipping': order['shipping'] ?? 0,
+        'discount': order['discount'] ?? 0,
+        'tax': order['tax'] ?? 0,
+        'cgst': order['cgst'] ?? 0,
+        'sgst': order['sgst'] ?? 0,
+        'persontype': order['persontype'] ?? order['personType'],
+        'doctorName': order['doctorName'],
+        'userDetails': order['userDetails'],
+      };
+
+      final List<dynamic> items = order['items'] ?? [];
+      for (var item in items) {
+        final Map<String, dynamic> merged = {
+          'orderId': orderId,
+          'orderRef': orderRef,
+          'orderStatus': orderStatus,
+          'paymentStatus': paymentStatus,
+          'bookingType': bookingType,
+          'createdAt': createdAt.toIso8601String(),
+          'orderItemId': orderRef,
+          'quantity': item['quantity'] ?? 0,
+          'type': item['type']?.toString() ?? '',
+          'price': item['productSnapshot']?['price'] ?? 0,
+          'discountPrice': item['productSnapshot']?['discountprice'] ?? 0,
+          'totalPrice': (() {
+            final orderBilling = order['billingSummary'] ?? {};
+            final itemBilling = item['billingSummary'] ?? {};
+            if (orderBilling['unitPrice'] != null &&
+                orderBilling['unitPrice'] != 0) {
+              return orderBilling['unitPrice'];
+            }
+            if (itemBilling['unitPrice'] != null &&
+                itemBilling['unitPrice'] != 0) {
+              return itemBilling['unitPrice'];
+            }
+            return order['total'] ?? 0;
+          })(),
+          'billingSummary': order['billingSummary'] ?? item['billingSummary'],
+          'productId': item['productSnapshot']?['productId']?.toString() ?? '',
+          'productDetails': item['productSnapshot'] ?? {},
+          'orderDetails': orderDetailsJson,
+          'userDetails': order['userDetails'],
+          'shippingAddressDetails': order['shippingAddressDetails'],
+          'billingAddressDetails': order['billingAddressDetails'],
+        };
+        flattenedItems.add(merged);
+      }
+    }
     return OrdersListModel(
       orderItems:
-          orderItemsJson.map((item) => OrderItemModel.fromJson(item)).toList(),
-      pagination: PaginationModel.fromJson(json['pagination'] ?? {}),
+          flattenedItems.map((e) => OrderItemModel.fromJson(e)).toList(),
+      pagination:
+          PaginationModel.fromJson(json['pagination'] ?? <String, dynamic>{}),
     );
   }
 }

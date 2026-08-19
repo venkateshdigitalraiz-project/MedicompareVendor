@@ -1,4 +1,5 @@
 import '../entities/order_entity.dart';
+import '../entities/order_details_response_entity.dart';
 
 abstract class OrdersRepository {
   Future<OrdersListEntity> getOrders({
@@ -8,7 +9,7 @@ abstract class OrdersRepository {
     String search = '',
     String orderType = 'normal',
   });
-  Future<OrderItemEntity> getOrderDetails(String orderId,
+  Future<OrderDetailsResponseEntity> getOrderDetails(String orderId,
       {String orderType = 'normal'});
   Future<bool> updateOrderStatus(
       String orderItemId, Map<String, dynamic> payload);
