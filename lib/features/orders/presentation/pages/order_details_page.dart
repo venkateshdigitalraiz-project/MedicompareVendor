@@ -426,7 +426,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            "₹${item.billingSummary.finalAmount.toStringAsFixed(2)}",
+                            "₹${(item.billingSummary.finalAmount - item.billingSummary.gstAmount).toStringAsFixed(2)}",
                             style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
