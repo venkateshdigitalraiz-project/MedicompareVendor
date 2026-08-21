@@ -1,5 +1,6 @@
 import '../../domain/entities/order_details_response_entity.dart';
 import 'order_model.dart';
+import 'rental_booking_model.dart';
 
 class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
   const OrderDetailsResponseModel({
@@ -18,6 +19,8 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     required super.billingSummary,
     required super.items,
     super.userDetails,
+    super.shippingAddressDetails,
+    super.billingAddressDetails,
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -38,11 +41,20 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       total: (json['total'] ?? 0).toDouble(),
       billingSummary: OrderBillingSummaryModel.fromJson(
           json['billingSummary'] ?? <String, dynamic>{}),
-      items: (json['items'] as List<dynamic>? ?? [])
-          .map((e) => OrderDetailsItemModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      items: json['items'] != null
+          ? (json['items'] as List<dynamic>)
+              .map((e) =>
+                  OrderDetailsItemModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : [OrderDetailsItemModel.fromJson(json)],
       userDetails: json['userDetails'] != null
           ? FullUserDetailsModel.fromJson(json['userDetails'])
+          : null,
+      shippingAddressDetails: json['shippingAddressDetails'] != null
+          ? AddressDetailsModel.fromJson(json['shippingAddressDetails'])
+          : null,
+      billingAddressDetails: json['billingAddressDetails'] != null
+          ? AddressDetailsModel.fromJson(json['billingAddressDetails'])
           : null,
     );
   }
@@ -55,15 +67,17 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
     required super.finalAmount,
     required super.unitPrice,
     required super.gstAmount,
+    super.paidAmount,
   });
 
   factory OrderBillingSummaryModel.fromJson(Map<String, dynamic> json) {
     return OrderBillingSummaryModel(
-      subtotal: (json['subtotal'] ?? 0).toDouble(),
-      totalGst: (json['totalGst'] ?? 0).toDouble(),
-      finalAmount: (json['finalAmount'] ?? 0).toDouble(),
-      unitPrice: (json['unitPrice'] ?? 0).toDouble(),
-      gstAmount: (json['gstAmount'] ?? 0).toDouble(),
+      subtotal: double.tryParse(json['subtotal']?.toString() ?? '0') ?? 0.0,
+      totalGst: double.tryParse(json['totalGst']?.toString() ?? '0') ?? 0.0,
+      finalAmount: double.tryParse(json['finalAmount']?.toString() ?? '0') ?? 0.0,
+      unitPrice: double.tryParse(json['unitPrice']?.toString() ?? '0') ?? 0.0,
+      gstAmount: double.tryParse(json['gstAmount']?.toString() ?? '0') ?? 0.0,
+      paidAmount: double.tryParse(json['paidAmount']?.toString() ?? '0') ?? 0.0,
     );
   }
 }
@@ -74,9 +88,11 @@ class OrderDetailsItemModel extends OrderDetailsItemEntity {
     required super.quantity,
     required super.type,
     required super.bookingType,
+    required super.price,
     required super.billingSummary,
     required super.productDetails,
     required super.vendorCommissionAmount,
+    super.rentalDetails,
   });
 
   factory OrderDetailsItemModel.fromJson(Map<String, dynamic> json) {
@@ -85,24 +101,19 @@ class OrderDetailsItemModel extends OrderDetailsItemEntity {
       quantity: json['quantity'] ?? 0,
       type: json['type']?.toString() ?? '',
       bookingType: json['bookingType']?.toString() ?? '',
+      price: (json['price'] ?? 0).toDouble(),
       billingSummary: OrderBillingSummaryModel.fromJson(
           json['billingSummary'] ?? <String, dynamic>{}),
-      productDetails: () {
-        final productSnapshot = Map<String, dynamic>.from(json['productSnapshot'] ?? {});
-        if (productSnapshot['imageUrl'] != null) {
-          final tabletDetails = productSnapshot['tabletDetails'] ?? productSnapshot['tabletdetails'];
-          if (tabletDetails is Map<String, dynamic>) {
-            tabletDetails['imageUrl'] = productSnapshot['imageUrl'];
-          } else if (tabletDetails == null) {
-            productSnapshot['tabletDetails'] = {'imageUrl': productSnapshot['imageUrl']};
-          }
-        }
-        return ProductDetailsModel.fromJson(productSnapshot);
-      }(),
+      productDetails: json['productDetails'] != null
+          ? ProductDetailsModel.fromJson(json['productDetails'])
+          : ProductDetailsModel.fromJson(json),
       vendorCommissionAmount: (json['vendorCommissionAmount'] ??
               json['vendorcommissionamount'] ??
               0)
           .toDouble(),
+      rentalDetails: json['rentalDetails'] != null
+          ? RentalDetailsModel.fromJson(json['rentalDetails'])
+          : RentalDetailsModel.fromJson(json),
     );
   }
 }

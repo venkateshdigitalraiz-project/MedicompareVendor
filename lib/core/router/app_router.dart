@@ -10,6 +10,11 @@ import 'package:MediCompare/features/auth/presentation/pages/vendor_onboarding_s
 import 'package:MediCompare/features/profile/presentation/pages/change_password_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
+import 'package:MediCompare/features/appointment/presentation/pages/appointment_bookings_page.dart';
+import 'package:MediCompare/features/appointment/presentation/bloc/appointment_booking_event.dart';
+import 'package:MediCompare/features/appointment/appointment_injection.dart';
+import 'package:MediCompare/features/appointment/presentation/pages/appointment_bookings_page.dart';
+import 'package:MediCompare/features/appointment/presentation/pages/appointment_details_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branches_list_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branch_details_page.dart';
 import 'package:MediCompare/features/tickets/presentation/pages/support_help_center_page.dart';
@@ -18,10 +23,12 @@ import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_bus
 import 'package:MediCompare/features/orders/presentation/pages/order_page.dart';
 import 'package:MediCompare/features/orders/presentation/pages/rental_bookings_page.dart';
 import 'package:MediCompare/features/orders/presentation/bloc/orders_event.dart';
+import 'package:MediCompare/features/orders/presentation/bloc/rental_booking_event.dart';
 import 'package:MediCompare/features/leads/presentation/pages/leads_page.dart';
 import 'package:MediCompare/features/subscription/presentation/pages/subscription_plan_page.dart';
 import 'package:MediCompare/features/subscription/presentation/pages/lead_plan_history_page.dart';
 import 'package:MediCompare/features/orders/presentation/pages/order_details_page.dart';
+import 'package:MediCompare/features/orders/presentation/pages/rental_order_details_page.dart';
 import 'package:MediCompare/features/medicine/presentation/pages/medicine_list_page.dart';
 import 'package:MediCompare/features/medicine/presentation/pages/medicine_details_page.dart';
 import 'package:MediCompare/features/medicine/data/models/medicine_model.dart';
@@ -89,14 +96,17 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/registration-webview',
           builder: (context, state) {
-            final url = state.extra as String? ?? 'https://vendor.medicompares.com/register';
-            return AppWebViewScreen(url: url, title: 'Registration', enableSuccessDetection: true);
+            final url = state.extra as String? ??
+                'https://vendor.medicompares.com/register';
+            return AppWebViewScreen(
+                url: url, title: 'Registration', enableSuccessDetection: true);
           },
         ),
         GoRoute(
           path: '/webview',
           builder: (context, state) {
-            final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+            final Map<String, dynamic> extras =
+                state.extra as Map<String, dynamic>;
             final url = extras['url'] as String;
             final title = extras['title'] as String;
             return AppWebViewScreen(url: url, title: title);
@@ -168,10 +178,28 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/rental-orders',
           builder: (_, __) => BlocProvider(
-            create: (_) => OrdersInjection.provideOrdersBloc()
-              ..add(const GetOrdersEvent(orderType: 'rental')),
+            create: (_) => OrdersInjection.provideRentalBookingBloc()
+              ..add(const GetRentalBookingsEvent(page: 1)),
             child: const RentalBookingsPage(),
           ),
+        ),
+        GoRoute(
+          path: '/appointment',
+          builder: (_, __) => BlocProvider(
+            create: (_) => AppointmentInjection.provideAppointmentBookingBloc()
+              ..add(const GetAppointmentBookingsEvent(page: 1)),
+            child: const AppointmentBookingsPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/appointment-details/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return BlocProvider(
+              create: (_) => AppointmentInjection.provideAppointmentDetailsBloc(),
+              child: AppointmentDetailsPage(appointmentId: id),
+            );
+          },
         ),
         GoRoute(
           path: '/leads',
@@ -220,7 +248,7 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
             final id = state.pathParameters['id']!;
             return BlocProvider(
               create: (_) => OrdersInjection.provideOrderDetailsBloc(),
-              child: OrderDetailPage(orderId: id, orderType: 'rental'),
+              child: RentalOrderDetailsPage(orderId: id),
             );
           },
         ),

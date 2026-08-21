@@ -23,6 +23,7 @@ class _OrdersPageState extends State<OrdersPage> {
   String _selectedStatus = '';
   // String _selectedDuration = 'No delivery Time';
   int _currentPage = 1;
+  bool _isFetching = false;
   final ScrollController _scrollController = ScrollController();
 
   // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
@@ -46,10 +47,17 @@ class _OrdersPageState extends State<OrdersPage> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
+      if (_isFetching) return;
+      
       final state = context.read<OrdersBloc>().state;
       if (state is OrdersLoaded && !state.isLoadingMore) {
         if (state.ordersList.pagination.page <
             state.ordersList.pagination.totalPages) {
+          
+          setState(() {
+            _isFetching = true;
+          });
+          
           _currentPage++;
           context.read<OrdersBloc>().add(GetOrdersEvent(
                 status: _selectedStatus,
@@ -57,6 +65,15 @@ class _OrdersPageState extends State<OrdersPage> {
                 page: _currentPage,
                 isLoadMore: true,
               ));
+              
+          // Reset after a short delay to allow the bloc to emit the loading state
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              setState(() {
+                _isFetching = false;
+              });
+            }
+          });
         }
       }
     }

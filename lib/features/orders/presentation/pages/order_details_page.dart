@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../domain/entities/order_entity.dart';
 import '../bloc/order_details_bloc.dart';
 import '../bloc/order_details_event.dart';
 import '../bloc/order_details_state.dart';
@@ -139,8 +138,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 children: [
                   _buildCustomerInformationSection(orderDetails),
                   const SizedBox(height: 16),
-                  // TODO: Shipping address isn't in OrderDetailsResponseEntity currently,
-                  // skipping it or extracting if added.
+                  _buildShippingAddressSection(orderDetails),
+                  if (orderDetails.shippingAddressDetails != null)
+                    const SizedBox(height: 16),
+                  _buildBillingAddressSection(orderDetails),
                 ],
               );
 
@@ -164,7 +165,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           const SizedBox(height: 16),
                           _buildOrderSummarySection(orderDetails),
                           const SizedBox(height: 16),
-                          // _buildShippingAddressSection(orderDetails),
+                          _buildShippingAddressSection(orderDetails),
+                          if (orderDetails.shippingAddressDetails != null)
+                            const SizedBox(height: 16),
+                          _buildBillingAddressSection(orderDetails),
                         ],
                       ),
               );
@@ -346,7 +350,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: Image.network(imageUrl, fit: BoxFit.cover))
-                          : const Icon(Icons.image_outlined, color: Colors.grey),
+                          : const Icon(Icons.image_outlined,
+                              color: Colors.grey),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -411,7 +416,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             style: GoogleFonts.inter(
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
-                        Text("₹${item.billingSummary.gstAmount.toStringAsFixed(2)}",
+                        Text(
+                            "₹${item.billingSummary.gstAmount.toStringAsFixed(2)}",
                             style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: Colors.black87,
@@ -584,7 +590,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  Widget _buildShippingAddressSection(OrderItemEntity order) {
+  Widget _buildShippingAddressSection(OrderDetailsResponseEntity order) {
     final adr = order.shippingAddressDetails;
     if (adr == null) return const SizedBox.shrink();
 
@@ -595,6 +601,66 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               color: AppColors.primary, size: 20),
           const SizedBox(width: 8),
           Text("Shipping Address",
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.black87)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(adr.houseNo.isNotEmpty ? adr.houseNo : "No House No",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.black87)),
+          const SizedBox(height: 8),
+          Text(adr.area.isNotEmpty ? adr.area : "No Area",
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87)),
+          const SizedBox(height: 8),
+          Text(adr.landmark.isNotEmpty ? adr.landmark : "No Landmark",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600])),
+          const SizedBox(height: 8),
+          Text(adr.fullAddress.isNotEmpty ? adr.fullAddress : "No Full Address",
+              style: GoogleFonts.inter(
+                  fontSize: 13, color: Colors.grey[600], height: 1.5)),
+          const SizedBox(height: 12),
+          Text("PIN: ${adr.pincode}",
+              style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.business_outlined, size: 14, color: Colors.grey[500]),
+              const SizedBox(width: 6),
+              Text(
+                  adr.addressType.isNotEmpty
+                      ? adr.addressType[0].toUpperCase() +
+                          adr.addressType.substring(1).toLowerCase()
+                      : "Address Type",
+                  style:
+                      GoogleFonts.inter(fontSize: 11, color: Colors.grey[600])),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBillingAddressSection(OrderDetailsResponseEntity order) {
+    final adr = order.billingAddressDetails;
+    if (adr == null) return const SizedBox.shrink();
+
+    return _buildCard(
+      titleWidget: Row(
+        children: [
+          const Icon(Icons.location_on_outlined,
+              color: AppColors.primary, size: 20),
+          const SizedBox(width: 8),
+          Text("Billing Address",
               style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,

@@ -6,68 +6,55 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../domain/entities/order_entity.dart';
-import '../bloc/orders_bloc.dart';
-import '../bloc/orders_event.dart';
-import '../bloc/orders_state.dart';
-import '../bloc/rental_booking_bloc.dart';
-import '../bloc/rental_booking_event.dart';
-import '../bloc/rental_booking_state.dart';
-import '../../domain/entities/rental_booking_entity.dart';
+import '../../domain/entities/appointment_entity.dart';
+import '../bloc/appointment_booking_bloc.dart';
+import '../bloc/appointment_booking_event.dart';
+import '../bloc/appointment_booking_state.dart';
 
-class RentalBookingsPage extends StatefulWidget {
-  const RentalBookingsPage({super.key});
+class AppointmentBookingsPage extends StatefulWidget {
+  const AppointmentBookingsPage({super.key});
 
   @override
-  State<RentalBookingsPage> createState() => _RentalBookingsPageState();
+  State<AppointmentBookingsPage> createState() =>
+      _AppointmentBookingsPageState();
 }
 
-class _RentalBookingsPageState extends State<RentalBookingsPage> {
+class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
-  String _selectedDuration = 'No delivery Time';
   int _currentPage = 1;
   final ScrollController _scrollController = ScrollController();
 
-  final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
-    {'label': 'New', 'value': 'new'},
-    // {'label': 'Pending', 'value': 'pending'},
-    {'label': 'Confirmed', 'value': 'confirmed'},
-    // {'label': 'Processing', 'value': 'processing'},
-    // {'label': 'Shipped', 'value': 'shipped'},
-    // {'label': 'Delivered', 'value': 'delivered'},
-    {'label': 'Cancelled', 'value': 'cancelled'},
+    {'label': 'Pending', 'value': 'pending'},
+    {'label': 'Sample Collected', 'value': 'sample_collected'},
+    {'label': 'Sample Not Collected', 'value': 'sample_not_collected'},
+    {'label': 'Completed', 'value': 'completed'},
   ];
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
-    // Initial fetch for rental orders
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<RentalBookingBloc>()
-          .add(const GetRentalBookingsEvent(page: 1));
-    });
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      final state = context.read<RentalBookingBloc>().state;
-      if (state is RentalBookingLoaded && !state.isLoadingMore) {
-        if (state.bookingsResponse.pagination.page <
-            state.bookingsResponse.pagination.totalPages) {
+      final state = context.read<AppointmentBookingBloc>().state;
+      if (state is AppointmentBookingLoaded && !state.isFetchingMore) {
+        if (state.appointmentsList.pagination.page <
+            state.appointmentsList.pagination.totalPages) {
           _currentPage++;
-          context.read<RentalBookingBloc>().add(GetRentalBookingsEvent(
-                status: _selectedStatus,
-                search: _searchQuery,
-                page: _currentPage,
-                isLoadMore: true,
-              ));
+          context.read<AppointmentBookingBloc>().add(
+                GetAppointmentBookingsEvent(
+                  status: _selectedStatus,
+                  search: _searchQuery,
+                  page: _currentPage,
+                  isLoadMore: true,
+                ),
+              );
         }
       }
     }
@@ -84,30 +71,30 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FF),
       appBar: const CustomHomeAppBar(
-        title: "Rental Bookings",
-        subtitle: "Manage and track all your rental bookings",
+        title: "Appointment Bookings",
+        subtitle: "Manage and track all your appointments",
       ),
       body: Column(
         children: [
           _buildFilters(),
           Expanded(
-            child: BlocBuilder<RentalBookingBloc, RentalBookingState>(
+            child: BlocBuilder<AppointmentBookingBloc, AppointmentBookingState>(
               builder: (context, state) {
-                if (state is RentalBookingLoading) {
+                if (state is AppointmentBookingLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state is RentalBookingLoaded) {
+                } else if (state is AppointmentBookingLoaded) {
                   return Column(
                     children: [
                       Expanded(
-                          child: _buildOrdersList(
-                              state.bookingsResponse.orderItems,
-                              state.isLoadingMore)),
+                          child: _buildAppointmentsList(
+                              state.appointmentsList.appointmentItems,
+                              state.isFetchingMore)),
                     ],
                   );
-                } else if (state is RentalBookingError) {
+                } else if (state is AppointmentBookingError) {
                   return Center(child: Text(state.message));
                 }
-                return const Center(child: Text('No orders found.'));
+                return const Center(child: Text('No appointments found.'));
               },
             ),
           ),
@@ -135,7 +122,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                     _onFilterChanged();
                   },
                   decoration: InputDecoration(
-                    hintText: "Search by order item Name...",
+                    hintText: "Search appointments...",
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -145,19 +132,6 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                   ),
                 ),
               ),
-              // const SizedBox(width: 8),
-              // Expanded(
-              //   flex: 2,
-              //   child: _buildDropdown(
-              //     value: _durations.contains(_selectedDuration)
-              //         ? _selectedDuration
-              //         : _durations.first,
-              //     items: _durations,
-              //     onChanged: (val) {
-              //       setState(() => _selectedDuration = val!);
-              //     },
-              //   ),
-              // ),
             ],
           ),
           const SizedBox(height: 12),
@@ -216,18 +190,19 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
   }
 
   void _onFilterChanged() {
-    context.read<RentalBookingBloc>().add(GetRentalBookingsEvent(
+    context.read<AppointmentBookingBloc>().add(GetAppointmentBookingsEvent(
           status: _selectedStatus,
           search: _searchQuery,
           page: _currentPage,
         ));
   }
 
-  Widget _buildOrdersList(
-      List<RentalBookingEntity> orders, bool isLoadingMore) {
+  Widget _buildAppointmentsList(
+      List<AppointmentItemEntity> orders, bool isLoadingMore) {
     if (orders.isEmpty) {
-      return const Center(child: Text("No orders matching filters."));
+      return const Center(child: Text("No appointments matching filters."));
     }
+
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
@@ -235,7 +210,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
       itemBuilder: (context, index) {
         if (index < orders.length) {
           final order = orders[index];
-          return _buildOrderItemCard(order);
+          return _buildAppointmentCard(order);
         } else {
           return const Center(
             child: Padding(
@@ -248,15 +223,12 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
     );
   }
 
-  Widget _buildOrderItemCard(RentalBookingEntity item) {
-    final user = item.orderDetails?.userDetails;
-    final product = item.rentalDetails?.productSnapshot;
-    final productName =
-        product?.tabletName ?? product?.name ?? "Unknown Product";
+  Widget _buildAppointmentCard(AppointmentItemEntity item) {
+    final user = item.userDetails;
 
     return GestureDetector(
       onTap: () {
-        context.push('/rental-order-details/${item.id}').then((_) {
+        context.push('/appointment-details/${item.id}').then((_) {
           _onFilterChanged(); // Refresh the list when coming back
         });
       },
@@ -280,34 +252,38 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.orderItemId,
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.black87,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.orderItemId,
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        productName,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                        const SizedBox(height: 4),
+                        Text(
+                          item.productDetails.name.isNotEmpty
+                              ? item.productDetails.name
+                              : "Appointment Service",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "Type: ${item.type} • ${item.bookingType}",
-                        style:
-                            GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
+                        Text(
+                          "Type: ${item.type}",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
-                  _buildStatusBadge(item.orderDetails?.orderStatus ?? item.orderStatus),
+                  _buildStatusBadge(item.orderStatus),
                 ],
               ),
               const Divider(height: 24),
@@ -389,6 +365,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
         color = Colors.orange;
         break;
       case 'delivered':
+      case 'completed':
         color = Colors.green;
         break;
       case 'cancelled':
@@ -408,36 +385,11 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
       child: Text(
         status.toUpperCase(),
         style: GoogleFonts.inter(
-          color: getStatusColor(status),
+          color: color,
           fontSize: 10,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
-  }
-}
-
-Color getStatusColor(String? status) {
-  if (status == null) return Colors.grey;
-  switch (status.toLowerCase()) {
-    case 'new': return Colors.blue;
-    case 'accepted': return Colors.green;
-    case 'assigned': return Colors.indigo;
-    case 'processing': return Colors.orange;
-    case 'shipped': return Colors.deepPurple;
-    case 'delivered': return Colors.green;
-    case 'cancelled': return Colors.red;
-    case 'returned': return Colors.redAccent;
-    case 'confirmed': return Colors.teal;
-    case 'rejected': return Colors.red;
-    case 'pending': return Colors.orange;
-    case 'completed': return Colors.green;
-    case 'failed': return Colors.red;
-    case 'refunded': return Colors.purple;
-    case 'sample_collected': return Colors.teal;
-    case 'sample_not_collected': return Colors.orange;
-    case 'partially_returned': return Colors.deepOrange;
-    case 'under_review': return Colors.amber;
-    default: return Colors.grey;
   }
 }

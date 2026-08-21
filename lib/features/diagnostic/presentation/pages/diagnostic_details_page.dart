@@ -336,101 +336,101 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
     );
   }
 
-  Widget _buildSectionHeader(IconData icon, String title, String subtitle) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-              color: const Color(0xFFF5F3FF),
-              borderRadius: BorderRadius.circular(8)),
-          child: Icon(icon, color: const Color(0xFF7C3AED), size: 18),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1E1B4B))),
-            Text(subtitle,
-                style:
-                    GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
-          ],
-        ),
-      ],
-    );
-  }
+  // Widget _buildSectionHeader(IconData icon, String title, String subtitle) {
+  //   return Row(
+  //     children: [
+  //       Container(
+  //         padding: const EdgeInsets.all(8),
+  //         decoration: BoxDecoration(
+  //             color: const Color(0xFFF5F3FF),
+  //             borderRadius: BorderRadius.circular(8)),
+  //         child: Icon(icon, color: const Color(0xFF7C3AED), size: 18),
+  //       ),
+  //       const SizedBox(width: 12),
+  //       Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text(title,
+  //               style: GoogleFonts.inter(
+  //                   fontSize: 16,
+  //                   fontWeight: FontWeight.bold,
+  //                   color: const Color(0xFF1E1B4B))),
+  //           Text(subtitle,
+  //               style:
+  //                   GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildDetailsGrid(DiagnosticDetails details) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        children: [
-          _detailRow("DIAGNOSTIC NAME", details.name, Icons.crop_free_outlined,
-              Colors.indigo),
-          const Divider(height: 1),
-          _detailRow("BODY PART", details.bodyPart ?? 'N/A',
-              Icons.location_on_outlined, Colors.blue),
-          if (details.subcategory != null) ...[
-            const Divider(height: 1),
-            _detailRow("CATEGORY", details.subcategory!.name,
-                Icons.category_outlined, Colors.purple),
-          ],
-          const Divider(height: 1),
-          _detailRow(
-            "CONTRAST REQUIRED",
-            details.isContrast?.toLowerCase() == 'yes'
-                ? 'Yes'
-                : 'No Contrast Required',
-            Icons.contrast,
-            details.isContrast?.toLowerCase() == 'yes'
-                ? Colors.orange
-                : Colors.green,
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildDetailsGrid(DiagnosticDetails details) {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //         color: Colors.white, borderRadius: BorderRadius.circular(16)),
+  //     child: Column(
+  //       children: [
+  //         _detailRow("DIAGNOSTIC NAME", details.name, Icons.crop_free_outlined,
+  //             Colors.indigo),
+  //         const Divider(height: 1),
+  //         _detailRow("BODY PART", details.bodyPart ?? 'N/A',
+  //             Icons.location_on_outlined, Colors.blue),
+  //         if (details.subcategory != null) ...[
+  //           const Divider(height: 1),
+  //           _detailRow("CATEGORY", details.subcategory!.name,
+  //               Icons.category_outlined, Colors.purple),
+  //         ],
+  //         const Divider(height: 1),
+  //         _detailRow(
+  //           "CONTRAST REQUIRED",
+  //           details.isContrast?.toLowerCase() == 'yes'
+  //               ? 'Yes'
+  //               : 'No Contrast Required',
+  //           Icons.contrast,
+  //           details.isContrast?.toLowerCase() == 'yes'
+  //               ? Colors.orange
+  //               : Colors.green,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _detailRow(String label, String value, IconData icon, Color color) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: GoogleFonts.inter(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[500])),
-                const SizedBox(height: 4),
-                Text(value,
-                    style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E1B4B))),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _detailRow(String label, String value, IconData icon, Color color) {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16),
+  //     child: Row(
+  //       children: [
+  //         Container(
+  //           padding: const EdgeInsets.all(8),
+  //           decoration: BoxDecoration(
+  //               color: color.withValues(alpha: 0.08),
+  //               borderRadius: BorderRadius.circular(8)),
+  //           child: Icon(icon, color: color, size: 18),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(label,
+  //                   style: GoogleFonts.inter(
+  //                       fontSize: 9,
+  //                       fontWeight: FontWeight.bold,
+  //                       color: Colors.grey[500])),
+  //               const SizedBox(height: 4),
+  //               Text(value,
+  //                   style: GoogleFonts.inter(
+  //                       fontSize: 13,
+  //                       fontWeight: FontWeight.bold,
+  //                       color: const Color(0xFF1E1B4B))),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildCollapsibleHtml(String title, String content, IconData icon,
       Color iconColor, bool isExpanded, VoidCallback onToggle) {

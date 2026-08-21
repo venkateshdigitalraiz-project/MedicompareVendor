@@ -34,7 +34,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }) async {
     final endpoint = orderType == 'rental'
         ? ApiEndpoints.rentalOrderList
-        : ApiEndpoints.orderList;
+        : (orderType == 'appointment'
+            ? ApiEndpoints.appointmentOrderList
+            : ApiEndpoints.orderList);
 
     final response = await apiService.get(
       endpoint,

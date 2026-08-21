@@ -7,6 +7,11 @@ import 'domain/usecases/get_order_details_usecase.dart';
 import 'domain/usecases/update_order_status_usecase.dart';
 import 'presentation/bloc/orders_bloc.dart';
 import 'presentation/bloc/order_details_bloc.dart';
+import 'domain/repositories/rental_booking_repository.dart';
+import 'domain/usecases/get_rental_bookings_usecase.dart';
+import 'data/repositories/rental_booking_repository_impl.dart';
+import 'data/datasources/rental_booking_remote_data_source.dart';
+import 'presentation/bloc/rental_booking_bloc.dart';
 
 class OrdersInjection {
   static OrdersBloc provideOrdersBloc() {
@@ -42,6 +47,28 @@ class OrdersInjection {
 
   static OrdersRemoteDataSource provideOrdersRemoteDataSource() {
     return OrdersRemoteDataSourceImpl(
+      apiService: CoreInjection.provideApiService(),
+    );
+  }
+
+  static RentalBookingBloc provideRentalBookingBloc() {
+    return RentalBookingBloc(
+      getRentalBookingsUseCase: provideGetRentalBookingsUseCase(),
+    );
+  }
+
+  static GetRentalBookingsUseCase provideGetRentalBookingsUseCase() {
+    return GetRentalBookingsUseCase(provideRentalBookingRepository());
+  }
+
+  static RentalBookingRepository provideRentalBookingRepository() {
+    return RentalBookingRepositoryImpl(
+      remoteDataSource: provideRentalBookingRemoteDataSource(),
+    );
+  }
+
+  static RentalBookingRemoteDataSource provideRentalBookingRemoteDataSource() {
+    return RentalBookingRemoteDataSourceImpl(
       apiService: CoreInjection.provideApiService(),
     );
   }

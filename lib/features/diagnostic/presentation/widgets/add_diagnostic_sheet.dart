@@ -6,8 +6,8 @@ import 'package:MediCompare/features/diagnostic/data/models/diagnostic_model.dar
 import 'package:MediCompare/features/diagnostic/diagnostic_injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:dotted_border/dotted_border.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:dotted_border/dotted_border.dart';
 
 class AddDiagnosticSheet extends StatefulWidget {
   final DiagnosticItem? editItem;
@@ -58,15 +58,15 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
-  }
+  // Future<void> _pickImage() async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _selectedImage = File(pickedFile.path);
+  //     });
+  //   }
+  // }
 
   void _onSearchChanged(String query) {
     _debounce?.cancel();
@@ -397,43 +397,43 @@ class _AddDiagnosticSheetState extends State<AddDiagnosticSheet> {
     );
   }
 
-  Widget _buildImagePicker() {
-    return GestureDetector(
-      onTap: _pickImage,
-      child: DottedBorder(
-        color: Colors.grey[300]!,
-        borderType: BorderType.RRect,
-        radius: const Radius.circular(12),
-        dashPattern: const [6, 4],
-        child: Container(
-          width: double.infinity,
-          height: 100,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: _selectedImage != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                )
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.upload_file_outlined,
-                          color: Colors.grey[400], size: 28),
-                      const SizedBox(height: 4),
-                      Text("Upload diagnostic image",
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey[400])),
-                    ],
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildImagePicker() {
+  //   return GestureDetector(
+  //     onTap: _pickImage,
+  //     child: DottedBorder(
+  //       color: Colors.grey[300]!,
+  //       borderType: BorderType.RRect,
+  //       radius: const Radius.circular(12),
+  //       dashPattern: const [6, 4],
+  //       child: Container(
+  //         width: double.infinity,
+  //         height: 100,
+  //         decoration: BoxDecoration(
+  //           color: const Color(0xFFF9FAFB),
+  //           borderRadius: BorderRadius.circular(12),
+  //         ),
+  //         child: _selectedImage != null
+  //             ? ClipRRect(
+  //                 borderRadius: BorderRadius.circular(12),
+  //                 child: Image.file(_selectedImage!, fit: BoxFit.cover),
+  //               )
+  //             : Center(
+  //                 child: Column(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   children: [
+  //                     Icon(Icons.upload_file_outlined,
+  //                         color: Colors.grey[400], size: 28),
+  //                     const SizedBox(height: 4),
+  //                     Text("Upload diagnostic image",
+  //                         style: GoogleFonts.inter(
+  //                             fontSize: 12, color: Colors.grey[400])),
+  //                   ],
+  //                 ),
+  //               ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildDiagnosticSearchField() {
     return Column(

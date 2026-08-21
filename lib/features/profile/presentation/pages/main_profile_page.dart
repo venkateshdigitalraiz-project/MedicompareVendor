@@ -73,14 +73,14 @@ class _ProfilePageState extends State<MainprofileScreen> {
             final List<PermissionModel> permissions = permissionsData
                 .map((p) => PermissionModel.fromJson(p))
                 .toList();
-            
+
             PermissionHandler().setPermissions(permissions);
 
             _activeModules = permissions
                 .where((p) => p.status == 'active' && p.hasAction('view'))
                 .map((p) => p.module)
                 .toList();
-                
+
             // debugPrint('VENDOR_PERMISSIONS_MODULES: $_activeModules');
 
             _isLoading = false;
@@ -327,6 +327,10 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("Rental bookings", Icons.calendar_today_outlined, () {
               context.push('/rental-orders');
             }),
+            _menuTile("Appointment Booking", Icons.medical_services_rounded,
+                () {
+              context.push('/appointment');
+            }),
             _menuTile("Leads", Icons.leaderboard_outlined, () {
               context.push('/leads');
             }),
@@ -334,9 +338,10 @@ class _ProfilePageState extends State<MainprofileScreen> {
               context.push('/branches');
             }),
             if (!Platform.isIOS)
-              _menuTile("My Subscription Plan", Icons.subscriptions_outlined, () {
+              _menuTile("My Subscription Plan", Icons.subscriptions_outlined,
+                  () {
                 context.push('/subscription-plan');
-              // howSubscriptionUpgradeDialog();
+                // howSubscriptionUpgradeDialog();
               }),
             _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
               context.push('/lead-plan-history');
@@ -445,7 +450,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
                     context.push(
                       '/webview',
                       extra: {
-                        'url': 'https://vendor.medicompares.com/terms-and-conditions',
+                        'url':
+                            'https://vendor.medicompares.com/terms-and-conditions',
                         'title': 'Terms and Conditions'
                       },
                     );

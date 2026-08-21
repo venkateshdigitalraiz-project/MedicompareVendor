@@ -1,7 +1,6 @@
 import 'package:MediCompare/core/utils/token_storage.dart';
 import 'package:MediCompare/features/auth/auth_injection.dart';
 import 'package:MediCompare/features/vendor_profile/presentation/providers/vendor_profile_provider.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
