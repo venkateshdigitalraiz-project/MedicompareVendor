@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:MediCompare/core/utils/price_formatter.dart';
 import '../../data/models/surgery_model.dart';
 import '../../surgery_injection.dart';
 
@@ -170,7 +171,7 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                       const SizedBox(height: 8),
                                       if (_calculateFinalPrice() < _calculateOriginalPrice())
                                         Text(
-                                          "MRP: ₹${_calculateOriginalPrice().toStringAsFixed(0)}",
+                                          "MRP: ${_calculateOriginalPrice().toRupeeFormat()}",
                                           style: GoogleFonts.poppins(
                                               fontSize: 10,
                                               decoration: TextDecoration.lineThrough,
@@ -196,7 +197,7 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                                       const Color(0xFF166534)),
                                             ),
                                             Text(
-                                              "₹${_calculateFinalPrice().toStringAsFixed(0)}",
+                                              _calculateFinalPrice().toRupeeFormat(),
                                               style: GoogleFonts.poppins(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
@@ -401,12 +402,12 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF1F2937)))),
-                  DataCell(Text("₹${v.price.toStringAsFixed(0)}",
+                  DataCell(Text(v.price.toRupeeFormat(),
                       style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF374151)))),
-                  DataCell(Text("₹${sellingPrice.toStringAsFixed(0)}",
+                  DataCell(Text(sellingPrice.toRupeeFormat(),
                       style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

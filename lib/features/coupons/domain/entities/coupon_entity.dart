@@ -13,6 +13,10 @@ class Coupon {
   final DateTime validTo;
   final String status;
   final bool hiddenCoupon;
+  final String description;
+  final String? userId;
+  final String? applicableType;
+  final String? category;
 
   const Coupon({
     this.id,
@@ -29,5 +33,9 @@ class Coupon {
     required this.validTo,
     required this.status,
     required this.hiddenCoupon,
+    this.description = '',
+    this.userId,
+    this.applicableType,
+    this.category = 'all',
   });
 }

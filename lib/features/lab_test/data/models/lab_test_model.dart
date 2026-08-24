@@ -7,6 +7,17 @@ class LabTestCategory extends Equatable {
   final String slug;
   final String status;
   final List<String> files;
+  final String? categoryId;
+  final int? priority;
+  final bool? itsrisk;
+  final double? gst;
+  final String? gstType;
+  final double? igst;
+  final double? cgst;
+  final double? sgst;
+  final String? commission;
+  final String? createdAt;
+  final String? updatedAt;
 
   const LabTestCategory({
     required this.id,
@@ -15,6 +26,17 @@ class LabTestCategory extends Equatable {
     required this.slug,
     required this.status,
     required this.files,
+    this.categoryId,
+    this.priority,
+    this.itsrisk,
+    this.gst,
+    this.gstType,
+    this.igst,
+    this.cgst,
+    this.sgst,
+    this.commission,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory LabTestCategory.fromJson(Map<String, dynamic> json) {
@@ -27,11 +49,40 @@ class LabTestCategory extends Equatable {
       files: (json['files'] != null && (json['files'] as List).isNotEmpty)
           ? List<String>.from(json['files'])
           : List<String>.from(json['imageUrl'] ?? []),
+      categoryId: json['categoryId']?.toString(),
+      priority: json['priority'] is int ? json['priority'] : int.tryParse(json['priority']?.toString() ?? ''),
+      itsrisk: json['itsrisk'] is bool ? json['itsrisk'] : (json['itsrisk']?.toString() == 'true'),
+      gst: (json['gst'] ?? 0).toDouble(),
+      gstType: json['gstType']?.toString(),
+      igst: (json['igst'] ?? 0).toDouble(),
+      cgst: (json['cgst'] ?? 0).toDouble(),
+      sgst: (json['sgst'] ?? 0).toDouble(),
+      commission: json['commission']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
     );
   }
 
   @override
-  List<Object?> get props => [id, name, description, slug, status, files];
+  List<Object?> get props => [
+        id,
+        name,
+        description,
+        slug,
+        status,
+        files,
+        categoryId,
+        priority,
+        itsrisk,
+        gst,
+        gstType,
+        igst,
+        cgst,
+        sgst,
+        commission,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 class LabTestItem extends Equatable {

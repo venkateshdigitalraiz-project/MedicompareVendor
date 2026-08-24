@@ -12,6 +12,7 @@ import '../bloc/surgery_event.dart';
 import '../bloc/surgery_state.dart';
 import '../widgets/add_surgery_sheet.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class SurgeryListPage extends StatefulWidget {
   const SurgeryListPage({super.key});
@@ -502,7 +503,7 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                       // ),
                       if (item.discountPrice > 0)
                         Text(
-                          "₹${item.discountPrice.toInt()}",
+                          item.discountPrice.toRupeeFormat(),
                           style: GoogleFonts.inter(
                               fontSize: 12,
                               color: Colors.green,

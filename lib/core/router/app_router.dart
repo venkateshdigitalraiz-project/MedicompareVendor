@@ -3,6 +3,8 @@ import 'package:MediCompare/features/auth/presentation/pages/bank_information_up
 import 'package:MediCompare/features/auth/presentation/pages/business_information_upload.dart';
 import 'package:MediCompare/features/auth/presentation/pages/documents_upload.dart';
 import 'package:MediCompare/features/auth/presentation/pages/forget_password_page.dart';
+import 'package:MediCompare/features/service_fee/presentation/pages/service_fee_page.dart';
+import 'package:MediCompare/features/service_fee/service_fee_injection.dart';
 import 'package:MediCompare/features/auth/presentation/pages/login_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/registration_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/app_webview_screen.dart';
@@ -72,6 +74,7 @@ import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:MediCompare/features/coupons/presentation/pages/add_coupon_screen.dart';
+import 'package:MediCompare/features/coupons/presentation/pages/coupon_list_screen.dart';
 import 'package:MediCompare/features/coupons/coupons_injection.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -362,8 +365,22 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/coupons',
           builder: (context, state) => BlocProvider(
-            create: (_) => CouponsInjection.provideAddCouponBloc(),
+            create: (_) => CouponsInjection.provideCouponBloc(),
+            child: const CouponListScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/add-coupon',
+          builder: (context, state) => BlocProvider(
+            create: (_) => CouponsInjection.provideCouponBloc(),
             child: const AddCouponScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/service-fee',
+          builder: (context, state) => BlocProvider(
+            create: (_) => ServiceFeeInjection.provideServiceFeeBloc(),
+            child: const ServiceFeePage(),
           ),
         ),
       ],

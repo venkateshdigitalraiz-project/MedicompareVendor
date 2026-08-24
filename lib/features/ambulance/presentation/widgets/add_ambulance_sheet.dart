@@ -90,7 +90,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
       "name":
           isEditMode ? widget.editAmbulance!.tabletId : _selectedAmbulance!.id,
       "price": double.tryParse(_priceController.text) ?? 0,
-      "discount": double.tryParse(_discountPriceController.text) ?? 0,
+      "discountprice": double.tryParse(_discountPriceController.text) ?? 0,
       "facilities": _selectedFacilities,
       "status": _status,
     };

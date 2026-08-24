@@ -1,11 +1,12 @@
+import 'package:MediCompare/features/coupons/domain/entities/customer_entity.dart';
+import 'package:MediCompare/features/coupons/presentation/bloc/coupon_bloc.dart';
+import 'package:MediCompare/features/coupons/presentation/bloc/coupon_event.dart';
+import 'package:MediCompare/features/coupons/presentation/bloc/coupon_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/coupon_entity.dart';
-import '../bloc/add_coupon_bloc.dart';
-import '../bloc/add_coupon_event.dart';
-import '../bloc/add_coupon_state.dart';
 
 class AddCouponScreen extends StatefulWidget {
   const AddCouponScreen({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   final _minPurchaseController = TextEditingController();
   final _maxDiscountController = TextEditingController();
 
-  String _selectionType = 'User';
+  String _selectionType = 'All';
   String _renewalCycle = 'Never (One-time)';
   String _discountType = 'Percentage (%)';
   String _status = 'Active';
@@ -33,9 +34,18 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   DateTime? _validTo;
   bool _hiddenCoupon = false;
 
+  List<Customer> _customers = [];
+  Customer? _selectedCustomer;
+
   final DateFormat _dateFormat = DateFormat('MM/dd/yyyy');
 
   final Color _primaryColor = const Color(0xFF2D1B69);
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CouponBloc>().add(const FetchCustomersEvent());
+  }
 
   @override
   void dispose() {
@@ -51,8 +61,10 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   Future<void> _selectDate(BuildContext context, bool isFromDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      initialDate: isFromDate
+          ? (_validFrom ?? DateTime.now())
+          : (_validTo ?? _validFrom ?? DateTime.now()),
+      firstDate: isFromDate ? DateTime.now() : (_validFrom ?? DateTime.now()),
       lastDate: DateTime(2101),
       builder: (context, child) {
         return Theme(
@@ -111,9 +123,10 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
         validTo: _validTo!,
         status: _status,
         hiddenCoupon: _hiddenCoupon,
+        userId: _selectedCustomer?.id,
       );
 
-      context.read<AddCouponBloc>().add(SubmitAddCouponEvent(coupon: coupon));
+      context.read<CouponBloc>().add(SubmitAddCouponEvent(coupon: coupon));
     }
   }
 
@@ -209,9 +222,14 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: BlocConsumer<AddCouponBloc, AddCouponState>(
+      body: BlocConsumer<CouponBloc, CouponState>(
         listener: (context, state) {
-          if (state is AddCouponSuccess) {
+          if (state is CustomersLoaded) {
+            setState(() {
+              _customers = List.from(state.customers)
+                ..sort((a, b) => a.fullName.toLowerCase().compareTo(b.fullName.toLowerCase()));
+            });
+          } else if (state is CouponSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Coupon created successfully!',
@@ -220,8 +238,8 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                 behavior: SnackBarBehavior.floating,
               ),
             );
-            Navigator.of(context).pop();
-          } else if (state is AddCouponFailure) {
+            Navigator.of(context).pop(true);
+          } else if (state is CouponFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message, style: GoogleFonts.inter()),
@@ -314,7 +332,321 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                       ),
                     ],
                   ),
+                  // --- SECTION 4: Settings ---
+                  _buildSectionCard(
+                    title: 'Additional Settings',
+                    children: [
+                      _buildLabel('Selection Type'),
+                      Container(
+                        height: 44,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectionType = 'User'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _selectionType == 'User'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: _selectionType == 'User'
+                                        ? [
+                                            BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.05),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2))
+                                          ]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.person_outline,
+                                          size: 18,
+                                          color: _selectionType == 'User'
+                                              ? Colors.black87
+                                              : Colors.grey.shade600),
+                                      const SizedBox(width: 6),
+                                      Text('User',
+                                          style: GoogleFonts.inter(
+                                              color: _selectionType == 'User'
+                                                  ? Colors.black87
+                                                  : Colors.grey.shade600,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectionType = 'Multiple'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _selectionType == 'Multiple'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: _selectionType == 'Multiple'
+                                        ? [
+                                            BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.05),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2))
+                                          ]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.people_outline,
+                                          size: 18,
+                                          color: _selectionType == 'Multiple'
+                                              ? Colors.black87
+                                              : Colors.grey.shade600),
+                                      const SizedBox(width: 6),
+                                      Text('Multiple',
+                                          style: GoogleFonts.inter(
+                                              color:
+                                                  _selectionType == 'Multiple'
+                                                      ? Colors.black87
+                                                      : Colors.grey.shade600,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectionType = 'All'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _selectionType == 'All'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: _selectionType == 'All'
+                                        ? [
+                                            BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.05),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2))
+                                          ]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.public,
+                                          size: 18,
+                                          color: _selectionType == 'All'
+                                              ? Colors.black87
+                                              : Colors.grey.shade600),
+                                      const SizedBox(width: 6),
+                                      Text('All',
+                                          style: GoogleFonts.inter(
+                                              color: _selectionType == 'All'
+                                                  ? Colors.black87
+                                                  : Colors.grey.shade600,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_selectionType == 'All') ...[
+                        _buildLabel('Renewal Cycle'),
+                        DropdownButtonFormField<String>(
+                          value: _renewalCycle,
+                          decoration: _buildInputDecoration(''),
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          items: [
+                            'Never (One-time)',
+                            'Every Week',
+                            'Every 10 days',
+                            'Every Month'
+                          ].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value, style: GoogleFonts.inter()),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) =>
+                              setState(() => _renewalCycle = newValue!),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      const SizedBox(height: 16),
+                      if (_selectionType == 'User' ||
+                          _selectionType == 'Multiple') ...[
+                        _buildLabel('Select Customer(s)'),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return DropdownMenu<Customer>(
+                              width: constraints.maxWidth,
+                              menuHeight: 250,
+                              enableSearch: true,
+                              enableFilter: true,
+                              requestFocusOnTap: true,
+                              initialSelection: _selectedCustomer,
+                              hintText: 'Search customer...',
+                              textStyle: GoogleFonts.inter(fontSize: 14),
+                              inputDecorationTheme: InputDecorationTheme(
+                                filled: true,
+                                fillColor: const Color(0xFFF9FAFB),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: _primaryColor, width: 1.5),
+                                ),
+                              ),
+                              dropdownMenuEntries: _customers.map((Customer customer) {
+                                return DropdownMenuEntry<Customer>(
+                                  value: customer,
+                                  label: customer.fullName,
+                                );
+                              }).toList(),
+                              onSelected: (newValue) {
+                                setState(() {
+                                  _selectedCustomer = newValue;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      _buildLabel('Status'),
+                      Container(
+                        height: 44,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _status = 'Active'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _status == 'Active'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: _status == 'Active'
+                                        ? [
+                                            BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.05),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2))
+                                          ]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text('Active',
+                                      style: GoogleFonts.inter(
+                                          color: _status == 'Active'
+                                              ? Colors.black87
+                                              : Colors.grey.shade600,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13)),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _status = 'Inactive'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _status == 'Inactive'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: _status == 'Inactive'
+                                        ? [
+                                            BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.05),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2))
+                                          ]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text('Inactive',
+                                      style: GoogleFonts.inter(
+                                          color: _status == 'Inactive'
+                                              ? Colors.black87
+                                              : Colors.grey.shade600,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: CheckboxListTile(
+                          title: Text('Hidden Coupon',
+                              style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600, fontSize: 14)),
+                          subtitle: Text('Hide from general list',
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: Colors.grey.shade600)),
+                          value: _hiddenCoupon,
+                          activeColor: _primaryColor,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          onChanged: (bool? value) =>
+                              setState(() => _hiddenCoupon = value ?? false),
+                          controlAffinity: ListTileControlAffinity.trailing,
+                        ),
+                      ),
+                    ],
+                  ),
 
+                  const SizedBox(height: 16),
                   // --- SECTION 2: Discount Details ---
                   _buildSectionCard(
                     title: 'Discount Details',
@@ -331,63 +663,15 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                           children: [
                             Expanded(
                               child: GestureDetector(
-                                  onTap: () => setState(() =>
-                                      _discountType = 'Percentage (%)'),
+                                onTap: () => setState(
+                                    () => _discountType = 'Percentage (%)'),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      color:
-                                          _discountType == 'Percentage (%)'
-                                              ? Colors.white
-                                              : Colors.transparent,
-                                      borderRadius:
-                                          BorderRadius.circular(8),
-                                    boxShadow: _discountType ==
-                                            'Percentage (%)'
-                                        ? [
-                                            BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                blurRadius: 4,
-                                                  offset:
-                                                      const Offset(0, 2))
-                                          ]
-                                        : [],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 4.0),
-                                      child: Text(
-                                        'Percent(%)',
-                                        style: GoogleFonts.inter(
-                                          color: _discountType ==
-                                                  'Percentage (%)'
-                                              ? Colors.black87
-                                              : Colors.grey.shade600,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => setState(() =>
-                                    _discountType = 'Fixed Amount(₹)'),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color:
-                                        _discountType == 'Fixed Amount(₹)'
-                                            ? Colors.white
-                                            : Colors.transparent,
+                                    color: _discountType == 'Percentage (%)'
+                                        ? Colors.white
+                                        : Colors.transparent,
                                     borderRadius: BorderRadius.circular(8),
-                                    boxShadow: _discountType ==
-                                            'Fixed Amount(₹)'
+                                    boxShadow: _discountType == 'Percentage (%)'
                                         ? [
                                             BoxShadow(
                                                 color: Colors.black
@@ -404,12 +688,55 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4.0),
                                       child: Text(
+                                        'Percent(%)',
+                                        style: GoogleFonts.inter(
+                                          color:
+                                              _discountType == 'Percentage (%)'
+                                                  ? Colors.black87
+                                                  : Colors.grey.shade600,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                    () => _discountType = 'Fixed Amount(₹)'),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _discountType == 'Fixed Amount(₹)'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow:
+                                        _discountType == 'Fixed Amount(₹)'
+                                            ? [
+                                                BoxShadow(
+                                                    color: Colors.black
+                                                        .withOpacity(0.05),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 2))
+                                              ]
+                                            : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4.0),
+                                      child: Text(
                                         'Fixed(₹)',
                                         style: GoogleFonts.inter(
-                                          color: _discountType ==
-                                                  'Fixed Amount(₹)'
-                                              ? Colors.black87
-                                              : Colors.grey.shade600,
+                                          color:
+                                              _discountType == 'Fixed Amount(₹)'
+                                                  ? Colors.black87
+                                                  : Colors.grey.shade600,
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13,
                                         ),
@@ -586,231 +913,6 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                     ],
                   ),
 
-                  // --- SECTION 4: Settings ---
-                  _buildSectionCard(
-                    title: 'Additional Settings',
-                    children: [
-                      _buildLabel('Renewal Cycle'),
-                      DropdownButtonFormField<String>(
-                        value: _renewalCycle,
-                        decoration: _buildInputDecoration(''),
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                        items: [
-                          'Never (One-time)',
-                          'Every Week',
-                          'Every 10 days',
-                          'Every Month'
-                        ].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value, style: GoogleFonts.inter()),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) =>
-                            setState(() => _renewalCycle = newValue!),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildLabel('Selection Type'),
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    setState(() => _selectionType = 'User'),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: _selectionType == 'User'
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: _selectionType == 'User'
-                                        ? [
-                                            BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2))
-                                          ]
-                                        : [],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.person_outline,
-                                          size: 18,
-                                          color: _selectionType == 'User'
-                                              ? Colors.black87
-                                              : Colors.grey.shade600),
-                                      const SizedBox(width: 6),
-                                      Text('User',
-                                          style: GoogleFonts.inter(
-                                              color: _selectionType == 'User'
-                                                  ? Colors.black87
-                                                  : Colors.grey.shade600,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    setState(() => _selectionType = 'Multiple'),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: _selectionType == 'Multiple'
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: _selectionType == 'Multiple'
-                                        ? [
-                                            BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2))
-                                          ]
-                                        : [],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.people_outline,
-                                          size: 18,
-                                          color: _selectionType == 'Multiple'
-                                              ? Colors.black87
-                                              : Colors.grey.shade600),
-                                      const SizedBox(width: 6),
-                                      Text('Multiple',
-                                          style: GoogleFonts.inter(
-                                              color:
-                                                  _selectionType == 'Multiple'
-                                                      ? Colors.black87
-                                                      : Colors.grey.shade600,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildLabel('Status'),
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => setState(() => _status = 'Active'),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: _status == 'Active'
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: _status == 'Active'
-                                        ? [
-                                            BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2))
-                                          ]
-                                        : [],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text('Active',
-                                      style: GoogleFonts.inter(
-                                          color: _status == 'Active'
-                                              ? Colors.black87
-                                              : Colors.grey.shade600,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13)),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    setState(() => _status = 'Inactive'),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: _status == 'Inactive'
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: _status == 'Inactive'
-                                        ? [
-                                            BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.05),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2))
-                                          ]
-                                        : [],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text('Inactive',
-                                      style: GoogleFonts.inter(
-                                          color: _status == 'Inactive'
-                                              ? Colors.black87
-                                              : Colors.grey.shade600,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: CheckboxListTile(
-                          title: Text('Hidden Coupon',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600, fontSize: 14)),
-                          subtitle: Text('Hide from general list',
-                              style: GoogleFonts.inter(
-                                  fontSize: 12, color: Colors.grey.shade600)),
-                          value: _hiddenCoupon,
-                          activeColor: _primaryColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          onChanged: (bool? value) =>
-                              setState(() => _hiddenCoupon = value ?? false),
-                          controlAffinity: ListTileControlAffinity.trailing,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
                   // --- Action Buttons ---
                   Row(
                     children: [
@@ -856,10 +958,10 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                           ),
                           child: ElevatedButton.icon(
                             onPressed:
-                                state is AddCouponLoading ? null : _submitForm,
+                                state is CouponLoading ? null : _submitForm,
                             icon: const Icon(Icons.check_circle_outline_rounded,
                                 color: Colors.white, size: 20),
-                            label: state is AddCouponLoading
+                            label: state is CouponLoading
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,

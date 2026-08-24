@@ -325,7 +325,7 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
               ),
               const SizedBox(width: 4),
               Text(
-                "${plan.price.toInt()}",
+                plan.price.toFormattedPrice(),
                 style: GoogleFonts.inter(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -457,7 +457,7 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "₹${history.amount.toInt()}",
+                history.amount.toRupeeFormat(),
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

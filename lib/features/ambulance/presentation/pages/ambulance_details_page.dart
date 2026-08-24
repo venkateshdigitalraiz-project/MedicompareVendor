@@ -113,7 +113,7 @@ class AmbulanceDetailsPage extends StatelessWidget {
                           Colors.grey[700]!),
                       const SizedBox(width: 12),
                       _priceInfo(
-                          "Discount",
+                          "Discount Price",
                           "₹${(ambulance.discountPrice > 0 ? ambulance.discountPrice : ambulance.price).toInt()}/km",
                           const Color(0xFFF0FDF4),
                           const Color(0xFF15803D)),

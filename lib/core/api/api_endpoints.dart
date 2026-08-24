@@ -24,6 +24,12 @@ class ApiEndpoints {
   static const String slotTimings = '/vendor/vendor-timings/list';
   static String updateSlotTimings(String id) => '/vendor/vendor-timings/update/$id';
   
+  // Coupons
+  static const String couponList = '/vendor/coupon/list';
+  static const String couponCreate = '/vendor/coupon/create';
+  static String updateCoupon(String id) => '/vendor/coupon/update/$id';
+  static const String customersList = '/vendor/notifications/customers-list';
+  
   // Pincodes
   static const String pincodeList = '/vendor/pincode/list';
   static const String pincodeCreate = '/vendor/pincode/create';
@@ -156,4 +162,7 @@ class ApiEndpoints {
   static const String branchList = '/vendor/branch/list';
   static String branchDetails(String id) => '/vendor/branch/details/$id';
   static String updateBranch(String id) => '/vendor/branch/update/$id';
+
+  // Service Charge (Service Fee)
+  static const String serviceChargeList = '/vendor/service-charge/list';
 }

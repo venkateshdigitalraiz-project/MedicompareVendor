@@ -202,7 +202,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
             crossAxisSpacing: 20,
             childAspectRatio: 2.8,
             children: [
-              _infoTile("MONTHLY COST", "₹${pack.amount}"),
+              _infoTile("MONTHLY COST", pack.amount.toRupeeFormat()),
               _infoTile("BILLING CYCLE", "Monthly"),
               _infoTile("AUTO RENEW", "Enabled"),
               _infoTile("PAYMENT", "Razorpay"),
@@ -387,7 +387,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _historyDetail("BILLING PERIOD", month),
-              _historyDetail("AMOUNT PAID", "₹${item.amount}"),
+              _historyDetail("AMOUNT PAID", item.amount.toRupeeFormat()),
               _historyDetail("DATE", date),
             ],
           ),
@@ -395,7 +395,8 @@ class LeadPlanHistoryPage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: TextButton.icon(
-              onPressed: () => InvoiceGenerator.generateAndDownloadInvoice(item),
+              onPressed: () =>
+                  InvoiceGenerator.generateAndDownloadInvoice(item),
               icon: const Icon(Icons.file_download_outlined, size: 18),
               label: Text("Download Invoice",
                   style: GoogleFonts.inter(fontWeight: FontWeight.w600)),

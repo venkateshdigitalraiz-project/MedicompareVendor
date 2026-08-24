@@ -110,18 +110,8 @@ class AmbulanceCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (item.discountPrice > 0 &&
-                          item.discountPrice < item.price)
-                        Text(
-                          "₹${item.price.toInt()}",
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                          ),
-                        ),
                       Text(
-                        "₹${(item.discountPrice > 0 ? item.discountPrice : item.price).toInt()}/km",
+                        "₹${item.price.toInt()}/km",
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

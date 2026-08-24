@@ -52,7 +52,7 @@ class AmbulanceModel extends AmbulanceEntity {
       name: parsedName,
       ambulanceType: parsedAmbulanceType,
       price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      discountPrice: (json['discount'] ?? json['discountprice'] ?? json['discountPrice'] ?? 0).toDouble(),
       status: json['status'] ?? 'pending',
       facilities: facilitiesList,
       files: files,

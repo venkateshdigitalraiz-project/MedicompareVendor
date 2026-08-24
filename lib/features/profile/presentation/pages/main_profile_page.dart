@@ -12,6 +12,8 @@ import 'package:MediCompare/core/utils/core_injection.dart';
 import 'package:MediCompare/core/api/api_endpoints.dart';
 import 'package:MediCompare/core/models/permission_model.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
+import 'package:MediCompare/features/lab_test/presentation/widgets/add_lab_test_sheet.dart';
+import 'package:MediCompare/features/lab_test/presentation/widgets/add_lab_test_package_sheet.dart';
 // import 'package:url_launcher/url_launcher.dart';
 
 class MainprofileScreen extends StatefulWidget {
@@ -34,6 +36,10 @@ class _ProfilePageState extends State<MainprofileScreen> {
   String _email = '';
   String? _profileImageUrl;
   List<String> activeModules = [];
+  bool _isLabTestsExpanded = false;
+  bool _isAmbulanceExpanded = false;
+  bool _isCouponsExpanded = false;
+  bool _isLegalExpanded = false;
 
   @override
   void initState() {
@@ -331,9 +337,37 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 () {
               context.push('/appointment');
             }),
-            _menuTile("Coupons", Icons.local_offer_outlined, () {
-              context.push('/coupons');
-            }),
+            if (_hasPermission('coupons'))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ExpansionTile(
+                  leading: const Icon(Icons.local_offer_outlined,
+                      color: AppColors.primaryDark),
+                  title:
+                      Text("Coupons", style: GoogleFonts.inter(fontSize: 14)),
+                  shape: const Border(),
+                  childrenPadding: const EdgeInsets.only(left: 32),
+                  trailing: Icon(
+                      _isCouponsExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: AppColors.primaryDark),
+                  onExpansionChanged: (expanded) {
+                    setState(() {
+                      _isCouponsExpanded = expanded;
+                    });
+                  },
+                  children: [
+                    _menuTile("Add Coupon", Icons.add_circle_outline_rounded,
+                        () {
+                      context.push('/add-coupon');
+                    }, isSubTile: true),
+                    _menuTile("Coupon List", Icons.list_alt_outlined, () {
+                      context.push('/coupons');
+                    }, isSubTile: true),
+                  ],
+                ),
+              ),
             _menuTile("Leads", Icons.leaderboard_outlined, () {
               context.push('/leads');
             }),
@@ -349,21 +383,24 @@ class _ProfilePageState extends State<MainprofileScreen> {
             _menuTile("My Lead Plan History", Icons.history_edu_outlined, () {
               context.push('/lead-plan-history');
             }),
+            _menuTile("Service Fee", Icons.receipt_long, () {
+              context.push('/service-fee');
+            }),
             if (_hasPermission('medicine'))
               _menuTile("Medicines", Icons.medication_outlined, () {
                 context.push('/medicine-list');
               }),
-            //   if (_hasPermission('medical-equipment'))
-            _menuTile(
-                "Medical Equipment Services", Icons.medical_services_outlined,
-                () {
-              context.push('/equipment-list');
-            }),
+            if (_hasPermission('medicalequipment'))
+              _menuTile(
+                  "Medical Equipment Services", Icons.medical_services_outlined,
+                  () {
+                context.push('/equipment-list');
+              }),
             if (_hasPermission('surgeries'))
               _menuTile("Surgeries", Icons.show_chart, () {
                 context.push('/surgery-list');
               }),
-            if (_hasPermission('lab-tests'))
+            if (_hasPermission('labtests'))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ExpansionTile(
@@ -373,8 +410,16 @@ class _ProfilePageState extends State<MainprofileScreen> {
                       Text("Lab Tests", style: GoogleFonts.inter(fontSize: 14)),
                   shape: const Border(),
                   childrenPadding: const EdgeInsets.only(left: 32),
-                  trailing: const Icon(Icons.keyboard_arrow_down,
+                  trailing: Icon(
+                      _isLabTestsExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       color: AppColors.primaryDark),
+                  onExpansionChanged: (expanded) {
+                    setState(() {
+                      _isLabTestsExpanded = expanded;
+                    });
+                  },
                   children: [
                     _menuTile("List", Icons.list_alt_outlined, () {
                       context.push('/lab-test-list');
@@ -382,6 +427,46 @@ class _ProfilePageState extends State<MainprofileScreen> {
                     _menuTile("Packages", Icons.inventory_2_outlined, () {
                       context.push('/lab-test-package-list');
                     }, isSubTile: true),
+                    if (_hasPermission('labtests', action: 'add')) ...[
+                      _menuTile("Add Lab Test", Icons.add_circle_outline, () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (ctx) => Padding(
+                            padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(ctx).viewInsets.bottom),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.of(ctx).size.height * 0.9),
+                              child: AddLabTestSheet(
+                                onSuccess: () {},
+                              ),
+                            ),
+                          ),
+                        );
+                      }, isSubTile: true),
+                      _menuTile("Add Package", Icons.add_box_outlined, () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (ctx) => Padding(
+                            padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(ctx).viewInsets.bottom),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.of(ctx).size.height * 0.9),
+                              child: AddLabTestPackageSheet(
+                                onSuccess: () {},
+                              ),
+                            ),
+                          ),
+                        );
+                      }, isSubTile: true),
+                    ],
                   ],
                 ),
               ),
@@ -394,24 +479,24 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   "Home Care Services", Icons.home_repair_service_outlined, () {
                 context.push('/homecare-list');
               }),
-            if (_hasPermission('nursing-care'))
+            if (_hasPermission('nursingcare'))
               _menuTile("Care Taker Services", Icons.person_search_outlined,
                   () {
                 context.push('/nursing-list');
               }),
-            if (_hasPermission('dental-service'))
+            if (_hasPermission('dentalservice'))
               _menuTile(
                   "Odontogram Services", Icons.sentiment_satisfied_alt_outlined,
                   () {
                 context.push('/dental-list');
               }),
-            if (_hasPermission('medical-treatment'))
+            if (_hasPermission('medicaltreatment'))
               _menuTile("Medical Treatment Services",
                   Icons.health_and_safety_outlined, () {
                 context.push('/medical-treatment-list');
               }),
 
-            if (_hasPermission('ambulance-service'))
+            if (_hasPermission('ambulanceservice'))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ExpansionTile(
@@ -421,8 +506,16 @@ class _ProfilePageState extends State<MainprofileScreen> {
                       Text("Ambulance", style: GoogleFonts.inter(fontSize: 14)),
                   shape: const Border(),
                   childrenPadding: const EdgeInsets.only(left: 32),
-                  trailing: const Icon(Icons.keyboard_arrow_down,
+                  trailing: Icon(
+                      _isAmbulanceExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       color: AppColors.primaryDark),
+                  onExpansionChanged: (expanded) {
+                    setState(() {
+                      _isAmbulanceExpanded = expanded;
+                    });
+                  },
                   children: [
                     _menuTile("List", Icons.list_alt_outlined, () {
                       context.push('/ambulance-list');
@@ -446,8 +539,16 @@ class _ProfilePageState extends State<MainprofileScreen> {
                     style: GoogleFonts.inter(fontSize: 14)),
                 shape: const Border(),
                 childrenPadding: const EdgeInsets.only(left: 32),
-                trailing: const Icon(Icons.keyboard_arrow_down,
+                trailing: Icon(
+                    _isLegalExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: AppColors.primaryDark),
+                onExpansionChanged: (expanded) {
+                  setState(() {
+                    _isLegalExpanded = expanded;
+                  });
+                },
                 children: [
                   _menuTile("Terms and Conditions", Icons.description_outlined,
                       () {
@@ -637,7 +738,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
   }
 
   Widget _menuTile(String title, IconData icon, VoidCallback onTap,
-      {bool isSubTile = false}) {
+      {bool isSubTile = false, bool showArrow = true}) {
     return Padding(
       padding:
           EdgeInsets.symmetric(horizontal: isSubTile ? 0 : 16, vertical: 6),
@@ -657,7 +758,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
               Expanded(
                   child: Text(title,
                       style: GoogleFonts.inter(fontSize: isSubTile ? 13 : 14))),
-              if (!isSubTile)
+              if (showArrow)
                 const Icon(Icons.chevron_right, color: AppColors.primaryDark),
             ],
           ),
