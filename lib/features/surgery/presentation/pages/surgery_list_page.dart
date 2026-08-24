@@ -189,49 +189,49 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.show_chart,
-                    color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Manage Surgeries",
-                    style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E1B4B)),
-                  ),
-                  Text(
-                    "Manage surgical procedures and vendors",
-                    style: GoogleFonts.inter(
-                        fontSize: 12, color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildHeader() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     width: double.infinity,
+  //     color: Colors.white,
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Container(
+  //               padding: const EdgeInsets.all(8),
+  //               decoration: BoxDecoration(
+  //                 color: AppColors.primary.withOpacity(0.1),
+  //                 borderRadius: BorderRadius.circular(8),
+  //               ),
+  //               child: const Icon(Icons.show_chart,
+  //                   color: AppColors.primary, size: 20),
+  //             ),
+  //             const SizedBox(width: 12),
+  //             Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   "Manage Surgeries",
+  //                   style: GoogleFonts.inter(
+  //                       fontSize: 16,
+  //                       fontWeight: FontWeight.bold,
+  //                       color: const Color(0xFF1E1B4B)),
+  //                 ),
+  //                 Text(
+  //                   "Manage surgical procedures and vendors",
+  //                   style: GoogleFonts.inter(
+  //                       fontSize: 12, color: Colors.grey[500]),
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildFilters(SurgeryLoaded state) {
     return Container(
@@ -321,7 +321,7 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                   ].map((e) {
                     return Container(
                       alignment: Alignment.centerLeft,
-                      child: e.child!,
+                      child: e.child,
                     );
                   }).toList();
                 },

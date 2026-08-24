@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../domain/entities/order_entity.dart';
-import '../bloc/orders_bloc.dart';
-import '../bloc/orders_event.dart';
-import '../bloc/orders_state.dart';
+// import '../../domain/entities/order_entity.dart';
+// import '../bloc/orders_bloc.dart';
+// import '../bloc/orders_event.dart';
+// import '../bloc/orders_state.dart';
 import '../bloc/rental_booking_bloc.dart';
 import '../bloc/rental_booking_event.dart';
 import '../bloc/rental_booking_state.dart';
@@ -25,11 +25,11 @@ class RentalBookingsPage extends StatefulWidget {
 class _RentalBookingsPageState extends State<RentalBookingsPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
-  String _selectedDuration = 'No delivery Time';
+  // String _selectedDuration = 'No delivery Time';
   int _currentPage = 1;
   final ScrollController _scrollController = ScrollController();
 
-  final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
+  // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
     {'label': 'New', 'value': 'new'},
@@ -307,7 +307,8 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                       ),
                     ],
                   ),
-                  _buildStatusBadge(item.orderDetails?.orderStatus ?? item.orderStatus),
+                  _buildStatusBadge(
+                      item.orderDetails?.orderStatus ?? item.orderStatus),
                 ],
               ),
               const Divider(height: 24),
@@ -420,24 +421,43 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
 Color getStatusColor(String? status) {
   if (status == null) return Colors.grey;
   switch (status.toLowerCase()) {
-    case 'new': return Colors.blue;
-    case 'accepted': return Colors.green;
-    case 'assigned': return Colors.indigo;
-    case 'processing': return Colors.orange;
-    case 'shipped': return Colors.deepPurple;
-    case 'delivered': return Colors.green;
-    case 'cancelled': return Colors.red;
-    case 'returned': return Colors.redAccent;
-    case 'confirmed': return Colors.teal;
-    case 'rejected': return Colors.red;
-    case 'pending': return Colors.orange;
-    case 'completed': return Colors.green;
-    case 'failed': return Colors.red;
-    case 'refunded': return Colors.purple;
-    case 'sample_collected': return Colors.teal;
-    case 'sample_not_collected': return Colors.orange;
-    case 'partially_returned': return Colors.deepOrange;
-    case 'under_review': return Colors.amber;
-    default: return Colors.grey;
+    case 'new':
+      return Colors.blue;
+    case 'accepted':
+      return Colors.green;
+    case 'assigned':
+      return Colors.indigo;
+    case 'processing':
+      return Colors.orange;
+    case 'shipped':
+      return Colors.deepPurple;
+    case 'delivered':
+      return Colors.green;
+    case 'cancelled':
+      return Colors.red;
+    case 'returned':
+      return Colors.redAccent;
+    case 'confirmed':
+      return Colors.teal;
+    case 'rejected':
+      return Colors.red;
+    case 'pending':
+      return Colors.orange;
+    case 'completed':
+      return Colors.green;
+    case 'failed':
+      return Colors.red;
+    case 'refunded':
+      return Colors.purple;
+    case 'sample_collected':
+      return Colors.teal;
+    case 'sample_not_collected':
+      return Colors.orange;
+    case 'partially_returned':
+      return Colors.deepOrange;
+    case 'under_review':
+      return Colors.amber;
+    default:
+      return Colors.grey;
   }
 }

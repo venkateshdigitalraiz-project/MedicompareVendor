@@ -9,7 +9,7 @@ class MedicalEquipmentService {
 
   MedicalEquipmentService(this.apiService);
 
-  Future<List<MedicalEquipmentCategory>> getCategories() async {
+  Future<List<MedicalEquipmentCategoryModel>> getCategories() async {
     try {
       final response =
           await apiService.get(ApiEndpoints.medicalEquipmentCategories);
@@ -17,7 +17,7 @@ class MedicalEquipmentService {
       if (body['success'] == true) {
         final List categoriesJson = body['data']['allcategory'] ?? [];
         return categoriesJson
-            .map((json) => MedicalEquipmentCategory.fromJson(json))
+            .map((json) => MedicalEquipmentCategoryModel.fromJson(json))
             .toList();
       }
       throw ServerException(body['message'] ?? 'Failed to fetch categories');
@@ -27,7 +27,7 @@ class MedicalEquipmentService {
     }
   }
 
-  Future<MedicalEquipmentResponse> getList({
+  Future<MedicalEquipmentResponseModel> getList({
     String? categoryId,
     String? search,
     int page = 1,
@@ -44,7 +44,7 @@ class MedicalEquipmentService {
           queryParameters: query);
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
-        return MedicalEquipmentResponse.fromJson(body['data']);
+        return MedicalEquipmentResponseModel.fromJson(body['data']);
       }
       throw ServerException(body['message'] ?? 'Failed to fetch products');
     } catch (e) {
@@ -53,13 +53,13 @@ class MedicalEquipmentService {
     }
   }
 
-  Future<MedicalEquipmentItem> getDetails(String id) async {
+  Future<MedicalEquipmentItemModel> getDetails(String id) async {
     try {
       final response =
-          await apiService.get(ApiEndpoints.medicalEquipmentDetails(id));
+          await apiService.post(ApiEndpoints.medicalEquipmentDetails(id));
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
-        return MedicalEquipmentItem.fromJson(body['data']['product']);
+        return MedicalEquipmentItemModel.fromJson(body['data']['product']);
       }
       throw ServerException(body['message'] ?? 'Failed to fetch details');
     } catch (e) {
@@ -68,7 +68,7 @@ class MedicalEquipmentService {
     }
   }
 
-  Future<List<MedicalEquipmentDropdownItem>> searchTablets(String query) async {
+  Future<List<MedicalEquipmentDropdownItemModel>> searchTablets(String query) async {
     try {
       final response = await apiService.get(
         ApiEndpoints.commonTablets,
@@ -78,7 +78,7 @@ class MedicalEquipmentService {
       if (body['success'] == true) {
         final List list = body['data']['tablets'] ?? [];
         return list
-            .map((e) => MedicalEquipmentDropdownItem.fromJson(e))
+            .map((e) => MedicalEquipmentDropdownItemModel.fromJson(e))
             .toList();
       }
       return [];

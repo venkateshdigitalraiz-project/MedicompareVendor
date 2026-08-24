@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
-import 'package:MediCompare/features/medical_equipment/data/data_sources/medical_equipment_service.dart';
-import 'package:MediCompare/features/medical_equipment/data/models/medical_equipment_model.dart';
-import 'package:MediCompare/features/medical_equipment/medical_equipment_injection.dart';
+import '../../domain/entities/medical_equipment_entity.dart';
+import '../../domain/usecases/create_medical_equipment_usecase.dart';
+import '../../domain/usecases/search_tablets_usecase.dart';
+import '../../domain/usecases/update_medical_equipment_usecase.dart';
+import '../../medical_equipment_injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -25,8 +27,12 @@ class AddMedicalEquipmentSheet extends StatefulWidget {
 
 class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
   final _formKey = GlobalKey<FormState>();
-  final MedicalEquipmentService _service =
-      MedicalEquipmentInjection.provideMedicalEquipmentService();
+  final SearchTabletsUseCase _searchTabletsUseCase =
+      MedicalEquipmentInjection.provideSearchTabletsUseCase();
+  final CreateMedicalEquipmentUseCase _createUseCase =
+      MedicalEquipmentInjection.provideCreateUseCase();
+  final UpdateMedicalEquipmentUseCase _updateUseCase =
+      MedicalEquipmentInjection.provideUpdateUseCase();
 
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
@@ -70,7 +76,7 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () async {
       try {
-        final results = await _service.searchTablets(query);
+        final results = await _searchTabletsUseCase(query);
         if (mounted) setState(() => _searchResults = results);
       } catch (_) {}
     });
@@ -116,9 +122,9 @@ class _AddMedicalEquipmentSheetState extends State<AddMedicalEquipmentSheet> {
       };
 
       if (isEditMode) {
-        await _service.update(widget.editItem!.id, payload);
+        await _updateUseCase(widget.editItem!.id, payload);
       } else {
-        await _service.create(payload);
+        await _createUseCase(payload);
       }
       widget.onSuccess();
       if (mounted) {

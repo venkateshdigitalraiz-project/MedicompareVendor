@@ -1,47 +1,37 @@
-class MedicalEquipmentCategory {
-  final String id;
-  final String name;
+import '../../domain/entities/medical_equipment_entity.dart';
 
-  MedicalEquipmentCategory({
-    required this.id,
-    required this.name,
+class MedicalEquipmentCategoryModel extends MedicalEquipmentCategory {
+  const MedicalEquipmentCategoryModel({
+    required super.id,
+    required super.name,
+    super.slug,
   });
 
-  factory MedicalEquipmentCategory.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentCategory(
+  factory MedicalEquipmentCategoryModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentCategoryModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
+      slug: json['slug'],
     );
   }
 }
 
-class MedicalEquipmentItem {
-  final String id;
-  final double price;
-  final double discountPrice;
-  final String status;
-  final double? fixedDeposit;
-  final double? returnCharge;
-  final double? serviceCharges;
-  final double? interest;
-  final double? perDayRent;
-  final MedicalEquipmentDetails details;
-
-  MedicalEquipmentItem({
-    required this.id,
-    required this.price,
-    required this.discountPrice,
-    required this.status,
-    this.fixedDeposit,
-    this.returnCharge,
-    this.serviceCharges,
-    this.interest,
-    this.perDayRent,
-    required this.details,
+class MedicalEquipmentItemModel extends MedicalEquipmentItem {
+  const MedicalEquipmentItemModel({
+    required super.id,
+    required super.price,
+    required super.discountPrice,
+    required super.status,
+    super.fixedDeposit,
+    super.returnCharge,
+    super.serviceCharges,
+    super.interest,
+    super.perDayRent,
+    required super.details,
   });
 
-  factory MedicalEquipmentItem.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentItem(
+  factory MedicalEquipmentItemModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentItemModel(
       id: json['_id'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
@@ -51,34 +41,25 @@ class MedicalEquipmentItem {
       serviceCharges: (json['serviceCharges'] ?? 0).toDouble(),
       interest: (json['interest'] ?? 0).toDouble(),
       perDayRent: (json['perDayRent'] ?? 0).toDouble(),
-      details: MedicalEquipmentDetails.fromJson(json['tablets'] ?? {}),
+      details: MedicalEquipmentDetailsModel.fromJson(json['tablets'] ?? {}),
     );
   }
 }
 
-class MedicalEquipmentDetails {
-  final String id;
-  final String name;
-  final String description;
-  final String? machineType;
-  final String? model;
-  final String? condition;
-  final List<String> files;
-  final MedicalEquipmentSubcategory? subcategory;
-
-  MedicalEquipmentDetails({
-    required this.id,
-    required this.name,
-    required this.description,
-    this.machineType,
-    this.model,
-    this.condition,
-    required this.files,
-    this.subcategory,
+class MedicalEquipmentDetailsModel extends MedicalEquipmentDetails {
+  const MedicalEquipmentDetailsModel({
+    required super.id,
+    required super.name,
+    required super.description,
+    super.machineType,
+    super.model,
+    super.condition,
+    required super.files,
+    super.subcategory,
   });
 
-  factory MedicalEquipmentDetails.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentDetails(
+  factory MedicalEquipmentDetailsModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentDetailsModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
@@ -87,24 +68,23 @@ class MedicalEquipmentDetails {
       condition: json['condition'],
       files: (json['files'] as List?)?.map((e) => e.toString()).toList() ?? [],
       subcategory: json['subcategory'] is Map
-          ? MedicalEquipmentSubcategory.fromJson(json['subcategory'])
+          ? MedicalEquipmentSubcategoryModel.fromJson(json['subcategory'])
           : (json['subcategorys'] is Map
-              ? MedicalEquipmentSubcategory.fromJson(json['subcategorys'])
+              ? MedicalEquipmentSubcategoryModel.fromJson(json['subcategorys'])
               : null),
     );
   }
 }
 
-class MedicalEquipmentSubcategory {
-  final String id;
-  final String name;
-  final String? description;
+class MedicalEquipmentSubcategoryModel extends MedicalEquipmentSubcategory {
+  const MedicalEquipmentSubcategoryModel({
+    required super.id,
+    required super.name,
+    super.description,
+  });
 
-  MedicalEquipmentSubcategory(
-      {required this.id, required this.name, this.description});
-
-  factory MedicalEquipmentSubcategory.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentSubcategory(
+  factory MedicalEquipmentSubcategoryModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentSubcategoryModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'],
@@ -112,41 +92,33 @@ class MedicalEquipmentSubcategory {
   }
 }
 
-class MedicalEquipmentResponse {
-  final List<MedicalEquipmentItem> list;
-  final MedicalEquipmentPagination pagination;
-
-  MedicalEquipmentResponse({
-    required this.list,
-    required this.pagination,
+class MedicalEquipmentResponseModel extends MedicalEquipmentResponse {
+  const MedicalEquipmentResponseModel({
+    required super.list,
+    required super.pagination,
   });
 
-  factory MedicalEquipmentResponse.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentResponse(
+  factory MedicalEquipmentResponseModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentResponseModel(
       list: (json['list'] as List?)
-              ?.map((i) => MedicalEquipmentItem.fromJson(i))
+              ?.map((i) => MedicalEquipmentItemModel.fromJson(i))
               .toList() ??
           [],
-      pagination: MedicalEquipmentPagination.fromJson(json['pagination'] ?? {}),
+      pagination: MedicalEquipmentPaginationModel.fromJson(json['pagination'] ?? {}),
     );
   }
 }
 
-class MedicalEquipmentPagination {
-  final int total;
-  final int page;
-  final int limit;
-  final int totalPages;
-
-  MedicalEquipmentPagination({
-    required this.total,
-    required this.page,
-    required this.limit,
-    required this.totalPages,
+class MedicalEquipmentPaginationModel extends MedicalEquipmentPagination {
+  const MedicalEquipmentPaginationModel({
+    required super.total,
+    required super.page,
+    required super.limit,
+    required super.totalPages,
   });
 
-  factory MedicalEquipmentPagination.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentPagination(
+  factory MedicalEquipmentPaginationModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentPaginationModel(
       total: json['total'] ?? 0,
       page: json['page'] ?? 1,
       limit: json['limit'] ?? 10,
@@ -155,32 +127,25 @@ class MedicalEquipmentPagination {
   }
 }
 
-class MedicalEquipmentDropdownItem {
-  final String id;
-  final String name;
-  final String? description;
-  final String? model;
-  final String? brand;
-  final MedicalEquipmentSubcategory? subcategory;
-
-  MedicalEquipmentDropdownItem({
-    required this.id,
-    required this.name,
-    this.description,
-    this.model,
-    this.brand,
-    this.subcategory,
+class MedicalEquipmentDropdownItemModel extends MedicalEquipmentDropdownItem {
+  const MedicalEquipmentDropdownItemModel({
+    required super.id,
+    required super.name,
+    super.description,
+    super.model,
+    super.brand,
+    super.subcategory,
   });
 
-  factory MedicalEquipmentDropdownItem.fromJson(Map<String, dynamic> json) {
-    return MedicalEquipmentDropdownItem(
+  factory MedicalEquipmentDropdownItemModel.fromJson(Map<String, dynamic> json) {
+    return MedicalEquipmentDropdownItemModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'],
       model: json['model'],
       brand: json['brand'] is Map ? json['brand']['name'] : json['brand'],
       subcategory: json['subcategory'] is Map
-          ? MedicalEquipmentSubcategory.fromJson(json['subcategory'])
+          ? MedicalEquipmentSubcategoryModel.fromJson(json['subcategory'])
           : null,
     );
   }

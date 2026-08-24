@@ -1,3 +1,5 @@
+// ignore_for_file: dead_null_aware_expression, unnecessary_null_comparison
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
@@ -21,7 +23,7 @@ class MedicineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final details = item.details;
-    final String name = details.name ?? "Unknown Medicine";
+    final String name = details.name;
     final String category = details.subcategory?.name ?? "No Category";
     final String rawImageUrl = (details.tabletVariants.isNotEmpty &&
             details.tabletVariants.first.files.isNotEmpty)
@@ -56,7 +58,8 @@ class MedicineCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        cacheWidth: 150, // Optimize memory by resizing image at decode time
+                        cacheWidth:
+                            150, // Optimize memory by resizing image at decode time
                         cacheHeight: 150,
                         errorBuilder: (context, error, stackTrace) =>
                             _placeholderImage(),

@@ -40,7 +40,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
 
   // Google Places API state
   List<dynamic> _predictions = [];
-  bool _isSearchingAddress = false;
+  bool isSearchingAddress = false;
 
   @override
   void initState() {
@@ -73,7 +73,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
       return;
     }
 
-    setState(() => _isSearchingAddress = true);
+    setState(() => isSearchingAddress = true);
     try {
       final url =
           "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&key=$_googleApiKey&sessiontoken=branch_edit_v1";
@@ -88,7 +88,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
     } catch (e) {
       debugPrint("Address search error: $e");
     } finally {
-      if (mounted) setState(() => _isSearchingAddress = false);
+      if (mounted) setState(() => isSearchingAddress = false);
     }
   }
 

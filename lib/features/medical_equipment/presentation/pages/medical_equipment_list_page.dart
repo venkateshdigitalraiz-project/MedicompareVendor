@@ -1,5 +1,6 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/medical_equipment/medical_equipment_injection.dart';
+import '../../domain/usecases/delete_medical_equipment_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../bloc/medical_equipment_bloc.dart';
 import '../bloc/medical_equipment_event.dart';
 import '../bloc/medical_equipment_state.dart';
-import '../../data/models/medical_equipment_model.dart';
+import '../../domain/entities/medical_equipment_entity.dart';
 import '../widgets/medical_equipment_card.dart';
 import '../widgets/add_medical_equipment_sheet.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
@@ -23,6 +24,7 @@ class MedicalEquipmentListPage extends StatefulWidget {
 class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isFetchingMore = false;
 
   @override
   void initState() {
@@ -32,11 +34,14 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
 
   void _onScroll() {
     final state = context.read<MedicalEquipmentBloc>().state;
-    if (state is MedicalEquipmentLoaded && !state.isLoadingMore) {
+    if (state is MedicalEquipmentLoaded && !state.isLoadingMore && !_isFetchingMore) {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         final pagination = state.response.pagination;
         if (pagination.page < pagination.totalPages) {
+          setState(() {
+            _isFetchingMore = true;
+          });
           context
               .read<MedicalEquipmentBloc>()
               .add(LoadMedicalEquipmentListEvent(
@@ -123,7 +128,14 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
             ),
         ],
       ),
-      body: BlocBuilder<MedicalEquipmentBloc, MedicalEquipmentState>(
+      body: BlocConsumer<MedicalEquipmentBloc, MedicalEquipmentState>(
+        listener: (context, state) {
+          if (state is MedicalEquipmentLoaded && !state.isLoadingMore) {
+            setState(() {
+              _isFetchingMore = false;
+            });
+          }
+        },
         builder: (context, state) {
           if (state is MedicalEquipmentLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -262,7 +274,7 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
                   ),
                   ...state.categories.map((c) => DropdownMenuItem(
                         value: c.id,
-                        child: Text(c.name,
+                        child: Text(c.slug != null && c.slug!.isNotEmpty ? "${c.name} (${c.slug})" : c.name,
                             style: GoogleFonts.inter(
                                 fontSize: 13, color: Colors.black87)),
                       )),
@@ -319,9 +331,9 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               try {
-                final service =
-                    MedicalEquipmentInjection.provideMedicalEquipmentService();
-                await service.delete(item.id);
+                final deleteUseCase =
+                    MedicalEquipmentInjection.provideDeleteUseCase();
+                await deleteUseCase(item.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Equipment deleted successfully'),

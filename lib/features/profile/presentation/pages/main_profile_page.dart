@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/gestures.dart';
+// import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +12,7 @@ import 'package:MediCompare/core/utils/core_injection.dart';
 import 'package:MediCompare/core/api/api_endpoints.dart';
 import 'package:MediCompare/core/models/permission_model.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 class MainprofileScreen extends StatefulWidget {
   const MainprofileScreen({super.key});
@@ -33,7 +33,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
   String _mobile = '';
   String _email = '';
   String? _profileImageUrl;
-  List<String> _activeModules = [];
+  List<String> activeModules = [];
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
 
             PermissionHandler().setPermissions(permissions);
 
-            _activeModules = permissions
+            activeModules = permissions
                 .where((p) => p.status == 'active' && p.hasAction('view'))
                 .map((p) => p.module)
                 .toList();
@@ -182,16 +182,16 @@ class _ProfilePageState extends State<MainprofileScreen> {
     return PermissionHandler().hasPermission(module, action);
   }
 
-  Future<void> _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $url')),
-        );
-      }
-    }
-  }
+  // Future<void> _launchURL(String url) async {
+  //   final Uri uri = Uri.parse(url);
+  //   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Could not launch $url')),
+  //       );
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -331,6 +331,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 () {
               context.push('/appointment');
             }),
+            _menuTile("Coupons", Icons.local_offer_outlined, () {
+              context.push('/coupons');
+            }),
             _menuTile("Leads", Icons.leaderboard_outlined, () {
               context.push('/leads');
             }),
@@ -350,6 +353,12 @@ class _ProfilePageState extends State<MainprofileScreen> {
               _menuTile("Medicines", Icons.medication_outlined, () {
                 context.push('/medicine-list');
               }),
+            //   if (_hasPermission('medical-equipment'))
+            _menuTile(
+                "Medical Equipment Services", Icons.medical_services_outlined,
+                () {
+              context.push('/equipment-list');
+            }),
             if (_hasPermission('surgeries'))
               _menuTile("Surgeries", Icons.show_chart, () {
                 context.push('/surgery-list');
@@ -401,12 +410,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   Icons.health_and_safety_outlined, () {
                 context.push('/medical-treatment-list');
               }),
-            if (_hasPermission('medical-equipment'))
-              _menuTile(
-                  "Medical Equipment Services", Icons.medical_services_outlined,
-                  () {
-                context.push('/equipment-list');
-              }),
+
             if (_hasPermission('ambulance-service'))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -662,68 +666,68 @@ class _ProfilePageState extends State<MainprofileScreen> {
     );
   }
 
-  void _showSubscriptionUpgradeDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Text(
-            "Subscription Upgrade",
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18),
-          ),
-          content: Text(
-            "To upgrade your plan and unlock additional features, please contact our support team.",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-          ),
-          actions: [
-            Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryDark,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      context.push('/support-ticket');
-                    },
-                    child: Text(
-                      "Contact Support",
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      "Close",
-                      style: GoogleFonts.inter(
-                        color: AppColors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showSubscriptionUpgradeDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         shape:
+  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+  //         title: Text(
+  //           "Subscription Upgrade",
+  //           style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18),
+  //         ),
+  //         content: Text(
+  //           "To upgrade your plan and unlock additional features, please contact our support team.",
+  //           textAlign: TextAlign.center,
+  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+  //         ),
+  //         actions: [
+  //           Column(
+  //             children: [
+  //               SizedBox(
+  //                 width: double.infinity,
+  //                 child: ElevatedButton(
+  //                   style: ElevatedButton.styleFrom(
+  //                     backgroundColor: AppColors.primaryDark,
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                   ),
+  //                   onPressed: () {
+  //                     Navigator.pop(context);
+  //                     context.push('/support-ticket');
+  //                   },
+  //                   child: Text(
+  //                     "Contact Support",
+  //                     style: GoogleFonts.inter(
+  //                       color: Colors.white,
+  //                       fontWeight: FontWeight.w600,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 8),
+  //               SizedBox(
+  //                 width: double.infinity,
+  //                 child: TextButton(
+  //                   onPressed: () => Navigator.pop(context),
+  //                   child: Text(
+  //                     "Close",
+  //                     style: GoogleFonts.inter(
+  //                       color: AppColors.grey,
+  //                       fontWeight: FontWeight.w500,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _infoRow(IconData icon, String text) {
     return Padding(

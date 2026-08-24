@@ -1,14 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/data_sources/medical_equipment_service.dart';
+import '../../domain/entities/medical_equipment_entity.dart';
+import '../../domain/usecases/get_medical_equipment_categories_usecase.dart';
+import '../../domain/usecases/get_medical_equipment_list_usecase.dart';
 import 'medical_equipment_event.dart';
 import 'medical_equipment_state.dart';
-import '../../data/models/medical_equipment_model.dart';
 
 class MedicalEquipmentBloc
     extends Bloc<MedicalEquipmentEvent, MedicalEquipmentState> {
-  final MedicalEquipmentService service;
+  final GetMedicalEquipmentCategoriesUseCase getCategoriesUseCase;
+  final GetMedicalEquipmentListUseCase getListUseCase;
 
-  MedicalEquipmentBloc(this.service) : super(MedicalEquipmentInitial()) {
+  MedicalEquipmentBloc({
+    required this.getCategoriesUseCase,
+    required this.getListUseCase,
+  }) : super(MedicalEquipmentInitial()) {
     on<LoadMedicalEquipmentCategoriesEvent>(_onLoadCategories);
     on<LoadMedicalEquipmentListEvent>(_onLoadList);
     on<SelectMedicalEquipmentCategoryEvent>(_onSelectCategory);
@@ -19,8 +24,8 @@ class MedicalEquipmentBloc
       Emitter<MedicalEquipmentState> emit) async {
     emit(MedicalEquipmentLoading());
     try {
-      final categories = await service.getCategories();
-      final response = await service.getList(page: 1);
+      final categories = await getCategoriesUseCase();
+      final response = await getListUseCase(page: 1);
       emit(MedicalEquipmentLoaded(categories: categories, response: response));
     } catch (e) {
       emit(MedicalEquipmentError(e.toString()));
@@ -34,7 +39,7 @@ class MedicalEquipmentBloc
       try {
         if (event.isLoadMore) {
           emit(currentState.copyWith(isLoadingMore: true));
-          final newResponse = await service.getList(
+          final newResponse = await getListUseCase(
             page: event.page,
             categoryId: currentState.selectedCategoryId,
             search: currentState.searchQuery,
@@ -48,7 +53,7 @@ class MedicalEquipmentBloc
           ));
         } else {
           emit(MedicalEquipmentLoading());
-          final response = await service.getList(
+          final response = await getListUseCase(
             page: 1,
             categoryId: event.categoryId ?? currentState.selectedCategoryId,
             search: event.search ?? currentState.searchQuery,
@@ -72,7 +77,7 @@ class MedicalEquipmentBloc
     if (currentState is MedicalEquipmentLoaded) {
       emit(MedicalEquipmentLoading());
       try {
-        final response = await service.getList(
+        final response = await getListUseCase(
           page: 1,
           categoryId: event.categoryId,
           search: currentState.searchQuery,
@@ -92,7 +97,7 @@ class MedicalEquipmentBloc
     final currentState = state;
     if (currentState is MedicalEquipmentLoaded) {
       try {
-        final response = await service.getList(
+        final response = await getListUseCase(
           page: 1,
           categoryId: currentState.selectedCategoryId,
           search: event.query,
@@ -108,10 +113,13 @@ class MedicalEquipmentBloc
   }
 }
 
-extension on dynamic {
-  dynamic copyWith({List? list, dynamic pagination}) {
+extension on MedicalEquipmentResponse {
+  MedicalEquipmentResponse copyWith({
+    List<MedicalEquipmentItem>? list,
+    MedicalEquipmentPagination? pagination,
+  }) {
     return MedicalEquipmentResponse(
-      list: (list ?? this.list).cast<MedicalEquipmentItem>(),
+      list: list ?? this.list,
       pagination: pagination ?? this.pagination,
     );
   }

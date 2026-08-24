@@ -47,7 +47,6 @@ class MedicineVariantFormData {
   }
 }
 
-
 class AddMedicineSheet extends StatefulWidget {
   final VoidCallback onSuccess;
   final MedicineItem? editMedicine;
@@ -140,13 +139,13 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
 
         // Load variants
         final List variantDetailsJson = data['variantdetails'] ?? [];
-        final tabletVariantsJson = tabletData['tabletvariant'] ??
-            tabletData['tabletvariants'] ??
-            [];
+        // final tabletVariantsJson = tabletData['tabletvariant'] ??
+        tabletData['tabletvariants'] ?? [];
 
         _variants = variantDetailsJson.map((vd) {
           final tvMatch = (tabletData['tabletvariant'] as List?)?.firstWhere(
-              (tv) => tv['_id'] == vd['variantId'] || tv['_id'] == vd['varantId'],
+              (tv) =>
+                  tv['_id'] == vd['variantId'] || tv['_id'] == vd['varantId'],
               orElse: () => null);
           return MedicineVariantFormData(
             id: vd['_id'],
@@ -221,12 +220,17 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     final double? topLevelPrice = double.tryParse(_mrpPriceController.text);
     final double topPrice = (topLevelPrice != null && topLevelPrice > 0)
         ? topLevelPrice
-        : (firstVariant != null ? (double.tryParse(firstVariant.price.text) ?? 0) : 0);
+        : (firstVariant != null
+            ? (double.tryParse(firstVariant.price.text) ?? 0)
+            : 0);
 
     final double? topLevelDiscount = double.tryParse(_discountController.text);
-    final double topDiscount = (topLevelDiscount != null && topLevelDiscount > 0)
-        ? topLevelDiscount
-        : (firstVariant != null ? (double.tryParse(firstVariant.discount.text) ?? 0) : 0);
+    final double topDiscount =
+        (topLevelDiscount != null && topLevelDiscount > 0)
+            ? topLevelDiscount
+            : (firstVariant != null
+                ? (double.tryParse(firstVariant.discount.text) ?? 0)
+                : 0);
 
     setState(() => _isLoading = true);
     try {
@@ -237,22 +241,25 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
         "discount": topDiscount,
         "discountType": _discountType,
         "returnDetails": int.tryParse(_selectedReturnPolicy ?? '0') ?? 0,
-        "variants": _variants.map((v) => {
-          if (v.id != null) "_id": v.id,
-          "variantId": v.variantId,
-          "varantId": v.variantId, // Support internal typo in backend for updates
-          "name": v.name,
-          "price": double.tryParse(v.price.text) ?? 0,
-          "discount": double.tryParse(v.discount.text) ?? 0,
-          "discountprice": double.tryParse(v.discount.text) ?? 0,
-          "discountType": v.discountType,
-          "stock": int.tryParse(v.quantity.text) ?? 0,
-          "quantity": int.tryParse(v.quantity.text) ?? 0,
-          "isStock": v.isInStock,
-          "status": v.isActive ? "active" : "inactive",
-          "pricePerUnit": v.perUnit.text,
-          "removeImage": false,
-        }).toList(),
+        "variants": _variants
+            .map((v) => {
+                  if (v.id != null) "_id": v.id,
+                  "variantId": v.variantId,
+                  "varantId": v
+                      .variantId, // Support internal typo in backend for updates
+                  "name": v.name,
+                  "price": double.tryParse(v.price.text) ?? 0,
+                  "discount": double.tryParse(v.discount.text) ?? 0,
+                  "discountprice": double.tryParse(v.discount.text) ?? 0,
+                  "discountType": v.discountType,
+                  "stock": int.tryParse(v.quantity.text) ?? 0,
+                  "quantity": int.tryParse(v.quantity.text) ?? 0,
+                  "isStock": v.isInStock,
+                  "status": v.isActive ? "active" : "inactive",
+                  "pricePerUnit": v.perUnit.text,
+                  "removeImage": false,
+                })
+            .toList(),
         "quantity": int.tryParse(_quantityController.text) ?? 0,
         "pricePerUnit": double.tryParse(_pricePerUnitController.text) ?? 0,
         "isStock": _isInStock,
@@ -451,8 +458,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                   border: Border.all(color: Colors.grey[200]!),
                                   boxShadow: [
                                     BoxShadow(
-                                        color: Colors.black
-                                            .withOpacity(0.05),
+                                        color: Colors.black.withOpacity(0.05),
                                         blurRadius: 8)
                                   ],
                                 ),
@@ -464,41 +470,52 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                     final option = _searchResults[index];
                                     return InkWell(
                                       onTap: () async {
-                                        setState(() => _isFetchingDetails = true);
+                                        setState(
+                                            () => _isFetchingDetails = true);
                                         try {
-                                          final fullDetails = await _medicineService.getMedicineDetails(option.id);
+                                          final fullDetails =
+                                              await _medicineService
+                                                  .getMedicineDetails(
+                                                      option.id);
                                           setState(() {
                                             _selectedTablet = fullDetails;
-                                            _searchController.text = fullDetails.name;
-                                            _mrpPriceController.text = fullDetails.price.toString();
+                                            _searchController.text =
+                                                fullDetails.name;
+                                            _mrpPriceController.text =
+                                                fullDetails.price.toString();
                                             _searchResults = [];
 
                                             // Populate variants from selection
                                             for (var v in _variants) {
                                               v.dispose();
                                             }
-                                            _variants = fullDetails.tabletVariants
+                                            _variants = fullDetails
+                                                .tabletVariants
                                                 .map((tv) =>
                                                     MedicineVariantFormData(
                                                       variantId: tv.id,
                                                       name: tv.name,
                                                       defaultPrice:
                                                           tv.price.toString(),
-                                                      defaultPerUnit: tv
-                                                              .pricePerUnit ??
-                                                          '',
-                                                      defaultStock: tv.stock?.toString() ?? '0',
+                                                      defaultPerUnit:
+                                                          tv.pricePerUnit ?? '',
+                                                      defaultStock: tv.stock
+                                                              ?.toString() ??
+                                                          '0',
                                                     ))
                                                 .toList();
                                           });
                                         } catch (e) {
                                           if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Error fetching details: $e'))
-                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Error fetching details: $e')));
                                           }
                                         } finally {
-                                          if (mounted) setState(() => _isFetchingDetails = false);
+                                          if (mounted)
+                                            setState(() =>
+                                                _isFetchingDetails = false);
                                         }
                                       },
                                       child: Padding(
@@ -558,8 +575,10 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                 Row(
                                   children: [
                                     Expanded(
-                                        child: _buildStaticField("Medicine Name",
-                                            _selectedTablet!.name, Icons.link)),
+                                        child: _buildStaticField(
+                                            "Medicine Name",
+                                            _selectedTablet!.name,
+                                            Icons.link)),
                                     const SizedBox(width: 12),
                                     Expanded(
                                         child: _buildTextField(
@@ -569,7 +588,8 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                _buildLabel("Discount Type", icon: Icons.percent),
+                                _buildLabel("Discount Type",
+                                    icon: Icons.percent),
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
@@ -644,7 +664,8 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                                 Row(
                                   children: [
                                     Expanded(
-                                        child: _buildTextField("Percentage/Unit",
+                                        child: _buildTextField(
+                                            "Percentage/Unit",
                                             _percentagePerUnitController,
                                             hint: "e.g., 10%",
                                             icon: Icons.percent,
@@ -825,8 +846,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.grey[300]!)),
       enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!),),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
       focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFF7C3AED))),
@@ -937,8 +959,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           Row(
             children: [
               Expanded(
-                  child: _buildStaticField(
-                      "Variant Name", v.name, Icons.link)),
+                  child: _buildStaticField("Variant Name", v.name, Icons.link)),
               const SizedBox(width: 12),
               Expanded(
                   child: _buildTextField("Price (₹)", v.price,
@@ -976,8 +997,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
                   : "Discount Percentage (%)",
               v.discount,
               hint: v.discountType == 'price' ? "e.g., 50" : "e.g., 10",
-              icon: v.discountType == 'price' ? Icons.currency_rupee : Icons.percent,
-              validator: (val) {
+              icon: v.discountType == 'price'
+                  ? Icons.currency_rupee
+                  : Icons.percent, validator: (val) {
             if (val == null || val.isEmpty) {
               return null; // Allowed to be empty maybe? Or from screenshot it has a label
             }
@@ -1011,7 +1033,9 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
             children: [
               Expanded(
                   child: _buildTextField("Percentage/Unit", v.perUnitPercent,
-                      hint: "e.g., 10%", icon: Icons.percent, isRequired: false)),
+                      hint: "e.g., 10%",
+                      icon: Icons.percent,
+                      isRequired: false)),
             ],
           ),
           const SizedBox(height: 24),
@@ -1058,8 +1082,8 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
     );
   }
 
-  Widget _buildDiscountTypeBtn(
-      String label, String type, String currentType, Function(String) onSelect) {
+  Widget _buildDiscountTypeBtn(String label, String type, String currentType,
+      Function(String) onSelect) {
     final isSelected = currentType == type;
     return GestureDetector(
       onTap: () => onSelect(type),

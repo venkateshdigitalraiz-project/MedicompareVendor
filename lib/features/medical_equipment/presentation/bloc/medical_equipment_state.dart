@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/medical_equipment_model.dart';
+import '../../domain/entities/medical_equipment_entity.dart';
 
 abstract class MedicalEquipmentState extends Equatable {
   const MedicalEquipmentState();

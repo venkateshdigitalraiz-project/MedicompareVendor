@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
-import '../../data/models/medical_equipment_model.dart';
+import '../../domain/entities/medical_equipment_entity.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
 
 class MedicalEquipmentCard extends StatelessWidget {

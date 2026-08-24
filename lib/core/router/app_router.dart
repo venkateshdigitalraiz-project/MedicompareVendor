@@ -13,7 +13,6 @@ import 'package:MediCompare/features/profile/presentation/pages/main_profile_pag
 import 'package:MediCompare/features/appointment/presentation/pages/appointment_bookings_page.dart';
 import 'package:MediCompare/features/appointment/presentation/bloc/appointment_booking_event.dart';
 import 'package:MediCompare/features/appointment/appointment_injection.dart';
-import 'package:MediCompare/features/appointment/presentation/pages/appointment_bookings_page.dart';
 import 'package:MediCompare/features/appointment/presentation/pages/appointment_details_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branches_list_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branch_details_page.dart';
@@ -22,7 +21,6 @@ import 'package:MediCompare/features/vendor_profile/presentation/pages/step1_per
 import 'package:MediCompare/features/vendor_profile/presentation/pages/step2_business_details_screen.dart';
 import 'package:MediCompare/features/orders/presentation/pages/order_page.dart';
 import 'package:MediCompare/features/orders/presentation/pages/rental_bookings_page.dart';
-import 'package:MediCompare/features/orders/presentation/bloc/orders_event.dart';
 import 'package:MediCompare/features/orders/presentation/bloc/rental_booking_event.dart';
 import 'package:MediCompare/features/leads/presentation/pages/leads_page.dart';
 import 'package:MediCompare/features/subscription/presentation/pages/subscription_plan_page.dart';
@@ -58,7 +56,7 @@ import 'package:MediCompare/features/medical_treatment/presentation/pages/medica
 import 'package:MediCompare/features/medical_treatment/data/models/medical_treatment_model.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_list_page.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/pages/medical_equipment_details_page.dart';
-import 'package:MediCompare/features/medical_equipment/data/models/medical_equipment_model.dart';
+import 'package:MediCompare/features/medical_equipment/domain/entities/medical_equipment_entity.dart';
 import 'package:MediCompare/features/ambulance/presentation/pages/ambulance_list_page.dart';
 import 'package:MediCompare/features/ambulance/presentation/pages/ambulance_details_page.dart';
 import 'package:MediCompare/features/ambulance/domain/entities/ambulance_entity.dart';
@@ -73,7 +71,8 @@ import 'package:MediCompare/features/notifications/presentation/pages/notificati
 import 'package:MediCompare/navigation/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:MediCompare/features/orders/presentation/bloc/order_details_bloc.dart';
+import 'package:MediCompare/features/coupons/presentation/pages/add_coupon_screen.dart';
+import 'package:MediCompare/features/coupons/coupons_injection.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -196,7 +195,8 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             return BlocProvider(
-              create: (_) => AppointmentInjection.provideAppointmentDetailsBloc(),
+              create: (_) =>
+                  AppointmentInjection.provideAppointmentDetailsBloc(),
               child: AppointmentDetailsPage(appointmentId: id),
             );
           },
@@ -358,6 +358,13 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/notifications',
           builder: (_, __) => const NotificationsPage(),
+        ),
+        GoRoute(
+          path: '/coupons',
+          builder: (context, state) => BlocProvider(
+            create: (_) => CouponsInjection.provideAddCouponBloc(),
+            child: const AddCouponScreen(),
+          ),
         ),
       ],
     );

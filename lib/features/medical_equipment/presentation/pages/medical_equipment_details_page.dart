@@ -1,9 +1,14 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/features/medical_equipment/medical_equipment_injection.dart';
+import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_details_bloc.dart';
+import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_details_event.dart';
+import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_details_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:go_router/go_router.dart';
-import '../../data/models/medical_equipment_model.dart';
+import '../../domain/entities/medical_equipment_entity.dart';
 
 class MedicalEquipmentDetailsPage extends StatefulWidget {
   final MedicalEquipmentItem item;
@@ -18,73 +23,156 @@ class MedicalEquipmentDetailsPage extends StatefulWidget {
 class _MedicalEquipmentDetailsPageState
     extends State<MedicalEquipmentDetailsPage> {
   bool _showAllDescription = false;
+  bool _showAllPrecaution = false;
+  bool _showAllSideEffects = false;
+  bool _showAllPreparation = false;
 
   @override
   Widget build(BuildContext context) {
-    final details = widget.item.details;
-    const baseUrl = 'https://api.medicompares.com';
-    String? imageUrl;
-    if (details.files.isNotEmpty) {
-      imageUrl = details.files.first;
-      if (!imageUrl.startsWith('http')) {
-        imageUrl = '$baseUrl$imageUrl';
-      }
-      imageUrl = Uri.encodeFull(imageUrl);
-    }
-    final double saving = widget.item.price - widget.item.discountPrice;
-    final double percent =
-        widget.item.price > 0 ? (saving / widget.item.price * 100) : 0;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E1B4B)),
-          onPressed: () => context.pop(),
+    return BlocProvider(
+      create: (context) =>
+          MedicalEquipmentInjection.provideMedicalEquipmentDetailsBloc()
+            ..add(LoadMedicalEquipmentDetailsEvent(widget.item.id)),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FD),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF1E1B4B)),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            "Equipment Details",
+            style: GoogleFonts.inter(
+                color: const Color(0xFF1E1B4B),
+                fontWeight: FontWeight.bold,
+                fontSize: 18),
+          ),
         ),
-        title: Text(
-          "Equipment Details",
-          style: GoogleFonts.inter(
-              color: const Color(0xFF1E1B4B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            _buildHeader(details, imageUrl, percent),
-            const SizedBox(height: 16),
+        body: BlocBuilder<MedicalEquipmentDetailsBloc,
+            MedicalEquipmentDetailsState>(
+          builder: (context, state) {
+            if (state is MedicalEquipmentDetailsLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-            // Rental Info Grid
-            _buildInfoGrid(widget.item),
-            const SizedBox(height: 16),
+            if (state is MedicalEquipmentDetailsError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.message,
+                      style: GoogleFonts.inter(color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<MedicalEquipmentDetailsBloc>().add(
+                              LoadMedicalEquipmentDetailsEvent(widget.item.id),
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      child: const Text("Retry"),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-            // Description
-            if (details.description.isNotEmpty)
-              _buildCollapsibleSection(
-                title: "Description",
-                content: details.description,
-                icon: Icons.description_outlined,
-                iconColor: const Color(0xFF059669),
-                isExpanded: _showAllDescription,
-                onToggle: () =>
-                    setState(() => _showAllDescription = !_showAllDescription),
+            // Fallback to widget.item if initial or load succeeds
+            final item = state is MedicalEquipmentDetailsLoaded
+                ? state.item
+                : widget.item;
+
+            final details = item.details;
+            const baseUrl = 'https://api.medicompares.com';
+            String? imageUrl;
+            if (details.files.isNotEmpty) {
+              imageUrl = details.files.first;
+              if (!imageUrl.startsWith('http')) {
+                imageUrl = '$baseUrl$imageUrl';
+              }
+              imageUrl = Uri.encodeFull(imageUrl);
+            }
+            final double saving = item.price - item.discountPrice;
+            final double percent =
+                item.price > 0 ? (saving / item.price * 100) : 0;
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Section
+                  _buildHeader(item, details, imageUrl, percent),
+                  const SizedBox(height: 16),
+
+                  // Rental Info Grid
+                  _buildInfoGrid(item),
+                  const SizedBox(height: 16),
+
+                  // Description
+                  if (details.description.isNotEmpty) ...[
+                    _buildCollapsibleSection(
+                      title: "Description",
+                      content: details.description,
+                      icon: Icons.description_outlined,
+                      iconColor: const Color(0xFF059669),
+                      isExpanded: _showAllDescription,
+                      onToggle: () => setState(
+                          () => _showAllDescription = !_showAllDescription),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Precaution / Instructions
+                  if (details.condition != null &&
+                      details.condition!.isNotEmpty) ...[
+                    _buildCollapsibleSection(
+                      title: "Precautions & Instructions",
+                      content: details.condition!, // Uses precaution value if stored in details
+                      icon: Icons.warning_amber_rounded,
+                      iconColor: Colors.amber[800]!,
+                      isExpanded: _showAllPrecaution,
+                      onToggle: () => setState(
+                          () => _showAllPrecaution = !_showAllPrecaution),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Side Effects / Care Info
+                  if (details.machineType != null &&
+                      details.machineType!.isNotEmpty) ...[
+                    _buildCollapsibleSection(
+                      title: "Machine Information",
+                      content: "Type: ${details.machineType}",
+                      icon: Icons.info_outline,
+                      iconColor: Colors.blue[800]!,
+                      isExpanded: _showAllSideEffects,
+                      onToggle: () => setState(
+                          () => _showAllSideEffects = !_showAllSideEffects),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  const SizedBox(height: 100),
+                ],
               ),
-
-            const SizedBox(height: 100),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildHeader(
+  Widget _buildHeader(MedicalEquipmentItem item,
       MedicalEquipmentDetails details, String? imageUrl, double percent) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -120,7 +208,7 @@ class _MedicalEquipmentDetailsPageState
                       decoration: BoxDecoration(
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(4)),
-                      child: Text(widget.item.status,
+                      child: Text(item.status,
                           style: GoogleFonts.inter(
                               fontSize: 9,
                               color: Colors.white,
@@ -149,7 +237,7 @@ class _MedicalEquipmentDetailsPageState
             ],
           ),
           const SizedBox(height: 16),
-          _buildPriceArea(percent),
+          _buildPriceArea(item, percent),
         ],
       ),
     );
@@ -174,7 +262,7 @@ class _MedicalEquipmentDetailsPageState
     );
   }
 
-  Widget _buildPriceArea(double percent) {
+  Widget _buildPriceArea(MedicalEquipmentItem item, double percent) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -193,7 +281,7 @@ class _MedicalEquipmentDetailsPageState
                       fontSize: 9,
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold)),
-              Text("₹${widget.item.price.toInt()}",
+              Text("₹${item.price.toInt()}",
                   style: GoogleFonts.inter(
                       fontSize: 13,
                       color: Colors.grey[500],
@@ -208,7 +296,7 @@ class _MedicalEquipmentDetailsPageState
                       fontSize: 9,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.bold)),
-              Text("₹${widget.item.discountPrice.toInt()}",
+              Text("₹${item.discountPrice.toInt()}",
                   style: GoogleFonts.inter(
                       fontSize: 16,
                       color: Colors.green[700],

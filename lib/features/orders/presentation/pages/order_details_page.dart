@@ -26,8 +26,8 @@ class OrderDetailPage extends StatefulWidget {
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
   // Keeping delivery state for updates even if hidden from this UI view for now
-  String _selectedDeliveryPartner = 'medicompares';
-  int _selectedParcelTime = 30;
+  // String _selectedDeliveryPartner = 'medicompares';
+  // int _selectedParcelTime = 30;
 
   @override
   void initState() {
@@ -184,124 +184,124 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  void _handleUpdateStatus(String status, {String? rejectionReason}) {
-    final state = context.read<OrderDetailsBloc>().state;
-    if (state is OrderDetailsLoaded) {
-      final orderDetails = state.orderDetails;
-      if (orderDetails.items.isEmpty) return;
-      final payload = {
-        "orderStatus": status,
-        "status": status,
-        "orderId": orderDetails.orderId,
-        "productIds":
-            orderDetails.items.map((item) => item.productDetails.id).toList(),
-        "packageIds": [],
-        "deliveryPartner": _selectedDeliveryPartner,
-        "readyTime": _selectedParcelTime.toString(),
-        "assignedPartnerId": null,
-        if (rejectionReason != null) "rejectionReason": rejectionReason,
-      };
+  // void _handleUpdateStatus(String status, {String? rejectionReason}) {
+  //   final state = context.read<OrderDetailsBloc>().state;
+  //   if (state is OrderDetailsLoaded) {
+  //     final orderDetails = state.orderDetails;
+  //     if (orderDetails.items.isEmpty) return;
+  //     final payload = {
+  //       "orderStatus": status,
+  //       "status": status,
+  //       "orderId": orderDetails.orderId,
+  //       "productIds":
+  //           orderDetails.items.map((item) => item.productDetails.id).toList(),
+  //       "packageIds": [],
+  //       "deliveryPartner": _selectedDeliveryPartner,
+  //       "readyTime": _selectedParcelTime.toString(),
+  //       "assignedPartnerId": null,
+  //       if (rejectionReason != null) "rejectionReason": rejectionReason,
+  //     };
 
-      context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
-            orderItemId: orderDetails.items.first.orderItemId,
-            payload: payload,
-          ));
-    }
-  }
+  //     context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
+  //           orderItemId: orderDetails.items.first.orderItemId,
+  //           payload: payload,
+  //         ));
+  //   }
+  // }
 
-  void _showRejectionDialog() {
-    final TextEditingController reasonController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          "Reject Order",
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Please provide a reason for rejecting this order.",
-              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: reasonController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "Enter rejection reason...",
-                hintStyle: GoogleFonts.inter(fontSize: 13),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              style: GoogleFonts.inter(fontSize: 13),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "Cancel",
-              style: GoogleFonts.inter(color: Colors.grey),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (reasonController.text.trim().isNotEmpty) {
-                Navigator.pop(context);
-                _handleUpdateStatus('cancelled',
-                    rejectionReason: reasonController.text.trim());
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Please enter a reason for rejection"),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              "Reject",
-              style: GoogleFonts.inter(
-                  color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _showRejectionDialog() {
+  //   final TextEditingController reasonController = TextEditingController();
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: Text(
+  //         "Reject Order",
+  //         style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+  //       ),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text(
+  //             "Please provide a reason for rejecting this order.",
+  //             style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
+  //           ),
+  //           const SizedBox(height: 16),
+  //           TextField(
+  //             controller: reasonController,
+  //             maxLines: 3,
+  //             decoration: InputDecoration(
+  //               hintText: "Enter rejection reason...",
+  //               hintStyle: GoogleFonts.inter(fontSize: 13),
+  //               border: OutlineInputBorder(
+  //                 borderRadius: BorderRadius.circular(8),
+  //               ),
+  //             ),
+  //             style: GoogleFonts.inter(fontSize: 13),
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: Text(
+  //             "Cancel",
+  //             style: GoogleFonts.inter(color: Colors.grey),
+  //           ),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () {
+  //             if (reasonController.text.trim().isNotEmpty) {
+  //               Navigator.pop(context);
+  //               _handleUpdateStatus('cancelled',
+  //                   rejectionReason: reasonController.text.trim());
+  //             } else {
+  //               ScaffoldMessenger.of(context).showSnackBar(
+  //                 const SnackBar(
+  //                   content: Text("Please enter a reason for rejection"),
+  //                   backgroundColor: Colors.red,
+  //                 ),
+  //               );
+  //             }
+  //           },
+  //           style: ElevatedButton.styleFrom(
+  //             backgroundColor: Colors.red,
+  //             shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.circular(8),
+  //             ),
+  //           ),
+  //           child: Text(
+  //             "Reject",
+  //             style: GoogleFonts.inter(
+  //                 color: Colors.white, fontWeight: FontWeight.bold),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _buildCompactActionButton(
-      String label, Color color, VoidCallback onTap) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          minimumSize: const Size(60, 32),
-        ),
-        child: Text(label,
-            style:
-                GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
+  // Widget _buildCompactActionButton(
+  //     String label, Color color, VoidCallback onTap) {
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+  //     child: ElevatedButton(
+  //       onPressed: onTap,
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: color,
+  //         foregroundColor: Colors.white,
+  //         padding: const EdgeInsets.symmetric(horizontal: 12),
+  //         elevation: 0,
+  //         shape:
+  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //         minimumSize: const Size(60, 32),
+  //       ),
+  //       child: Text(label,
+  //           style:
+  //               GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+  //     ),
+  //   );
+  // }
 
   Widget _buildOrderItemsSection(OrderDetailsResponseEntity orderDetails) {
     return _buildCard(
@@ -324,7 +324,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           }
           log("imageUrl : $imageUrl");
 
-          final gst = item.billingSummary.gstAmount;
+          //  final gst = item.billingSummary.gstAmount;
 
           return Container(
             padding: const EdgeInsets.all(16),

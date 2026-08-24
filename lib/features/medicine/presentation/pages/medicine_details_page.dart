@@ -30,7 +30,8 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
   Future<void> _fetchFullDetails() async {
     try {
       final service = MedicineInjection.provideMedicineService();
-      final fullMedicineJson = await service.getVendorMedicineDetails(widget.medicine.id);
+      final fullMedicineJson =
+          await service.getVendorMedicineDetails(widget.medicine.id);
       if (mounted) {
         setState(() {
           _currentMedicine = MedicineItem.fromJson(fullMedicineJson);
@@ -82,7 +83,8 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.primary,
-          title: Text("Medicine Details", style: GoogleFonts.poppins(color: Colors.white)),
+          title: Text("Medicine Details",
+              style: GoogleFonts.poppins(color: Colors.white)),
           leading: const BackButton(color: Colors.white),
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -90,7 +92,7 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
     }
 
     if (_error != null) {
-       return Scaffold(
+      return Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.primary,
           title: Text("Error", style: GoogleFonts.poppins(color: Colors.white)),
@@ -549,9 +551,10 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                   DataCell(Text("₹${sellingPrice.toStringAsFixed(0)}",
                       style: GoogleFonts.poppins(
                           fontSize: 12,
-                          fontWeight: FontWeight.w600, // Emphasis on selling price
+                          fontWeight:
+                              FontWeight.w600, // Emphasis on selling price
                           color: const Color(0xFF15803D)))),
-                  DataCell(Text("${v.stock ?? 0}",
+                  DataCell(Text("${v.stock}",
                       style: GoogleFonts.poppins(
                           fontSize: 12, color: const Color(0xFF374151)))),
                   DataCell(_tableStatusBadge(v.status)),
