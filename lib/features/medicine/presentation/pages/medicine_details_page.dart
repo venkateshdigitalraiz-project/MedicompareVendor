@@ -3,6 +3,7 @@ import 'package:MediCompare/features/medicine/medicine_injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:intl/intl.dart';
 import '../../data/models/medicine_model.dart';
 
 class MedicineDetailsPage extends StatefulWidget {
@@ -299,6 +300,20 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
                           details.manufacture?.name ?? "N/A",
                           const Color(0xFFEAF9F1),
                           Icons.domain),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _infoCard(
+                          "CREATED DATE",
+                          details.createdAt != null
+                              ? DateFormat('dd MMM yyyy').format(details.createdAt!)
+                              : "N/A",
+                          const Color(0xFFF3F4F6),
+                          Icons.calendar_today_outlined),
+                      const SizedBox(width: 12),
+                      Expanded(child: const SizedBox()),
                     ],
                   ),
                 ],

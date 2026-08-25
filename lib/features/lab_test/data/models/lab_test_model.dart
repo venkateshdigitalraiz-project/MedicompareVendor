@@ -126,6 +126,7 @@ class LabTestDetails extends Equatable {
   final String? reportsDuration;
   final List<String> files;
   final List<LabTestParameter> parameters;
+  final List<LabTestParameter> detailedParameters;
   final LabTestSubcategory? subcategory;
 
   const LabTestDetails({
@@ -140,6 +141,7 @@ class LabTestDetails extends Equatable {
     this.reportsDuration,
     required this.files,
     required this.parameters,
+    required this.detailedParameters,
     this.subcategory,
   });
 
@@ -157,8 +159,13 @@ class LabTestDetails extends Equatable {
       files: (json['files'] != null && (json['files'] as List).isNotEmpty)
           ? List<String>.from(json['files'])
           : List<String>.from(json['imageUrl'] ?? []),
-      parameters: (json['parameterss'] as List? ?? [])
-          .map((i) => LabTestParameter.fromJson(i))
+      parameters: (json['parameters'] as List? ?? [])
+          .where((i) => i is Map<String, dynamic>)
+          .map((i) => LabTestParameter.fromJson(i as Map<String, dynamic>))
+          .toList(),
+      detailedParameters: (json['parameterss'] as List? ?? [])
+          .where((i) => i is Map<String, dynamic>)
+          .map((i) => LabTestParameter.fromJson(i as Map<String, dynamic>))
           .toList(),
       subcategory: json['subcategory'] != null && json['subcategory'] is Map
           ? LabTestSubcategory.fromJson(json['subcategory'])
@@ -181,6 +188,7 @@ class LabTestDetails extends Equatable {
         reportsDuration,
         files,
         parameters,
+        detailedParameters,
         subcategory
       ];
 }
@@ -190,14 +198,22 @@ class LabTestParameter extends Equatable {
   final String name;
   final String? description;
   final String? normalRange;
+  final String? childnormalRange;
+  final String? adultMaleRange;
+  final String? adultFemaleRange;
   final String? units;
+  final String? status;
 
   const LabTestParameter({
     required this.id,
     required this.name,
     this.description,
     this.normalRange,
+    this.childnormalRange,
+    this.adultMaleRange,
+    this.adultFemaleRange,
     this.units,
+    this.status,
   });
 
   factory LabTestParameter.fromJson(Map<String, dynamic> json) {
@@ -206,12 +222,16 @@ class LabTestParameter extends Equatable {
       name: json['name'] ?? '',
       description: json['description'],
       normalRange: json['normalRange'],
+      childnormalRange: json['childnormalRange'],
+      adultMaleRange: json['AdultMaleRange'],
+      adultFemaleRange: json['AdultFemaleRange'],
       units: json['units'],
+      status: json['status'],
     );
   }
 
   @override
-  List<Object?> get props => [id, name, description, normalRange, units];
+  List<Object?> get props => [id, name, description, normalRange, childnormalRange, adultMaleRange, adultFemaleRange, units, status];
 }
 
 class LabTestSubcategory extends Equatable {

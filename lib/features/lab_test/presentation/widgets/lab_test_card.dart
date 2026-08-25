@@ -91,9 +91,14 @@ class LabTestCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _statusBadge(item.status),
-                        const SizedBox(width: 8),
+                        // _statusBadge(item.status),
+                        // const SizedBox(width: 8),
                         _fastingBadge(isFasting),
+                        if (details.sampleType != null &&
+                            details.sampleType!.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          _sampleTypeBadge(details.sampleType!),
+                        ],
                       ],
                     ),
                   ],
@@ -142,35 +147,35 @@ class LabTestCard extends StatelessWidget {
     );
   }
 
-  Widget _statusBadge(String status) {
-    final bool isActive = status.toLowerCase() == 'active';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: (isActive ? Colors.green : Colors.red).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isActive ? Icons.check_circle_outline : Icons.error_outline,
-            size: 10,
-            color: isActive ? Colors.green : Colors.red,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            status.toUpperCase(),
-            style: GoogleFonts.inter(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: isActive ? Colors.green : Colors.red,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _statusBadge(String status) {
+  //   final bool isActive = status.toLowerCase() == 'active';
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+  //     decoration: BoxDecoration(
+  //       color: (isActive ? Colors.green : Colors.red).withOpacity(0.1),
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         Icon(
+  //           isActive ? Icons.check_circle_outline : Icons.error_outline,
+  //           size: 10,
+  //           color: isActive ? Colors.green : Colors.red,
+  //         ),
+  //         const SizedBox(width: 4),
+  //         Text(
+  //           status.toUpperCase(),
+  //           style: GoogleFonts.inter(
+  //             fontSize: 9,
+  //             fontWeight: FontWeight.bold,
+  //             color: isActive ? Colors.green : Colors.red,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _fastingBadge(bool isFasting) {
     return Container(
@@ -196,6 +201,35 @@ class LabTestCard extends StatelessWidget {
               fontSize: 9,
               fontWeight: FontWeight.bold,
               color: isFasting ? Colors.orange : Colors.blue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sampleTypeBadge(String sampleType) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.purple.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.bloodtype_outlined,
+            size: 10,
+            color: Colors.purple,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            sampleType,
+            style: GoogleFonts.inter(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
             ),
           ),
         ],

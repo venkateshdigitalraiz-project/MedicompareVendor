@@ -14,22 +14,25 @@ class AmbulanceModel extends AmbulanceEntity {
   });
 
   factory AmbulanceModel.fromJson(Map<String, dynamic> json) {
+    // In case the entire response or 'data' object is passed instead of 'product'
+    final Map<String, dynamic> dataObj = (json['product'] as Map<String, dynamic>?) ?? json;
+
     String parsedName = 'Unknown';
     String parsedAmbulanceType = 'Unknown';
     String parsedTabletId = '';
     List<String> files = [];
 
-    if (json['tablets'] is Map<String, dynamic>) {
-      parsedName = json['tablets']['name'] ?? 'Unknown';
-      parsedAmbulanceType = json['tablets']['ambulancetype'] ?? 'Unknown';
-      parsedTabletId = json['tablets']['_id'] ?? '';
-      files = (json['tablets']['files'] as List?)
+    if (dataObj['tablets'] is Map<String, dynamic>) {
+      parsedName = dataObj['tablets']['name'] ?? 'Unknown';
+      parsedAmbulanceType = dataObj['tablets']['ambulancetype'] ?? 'Unknown';
+      parsedTabletId = dataObj['tablets']['_id'] ?? '';
+      files = (dataObj['tablets']['files'] as List?)
               ?.map((e) => e.toString())
               .toList() ??
           [];
-    } else if (json['tablets'] is List &&
-        (json['tablets'] as List).isNotEmpty) {
-      final tList = json['tablets'] as List;
+    } else if (dataObj['tablets'] is List &&
+        (dataObj['tablets'] as List).isNotEmpty) {
+      final tList = dataObj['tablets'] as List;
       if (tList[0] is Map) {
         parsedName = tList[0]['name'] ?? 'Unknown';
         parsedAmbulanceType = tList[0]['ambulancetype'] ?? 'Unknown';
@@ -40,20 +43,41 @@ class AmbulanceModel extends AmbulanceEntity {
     }
 
     List<AmbulanceFacilityEntity> facilitiesList = [];
-    if (json['facilitiesDetails'] is List) {
-      facilitiesList = (json['facilitiesDetails'] as List)
-          .map((e) => AmbulanceFacilityModel.fromJson(e))
-          .toList();
+
+    List<dynamic>? rawFacilitiesList;
+
+    // Prioritize checking inside tablets first
+    if (dataObj['tablets'] is Map<String, dynamic>) {
+      rawFacilitiesList = (dataObj['tablets']['facilitiesDetails'] as List?) ?? (dataObj['tablets']['facilities'] as List?);
+    } else if (dataObj['tablets'] is List && (dataObj['tablets'] as List).isNotEmpty) {
+      final tList = dataObj['tablets'] as List;
+      if (tList[0] is Map) {
+        rawFacilitiesList = (tList[0]['facilitiesDetails'] as List?) ?? (tList[0]['facilities'] as List?);
+      }
+    }
+
+    // Fallback to root level if not found in tablets
+    if (rawFacilitiesList == null || rawFacilitiesList.isEmpty) {
+      rawFacilitiesList = (dataObj['facilitiesDetails'] as List?) ?? (dataObj['facilities'] as List?);
+    }
+
+    if (rawFacilitiesList != null) {
+      facilitiesList = rawFacilitiesList.map((e) {
+        if (e is Map<String, dynamic>) {
+          return AmbulanceFacilityModel.fromJson(e);
+        }
+        return AmbulanceFacilityModel(id: e.toString(), name: 'Facility');
+      }).toList();
     }
 
     return AmbulanceModel(
-      id: json['_id'] ?? '',
+      id: dataObj['_id'] ?? '',
       tabletId: parsedTabletId,
       name: parsedName,
       ambulanceType: parsedAmbulanceType,
-      price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discount'] ?? json['discountprice'] ?? json['discountPrice'] ?? 0).toDouble(),
-      status: json['status'] ?? 'pending',
+      price: (dataObj['price'] ?? 0).toDouble(),
+      discountPrice: (dataObj['discount'] ?? dataObj['discountprice'] ?? dataObj['discountPrice'] ?? 0).toDouble(),
+      status: dataObj['status'] ?? 'pending',
       facilities: facilitiesList,
       files: files,
     );

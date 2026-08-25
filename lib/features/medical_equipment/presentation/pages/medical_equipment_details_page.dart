@@ -43,7 +43,7 @@ class _MedicalEquipmentDetailsPageState
             onPressed: () => context.pop(),
           ),
           title: Text(
-            "Equipment Details",
+            " Medical Equipment Details",
             style: GoogleFonts.inter(
                 color: const Color(0xFF1E1B4B),
                 fontWeight: FontWeight.bold,
@@ -62,7 +62,8 @@ class _MedicalEquipmentDetailsPageState
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(
                       state.message,
@@ -118,6 +119,108 @@ class _MedicalEquipmentDetailsPageState
                   _buildInfoGrid(item),
                   const SizedBox(height: 16),
 
+                  // Equipment Details Card
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F1FF),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.medical_services_outlined,
+                                color: Color(0xFF2563EB),
+                                size: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Equipment Details",
+                              style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1E1B4B)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Brand",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      details.brand ?? "N/A",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 1,
+                                height: 40,
+                                color: Colors.grey.shade200,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Model",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      details.model ?? "N/A",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   // Description
                   if (details.description.isNotEmpty) ...[
                     _buildCollapsibleSection(
@@ -137,7 +240,8 @@ class _MedicalEquipmentDetailsPageState
                       details.condition!.isNotEmpty) ...[
                     _buildCollapsibleSection(
                       title: "Precautions & Instructions",
-                      content: details.condition!, // Uses precaution value if stored in details
+                      content: details
+                          .condition!, // Uses precaution value if stored in details
                       icon: Icons.warning_amber_rounded,
                       iconColor: Colors.amber[800]!,
                       isExpanded: _showAllPrecaution,

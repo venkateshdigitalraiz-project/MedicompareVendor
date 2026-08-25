@@ -61,6 +61,10 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
             _buildInfoGrid(details),
             const SizedBox(height: 16),
 
+            // Treatment Information
+            _buildTreatmentInfo(details),
+            const SizedBox(height: 16),
+
             // Description
             if (details.description.isNotEmpty)
               _buildCollapsibleSection(
@@ -137,6 +141,11 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
                     const SizedBox(height: 8),
                     _chip(details.subcategory?.name ?? "Teeth Whitening",
                         Icons.category_outlined, Colors.indigo),
+                    if (details.treatmentType != null && details.treatmentType!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _chip(capitalizeFirstLetter(details.treatmentType!),
+                          Icons.medical_services_outlined, Colors.teal),
+                    ],
                   ],
                 ),
               ),
@@ -379,5 +388,99 @@ class _DentalServiceDetailsPageState extends State<DentalServiceDetailsPage> {
       child: const Icon(Icons.medical_services_outlined,
           color: Colors.grey, size: 28),
     );
+  }
+
+  Widget _buildTreatmentInfo(DentalServiceDetails details) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  "Treatment Information",
+                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _buildInfoCard("Treatment Name", details.name),
+              const SizedBox(width: 12),
+              _buildInfoCard("Category", details.subcategory?.name ?? "N/A"),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildInfoCard(
+                  "Treatment Type",
+                  details.treatmentType != null && details.treatmentType!.isNotEmpty
+                      ? capitalizeFirstLetter(details.treatmentType!)
+                      : "N/A"),
+              const SizedBox(width: 12),
+              _buildInfoCard(
+                  "Complexity",
+                  details.complexity != null && details.complexity!.isNotEmpty
+                      ? capitalizeFirstLetter(details.complexity!)
+                      : "N/A"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String value) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[500])),
+            const SizedBox(height: 4),
+            Text(value,
+                style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1E1B4B))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.split(RegExp(r'[_\s]')).map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 }

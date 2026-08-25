@@ -54,7 +54,21 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
             // Info Grid
             _buildInfoGrid(details),
             const SizedBox(height: 16),
-
+            // Test Parameters
+            if (details.detailedParameters.isNotEmpty) ...[
+              _buildTestParametersTable(details.detailedParameters),
+              const SizedBox(height: 16),
+            ],
+            //description
+            _buildCollapsibleSection(
+              title: "Test Information",
+              content: details.description ?? "No description available",
+              icon: Icons.description_outlined,
+              iconColor: const Color(0xFF059669),
+              isExpanded: _showAllDescription,
+              onToggle: () =>
+                  setState(() => _showAllDescription = !_showAllDescription),
+            ),
             // Precaution Section
             if (details.precaution != null &&
                 details.precaution!.isNotEmpty) ...[
@@ -85,21 +99,12 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
               const SizedBox(height: 16),
             ],
 
-            // Test Parameters
-            _buildParametersTable(details.parameters),
-            const SizedBox(height: 16),
+            if (details.detailedParameters.isNotEmpty) ...[
+              _buildDetailedParametersTable(details.detailedParameters),
+              const SizedBox(height: 16),
+            ],
 
             // Description
-            _buildCollapsibleSection(
-              title: "Description",
-              content: details.description ?? "No description available",
-              icon: Icons.description_outlined,
-              iconColor: const Color(0xFF059669),
-              isExpanded: _showAllDescription,
-              onToggle: () =>
-                  setState(() => _showAllDescription = !_showAllDescription),
-            ),
-            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -329,7 +334,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
     );
   }
 
-  Widget _buildParametersTable(List<LabTestParameter> params) {
+  Widget _buildTestParametersTable(List<LabTestParameter> params) {
     final showAll = _showAllParameters || params.length <= 3;
     final displayParams = showAll ? params : params.take(3).toList();
 
@@ -344,31 +349,37 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          color: const Color(0xFFF5F3FF),
-                          borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.list_alt,
-                          color: Color(0xFF7C3AED), size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Test Parameters",
-                            style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E1B4B))),
-                        Text("Parameters included in this test",
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: Colors.grey[500])),
-                      ],
-                    ),
-                  ],
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFF0FDF4),
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.analytics_outlined,
+                            color: Color(0xFF16A34A), size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Test Parameters",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E1B4B))),
+                            Text("Parameters evaluated in this test",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                    fontSize: 11, color: Colors.grey[500])),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 if (params.length > 3)
                   GestureDetector(
@@ -401,6 +412,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
             child: Row(
               children: [
                 Expanded(
+                    flex: 5,
                     child: Text("PARAMETER NAME",
                         style: GoogleFonts.inter(
                             fontSize: 10,
@@ -408,6 +420,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                             color: Colors.grey[400],
                             letterSpacing: 0.5))),
                 Expanded(
+                    flex: 2,
                     child: Text("NORMAL RANGE",
                         style: GoogleFonts.inter(
                             fontSize: 10,
@@ -415,6 +428,7 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                             color: Colors.grey[400],
                             letterSpacing: 0.5))),
                 Expanded(
+                    flex: 2,
                     child: Text("UNITS",
                         style: GoogleFonts.inter(
                             fontSize: 10,
@@ -433,30 +447,348 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
                 child: Row(
                   children: [
                     Expanded(
+                        flex: 5,
                         child: Text(p.name,
                             style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF1E1B4B)))),
                     Expanded(
-                        child: Text(p.normalRange ?? "N/A",
+                        flex: 2,
+                        child: Text(_getValidParameterText(p.normalRange),
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: const Color(0xFF475569)))),
                     Expanded(
-                        child: Text(p.units ?? "N/A",
+                        flex: 2,
+                        child: Text(_getValidParameterText(p.units),
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: const Color(0xFF475569)))),
                   ],
                 ),
               )),
-          if (params.isEmpty)
-            const Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(child: Text("No parameters listed"))),
         ],
       ),
     );
   }
+
+  Widget _buildDetailedParametersTable(List<LabTestParameter> params) {
+    final showAll = _showAllParameters || params.length <= 3;
+    final displayParams = showAll ? params : params.take(3).toList();
+
+    // Fixed widths per column so header + rows always line up while scrolling
+    const double wName = 140;
+    const double wDesc = 160;
+    const double wRange = 120;
+    const double wUnits = 90;
+    const double wStatus = 100;
+    final double tableWidth = wName + wDesc + wRange + wUnits + wStatus;
+
+    Widget headerCell(String label, double width) => Container(
+          width: width,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[400],
+                  letterSpacing: 0.5)),
+        );
+
+    Widget dataCell(String text, double width,
+            {bool bold = false, Color? color}) =>
+        Container(
+          width: width,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(text,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+                  color: color ?? const Color(0xFF475569))),
+        );
+
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFF5F3FF),
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.list_alt,
+                            color: Color(0xFF7C3AED), size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Detailed Test Parameters",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E1B4B))),
+                            Text("Parameters included in this test",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                    fontSize: 11, color: Colors.grey[500])),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (params.length > 3)
+                  GestureDetector(
+                    onTap: () => setState(
+                        () => _showAllParameters = !_showAllParameters),
+                    child: Row(
+                      children: [
+                        Text(_showAllParameters ? "Show Less" : "Show More",
+                            style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary)),
+                        Icon(
+                            _showAllParameters
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 18,
+                            color: AppColors.primary),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // Horizontally scrollable table
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: tableWidth,
+              child: Column(
+                children: [
+                  // Table Header
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    color: const Color(0xFFF8F9FD),
+                    child: Row(
+                      children: [
+                        headerCell("PARAMETER NAME", wName),
+                        headerCell("DESCRIPTION", wDesc),
+                        headerCell("NORMAL RANGE", wRange),
+                        headerCell("UNITS", wUnits),
+                        headerCell("STATUS", wStatus),
+                      ],
+                    ),
+                  ),
+                  ...displayParams.map((p) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(color: Colors.grey[100]!))),
+                        child: Row(
+                          children: [
+                            dataCell(p.name, wName,
+                                bold: true, color: const Color(0xFF1E1B4B)),
+                            dataCell(
+                                _getValidParameterText(p.description), wDesc),
+                            Container(
+                              width: wRange,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: _buildNormalRangeCell(p),
+                            ),
+                            dataCell(_getValidParameterText(p.units), wUnits),
+                            dataCell(_getValidParameterText(p.status), wStatus),
+                          ],
+                        ),
+                      )),
+                  if (params.isEmpty)
+                    const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: Text("No parameters listed"))),
+                  SizedBox(
+                    height: 50,
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget _buildDetailedParametersTable(List<LabTestParameter> params) {
+  //   final showAll = _showAllParameters || params.length <= 3;
+  //   final displayParams = showAll ? params : params.take(3).toList();
+
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //         color: Colors.white, borderRadius: BorderRadius.circular(16)),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.all(16),
+  //           child: Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               Expanded(
+  //                 child: Row(
+  //                   children: [
+  //                     Container(
+  //                       padding: const EdgeInsets.all(8),
+  //                       decoration: BoxDecoration(
+  //                           color: const Color(0xFFF5F3FF),
+  //                           borderRadius: BorderRadius.circular(8)),
+  //                       child: const Icon(Icons.list_alt,
+  //                           color: Color(0xFF7C3AED), size: 18),
+  //                     ),
+  //                     const SizedBox(width: 12),
+  //                     Expanded(
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text("Detailed Test Parameters",
+  //                               overflow: TextOverflow.ellipsis,
+  //                               style: GoogleFonts.inter(
+  //                                   fontSize: 16,
+  //                                   fontWeight: FontWeight.bold,
+  //                                   color: const Color(0xFF1E1B4B))),
+  //                           Text("Parameters included in this test",
+  //                               overflow: TextOverflow.ellipsis,
+  //                               style: GoogleFonts.inter(
+  //                                   fontSize: 11, color: Colors.grey[500])),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               if (params.length > 3)
+  //                 GestureDetector(
+  //                   onTap: () => setState(
+  //                       () => _showAllParameters = !_showAllParameters),
+  //                   child: Row(
+  //                     children: [
+  //                       Text(_showAllParameters ? "Show Less" : "Show More",
+  //                           style: GoogleFonts.inter(
+  //                               fontSize: 12,
+  //                               fontWeight: FontWeight.bold,
+  //                               color: AppColors.primary)),
+  //                       Icon(
+  //                           _showAllParameters
+  //                               ? Icons.keyboard_arrow_up
+  //                               : Icons.keyboard_arrow_down,
+  //                           size: 18,
+  //                           color: AppColors.primary),
+  //                     ],
+  //                   ),
+  //                 ),
+  //             ],
+  //           ),
+  //         ),
+  //         const Divider(height: 1),
+  //         // Table Header
+  //         Container(
+  //           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //           color: const Color(0xFFF8F9FD),
+  //           child: Row(
+  //             children: [
+  //               Expanded(
+  //                   flex: 4,
+  //                   child: Text("PARAMETER NAME",
+  //                       style: GoogleFonts.inter(
+  //                           fontSize: 10,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: Colors.grey[400],
+  //                           letterSpacing: 0.5))),
+  //               Expanded(
+  //                   flex: 2,
+  //                   child: Text("DESCRIPTION",
+  //                       style: GoogleFonts.inter(
+  //                           fontSize: 10,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: Colors.grey[400],
+  //                           letterSpacing: 0.5))),
+  //               Expanded(
+  //                   flex: 2,
+  //                   child: Text("NORMAL RANGE",
+  //                       style: GoogleFonts.inter(
+  //                           fontSize: 10,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: Colors.grey[400],
+  //                           letterSpacing: 0.5))),
+  //               Expanded(
+  //                   flex: 2,
+  //                   child: Text("UNITS",
+  //                       style: GoogleFonts.inter(
+  //                           fontSize: 10,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: Colors.grey[400],
+  //                           letterSpacing: 0.5))),
+  //               Expanded(
+  //                   flex: 2,
+  //                   child: Text("STATUS",
+  //                       style: GoogleFonts.inter(
+  //                           fontSize: 10,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: Colors.grey[400],
+  //                           letterSpacing: 0.5))),
+  //             ],
+  //           ),
+  //         ),
+  //         ...displayParams.map((p) => Container(
+  //               padding:
+  //                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //               decoration: BoxDecoration(
+  //                   border:
+  //                       Border(bottom: BorderSide(color: Colors.grey[100]!))),
+  //               child: Row(
+  //                 children: [
+  //                   Expanded(
+  //                       child: Text(p.name,
+  //                           style: GoogleFonts.inter(
+  //                               fontSize: 11,
+  //                               fontWeight: FontWeight.bold,
+  //                               color: const Color(0xFF1E1B4B)))),
+  //                   Expanded(
+  //                       child: Text(_getValidParameterText(p.normalRange),
+  //                           style: GoogleFonts.inter(
+  //                               fontSize: 11, color: const Color(0xFF475569)))),
+  //                   Expanded(
+  //                       child: Text(_getValidParameterText(p.units),
+  //                           style: GoogleFonts.inter(
+  //                               fontSize: 11, color: const Color(0xFF475569)))),
+  //                 ],
+  //               ),
+  //             )),
+  //         if (params.isEmpty)
+  //           const Padding(
+  //               padding: EdgeInsets.all(24),
+  //               child: Center(child: Text("No parameters listed"))),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildCollapsibleSection({
     required String title,
@@ -560,6 +892,64 @@ class _LabTestDetailsPageState extends State<LabTestDetailsPage> {
       height: 80,
       color: const Color(0xFFF1F5F9),
       child: const Icon(Icons.science_outlined, color: Colors.grey, size: 28),
+    );
+  }
+
+  String _getValidParameterText(String? text) {
+    if (text == null || text.trim().isEmpty || text == "null") {
+      return "N/A";
+    }
+    return text;
+  }
+
+  bool _isValidRange(String? text) {
+    return text != null && text.trim().isNotEmpty && text != "null";
+  }
+
+  Widget _buildNormalRangeCell(LabTestParameter p) {
+    final ranges = <MapEntry<String, String>>[];
+
+    if (_isValidRange(p.normalRange)) {
+      ranges.add(MapEntry("General", p.normalRange!));
+    }
+    if (_isValidRange(p.childnormalRange)) {
+      ranges.add(MapEntry("Child", p.childnormalRange!));
+    }
+    if (_isValidRange(p.adultMaleRange)) {
+      ranges.add(MapEntry("Male", p.adultMaleRange!));
+    }
+    if (_isValidRange(p.adultFemaleRange)) {
+      ranges.add(MapEntry("Female", p.adultFemaleRange!));
+    }
+
+    if (ranges.isEmpty) {
+      return Text("N/A",
+          style:
+              GoogleFonts.inter(fontSize: 11, color: const Color(0xFF475569)));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: ranges
+          .map((e) => Text.rich(
+                TextSpan(children: [
+                  TextSpan(
+                    text: "${e.key}: ",
+                    style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E1B4B)),
+                  ),
+                  TextSpan(
+                    text: e.value,
+                    style: GoogleFonts.inter(
+                        fontSize: 10, color: const Color(0xFF475569)),
+                  ),
+                ]),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ))
+          .toList(),
     );
   }
 }

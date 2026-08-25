@@ -93,7 +93,7 @@ class LabTestService {
     try {
       final response = await _apiService.get(
         ApiEndpoints.labTestsSearchTablets,
-        queryParameters: {'type': 'labtests'},
+        queryParameters: {'type': 'labtests', 'limit': '1000'},
       );
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
@@ -212,25 +212,29 @@ class LabTestService {
 
       LabTestPackageItem pkg = LabTestPackageItem.fromJson(matchJson);
 
-      // Step 2: If tabletsdetails is not already populated, enrich using the
+      // Step 2: If tabletsdetails is not fully populated, enrich using the
       // all-tablets API (type=labtests) by matching products IDs
-      if (pkg.tabletsDetails.isEmpty && pkg.products.isNotEmpty) {
+      if (pkg.tabletsDetails.length != pkg.products.length && pkg.products.isNotEmpty) {
         final allTests = await getAllLabTestTablets();
         final matched =
             allTests.where((t) => pkg.products.contains(t.id)).toList();
-        pkg = LabTestPackageItem(
-          id: pkg.id,
-          name: pkg.name,
-          description: pkg.description,
-          price: pkg.price,
-          discountPrice: pkg.discountPrice,
-          status: pkg.status,
-          files: pkg.files,
-          products: pkg.products,
-          tabletsDetails: matched,
-          createdAt: pkg.createdAt,
-          updatedAt: pkg.updatedAt,
-        );
+        
+        // If we found the matched tests, update the package
+        if (matched.isNotEmpty) {
+          pkg = LabTestPackageItem(
+            id: pkg.id,
+            name: pkg.name,
+            description: pkg.description,
+            price: pkg.price,
+            discountPrice: pkg.discountPrice,
+            status: pkg.status,
+            files: pkg.files,
+            products: pkg.products,
+            tabletsDetails: matched,
+            createdAt: pkg.createdAt,
+            updatedAt: pkg.updatedAt,
+          );
+        }
       }
 
       return pkg;

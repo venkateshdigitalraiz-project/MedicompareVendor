@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../domain/entities/lead_entity.dart';
 import '../bloc/leads_bloc.dart';
 import '../bloc/leads_event.dart';
@@ -75,6 +76,35 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
                       "Personal Information", Icons.person_outline),
                   const SizedBox(height: 12),
                   _buildPersonalInformationGrid(lead),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(
+                      "Problem Description", Icons.description_outlined),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      lead.description != null && lead.description!.isNotEmpty
+                          ? lead.description!
+                          : "No description provided.",
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Colors.grey[800],
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   _buildSectionHeader("Information", Icons.info_outline),
                   const SizedBox(height: 12),
@@ -207,11 +237,23 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
           children: [
             _buildInfoCard(
                 "Full Name", lead.name, Icons.person_outline, Colors.blue),
+            if (lead.emailAddress != null && lead.emailAddress!.isNotEmpty)
+              _buildInfoCard("Email Address", lead.emailAddress!,
+                  Icons.email_outlined, Colors.redAccent),
             _buildInfoCard(
                 "Phone Number", lead.phone, Icons.phone_outlined, Colors.green),
             _buildInfoCard("Age", "${lead.age} years",
                 Icons.calendar_today_outlined, Colors.orange),
             _buildInfoCard("Gender", lead.gender, Icons.person, Colors.teal),
+            if (lead.city != null && lead.city!.isNotEmpty)
+              _buildInfoCard("City", lead.city!, Icons.location_city_outlined,
+                  Colors.cyan),
+            if (lead.policyNumber != null && lead.policyNumber!.isNotEmpty)
+              _buildInfoCard("Policy Number", lead.policyNumber!,
+                  Icons.badge_outlined, Colors.deepOrange),
+            if (lead.relation != null && lead.relation!.isNotEmpty)
+              _buildInfoCard("Relation", lead.relation!,
+                  Icons.family_restroom_outlined, Colors.brown),
             _buildInfoCard("Lead Type", lead.leadType,
                 Icons.local_offer_outlined, Colors.indigo),
             _buildInfoCard("Vendor Assignment", lead.vendorAssigned,
@@ -224,9 +266,13 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
                   DateFormat('MMM d, yyyy').format(lead.date!.toLocal()),
                   Icons.date_range_outlined,
                   AppColors.primary),
-            if (lead.address != null && lead.address!.isNotEmpty)
-              _buildInfoCard("Address", lead.address!,
-                  Icons.location_on_outlined, Colors.amber),
+            // if (lead.address != null && lead.address!.isNotEmpty)
+            //   _buildInfoCard("Address", lead.address!,
+            //       Icons.location_on_outlined, Colors.amber),
+            if (lead.preferredTimeline != null &&
+                lead.preferredTimeline!.isNotEmpty)
+              _buildInfoCard("Preferred Timeline", lead.preferredTimeline!,
+                  Icons.timeline_outlined, Colors.blueGrey),
           ],
         );
       },
@@ -259,14 +305,36 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
               Icons.timer_outlined,
               Colors.blue,
             ),
+            if (lead.complexity != null && lead.complexity!.isNotEmpty)
+              _buildInfoCard(
+                "Complexity",
+                lead.complexity!,
+                Icons.analytics_outlined,
+                Colors.deepPurple,
+              ),
+            if (lead.procedureType != null && lead.procedureType!.isNotEmpty)
+              _buildInfoCard(
+                "Procedure Type",
+                lead.procedureType!,
+                Icons.healing_outlined,
+                Colors.teal,
+              ),
+            if (lead.recoveryTime != null && lead.recoveryTime!.isNotEmpty)
+              _buildInfoCard(
+                "Recovery Time",
+                lead.recoveryTime!,
+                Icons.update_outlined,
+                Colors.amber,
+              ),
           ],
         );
       },
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon,
-      Color iconBgColor, {String? imageUrl}) {
+  Widget _buildInfoCard(
+      String title, String value, IconData icon, Color iconBgColor,
+      {String? imageUrl}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -387,7 +455,7 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
                   spacing: 4,
                   children: [
                     Text(
-                      "₹${finalPrice.toStringAsFixed(2)}",
+                      finalPrice.toRupeeFormat(),
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -396,7 +464,7 @@ class _LeadDetailsPageState extends State<LeadDetailsPage> {
                     ),
                     if (hasDiscount)
                       Text(
-                        "₹${lead.price.toStringAsFixed(2)}",
+                        lead.price.toRupeeFormat(),
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           color: Colors.grey,

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../domain/entities/ambulance_entity.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class AmbulanceCard extends StatelessWidget {
   final AmbulanceEntity item;
@@ -79,13 +80,13 @@ class AmbulanceCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      "${item.facilities.length} Facilities",
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: Colors.grey[500],
-                      ),
-                    ),
+                    // Text(
+                    //   "${item.facilities.length} Facilities",
+                    //   style: GoogleFonts.inter(
+                    //     fontSize: 10,
+                    //     color: Colors.grey[500],
+                    //   ),
+                    // ),
                     const SizedBox(height: 8),
                     _statusBadge(item.status),
                   ],
@@ -111,7 +112,7 @@ class AmbulanceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "₹${item.price.toInt()}/km",
+                        "₹${item.price.toFormattedPrice()}",
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -131,31 +132,46 @@ class AmbulanceCard extends StatelessWidget {
 
   Widget _statusBadge(String status) {
     final bool isActive = status.toLowerCase() == 'active';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: (isActive ? Colors.green : Colors.orange).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isActive ? Icons.check_circle_outline : Icons.error_outline,
-            size: 10,
-            color: isActive ? Colors.green : Colors.orange,
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: (isActive ? Colors.green : Colors.orange).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(width: 4),
-          Text(
-            status.toUpperCase(),
-            style: GoogleFonts.inter(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: isActive ? Colors.green : Colors.orange,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isActive ? Icons.check_circle_outline : Icons.error_outline,
+                size: 10,
+                color: isActive ? Colors.green : Colors.orange,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                status.toUpperCase(),
+                style: GoogleFonts.inter(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: isActive ? Colors.green : Colors.orange,
+                ),
+              ),
+              SizedBox(
+                width: 50,
+              ),
+              Text(
+                "₹${item.price.toFormattedPrice()}/km",
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../data/models/lab_test_package_model.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class LabTestPackageCard extends StatelessWidget {
   final LabTestPackageItem package;
@@ -107,7 +108,7 @@ class LabTestPackageCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "₹${package.discountPrice.toInt()}",
+                    "₹${package.discountPrice.toFormattedPrice()}",
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

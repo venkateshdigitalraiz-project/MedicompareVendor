@@ -50,11 +50,12 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
 
   double _calculateFinalPrice() {
     final item = _currentSurgery;
-    double price = item.price;
-    double discount = item.discountPrice;
-    String type = item.discountType ?? 'price';
+    double price = item.effectivePrice;
+    double discount = item.effectiveDiscountPrice;
+    String type = item.effectiveDiscountType ?? 'price';
 
-    if (price == 0 && item.variantDetails.isNotEmpty) {
+    // Only fall back to variantDetails when NOT a mix-variant product
+    if (!item.isVariant && price == 0 && item.variantDetails.isNotEmpty) {
       final v = item.variantDetails.first;
       price = v.price;
       discount = v.discountPrice;
@@ -64,13 +65,14 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
     if (type == 'percentage') {
       return price - (price * discount / 100);
     }
+    // Return discount if it exists, otherwise price
     return discount > 0 ? discount : price;
   }
 
   double _calculateOriginalPrice() {
     final item = _currentSurgery;
-    double price = item.price;
-    if (price == 0 && item.variantDetails.isNotEmpty) {
+    double price = item.effectivePrice;
+    if (!item.isVariant && price == 0 && item.variantDetails.isNotEmpty) {
       price = item.variantDetails.first.price;
     }
     return price;
@@ -169,12 +171,16 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      if (_calculateFinalPrice() < _calculateOriginalPrice())
+                                      if (_calculateOriginalPrice() > 0 &&
+                                          _calculateFinalPrice() > 0 &&
+                                          _calculateOriginalPrice() >
+                                              _calculateFinalPrice())
                                         Text(
                                           "MRP: ${_calculateOriginalPrice().toRupeeFormat()}",
                                           style: GoogleFonts.poppins(
                                               fontSize: 10,
-                                              decoration: TextDecoration.lineThrough,
+                                              decoration:
+                                                  TextDecoration.lineThrough,
                                               color: Colors.grey[500]),
                                         ),
                                       Container(
@@ -189,7 +195,11 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              _calculateOriginalPrice() == 0 ? "From " : "Selling Price: ",
+                                              _calculateOriginalPrice() == 0
+                                                  ? (_currentSurgery.isVariant
+                                                      ? "Price varies by variant"
+                                                      : "From ")
+                                                  : "Selling Price: ",
                                               style: GoogleFonts.poppins(
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.w600,
@@ -197,7 +207,11 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                                                       const Color(0xFF166534)),
                                             ),
                                             Text(
-                                              _calculateFinalPrice().toRupeeFormat(),
+                                              _calculateOriginalPrice() == 0 &&
+                                                      _currentSurgery.isVariant
+                                                  ? " ₹0"
+                                                  : _calculateFinalPrice()
+                                                      .toRupeeFormat(),
                                               style: GoogleFonts.poppins(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
@@ -214,29 +228,45 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                             ),
                             const SizedBox(height: 20),
                             // Badges
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
+                            // Wrap(
+                            //   spacing: 8,
+                            //   runSpacing: 8,
+                            //   children: [
+                            //     _badge(
+                            //         Icons.category_outlined,
+                            //         details.subcategory?.name ?? "N/A",
+                            //         const Color(0xFFE8EEFF),
+                            //         const Color(0xFF506CCF)),
+                            //     _badge(
+                            //         Icons.settings_suggest_outlined,
+                            //         details.procedureType ?? "N/A",
+                            //         const Color(0xFFF3E8FF),
+                            //         const Color(0xFF9333EA)),
+                            //     _badge(
+                            //         Icons.star_outline,
+                            //         details.complexity ?? "Simple",
+                            //         const Color(0xFFE6FFFA),
+                            //         const Color(0xFF0D9488)),
+                            //   ],
+                            // ),
+                            // const SizedBox(height: 24),
+                            // Grid Info Cards
+                            Row(
                               children: [
-                                _badge(
-                                    Icons.category_outlined,
+                                _infoCard(
+                                    "CATEGORY",
                                     details.subcategory?.name ?? "N/A",
-                                    const Color(0xFFE8EEFF),
-                                    const Color(0xFF506CCF)),
-                                _badge(
-                                    Icons.settings_suggest_outlined,
-                                    details.procedureType ?? "N/A",
-                                    const Color(0xFFF3E8FF),
-                                    const Color(0xFF9333EA)),
-                                _badge(
-                                    Icons.star_outline,
-                                    details.complexity ?? "Simple",
-                                    const Color(0xFFE6FFFA),
-                                    const Color(0xFF0D9488)),
+                                    const Color(0xFFF9F8EF),
+                                    Icons.category_outlined),
+                                const SizedBox(width: 12),
+                                _infoCard(
+                                    "STATUS",
+                                    details.status ?? "N/A",
+                                    const Color(0xFFE3DDDE),
+                                    Icons.healing_outlined),
                               ],
                             ),
-                            const SizedBox(height: 24),
-                            // Grid Info Cards
+                            const SizedBox(height: 12),
                             Row(
                               children: [
                                 _infoCard("DURATION", details.duration ?? "N/A",
@@ -277,33 +307,21 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                       if (details.description != null &&
                           details.description!.isNotEmpty)
                         ExpandableHtmlSection(
-                          title: "Description",
+                          title: "Surgery Information",
                           htmlContent: details.description!,
                           icon: Icons.description_outlined,
                           bg: const Color(0xFFEAF9F1),
                           color: const Color(0xFF15803D),
                         ),
-
-                      if (details.directionOfUse != null &&
-                          details.directionOfUse!.isNotEmpty)
-                        ExpandableHtmlSection(
-                          title: "Post-Procedure Care",
-                          htmlContent: details.directionOfUse!,
-                          icon: Icons.assignment_outlined,
-                          bg: const Color(0xFFEFF6FF),
-                          color: const Color(0xFF1D4ED8),
-                        ),
-
                       if (details.precaution != null &&
                           details.precaution!.isNotEmpty)
                         ExpandableHtmlSection(
-                          title: "Pre-Procedure Instructions",
+                          title: "Precaution Guidelines",
                           htmlContent: details.precaution!,
                           icon: Icons.warning_amber_outlined,
                           bg: const Color(0xFFFFF7ED),
                           color: const Color(0xFFC2410C),
                         ),
-
                       if (details.sideEffects != null &&
                           details.sideEffects!.isNotEmpty)
                         ExpandableHtmlSection(
@@ -312,6 +330,15 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                           icon: Icons.error_outline,
                           bg: const Color(0xFFFEF2F2),
                           color: const Color(0xFFB91C1C),
+                        ),
+                      if (details.directionOfUse != null &&
+                          details.directionOfUse!.isNotEmpty)
+                        ExpandableHtmlSection(
+                          title: "Pre Care & Post Care Surgery",
+                          htmlContent: details.directionOfUse!,
+                          icon: Icons.assignment_outlined,
+                          bg: const Color(0xFFEFF6FF),
+                          color: const Color(0xFF1D4ED8),
                         ),
 
                       const SizedBox(height: 20),
@@ -322,7 +349,105 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
   }
 
   Widget _buildVariantsTable() {
-    final variants = _currentSurgery.variantDetails;
+    final item = _currentSurgery;
+
+    // When is_variant==true, show allMixVariants (the actual variant list from API)
+    if (item.isVariant && item.allMixVariants.isNotEmpty) {
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF3E8FF),
+                      borderRadius: BorderRadius.circular(8)),
+                  child: const Icon(Icons.list_alt,
+                      color: Color(0xFF9333EA), size: 20),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Surgery Variants",
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text("Available options and pricing",
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: 24,
+                horizontalMargin: 0,
+                headingRowHeight: 40,
+                dataRowMinHeight: 48,
+                dataRowMaxHeight: 56,
+                columns: [
+                  DataColumn(label: _tableHeader("VARIANT NAME")),
+                  DataColumn(label: _tableHeader("PRICE")),
+                  DataColumn(label: _tableHeader("SELLING PRICE")),
+                ],
+                rows: item.allMixVariants.map((v) {
+                  return DataRow(cells: [
+                    DataCell(Text(v.name,
+                        style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1F2937)))),
+                    DataCell(Text(
+                      v.price != null && v.price! > 0
+                          ? v.price!.toRupeeFormat()
+                          : 'Contact for price',
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: v.price != null && v.price! > 0
+                              ? const Color(0xFF374151)
+                              : Colors.grey),
+                    )),
+                    DataCell(Text(
+                      v.discountPrice != null && v.discountPrice! > 0
+                          ? v.discountPrice!.toRupeeFormat()
+                          : (v.price != null && v.price! > 0
+                              ? v.price!.toRupeeFormat()
+                              : '-'),
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF15803D)),
+                    )),
+                  ]);
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // When is_variant==false, show variantDetails (the old table)
+    final variants = item.variantDetails;
     if (variants.isEmpty) return const SizedBox.shrink();
 
     return Container(
@@ -386,7 +511,11 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
                     _currentSurgery.details.tabletVariants.firstWhere(
                   (tv) => tv.id == v.variantId,
                   orElse: () => SurgeryTabletVariant(
-                      id: v.variantId, tabletId: '', name: 'Option', price: v.price, files: const []),
+                      id: v.variantId,
+                      tabletId: '',
+                      name: 'Option',
+                      price: v.price,
+                      files: const []),
                 );
 
                 double sellingPrice = v.discountPrice;

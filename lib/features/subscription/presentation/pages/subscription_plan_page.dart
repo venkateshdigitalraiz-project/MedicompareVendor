@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../core/utils/price_formatter.dart';
 
 class SubscriptionPlanPage extends StatefulWidget {
   const SubscriptionPlanPage({super.key});
@@ -325,7 +326,7 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
               ),
               const SizedBox(width: 4),
               Text(
-                plan.price.toFormattedPrice(),
+                (plan.price as num).toFormattedPrice(),
                 style: GoogleFonts.inter(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -457,7 +458,7 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                history.amount.toRupeeFormat(),
+                (history.amount as num).toRupeeFormat(),
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

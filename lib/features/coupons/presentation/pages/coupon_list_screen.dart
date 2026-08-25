@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/price_formatter.dart';
 import '../bloc/coupon_bloc.dart';
 import '../bloc/coupon_event.dart';
@@ -21,7 +20,7 @@ class CouponListScreen extends StatefulWidget {
 class _CouponListScreenState extends State<CouponListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedStatus = ''; // '' for All, 'active', 'inactive'
-  
+
   @override
   void initState() {
     super.initState();
@@ -30,11 +29,11 @@ class _CouponListScreenState extends State<CouponListScreen> {
 
   void _fetchCoupons() {
     context.read<CouponBloc>().add(
-      GetCouponsEvent(
-        search: _searchController.text,
-        status: _selectedStatus,
-      ),
-    );
+          GetCouponsEvent(
+            search: _searchController.text,
+            status: _selectedStatus,
+          ),
+        );
   }
 
   @override
@@ -50,7 +49,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
       appBar: AppBar(
         title: Text(
           'My Coupons',
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.black87),
+          style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold, color: Colors.black87),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
@@ -62,7 +62,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
           // Search & Filter header
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Column(
               children: [
                 // Search bar
@@ -71,8 +72,10 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   onChanged: (_) => _fetchCoupons(),
                   decoration: InputDecoration(
                     hintText: 'Search coupons...',
-                    hintStyle: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 14),
-                    prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey),
+                    hintStyle: GoogleFonts.inter(
+                        color: Colors.grey.shade400, fontSize: 14),
+                    prefixIcon:
+                        const Icon(Icons.search_rounded, color: Colors.grey),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear_rounded, size: 20),
@@ -85,7 +88,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
                     filled: true,
                     fillColor: const Color(0xFFF3F4F6),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -107,7 +111,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
               ],
             ),
           ),
-          
+
           // Coupons list
           Expanded(
             child: BlocBuilder<CouponBloc, CouponState>(
@@ -115,7 +119,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 if (state is CouponListLoading) {
                   return const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6B48FF)),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Color(0xFF6B48FF)),
                     ),
                   );
                 } else if (state is CouponListError) {
@@ -125,26 +130,31 @@ class _CouponListScreenState extends State<CouponListScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline_rounded, size: 64, color: Colors.red.shade300),
+                          Icon(Icons.error_outline_rounded,
+                              size: 64, color: Colors.red.shade300),
                           const SizedBox(height: 16),
                           Text(
                             'Failed to load coupons',
-                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.inter(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             state.message,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600),
+                            style: GoogleFonts.inter(
+                                fontSize: 13, color: Colors.grey.shade600),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: _fetchCoupons,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF6B48FF),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
                             ),
-                            child: Text('Retry', style: GoogleFonts.inter(color: Colors.white)),
+                            child: Text('Retry',
+                                style: GoogleFonts.inter(color: Colors.white)),
                           )
                         ],
                       ),
@@ -157,7 +167,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.local_offer_outlined, size: 80, color: Colors.grey.shade300),
+                          Icon(Icons.local_offer_outlined,
+                              size: 80, color: Colors.grey.shade300),
                           const SizedBox(height: 16),
                           Text(
                             'No Coupons Found',
@@ -170,7 +181,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Tap the button below to add your first coupon.',
-                            style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade400),
+                            style: GoogleFonts.inter(
+                                fontSize: 13, color: Colors.grey.shade400),
                           ),
                         ],
                       ),
@@ -260,14 +272,17 @@ class _CouponListScreenState extends State<CouponListScreen> {
   }
 
   Widget _buildCouponCard(Coupon coupon) {
-    final isPercent = coupon.discountType.toString().toLowerCase().contains('percent');
+    final isPercent =
+        coupon.discountType.toString().toLowerCase().contains('percent');
     final formattedValue = isPercent
         ? '${coupon.discountValue.toStringAsFixed(0)}%'
         : coupon.discountValue.toRupeeFormat();
-        
+
     final startDateStr = DateFormat('dd MMM yyyy').format(coupon.validFrom);
     final endDateStr = DateFormat('dd MMM yyyy').format(coupon.validTo);
-    final isActive = coupon.status.toString().toLowerCase() == 'active';
+    final computedStatus = coupon.computedStatus;
+    final isActive = computedStatus == 'Active';
+    final isUpcoming = computedStatus == 'Upcoming';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -326,7 +341,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   ],
                 ),
               ),
-              
+
               // Right contents
               Expanded(
                 child: Padding(
@@ -339,11 +354,13 @@ class _CouponListScreenState extends State<CouponListScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
                               color: const Color(0xFFEEF2FF),
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: const Color(0xFFC7D2FE)),
+                              border:
+                                  Border.all(color: const Color(0xFFC7D2FE)),
                             ),
                             child: Text(
                               coupon.couponCode,
@@ -356,17 +373,22 @@ class _CouponListScreenState extends State<CouponListScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: isActive ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                              color: isActive
+                                  ? const Color(0xFFDCFCE7)
+                                  : const Color(0xFFFEE2E2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              coupon.status,
+                              computedStatus,
                               style: GoogleFonts.inter(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: isActive ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                                color: isActive
+                                    ? const Color(0xFF15803D)
+                                    : const Color(0xFFB91C1C),
                               ),
                             ),
                           ),
@@ -384,18 +406,21 @@ class _CouponListScreenState extends State<CouponListScreen> {
                       ),
                       const SizedBox(height: 8),
                       // Details (Min purchase, hidden etc.)
-                      if (coupon.minimumPurchaseAmount != null && coupon.minimumPurchaseAmount! > 0)
+                      if (coupon.minimumPurchaseAmount != null &&
+                          coupon.minimumPurchaseAmount! > 0)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 4.0),
                           child: Text(
                             'Min. Purchase: ${coupon.minimumPurchaseAmount!.toRupeeFormat()}',
-                            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600),
+                            style: GoogleFonts.inter(
+                                fontSize: 12, color: Colors.grey.shade600),
                           ),
                         ),
                       // Validity dates
                       Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
+                          const Icon(Icons.calendar_today_outlined,
+                              size: 12, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
                             '$startDateStr - $endDateStr',
@@ -407,7 +432,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
                           if (coupon.hiddenCoupon) ...[
                             const Spacer(),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(4),

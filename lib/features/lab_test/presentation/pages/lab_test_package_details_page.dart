@@ -7,6 +7,7 @@ import 'package:MediCompare/features/lab_test/data/models/lab_test_package_model
 import 'package:MediCompare/features/lab_test/data/models/lab_test_model.dart';
 import 'package:MediCompare/features/lab_test/data/data_sources/lab_test_service.dart';
 import 'package:MediCompare/features/lab_test/lab_test_injection.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class LabTestPackageDetailsPage extends StatefulWidget {
   final LabTestPackageItem package;
@@ -108,8 +109,8 @@ class _LabTestPackageDetailsPageState extends State<LabTestPackageDetailsPage> {
             _buildPackageDetails(package),
             const SizedBox(height: 16),
 
-            // Included Tests Table
-            _buildIncludedTestsTable(package.tabletsDetails),
+            // Detailed Parameters Table
+            _buildDetailedParametersTable(package.tabletsDetails),
             const SizedBox(height: 16),
 
             // Description
@@ -243,7 +244,7 @@ class _LabTestPackageDetailsPageState extends State<LabTestPackageDetailsPage> {
                       fontSize: 9,
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold)),
-              Text("₹${package.price.toInt()}",
+              Text("₹${package.price.toFormattedPrice()}",
                   style: GoogleFonts.inter(
                       fontSize: 13,
                       color: Colors.grey[500],
@@ -258,7 +259,7 @@ class _LabTestPackageDetailsPageState extends State<LabTestPackageDetailsPage> {
                       fontSize: 9,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.bold)),
-              Text("₹${package.discountPrice.toInt()}",
+              Text("₹${package.discountPrice.toFormattedPrice()}",
                   style: GoogleFonts.inter(
                       fontSize: 16,
                       color: Colors.green[700],
@@ -407,7 +408,7 @@ class _LabTestPackageDetailsPageState extends State<LabTestPackageDetailsPage> {
     );
   }
 
-  Widget _buildIncludedTestsTable(List<LabTestDetails> tests) {
+  Widget _buildDetailedParametersTable(List<LabTestDetails> tests) {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(16)),
@@ -420,100 +421,73 @@ class _LabTestPackageDetailsPageState extends State<LabTestPackageDetailsPage> {
                 "Included Tests", "Lab tests included in this package"),
           ),
           const Divider(height: 1),
-          // Table Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: const Color(0xFFF8F9FD),
-            child: Row(
-              children: [
-                Expanded(
-                    flex: 3,
-                    child: Text("TEST NAME",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-                Expanded(
-                    flex: 2,
-                    child: Text("SAMPLE TYPE",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-                Expanded(
-                    flex: 2,
-                    child: Text("REPORT DURATION",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-                Expanded(
-                    flex: 1,
-                    child: Text("FASTING",
-                        style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[400],
-                            letterSpacing: 0.5))),
-              ],
-            ),
-          ),
-          ...tests.map((t) => Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                    border:
-                        Border(bottom: BorderSide(color: Colors.grey[100]!))),
-                child: Row(
-                  children: [
-                    Expanded(
-                        flex: 3,
-                        child: Text(t.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E1B4B)))),
-                    Expanded(
-                        flex: 2,
-                        child: Text(t.sampleType ?? "N/A",
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: const Color(0xFF475569)))),
-                    Expanded(
-                        flex: 2,
-                        child: Text(t.reportsDuration ?? "N/A",
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: const Color(0xFF475569)))),
-                    Expanded(
-                        flex: 1,
-                        child:
-                            _smallBadge(t.isFasting?.toLowerCase() == 'yes')),
-                  ],
-                ),
-              )),
           if (tests.isEmpty)
             const Padding(
                 padding: EdgeInsets.all(24),
-                child:
-                    Center(child: Text("No tests included in this package"))),
+                child: Center(child: Text("No tests included in this package")))
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor:
+                    MaterialStateProperty.all(const Color(0xFFF8F9FD)),
+                horizontalMargin: 16,
+                columnSpacing: 32,
+                columns: [
+                  DataColumn(
+                      label: Text("Test Name",
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700]))),
+                  DataColumn(
+                      label: Text("Sample Type",
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700]))),
+                  DataColumn(
+                      label: Text("Report Duration",
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700]))),
+                  DataColumn(
+                      label: Text("Fasting Required",
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700]))),
+                ],
+                rows: tests.map((t) {
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(t.name,
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1E1B4B)))),
+                      DataCell(Text(t.sampleType ?? "N/A",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: const Color(0xFF475569)))),
+                      DataCell(Text(t.reportsDuration ?? "N/A",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: const Color(0xFF475569)))),
+                      DataCell(Text(
+                          t.isFasting?.toLowerCase() == 'yes' ? "Yes" : "No",
+                          style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: t.isFasting?.toLowerCase() == 'yes'
+                                  ? Colors.orange[800]
+                                  : Colors.green[700]))),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
         ],
       ),
-    );
-  }
-
-  Widget _smallBadge(bool isYes) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-          color: (isYes ? Colors.yellow[100] : Colors.green[50]),
-          borderRadius: BorderRadius.circular(4)),
-      child: Text(isYes ? "Yes" : "No",
-          style: GoogleFonts.inter(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: (isYes ? Colors.orange[800] : Colors.green[700]))),
     );
   }
 

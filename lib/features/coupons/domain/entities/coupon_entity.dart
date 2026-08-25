@@ -38,4 +38,15 @@ class Coupon {
     this.applicableType,
     this.category = 'all',
   });
+
+  String get computedStatus {
+    final now = DateTime.now();
+    if (now.isBefore(validFrom)) {
+      return 'Active';
+    } else if (now.isAfter(validTo)) {
+      return 'Expired';
+    } else {
+      return 'Active';
+    }
+  }
 }

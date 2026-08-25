@@ -98,12 +98,24 @@ class NursingCareDetailsPage extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text("Discount: ",
+                                  Text("Price: ",
                                       style: GoogleFonts.poppins(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF166534))),
-                                  Text("₹${item.discountPrice.toInt()}",
+                                  if (item.price > item.discountPrice &&
+                                      item.discountPrice > 0) ...[
+                                    Text("₹${item.price.toInt()}",
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                            decoration:
+                                                TextDecoration.lineThrough,
+                                            color: Colors.grey[500])),
+                                    const SizedBox(width: 4),
+                                  ],
+                                  Text(
+                                      "₹${(item.discountPrice > 0 ? item.discountPrice : item.price).toInt()}",
                                       style: GoogleFonts.poppins(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -173,10 +185,79 @@ class NursingCareDetailsPage extends StatelessWidget {
               ),
             ),
 
+            // Clinic & Rehabs Information Section
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.info_outline,
+                            color: Colors.blue, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          "Clinic & Rehabs Information",
+                          style: GoogleFonts.poppins(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                          flex: 2,
+                          child: _buildInfoCard("Care Name", details.name)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                          flex: 3,
+                          child: _buildInfoCard(
+                              "Duration", details.duration ?? "N/A")),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _buildInfoCard(
+                            "Category", details.subcategory?.name ?? "N/A"),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 3,
+                        child: _buildInfoCard(
+                            "Shift Type",
+                            details.shiftType != null &&
+                                    details.shiftType!.isNotEmpty
+                                ? capitalizeFirstLetter(details.shiftType!)
+                                : "N/A"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
             // Content Sections
             if (details.description != null && details.description!.isNotEmpty)
               ExpandableHtmlSection(
-                  title: "Nursing Care Information",
+                  title: "Description",
                   htmlContent: details.description!,
                   icon: Icons.description_outlined,
                   bg: const Color(0xFFEAF9F1),
@@ -261,6 +342,68 @@ class NursingCareDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildInfoCard(String title, String value) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[500])),
+            const SizedBox(height: 4),
+            Text(value,
+                style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1E1B4B))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[500])),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(value,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1E1B4B))),
+        ),
+      ],
+    );
+  }
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.split(RegExp(r'[_\s]')).map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 }
 

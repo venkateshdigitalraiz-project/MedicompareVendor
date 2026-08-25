@@ -6,7 +6,8 @@ class LeadModel extends LeadEntity {
     required super.name,
     super.email,
     required super.phone,
-    super.address,
+    required super.age,
+    required super.price,
     required super.leadSource,
     required super.leadStage,
     required super.serviceType,
@@ -28,7 +29,10 @@ class LeadModel extends LeadEntity {
       name: json['name'] ?? 'Unknown',
       email: json['email'],
       phone: json['phone'] ?? '',
-      address: json['address'],
+      age: json['age'] is int
+          ? json['age']
+          : int.tryParse(json['age']?.toString() ?? '0') ?? 0,
+      price: (productDetails['price'] ?? 0).toDouble(),
       leadSource: json['leadSource'] ?? 'Unknown',
       leadStage: json['leadStage'] ?? 'new',
       serviceType: json['serviceType'] ?? 'Unknown',
@@ -95,6 +99,15 @@ class LeadDetailsModel extends LeadDetailsEntity {
     required super.duration,
     super.serviceImage,
     super.userDetails,
+    super.emailAddress,
+    super.city,
+    super.policyNumber,
+    super.relation,
+    super.preferredTimeline,
+    super.description,
+    super.complexity,
+    super.procedureType,
+    super.recoveryTime,
   });
 
   factory LeadDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -104,10 +117,16 @@ class LeadDetailsModel extends LeadDetailsEntity {
     String sName = 'Unknown Service';
     String duration = 'N/A';
     String? serviceImg;
+    String? complexityVal;
+    String? procedureTypeVal;
+    String? recoveryTimeVal;
     if (tabletDetailsList.isNotEmpty) {
       final tDetails = tabletDetailsList[0];
       sName = tDetails['name'] ?? 'Unknown Service';
       duration = tDetails['duration']?.toString() ?? 'N/A';
+      complexityVal = tDetails['complexity']?.toString();
+      procedureTypeVal = tDetails['procedureType']?.toString() ?? tDetails['procedure_type']?.toString();
+      recoveryTimeVal = tDetails['recoveryTime']?.toString() ?? tDetails['recovery_time']?.toString();
       if (tDetails['files'] != null && (tDetails['files'] as List).isNotEmpty) {
         serviceImg = tDetails['files'][0];
         if (serviceImg != null && !serviceImg.startsWith('http')) {
@@ -143,6 +162,15 @@ class LeadDetailsModel extends LeadDetailsEntity {
       duration: duration,
       serviceImage: serviceImg,
       userDetails: uDetails,
+      emailAddress: json['email']?.toString() ?? json['emailAddress']?.toString() ?? uDetails?.email ?? '',
+      city: json['city']?.toString() ?? '',
+      policyNumber: json['policyNumber']?.toString() ?? json['policy_number']?.toString() ?? '',
+      relation: json['relation']?.toString() ?? '',
+      preferredTimeline: json['preferredTimeline']?.toString() ?? json['preferred_timeline']?.toString() ?? '',
+      description: json['description']?.toString() ?? json['problemDescription']?.toString() ?? '',
+      complexity: complexityVal ?? json['complexity']?.toString() ?? productDetails['complexity']?.toString() ?? '',
+      procedureType: procedureTypeVal ?? json['procedureType']?.toString() ?? json['procedure_type']?.toString() ?? productDetails['procedureType']?.toString() ?? '',
+      recoveryTime: recoveryTimeVal ?? json['recoveryTime']?.toString() ?? json['recovery_time']?.toString() ?? productDetails['recoveryTime']?.toString() ?? '',
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/utils/invoice_generator.dart';
+import '../../../../core/utils/price_formatter.dart';
 
 class LeadPlanHistoryPage extends StatelessWidget {
   const LeadPlanHistoryPage({super.key});
@@ -140,7 +141,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
   Widget _buildActivePlanSection(dynamic pack) {
     final int limit = pack.plan?.limit ?? 1;
     final int usage = pack.usage ?? 0;
-    final double progress = (usage / limit).clamp(0.0, 1.0);
+    final double progress = limit > 0 ? (usage / limit).clamp(0.0, 1.0) : 0.0;
     final String startDate = DateFormat('dd MMM, yyyy').format(pack.createdAt);
 
     return Container(
@@ -202,7 +203,8 @@ class LeadPlanHistoryPage extends StatelessWidget {
             crossAxisSpacing: 20,
             childAspectRatio: 2.8,
             children: [
-              _infoTile("MONTHLY COST", pack.amount.toRupeeFormat()),
+              _infoTile("MONTHLY COST",
+                  (pack.plan?.price as num? ?? 0).toRupeeFormat()),
               _infoTile("BILLING CYCLE", "Monthly"),
               _infoTile("AUTO RENEW", "Enabled"),
               _infoTile("PAYMENT", "Razorpay"),
@@ -387,10 +389,13 @@ class LeadPlanHistoryPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _historyDetail("BILLING PERIOD", month),
-              _historyDetail("AMOUNT PAID", item.amount.toRupeeFormat()),
+              _historyDetail("AMOUNT PAID",
+                  (item.plan?.price as num? ?? 0).toRupeeFormat()),
               _historyDetail("DATE", date),
             ],
           ),
+          const SizedBox(height: 16),
+          _buildUsedLeadsBar(item),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -411,6 +416,66 @@ class LeadPlanHistoryPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildUsedLeadsBar(dynamic item) {
+    final int limit = item.plan?.limit ?? 0;
+    final int usage = item.usage ?? 0;
+    final double progress = limit > 0 ? (usage / limit).clamp(0.0, 1.0) : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Used Leads",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF4B5563),
+              ),
+            ),
+            Text(
+              "$usage / $limit leads",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Stack(
+          children: [
+            Container(
+              height: 8,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Container(
+                  height: 8,
+                  width: constraints.maxWidth * progress,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, Color(0xFF8B5CF6)],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 

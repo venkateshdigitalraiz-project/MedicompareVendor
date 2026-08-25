@@ -54,7 +54,9 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
             // Header Card
             _buildHeader(item, imageUrl),
             const SizedBox(height: 16),
-
+// // Diagnostic Info Section
+            _buildSectionHeader(Icons.info_outline, "Diagnostic Details",
+                "Complete details about the diagnostic"),
             // Info Grid
             _buildInfoGrid(item),
             const SizedBox(height: 16),
@@ -92,28 +94,28 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
             const SizedBox(height: 12),
 
             // Preparation Instructions
-            if (details.preparationInstructions != null &&
-                details.preparationInstructions!.isNotEmpty)
-              _buildCollapsibleHtml(
-                  "Preparation Instructions",
-                  details.preparationInstructions!,
-                  Icons.checklist_outlined,
-                  AppColors.primary,
-                  _showAllPrep,
-                  () => setState(() => _showAllPrep = !_showAllPrep)),
-
-            const SizedBox(height: 12),
 
             // Side Effects
             if (details.sideEffects != null && details.sideEffects!.isNotEmpty)
               _buildCollapsibleHtml(
-                  "Side Effects",
+                  "Risks & Side Effects",
                   details.sideEffects!,
                   Icons.medical_services_outlined,
                   Colors.red,
                   _showAllSideEffects,
                   () => setState(
                       () => _showAllSideEffects = !_showAllSideEffects)),
+
+            const SizedBox(height: 12),
+            if (details.preparationInstructions != null &&
+                details.preparationInstructions!.isNotEmpty)
+              _buildCollapsibleHtml(
+                  "Procedure Details",
+                  details.preparationInstructions!,
+                  Icons.checklist_outlined,
+                  AppColors.primary,
+                  _showAllPrep,
+                  () => setState(() => _showAllPrep = !_showAllPrep)),
 
             const SizedBox(height: 80),
           ],
@@ -279,23 +281,34 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
   }
 
   Widget _buildInfoGrid(DiagnosticItem item) {
-    return Row(
+    return Column(
       children: [
-        _infoTile("BODY PART", item.details.bodyPart ?? 'N/A',
-            Icons.location_on_outlined, Colors.blue),
-        const SizedBox(width: 12),
-        _infoTile(
-            "CONTRAST",
-            item.details.isContrast?.toLowerCase() == 'yes'
-                ? 'Required'
-                : 'Not Required',
-            Icons.contrast,
-            item.details.isContrast?.toLowerCase() == 'yes'
-                ? Colors.orange
-                : Colors.green),
-        const SizedBox(width: 12),
-        _infoTile("STATUS", item.status.toUpperCase(),
-            Icons.check_circle_outline, Colors.teal),
+        Row(
+          children: [
+            _infoTile("Diagnostic Name", item.details.name ?? 'N/A',
+                Icons.location_on_outlined, Colors.blue),
+            const SizedBox(width: 12),
+            _infoTile("BODY PART", item.details.bodyPart ?? 'N/A',
+                Icons.location_on_outlined, Colors.blue),
+          ],
+        ),
+        SizedBox(
+          height: 12,
+        ),
+        Row(
+          children: [
+            _infoTile(
+                "Category",
+                item.details.subcategory!.name,
+                Icons.contrast,
+                item.details.isContrast?.toLowerCase() == 'yes'
+                    ? Colors.orange
+                    : Colors.green),
+            const SizedBox(width: 12),
+            _infoTile("STATUS", item.status.toUpperCase(),
+                Icons.check_circle_outline, Colors.teal),
+          ],
+        ),
       ],
     );
   }
@@ -336,33 +349,33 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
     );
   }
 
-  // Widget _buildSectionHeader(IconData icon, String title, String subtitle) {
-  //   return Row(
-  //     children: [
-  //       Container(
-  //         padding: const EdgeInsets.all(8),
-  //         decoration: BoxDecoration(
-  //             color: const Color(0xFFF5F3FF),
-  //             borderRadius: BorderRadius.circular(8)),
-  //         child: Icon(icon, color: const Color(0xFF7C3AED), size: 18),
-  //       ),
-  //       const SizedBox(width: 12),
-  //       Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(title,
-  //               style: GoogleFonts.inter(
-  //                   fontSize: 16,
-  //                   fontWeight: FontWeight.bold,
-  //                   color: const Color(0xFF1E1B4B))),
-  //           Text(subtitle,
-  //               style:
-  //                   GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
+  Widget _buildSectionHeader(IconData icon, String title, String subtitle) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+              color: const Color(0xFFF5F3FF),
+              borderRadius: BorderRadius.circular(8)),
+          child: Icon(icon, color: const Color(0xFF7C3AED), size: 18),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B))),
+            Text(subtitle,
+                style:
+                    GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
+          ],
+        ),
+      ],
+    );
+  }
 
   // Widget _buildDetailsGrid(DiagnosticDetails details) {
   //   return Container(

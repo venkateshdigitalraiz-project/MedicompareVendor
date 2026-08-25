@@ -1,5 +1,51 @@
 import 'package:equatable/equatable.dart';
 
+double _parsePrice(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  final parsed = double.tryParse(value.toString());
+  return parsed ?? 0.0;
+}
+
+bool _parseBool(dynamic value) {
+  if (value == null) return false;
+  if (value is bool) return value;
+  if (value is int) return value == 1;
+  if (value is String) return value == 'true' || value == '1';
+  return false;
+}
+
+class AllMixVariant extends Equatable {
+  final String id;
+  final String name;
+  final double? price; // nullable — API can send null price
+  final double? discountPrice;
+  final String? discountType;
+
+  const AllMixVariant({
+    required this.id,
+    required this.name,
+    this.price,
+    this.discountPrice,
+    this.discountType,
+  });
+
+  factory AllMixVariant.fromJson(Map<String, dynamic> json) {
+    return AllMixVariant(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
+      price: json['price'] == null ? 0.0 : _parsePrice(json['price']),
+      discountPrice: json['discountprice'] == null
+          ? null
+          : _parsePrice(json['discountprice']),
+      discountType: json['discountType'],
+    );
+  }
+
+  @override
+  List<Object?> get props => [id, name, price, discountPrice, discountType];
+}
+
 class SurgeryCategory extends Equatable {
   final String id;
   final String name;
@@ -37,6 +83,8 @@ class SurgeryItem extends Equatable {
   final SurgeryDetails details;
   final String? discountType;
   final List<SurgeryVariantDetail> variantDetails;
+  final bool isVariant;
+  final List<AllMixVariant> allMixVariants; // list of mix variants from API
 
   const SurgeryItem({
     required this.id,
@@ -46,28 +94,92 @@ class SurgeryItem extends Equatable {
     required this.details,
     this.discountType,
     this.variantDetails = const [],
+    this.isVariant = false,
+    this.allMixVariants = const [],
   });
 
+  // Returns the effective display price based on is_variant flag.
+  // When isVariant=true, takes the first non-null price from allMixVariants.
+  // NEVER falls back to product.price when isVariant=true.
+  double get effectivePrice {
+    if (isVariant) {
+      for (final v in allMixVariants) {
+        if (v.price != null && v.price! > 0) return v.price!;
+      }
+      return 0.0; // all variants have null/0 price
+    }
+    return price;
+  }
+
+  // When isVariant=true, takes the first valid discount from allMixVariants.
+  double get effectiveDiscountPrice {
+    if (isVariant) {
+      for (final v in allMixVariants) {
+        if (v.price != null && v.price! > 0) {
+          return v.discountPrice ?? 0.0;
+        }
+      }
+      return 0.0;
+    }
+    return discountPrice;
+  }
+
+  // When isVariant=true, takes the first valid discount type from allMixVariants.
+  String? get effectiveDiscountType {
+    if (isVariant) {
+      for (final v in allMixVariants) {
+        if (v.price != null && v.price! > 0) {
+          return v.discountType;
+        }
+      }
+      return null;
+    }
+    return discountType;
+  }
+
   factory SurgeryItem.fromJson(Map<String, dynamic> json) {
+    // is_variant lives inside the tablets sub-object
+    final tabletsJson = json['tablets'] as Map<String, dynamic>? ?? {};
+    final isVariant = _parseBool(tabletsJson['is_variant']);
+
+    // allmixvariant is a List at the product root level
+    final rawMixVariants = json['allmixvariant'];
+    final allMixVariants = (rawMixVariants is List)
+        ? rawMixVariants
+            .whereType<Map<String, dynamic>>()
+            .map((i) => AllMixVariant.fromJson(i))
+            .toList()
+        : <AllMixVariant>[];
+
     return SurgeryItem(
       id: json['_id'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      price: _parsePrice(json['price']),
+      discountPrice: _parsePrice(json['discountprice']),
       discountType: json['discountType'],
       status: json['status'] ?? 'inactive',
-      details: SurgeryDetails.fromJson(json['tablets'] ?? {}),
+      details: SurgeryDetails.fromJson(tabletsJson),
       variantDetails: (json['variantdetails'] as List? ??
               json['variantdetail'] as List? ??
               [])
           .where((i) => i is Map<String, dynamic>)
-          .map((i) => SurgeryVariantDetail.fromJson(i))
+          .map((i) => SurgeryVariantDetail.fromJson(i as Map<String, dynamic>))
           .toList(),
+      isVariant: isVariant,
+      allMixVariants: allMixVariants,
     );
   }
 
   @override
-  List<Object?> get props =>
-      [id, price, discountPrice, status, details, variantDetails];
+  List<Object?> get props => [
+        id,
+        price,
+        discountPrice,
+        status,
+        details,
+        variantDetails,
+        isVariant,
+        allMixVariants
+      ];
 }
 
 class SurgeryDetails extends Equatable {
@@ -81,6 +193,7 @@ class SurgeryDetails extends Equatable {
   final String? directionOfUse;
   final String? precaution;
   final String? sideEffects;
+  final String? status;
   final List<String> files;
   final SurgerySubcategory? subcategory;
 
@@ -100,6 +213,7 @@ class SurgeryDetails extends Equatable {
     required this.files,
     this.subcategory,
     this.tabletVariants = const [],
+    this.status,
   });
 
   factory SurgeryDetails.fromJson(Map<String, dynamic> json) {
@@ -114,6 +228,7 @@ class SurgeryDetails extends Equatable {
       directionOfUse: json['directionofuse'],
       precaution: json['precaution'],
       sideEffects: json['sideeffects'],
+      status: json['status'],
       files: List<String>.from(json['files'] ?? []),
       subcategory: json['subcategory'] != null && json['subcategory'] is Map
           ? SurgerySubcategory.fromJson(json['subcategory'])
@@ -192,8 +307,8 @@ class SurgeryVariantDetail extends Equatable {
       id: json['_id'] ?? '',
       productId: json['productId'] ?? '',
       variantId: json['variantId'] ?? json['varantId'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      price: _parsePrice(json['price']),
+      discountPrice: _parsePrice(json['discountprice']),
       discountType: json['discountType'] ?? 'price',
       stock: json['stock'] ?? 0,
       status: json['status'] ?? 'inactive',
@@ -201,8 +316,16 @@ class SurgeryVariantDetail extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, productId, variantId, price, discountPrice, discountType, stock, status];
+  List<Object?> get props => [
+        id,
+        productId,
+        variantId,
+        price,
+        discountPrice,
+        discountType,
+        stock,
+        status
+      ];
 }
 
 class SurgeryTabletVariant extends Equatable {

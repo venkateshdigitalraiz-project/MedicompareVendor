@@ -5,7 +5,8 @@ class LeadEntity extends Equatable {
   final String name;
   final String? email;
   final String phone;
-  final String? address;
+  final int age;
+  final double price;
   final String leadSource;
   final String leadStage;
   final String serviceType;
@@ -18,7 +19,8 @@ class LeadEntity extends Equatable {
     required this.name,
     this.email,
     required this.phone,
-    this.address,
+    required this.age,
+    required this.price,
     required this.leadSource,
     required this.leadStage,
     required this.serviceType,
@@ -33,7 +35,8 @@ class LeadEntity extends Equatable {
         name,
         email,
         phone,
-        address,
+        age,
+        price,
         leadSource,
         leadStage,
         serviceType,
@@ -93,6 +96,15 @@ class LeadDetailsEntity extends Equatable {
   final String duration;
   final String? serviceImage;
   final UserDetailsEntity? userDetails;
+  final String? emailAddress;
+  final String? city;
+  final String? policyNumber;
+  final String? relation;
+  final String? preferredTimeline;
+  final String? description;
+  final String? complexity;
+  final String? procedureType;
+  final String? recoveryTime;
 
   const LeadDetailsEntity({
     required this.id,
@@ -114,6 +126,15 @@ class LeadDetailsEntity extends Equatable {
     required this.duration,
     this.serviceImage,
     this.userDetails,
+    this.emailAddress,
+    this.city,
+    this.policyNumber,
+    this.relation,
+    this.preferredTimeline,
+    this.description,
+    this.complexity,
+    this.procedureType,
+    this.recoveryTime,
   });
 
   @override
@@ -137,6 +158,15 @@ class LeadDetailsEntity extends Equatable {
         duration,
         serviceImage,
         userDetails,
+        emailAddress,
+        city,
+        policyNumber,
+        relation,
+        preferredTimeline,
+        description,
+        complexity,
+        procedureType,
+        recoveryTime,
       ];
 }
 

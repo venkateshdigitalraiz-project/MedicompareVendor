@@ -91,8 +91,29 @@ class DentalServiceCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (details.treatmentType != null &&
+                        details.treatmentType!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(
+                            " Type : ${details.treatmentType!}",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue[700],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(
+                            width: 30,
+                          ),
+                          _statusBadge(item.status),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 8),
-                    _statusBadge(item.status),
                   ],
                 ),
               ),
@@ -112,9 +133,24 @@ class DentalServiceCard extends StatelessWidget {
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  if (item.price > item.discountPrice &&
+                      item.discountPrice > 0) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      "₹${item.price.toInt()}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[500],
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                  ] else ...[
+                    const SizedBox(height: 12),
+                  ],
                   Text(
-                    "₹${item.discountPrice.toInt()}",
+                    "₹${(item.discountPrice > 0 ? item.discountPrice : item.price).toInt()}",
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

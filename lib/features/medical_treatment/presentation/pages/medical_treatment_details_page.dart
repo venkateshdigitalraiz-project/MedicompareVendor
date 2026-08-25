@@ -65,10 +65,14 @@ class _MedicalTreatmentDetailsPageState
             _buildInfoGrid(details),
             const SizedBox(height: 16),
 
+            // Treatment Information
+            _buildTreatmentInfo(details),
+            const SizedBox(height: 16),
+
             // Description
             if (details.description.isNotEmpty)
               _buildCollapsibleSection(
-                title: "Description",
+                title: "Treatment Description",
                 content: details.description,
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFF059669),
@@ -237,8 +241,8 @@ class _MedicalTreatmentDetailsPageState
       children: [
         Row(
           children: [
-            _infoItem("COMPLEXITY", details.complexity ?? "N/A",
-                Icons.speed_outlined, Colors.orange),
+            _infoItem("Category", details.subcategory?.name ?? "N/A",
+                Icons.restore_outlined, Colors.green),
             const SizedBox(width: 12),
             _infoItem("DURATION", details.duration ?? "N/A",
                 Icons.access_time_outlined, Colors.blue),
@@ -247,8 +251,8 @@ class _MedicalTreatmentDetailsPageState
         const SizedBox(height: 12),
         Row(
           children: [
-            _infoItem("RECOVERY", details.recoveryTime ?? "N/A",
-                Icons.restore_outlined, Colors.green),
+            _infoItem("COMPLEXITY", details.complexity ?? "N/A",
+                Icons.speed_outlined, Colors.orange),
             const SizedBox(width: 12),
             _infoItem("STATUS", widget.item.status.toUpperCase(),
                 Icons.check_circle_outline, Colors.teal),
@@ -395,5 +399,101 @@ class _MedicalTreatmentDetailsPageState
       child: const Icon(Icons.medical_services_outlined,
           color: Colors.grey, size: 28),
     );
+  }
+
+  Widget _buildTreatmentInfo(MedicalTreatmentDetails details) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.info_outline,
+                    color: Colors.blue, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  "Treatment Information",
+                  style: GoogleFonts.poppins(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _buildInfoCard("Treatment Name", details.name),
+              const SizedBox(width: 12),
+              _buildInfoCard(
+                  "Duration",
+                  details.duration != null && details.duration!.isNotEmpty
+                      ? details.duration!
+                      : "N/A"),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildInfoCard("Category", details.subcategory?.name ?? "N/A"),
+              const SizedBox(width: 12),
+              _buildInfoCard(
+                  "Complexity",
+                  details.complexity != null && details.complexity!.isNotEmpty
+                      ? capitalizeFirstLetter(details.complexity!)
+                      : "N/A"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String value) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[500])),
+            const SizedBox(height: 4),
+            Text(value,
+                style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1E1B4B))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.split(RegExp(r'[_\s]')).map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 }

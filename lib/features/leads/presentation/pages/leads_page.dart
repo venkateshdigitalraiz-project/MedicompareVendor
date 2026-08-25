@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../domain/entities/lead_entity.dart';
 import '../bloc/leads_bloc.dart';
 import '../bloc/leads_event.dart';
@@ -113,7 +114,7 @@ class _LeadsPageState extends State<LeadsPage> {
                     return _buildLeadsList(
                         state.leadsList.leads, state.isLoadingMore);
                   } else if (state is LeadDetailsLoaded) {
-                    // This state is shared, we might need a better way to handle 
+                    // This state is shared, we might need a better way to handle
                     // list view when details are loaded if navigation doesn't happen
                     return const SizedBox.shrink();
                   }
@@ -354,47 +355,65 @@ class _LeadsPageState extends State<LeadsPage> {
                           value: lead.serviceName,
                           icon: Icons.medical_services_outlined,
                           color: AppColors.primary,
+                          subvalue: lead.serviceType,
                         ),
                       ),
                       Expanded(
                         child: _buildBeautifulInfoItem(
                           label: "Posted On",
-                          value:
-                              DateFormat('MMM d, yyyy').format(lead.createdAt.toLocal()),
+                          value: DateFormat('MMM d, yyyy')
+                              .format(lead.createdAt.toLocal()),
                           icon: Icons.calendar_today_outlined,
                           color: Colors.blue,
+                          subvalue: '',
                         ),
                       ),
                     ],
                   ),
-                  if (lead.address != null && lead.address!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 14, color: Colors.grey),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              lead.address!,
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today_outlined,
+                                size: 14, color: Colors.grey),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Age: ${lead.age} years",
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 color: Colors.grey[700],
                                 height: 1.3,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const Icon(Icons.currency_rupee,
+                                size: 14, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Price: ${lead.price.toRupeeFormat()}",
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: Colors.grey[700],
+                                height: 1.3,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -408,12 +427,13 @@ class _LeadsPageState extends State<LeadsPage> {
       {required String label,
       required String value,
       required IconData icon,
+      required String subvalue,
       required Color color}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(6),
@@ -445,6 +465,17 @@ class _LeadsPageState extends State<LeadsPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
+              subvalue.isEmpty
+                  ? Container()
+                  : Text(
+                      subvalue,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                        letterSpacing: 0.5,
+                      ),
+                    ),
             ],
           ),
         ),
@@ -572,7 +603,8 @@ class _LeadsPageState extends State<LeadsPage> {
                   ElevatedButton(
                     onPressed: () {
                       context.read<LeadsBloc>().add(
-                            UpdateLeadStatusEvent(id: lead.id, status: newStatus),
+                            UpdateLeadStatusEvent(
+                                id: lead.id, status: newStatus),
                           );
                       Navigator.pop(context);
                     },

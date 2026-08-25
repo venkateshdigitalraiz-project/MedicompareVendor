@@ -56,6 +56,7 @@ class MedicalEquipmentDetailsModel extends MedicalEquipmentDetails {
     super.condition,
     required super.files,
     super.subcategory,
+    super.brand,
   });
 
   factory MedicalEquipmentDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -72,6 +73,7 @@ class MedicalEquipmentDetailsModel extends MedicalEquipmentDetails {
           : (json['subcategorys'] is Map
               ? MedicalEquipmentSubcategoryModel.fromJson(json['subcategorys'])
               : null),
+      brand: json['manufacture'] is Map ? json['manufacture']['name'] : (json['manufacture'] is String ? json['manufacture'] : null),
     );
   }
 }

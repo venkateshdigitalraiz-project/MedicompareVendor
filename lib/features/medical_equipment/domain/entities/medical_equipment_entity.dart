@@ -45,6 +45,7 @@ class MedicalEquipmentDetails {
   final String? condition;
   final List<String> files;
   final MedicalEquipmentSubcategory? subcategory;
+  final String? brand;
 
   const MedicalEquipmentDetails({
     required this.id,
@@ -55,6 +56,7 @@ class MedicalEquipmentDetails {
     this.condition,
     required this.files,
     this.subcategory,
+    this.brand,
   });
 }
 

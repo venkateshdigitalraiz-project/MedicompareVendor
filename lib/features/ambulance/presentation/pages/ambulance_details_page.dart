@@ -77,7 +77,7 @@ class AmbulanceDetailsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              ambulance.name,
+                              capitalizeFirstLetter(ambulance.name),
                               style: GoogleFonts.poppins(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -153,22 +153,34 @@ class AmbulanceDetailsPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: ambulance.facilities
-                        .map((f) => Chip(
-                              label: Text(f.name,
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500)),
-                              backgroundColor: Colors.grey[50],
-                              side: BorderSide(color: Colors.grey[200]!),
-                              avatar: const Icon(Icons.check_circle,
-                                  size: 14, color: Colors.green),
-                            ))
-                        .toList(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildInfoColumn("Type",
+                          capitalizeFirstLetter(ambulance.ambulanceType)),
+                      _buildInfoColumn(
+                          "Equipment", ambulance.facilities.length.toString()),
+                      _buildInfoColumn(
+                          "Status", capitalizeFirstLetter(ambulance.status)),
+                    ],
                   ),
+                  const SizedBox(height: 20),
+                  // Wrap(
+                  //   spacing: 8,
+                  //   runSpacing: 8,
+                  //   children: ambulance.facilities
+                  //       .map((f) => Chip(
+                  //             label: Text(capitalizeFirstLetter(f.name),
+                  //                 style: GoogleFonts.poppins(
+                  //                     fontSize: 12,
+                  //                     fontWeight: FontWeight.w500)),
+                  //             backgroundColor: Colors.grey[50],
+                  //             side: BorderSide(color: Colors.grey[200]!),
+                  //             avatar: const Icon(Icons.check_circle,
+                  //                 size: 14, color: Colors.green),
+                  //           ))
+                  //       .toList(),
+                  // ),
                   if (ambulance.facilities.isEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -181,37 +193,119 @@ class AmbulanceDetailsPage extends StatelessWidget {
             ),
 
             // Status Section
+            // Container(
+            //   margin: const EdgeInsets.all(12),
+            //   padding: const EdgeInsets.all(20),
+            //   decoration: BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.circular(16),
+            //   ),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       Text("Service Status",
+            //           style: GoogleFonts.poppins(
+            //               fontSize: 14, fontWeight: FontWeight.bold)),
+            //       _badge(
+            //         ambulance.status.toLowerCase() == 'active'
+            //             ? Icons.check_circle
+            //             : Icons.error,
+            //         ambulance.status.toUpperCase(),
+            //         ambulance.status.toLowerCase() == 'active'
+            //             ? Colors.green[50]!
+            //             : Colors.orange[50]!,
+            //         ambulance.status.toLowerCase() == 'active'
+            //             ? Colors.green
+            //             : Colors.orange,
+            //       ),
+            //     ],
+            //   ),
+            // ),
+
+            // Service Information Section
             Container(
-              margin: const EdgeInsets.all(12),
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Service Status",
-                      style: GoogleFonts.poppins(
-                          fontSize: 14, fontWeight: FontWeight.bold)),
-                  _badge(
-                    ambulance.status.toLowerCase() == 'active'
-                        ? Icons.check_circle
-                        : Icons.error,
-                    ambulance.status.toUpperCase(),
-                    ambulance.status.toLowerCase() == 'active'
-                        ? Colors.green[50]!
-                        : Colors.orange[50]!,
-                    ambulance.status.toLowerCase() == 'active'
-                        ? Colors.green
-                        : Colors.orange,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.info_outline,
+                            color: Colors.blue, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Ambulance Service Information",
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 20),
+                  _buildDetailRow(
+                      "Service Name", capitalizeFirstLetter(ambulance.name)),
+                  const Divider(
+                      height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
+                  _buildDetailRow("Ambulance Type",
+                      capitalizeFirstLetter(ambulance.ambulanceType)),
                 ],
               ),
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[500])),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(value,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1E1B4B))),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoColumn(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500])),
+        const SizedBox(height: 4),
+        Text(value,
+            style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1E1B4B))),
+      ],
     );
   }
 
@@ -272,5 +366,13 @@ class AmbulanceDetailsPage extends StatelessWidget {
     if (url.startsWith('http')) return url;
     final cleanPath = url.startsWith('/') ? url : '/$url';
     return "https://api.medicompares.com$cleanPath";
+  }
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text.split(RegExp(r'[_\s]')).map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 }

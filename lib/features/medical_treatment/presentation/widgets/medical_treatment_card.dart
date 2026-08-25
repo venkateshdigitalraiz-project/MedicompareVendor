@@ -91,8 +91,29 @@ class MedicalTreatmentCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (details.duration != null &&
+                        details.duration!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time,
+                              size: 12, color: Colors.blue[700]),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Duration: ${details.duration!}",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue[700],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 8),
-                    _statusBadge(item.status),
+                    //      _statusBadge(item.status),
                   ],
                 ),
               ),
