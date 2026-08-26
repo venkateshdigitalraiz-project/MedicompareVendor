@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../domain/entities/appointment_entity.dart';
 import '../bloc/appointment_booking_bloc.dart';
@@ -44,14 +45,17 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
         _scrollController.position.maxScrollExtent - 200) {
       final state = context.read<AppointmentBookingBloc>().state;
       if (state is AppointmentBookingLoaded && !state.isFetchingMore) {
-        if (state.appointmentsList.pagination.page <
-            state.appointmentsList.pagination.totalPages) {
-          _currentPage++;
+        final currentApiPage = state.appointmentsList.pagination.page;
+        final totalPages = state.appointmentsList.pagination.totalPages;
+
+        if (currentApiPage < totalPages) {
+          final nextPage = currentApiPage + 1;
+          _currentPage = nextPage;
           context.read<AppointmentBookingBloc>().add(
                 GetAppointmentBookingsEvent(
                   status: _selectedStatus,
                   search: _searchQuery,
-                  page: _currentPage,
+                  page: nextPage,
                   isLoadMore: true,
                 ),
               );
@@ -189,7 +193,18 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
     );
   }
 
+  Future<void> _onRefresh() async {
+    _currentPage = 1;
+    context.read<AppointmentBookingBloc>().add(GetAppointmentBookingsEvent(
+          status: _selectedStatus,
+          search: _searchQuery,
+          page: _currentPage,
+        ));
+    await Future.delayed(const Duration(seconds: 1));
+  }
+
   void _onFilterChanged() {
+    _currentPage = 1;
     context.read<AppointmentBookingBloc>().add(GetAppointmentBookingsEvent(
           status: _selectedStatus,
           search: _searchQuery,
@@ -203,23 +218,26 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
       return const Center(child: Text("No appointments matching filters."));
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: isLoadingMore ? orders.length + 1 : orders.length,
-      itemBuilder: (context, index) {
-        if (index < orders.length) {
-          final order = orders[index];
-          return _buildAppointmentCard(order);
-        } else {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-      },
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: isLoadingMore ? orders.length + 1 : orders.length,
+        itemBuilder: (context, index) {
+          if (index < orders.length) {
+            final order = orders[index];
+            return _buildAppointmentCard(order);
+          } else {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -276,7 +294,7 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
                           ),
                         ),
                         Text(
-                          "Type: ${item.type}",
+                          "Service: ${item.type}",
                           style: GoogleFonts.inter(
                               fontSize: 12, color: Colors.grey),
                         ),
@@ -315,6 +333,12 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
                           style: GoogleFonts.inter(
                               fontSize: 12, color: Colors.grey),
                         ),
+                        if (item.branchName != null && item.branchName!.isNotEmpty)
+                          Text(
+                            "Branch: ${item.branchName}",
+                            style: GoogleFonts.inter(
+                                fontSize: 12, color: Colors.grey),
+                          ),
                       ],
                     ),
                   ),
@@ -327,7 +351,7 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
                             fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       Text(
-                        "₹${item.totalPrice.toStringAsFixed(2)}",
+                        item.totalPrice.toRupeeFormat(decimalDigits: 2),
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,

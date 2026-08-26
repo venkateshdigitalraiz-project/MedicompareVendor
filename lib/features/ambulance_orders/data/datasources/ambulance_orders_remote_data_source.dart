@@ -54,14 +54,14 @@ class AmbulanceOrdersRemoteDataSource {
       final files = (u['files'] as List? ?? []);
       return AmbulanceOrderUser(
         id: u['_id'] ?? '',
-        firstName: u['first_name'] ?? '',
-        lastName: u['last_name'] ?? '',
-        phone: u['phone']?.toString() ?? '',
+        firstName: u['firstName'] ?? u['first_name'] ?? '',
+        lastName: u['lastName'] ?? u['last_name'] ?? '',
+        phone: u['mobile']?.toString() ?? u['phone']?.toString() ?? '',
         email: u['email']?.toString() ?? '',
         profileImage: files.isNotEmpty ? files.first.toString() : null,
-        age: u['age'] is int ? u['age'] : null,
+        age: u['age'] is int ? u['age'] : int.tryParse(u['age']?.toString() ?? ''),
         gender: u['gender']?.toString(),
-        medicalConditions: u['medical_conditions']?.toString(),
+        medicalConditions: (u['medical_conditions'] ?? u['medicalConditions'])?.toString(),
       );
     }).toList();
 
@@ -103,13 +103,13 @@ class AmbulanceOrdersRemoteDataSource {
         address: dropoff['address']?.toString() ?? '',
       ),
       distance: (e['distance'] as num?)?.toDouble() ?? 0,
-      fare: (e['fare'] as num?)?.toDouble() ?? 0,
-      totalFare: (e['totalFare'] as num?)?.toDouble() ?? 0,
+      fare: (e['fare'] as num?)?.toDouble() ?? (e['price'] as num?)?.toDouble() ?? 0,
+      totalFare: (e['totalFare'] as num?)?.toDouble() ?? (e['totalPrice'] as num?)?.toDouble() ?? (e['finalAmount'] as num?)?.toDouble() ?? 0,
       gst: (e['gst'] as num?)?.toDouble() ?? 0,
       status: e['status']?.toString() ?? 'pending',
       bookingStatus: e['bookingStatus']?.toString() ?? 'pending',
-      paymentMethod: e['paymentmethod']?.toString() ?? 'cod',
-      paymentStatus: e['paymentStatus']?.toString() ?? 'unpaid',
+      paymentMethod: e['paymentMethod']?.toString() ?? e['paymentmethod']?.toString() ?? 'cod',
+      paymentStatus: e['paymentStatus']?.toString() ?? e['paymentstatus']?.toString() ?? 'unpaid',
       emergencyType: e['emergencyType']?.toString() ?? '',
       createdAt: e['createdAt'] != null
           ? DateTime.tryParse(e['createdAt'].toString()) ?? DateTime.now()

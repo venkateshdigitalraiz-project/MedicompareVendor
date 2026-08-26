@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../domain/entities/appointment_details_entity.dart';
 import '../bloc/appointment_details_bloc.dart';
 import '../bloc/appointment_details_event.dart';
@@ -452,6 +453,18 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             details.orderStatus.substring(1)
         : 'Pending';
 
+    final String? createdType = details.couponDetails?.createdType?.toLowerCase();
+    
+    double couponAmount = 0.0;
+    if (createdType == 'vendor') {
+      couponAmount = details.billingSummary.couponAmount;
+    }
+
+    final double grandTotal = details.billingSummary.subtotal +
+        details.billingSummary.sampleCollection -
+        details.billingSummary.adminCommission -
+        couponAmount;
+
     return _buildCard(
       title: "Billing Summary",
       icon: Icons.receipt_long_outlined,
@@ -463,21 +476,22 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               valueColor: _getStatusColor(ordStatus)),
           const Divider(height: 24),
           _buildSummaryRow("Subtotal (Inclusive all Taxes)",
-              "₹${details.billingSummary.subtotal.toStringAsFixed(2)}"),
-          _buildSummaryRow("Sample Collection",
-              "₹${details.billingSummary.sampleCollection.toStringAsFixed(2)}"),
+              details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
+          if (details.billingSummary.sampleCollection > 0)
+            _buildSummaryRow("Sample Collection",
+                details.billingSummary.sampleCollection.toRupeeFormat(decimalDigits: 2)),
           if (details.billingSummary.tax > 0)
             _buildSummaryRow(
-                "Tax", "₹${details.billingSummary.tax.toStringAsFixed(2)}"),
+                "Tax", details.billingSummary.tax.toRupeeFormat(decimalDigits: 2)),
           if (details.billingSummary.deliveryCharges > 0)
             _buildSummaryRow("Delivery Charges",
-                "₹${details.billingSummary.deliveryCharges.toStringAsFixed(2)}"),
-          if (details.billingSummary.couponAmount > 0)
+                details.billingSummary.deliveryCharges.toRupeeFormat(decimalDigits: 2)),
+          if (couponAmount > 0)
             _buildSummaryRow("Coupon Discount",
-                "-₹${details.billingSummary.couponAmount.toStringAsFixed(2)}",
+                "-${couponAmount.toRupeeFormat(decimalDigits: 2)}",
                 valueColor: Colors.green),
           _buildSummaryRow("Admin Commission",
-              "-₹${details.billingSummary.adminCommission.toStringAsFixed(2)}",
+              "-${details.billingSummary.adminCommission.toRupeeFormat(decimalDigits: 2)}",
               valueColor: Colors.red, labelColor: Colors.red),
           const Divider(height: 24),
           Row(
@@ -487,7 +501,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold, fontSize: 16)),
               Text(
-                  "₹${(details.billingSummary.subtotal - details.billingSummary.couponAmount - details.billingSummary.adminCommission).toStringAsFixed(2)}",
+                  grandTotal.toRupeeFormat(decimalDigits: 2),
                   style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

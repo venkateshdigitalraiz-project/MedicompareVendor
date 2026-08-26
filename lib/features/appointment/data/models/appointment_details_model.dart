@@ -20,6 +20,7 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
     required super.normalItems,
     super.shippingAddress,
     super.billingAddress,
+    super.couponDetails,
   });
 
   factory AppointmentDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -63,6 +64,11 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
                   e as Map<String, dynamic>))
               .toList()
           : [],
+      couponDetails:
+          json['couponDetails'] != null && json['couponDetails'] is Map
+              ? AppointmentCouponDetailsModel.fromJson(
+                  json['couponDetails'] as Map<String, dynamic>)
+              : null,
       normalItems: json['items'] != null && json['items'] is List
           ? (json['items'] as List)
               .map((e) => AppointmentServiceItemModel.fromJson(
@@ -136,6 +142,19 @@ class AppointmentDetailsBillingSummaryModel
   }
 }
 
+class AppointmentCouponDetailsModel extends AppointmentCouponDetailsEntity {
+  const AppointmentCouponDetailsModel({
+    super.createdType,
+  });
+
+  factory AppointmentCouponDetailsModel.fromJson(Map<String, dynamic> json) {
+    return AppointmentCouponDetailsModel(
+      createdType:
+          json['createdType']?.toString() ?? json['createdtype']?.toString(),
+    );
+  }
+}
+
 class AppointmentGroupDetailsModel extends AppointmentGroupDetailsEntity {
   const AppointmentGroupDetailsModel({
     super.patientDetails,
@@ -193,6 +212,7 @@ class AppointmentServiceItemModel extends AppointmentServiceItemEntity {
     required super.status,
     required super.productName,
     required super.productImages,
+    required super.couponAmount,
   });
 
   factory AppointmentServiceItemModel.fromJson(Map<String, dynamic> json) {
@@ -265,6 +285,8 @@ class AppointmentServiceItemModel extends AppointmentServiceItemEntity {
       status: json['status']?.toString() ?? 'Pending',
       productName: productName,
       productImages: productImages,
+      couponAmount:
+          double.tryParse(json['couponAmount']?.toString() ?? '0') ?? 0.0,
     );
   }
 }

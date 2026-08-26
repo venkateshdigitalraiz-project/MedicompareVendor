@@ -20,6 +20,7 @@ class AppointmentDetailsEntity extends Equatable {
 
   final AppointmentAddressEntity? shippingAddress;
   final AppointmentAddressEntity? billingAddress;
+  final AppointmentCouponDetailsEntity? couponDetails;
 
   const AppointmentDetailsEntity({
     required this.orderId,
@@ -40,6 +41,7 @@ class AppointmentDetailsEntity extends Equatable {
     required this.normalItems,
     this.shippingAddress,
     this.billingAddress,
+    this.couponDetails,
   });
 
   @override
@@ -62,7 +64,19 @@ class AppointmentDetailsEntity extends Equatable {
         normalItems,
         shippingAddress,
         billingAddress,
+        couponDetails,
       ];
+}
+
+class AppointmentCouponDetailsEntity extends Equatable {
+  final String? createdType;
+
+  const AppointmentCouponDetailsEntity({
+    this.createdType,
+  });
+
+  @override
+  List<Object?> get props => [createdType];
 }
 
 class AppointmentDetailsBillingSummaryEntity extends Equatable {
@@ -150,6 +164,7 @@ class AppointmentServiceItemEntity extends Equatable {
   final String status;
   final String productName;
   final List<String> productImages;
+  final double couponAmount;
 
   const AppointmentServiceItemEntity({
     required this.orderItemId,
@@ -164,6 +179,7 @@ class AppointmentServiceItemEntity extends Equatable {
     required this.status,
     required this.productName,
     required this.productImages,
+    required this.couponAmount,
   });
 
   @override
@@ -180,6 +196,7 @@ class AppointmentServiceItemEntity extends Equatable {
         status,
         productName,
         productImages,
+        couponAmount,
       ];
 }
 

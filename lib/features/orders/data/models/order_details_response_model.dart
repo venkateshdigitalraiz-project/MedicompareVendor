@@ -12,6 +12,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     required super.orderStatus,
     required super.bookingType,
     required super.orderType,
+    required super.paymentMethod,
     required super.createdAt,
     required super.subtotal,
     required super.tax,
@@ -33,10 +34,14 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       orderStatus: json['orderStatus']?.toString() ?? '',
       bookingType: json['bookingType']?.toString() ?? '',
       orderType: json['orderType']?.toString() ?? '',
+      paymentMethod: (json['orderDetails']?['paymentmethod'] ?? 
+                      json['orderDetails']?['paymentMethod'] ?? 
+                      json['paymentMethod'] ?? 
+                      json['paymentmethod'])?.toString() ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
-      subtotal: (json['subtotal'] ?? 0).toDouble(),
+      subtotal: (json['baseAmount'] ?? 0).toDouble(),
       tax: (json['tax'] ?? 0).toDouble(),
       total: (json['total'] ?? 0).toDouble(),
       billingSummary: OrderBillingSummaryModel.fromJson(
@@ -72,9 +77,10 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
 
   factory OrderBillingSummaryModel.fromJson(Map<String, dynamic> json) {
     return OrderBillingSummaryModel(
-      subtotal: double.tryParse(json['subtotal']?.toString() ?? '0') ?? 0.0,
+      subtotal: double.tryParse(json['baseAmount']?.toString() ?? '0') ?? 0.0,
       totalGst: double.tryParse(json['totalGst']?.toString() ?? '0') ?? 0.0,
-      finalAmount: double.tryParse(json['finalAmount']?.toString() ?? '0') ?? 0.0,
+      finalAmount:
+          double.tryParse(json['finalAmount']?.toString() ?? '0') ?? 0.0,
       unitPrice: double.tryParse(json['unitPrice']?.toString() ?? '0') ?? 0.0,
       gstAmount: double.tryParse(json['gstAmount']?.toString() ?? '0') ?? 0.0,
       paidAmount: double.tryParse(json['paidAmount']?.toString() ?? '0') ?? 0.0,
@@ -106,7 +112,9 @@ class OrderDetailsItemModel extends OrderDetailsItemEntity {
           json['billingSummary'] ?? <String, dynamic>{}),
       productDetails: json['productDetails'] != null
           ? ProductDetailsModel.fromJson(json['productDetails'])
-          : ProductDetailsModel.fromJson(json),
+          : json['productSnapshot'] != null
+              ? ProductDetailsModel.fromJson(json['productSnapshot'])
+              : ProductDetailsModel.fromJson(json),
       vendorCommissionAmount: (json['vendorCommissionAmount'] ??
               json['vendorcommissionamount'] ??
               0)

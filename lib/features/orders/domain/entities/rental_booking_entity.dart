@@ -96,10 +96,12 @@ class RentalDetailsEntity extends Equatable {
   final DateTime? startDate;
   final DateTime? endDate;
   final String paymentType;
+  final String paymentMethod;
   final int numberOfInstallments;
   final double basePricePerDay;
   final int totalDays;
   final double totalAmount;
+  final double installmentAmount;
   final double serviceCharges;
   final double returnCharges;
   final double deposit;
@@ -111,10 +113,12 @@ class RentalDetailsEntity extends Equatable {
     this.startDate,
     this.endDate,
     required this.paymentType,
+    required this.paymentMethod,
     required this.numberOfInstallments,
     required this.basePricePerDay,
     required this.totalDays,
     required this.totalAmount,
+    this.installmentAmount = 0.0,
     this.serviceCharges = 0.0,
     this.returnCharges = 0.0,
     this.deposit = 0.0,
@@ -128,10 +132,12 @@ class RentalDetailsEntity extends Equatable {
         startDate,
         endDate,
         paymentType,
+        paymentMethod,
         numberOfInstallments,
         basePricePerDay,
         totalDays,
         totalAmount,
+        installmentAmount,
         serviceCharges,
         returnCharges,
         deposit,

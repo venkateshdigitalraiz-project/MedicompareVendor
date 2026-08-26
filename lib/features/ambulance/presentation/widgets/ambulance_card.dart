@@ -158,7 +158,7 @@ class AmbulanceCard extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 50,
+                width: 30,
               ),
               Text(
                 "₹${item.price.toFormattedPrice()}/km",

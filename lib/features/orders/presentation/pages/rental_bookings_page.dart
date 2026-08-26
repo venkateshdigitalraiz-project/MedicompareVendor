@@ -5,11 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-// import '../../domain/entities/order_entity.dart';
-// import '../bloc/orders_bloc.dart';
-// import '../bloc/orders_event.dart';
-// import '../bloc/orders_state.dart';
 import '../bloc/rental_booking_bloc.dart';
 import '../bloc/rental_booking_event.dart';
 import '../bloc/rental_booking_state.dart';
@@ -352,7 +349,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                             fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       Text(
-                        "₹${item.totalPrice.toStringAsFixed(2)}",
+                        item.totalPrice.toRupeeFormat(decimalDigits: 2),
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,

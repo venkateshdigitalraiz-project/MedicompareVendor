@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../domain/entities/ambulance_order_entity.dart';
 
 class AmbulanceOrderDetailsPage extends StatelessWidget {
@@ -100,11 +101,18 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                       icon: Icons.airport_shuttle_rounded,
                       iconColor: AppColors.primaryDark,
                       title: 'Ambulance Details',
-                      child: _buildAmbulanceDetails(product),
+                      child: _buildAmbulanceDetails(order, product),
                     ),
                     const SizedBox(height: 14),
                   ],
-
+                  // ── Fare Summary ───────────────────────────────────
+                  _sectionCard(
+                    icon: Icons.receipt_long_outlined,
+                    iconColor: Colors.green,
+                    title: 'Fare Summary',
+                    child: _buildFareSummary(order),
+                  ),
+                  const SizedBox(height: 14),
                   // ── Patient Info ───────────────────────────────────
                   if (customer != null) ...[
                     _sectionCard(
@@ -122,15 +130,6 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                     iconColor: Colors.deepOrange,
                     title: 'Trip Details',
                     child: _buildTripDetails(order),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // ── Fare Summary ───────────────────────────────────
-                  _sectionCard(
-                    icon: Icons.receipt_long_outlined,
-                    iconColor: Colors.green,
-                    title: 'Fare Summary',
-                    child: _buildFareSummary(order),
                   ),
                   const SizedBox(height: 14),
 
@@ -167,7 +166,7 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
         _statBox(
           icon: Icons.currency_rupee,
           label: 'Fare',
-          value: '₹${order.fare.toStringAsFixed(0)}',
+          value: order.fare.toRupeeFormat(),
           color: Colors.green,
         ),
         const SizedBox(width: 10),
@@ -214,7 +213,8 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
   }
 
   // ── Ambulance Details ────────────────────────────────────────────────
-  Widget _buildAmbulanceDetails(AmbulanceOrderProductDetail product) {
+  Widget _buildAmbulanceDetails(
+      AmbulanceOrderEntity order, AmbulanceOrderProductDetail product) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -239,9 +239,12 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
                       fontSize: 14,
                       color: const Color(0xFF1E1B4B))),
               const SizedBox(height: 4),
-              if (product.ambulanceType != null)
-                _pill(
-                    _capitalize(product.ambulanceType!), AppColors.primaryDark),
+              Text(
+                "Type: ${order.emergencyType.isNotEmpty ? order.emergencyType[0].toUpperCase() + order.emergencyType.substring(1) : 'N/A'}",
+                style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 6),
               if (product.businessName != null)
                 Row(children: [
@@ -257,7 +260,7 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text('₹${product.discountPrice.toStringAsFixed(0)}',
+        Text(product.discountPrice.toRupeeFormat(),
             style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -315,7 +318,8 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
         const SizedBox(height: 8),
         _contactTile(Icons.email_outlined, customer.email, Colors.purple),
         if (customer.medicalConditions != null &&
-            customer.medicalConditions!.isNotEmpty) ...[
+            customer.medicalConditions!.isNotEmpty &&
+            customer.medicalConditions!.toLowerCase() != 'null') ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -418,10 +422,10 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        _fareRow('Base Fare', '₹${order.fare.toStringAsFixed(0)}'),
+        _fareRow('Base Fare', order.fare.toRupeeFormat()),
         if (order.gst > 0) ...[
           const SizedBox(height: 6),
-          _fareRow('GST', '₹${order.gst.toStringAsFixed(0)}'),
+          _fareRow('GST', order.gst.toRupeeFormat()),
         ],
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 10),
@@ -429,7 +433,7 @@ class AmbulanceOrderDetailsPage extends StatelessWidget {
         ),
         _fareRow(
           'Total Fare',
-          '₹${(order.totalFare > 0 ? order.totalFare : order.fare).toStringAsFixed(0)}',
+          (order.totalFare > 0 ? order.totalFare : order.fare).toRupeeFormat(),
           isBold: true,
           valueColor: AppColors.primaryDark,
         ),

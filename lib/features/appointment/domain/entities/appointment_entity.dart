@@ -41,6 +41,7 @@ class AppointmentItemEntity extends Equatable {
   final AppointmentProductDetailsEntity productDetails;
   final AppointmentUserDetailsEntity? userDetails;
   final DateTime? appointmentDate;
+  final String? branchName;
 
   const AppointmentItemEntity({
     required this.id,
@@ -53,6 +54,7 @@ class AppointmentItemEntity extends Equatable {
     required this.productDetails,
     this.userDetails,
     this.appointmentDate,
+    this.branchName,
   });
 
   @override
@@ -67,6 +69,7 @@ class AppointmentItemEntity extends Equatable {
         productDetails,
         userDetails,
         appointmentDate,
+        branchName,
       ];
 }
 

@@ -61,6 +61,7 @@ class AppointmentItemModel extends AppointmentItemEntity {
     required super.productDetails,
     super.userDetails,
     super.appointmentDate,
+    super.branchName,
   });
 
   factory AppointmentItemModel.fromJson(Map<String, dynamic> json) {
@@ -83,11 +84,17 @@ class AppointmentItemModel extends AppointmentItemEntity {
       orderItemId: json['orderId']?.toString() ?? json['orderItemId']?.toString() ?? json['_id']?.toString() ?? '',
       orderStatus: json['orderStatus']?.toString() ?? 'pending',
       type: (() {
+        if (json['servicefixedTypes'] != null && json['servicefixedTypes'].toString().isNotEmpty) {
+            return json['servicefixedTypes'].toString();
+        }
+        if (json['orderDetails'] != null && json['orderDetails'] is Map && json['orderDetails']['servicefixedTypes'] != null) {
+            return json['orderDetails']['servicefixedTypes'].toString();
+        }
         final billing = json['billingSummary'] ?? json['billingsummary'];
         if (billing != null && billing is Map) {
             if (billing['vendorBilling'] != null && billing['vendorBilling'] is List && (billing['vendorBilling'] as List).isNotEmpty) {
                 final vb = (billing['vendorBilling'] as List).first;
-                if (vb is Map && vb['servicefixedTypes'] != null) {
+                if (vb is Map && vb['servicefixedTypes'] != null && vb['servicefixedTypes'].toString().isNotEmpty) {
                     return vb['servicefixedTypes'].toString();
                 }
             }
@@ -109,16 +116,16 @@ class AppointmentItemModel extends AppointmentItemEntity {
         }
       })(),
       totalPrice: (() {
+        final billing = json['billingSummary'] ?? json['billingsummary'];
+        if (billing != null && billing is Map) {
+            if (billing['subtotal'] != null) return double.tryParse(billing['subtotal'].toString()) ?? 0.0;
+            if (billing['finalAmount'] != null) return double.tryParse(billing['finalAmount'].toString()) ?? 0.0;
+            if (billing['unitPrice'] != null) return double.tryParse(billing['unitPrice'].toString()) ?? 0.0;
+        }
         if (json['totalPrice'] != null) return double.tryParse(json['totalPrice'].toString()) ?? 0.0;
         if (json['totalprice'] != null) return double.tryParse(json['totalprice'].toString()) ?? 0.0;
         if (json['total'] != null && double.tryParse(json['total'].toString()) != null && double.tryParse(json['total'].toString())! > 0) {
             return double.tryParse(json['total'].toString()) ?? 0.0;
-        }
-        final billing = json['billingSummary'] ?? json['billingsummary'];
-        if (billing != null && billing is Map) {
-            if (billing['finalAmount'] != null) return double.tryParse(billing['finalAmount'].toString()) ?? 0.0;
-            if (billing['subtotal'] != null) return double.tryParse(billing['subtotal'].toString()) ?? 0.0;
-            if (billing['unitPrice'] != null) return double.tryParse(billing['unitPrice'].toString()) ?? 0.0;
         }
         return 0.0;
       })(),
@@ -172,6 +179,11 @@ class AppointmentItemModel extends AppointmentItemEntity {
           ? AppointmentUserDetailsModel.fromJson(json['userDetails'] as Map<String, dynamic>)
           : null,
       appointmentDate: getAppointmentDate(),
+      branchName: (json['branchDetails'] is Map && json['branchDetails']['name'] != null)
+          ? json['branchDetails']['name'].toString()
+          : (json['orderDetails'] != null && json['orderDetails'] is Map && json['orderDetails']['branchDetails'] is Map && json['orderDetails']['branchDetails']['name'] != null)
+              ? json['orderDetails']['branchDetails']['name'].toString()
+              : null,
     );
   }
 }

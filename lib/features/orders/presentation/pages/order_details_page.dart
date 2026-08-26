@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../bloc/order_details_bloc.dart';
 import '../bloc/order_details_event.dart';
 import '../bloc/order_details_state.dart';
@@ -141,7 +142,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   _buildShippingAddressSection(orderDetails),
                   if (orderDetails.shippingAddressDetails != null)
                     const SizedBox(height: 16),
-                  _buildBillingAddressSection(orderDetails),
+                  //  _buildBillingAddressSection(orderDetails),
                 ],
               );
 
@@ -168,7 +169,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           _buildShippingAddressSection(orderDetails),
                           if (orderDetails.shippingAddressDetails != null)
                             const SizedBox(height: 16),
-                          _buildBillingAddressSection(orderDetails),
+                          //    _buildBillingAddressSection(orderDetails),
                         ],
                       ),
               );
@@ -312,17 +313,50 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           final tablet = product.tabletDetails;
           final productName =
               tablet != null ? tablet['name'] ?? product.name : product.name;
-          String? imageUrl;
-          if (tablet != null) {
-            if (tablet['imageUrl'] != null &&
-                (tablet['imageUrl'] as List).isNotEmpty) {
-              imageUrl = tablet['imageUrl'].first;
-            } else if (tablet['files'] != null &&
-                (tablet['files'] as List).isNotEmpty) {
-              imageUrl = tablet['files'].first;
+          List<String> imageUrls = [];
+          if (product.variantDetails != null &&
+              product.variantDetails['tabletVariant'] != null) {
+            final vImgUrl = product.variantDetails['tabletVariant']
+                    ['imageUrl'] ??
+                product.variantDetails['tabletVariant']['imageurl'];
+            if (vImgUrl is List && vImgUrl.isNotEmpty) {
+              imageUrls = vImgUrl
+                  .map((e) => e.toString())
+                  .where((e) => e.trim().isNotEmpty)
+                  .toList();
+            } else if (vImgUrl is String && vImgUrl.trim().isNotEmpty) {
+              imageUrls = [vImgUrl];
             }
           }
-          log("imageUrl : $imageUrl");
+
+          if (imageUrls.isEmpty) {
+            if (product.imageUrl.isNotEmpty) {
+              imageUrls =
+                  product.imageUrl.where((e) => e.trim().isNotEmpty).toList();
+            } else if (product.files.isNotEmpty) {
+              imageUrls =
+                  product.files.where((e) => e.trim().isNotEmpty).toList();
+            } else if (tablet != null) {
+              final tImgUrl = tablet['imageUrl'] ?? tablet['imageurl'];
+              final tFiles = tablet['files'];
+              if (tImgUrl is List && tImgUrl.isNotEmpty) {
+                imageUrls = tImgUrl
+                    .map((e) => e.toString())
+                    .where((e) => e.trim().isNotEmpty)
+                    .toList();
+              } else if (tImgUrl is String && tImgUrl.trim().isNotEmpty) {
+                imageUrls = [tImgUrl];
+              } else if (tFiles is List && tFiles.isNotEmpty) {
+                imageUrls = tFiles
+                    .map((e) => e.toString())
+                    .where((e) => e.trim().isNotEmpty)
+                    .toList();
+              } else if (tFiles is String && tFiles.trim().isNotEmpty) {
+                imageUrls = [tFiles];
+              }
+            }
+          }
+          log("imageUrls : $imageUrls");
 
           //  final gst = item.billingSummary.gstAmount;
 
@@ -346,10 +380,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: imageUrl != null
+                      child: imageUrls.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(4),
-                              child: Image.network(imageUrl, fit: BoxFit.cover))
+                              child: Image.network(imageUrls.first,
+                                  fit: BoxFit.cover))
                           : const Icon(Icons.image_outlined,
                               color: Colors.grey),
                     ),
@@ -371,7 +406,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                               Text("ID: ${item.orderItemId}",
                                   style: GoogleFonts.inter(
                                       fontSize: 11, color: Colors.grey[600])),
-                              if (tablet != null && tablet['variant'] != null)
+                              if (product.variantDetails != null &&
+                                  product.variantDetails['tabletVariant'] !=
+                                      null &&
+                                  product.variantDetails['tabletVariant']
+                                          ['name'] !=
+                                      null)
+                                Text(
+                                    "Variant: ${product.variantDetails['tabletVariant']['name']}",
+                                    style: GoogleFonts.inter(
+                                        fontSize: 11, color: Colors.grey[600]))
+                              else if (tablet != null &&
+                                  tablet['variant'] != null)
                                 Text("Variant: ${tablet['variant']}",
                                     style: GoogleFonts.inter(
                                         fontSize: 11, color: Colors.grey[600])),
@@ -402,7 +448,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            "₹${item.vendorCommissionAmount.toStringAsFixed(2)}",
+                            item.vendorCommissionAmount.toRupeeFormat(decimalDigits: 2),
                             style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: AppColors.primary,
@@ -417,7 +463,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            "₹${item.billingSummary.gstAmount.toStringAsFixed(2)}",
+                            item.billingSummary.gstAmount.toRupeeFormat(decimalDigits: 2),
                             style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: Colors.black87,
@@ -432,7 +478,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            "₹${(item.billingSummary.finalAmount - item.billingSummary.gstAmount).toStringAsFixed(2)}",
+                            (item.billingSummary.finalAmount - item.billingSummary.gstAmount).toRupeeFormat(decimalDigits: 2),
                             style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -523,29 +569,29 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   Widget _buildOrderSummarySection(OrderDetailsResponseEntity details) {
-    final gst = details.billingSummary.totalGst;
+    final gst = details.billingSummary.gstAmount;
     final adminCommission = details.items
         .fold<double>(0.0, (sum, item) => sum + item.vendorCommissionAmount);
     final totalEarnings =
         details.billingSummary.subtotal - adminCommission; // Example formula
-
+    // (item.billingSummary.finalAmount - item.billingSummary.gstAmount);
     return _buildCard(
       title: "Order Summary",
       child: Column(
         children: [
           _buildSummaryRow("Subtotal (Inclusive of all taxes)",
-              "₹ ${details.subtotal.toStringAsFixed(2)}"),
+              details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
-          _buildSummaryRow("GST", "₹ ${gst.toStringAsFixed(2)}"),
+          _buildSummaryRow("GST", gst.toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
           _buildSummaryRow(
-              "Admin Commission", "- ₹${adminCommission.toStringAsFixed(2)}",
+              "Admin Commission", "-${adminCommission.toRupeeFormat(decimalDigits: 2)}",
               valueColor: Colors.red, labelColor: Colors.red),
           const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),
           const SizedBox(height: 16),
           _buildSummaryRow(
-              "Total Earnings", "₹ ${totalEarnings.toStringAsFixed(2)}",
+              "Total Earnings", totalEarnings.toRupeeFormat(decimalDigits: 2),
               isTotal: true),
           const SizedBox(height: 16),
           Row(
@@ -553,7 +599,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               Text("Payment Method: ",
                   style:
                       GoogleFonts.inter(fontSize: 11, color: Colors.grey[500])),
-              Text("Online",
+              Text(
+                  details.paymentMethod.isNotEmpty
+                      ? details.paymentMethod[0].toUpperCase() +
+                          details.paymentMethod.substring(1).toLowerCase()
+                      : "Online",
                   style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,

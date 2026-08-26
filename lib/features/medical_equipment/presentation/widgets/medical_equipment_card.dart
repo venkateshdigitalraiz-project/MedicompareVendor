@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../domain/entities/medical_equipment_entity.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class MedicalEquipmentCard extends StatelessWidget {
   final MedicalEquipmentItem item;
@@ -114,7 +115,7 @@ class MedicalEquipmentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "₹${item.discountPrice.toInt()}",
+                    item.discountPrice.toRupeeFormat(),
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -122,7 +123,7 @@ class MedicalEquipmentCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Deposit: ₹${item.fixedDeposit?.toInt()}",
+                    "Deposit: ${(item.fixedDeposit ?? 0).toRupeeFormat()}",
                     style: GoogleFonts.inter(
                       fontSize: 9,
                       color: Colors.grey[500],

@@ -275,6 +275,13 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        Text(
+                          "Type: ${order.emergencyType.isNotEmpty ? order.emergencyType[0].toUpperCase() + order.emergencyType.substring(1) : 'N/A'}",
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey[600]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
@@ -323,20 +330,20 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                             fontSize: 15,
                             color: AppColors.primaryDark),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                            color: paymentColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6)),
-                        child: Text(
-                          order.paymentStatus.toUpperCase(),
-                          style: GoogleFonts.inter(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: paymentColor),
-                        ),
-                      ),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(
+                      //       horizontal: 6, vertical: 2),
+                      //   decoration: BoxDecoration(
+                      //       color: paymentColor.withOpacity(0.1),
+                      //       borderRadius: BorderRadius.circular(6)),
+                      //   child: Text(
+                      //     order.paymentStatus.toUpperCase(),
+                      //     style: GoogleFonts.inter(
+                      //         fontSize: 9,
+                      //         fontWeight: FontWeight.bold,
+                      //         color: paymentColor),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],
@@ -368,13 +375,27 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                       style: GoogleFonts.inter(
                           fontSize: 11, color: Colors.grey[500])),
                   const SizedBox(width: 12),
-                  Text(
-                    order.paymentMethod == 'cod'
-                        ? 'Cash on Delivery'
-                        : 'Online',
-                    style: GoogleFonts.inter(
-                        fontSize: 11, color: Colors.grey[500]),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                        color: paymentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6)),
+                    child: Text(
+                      order.paymentMethod == 'cod'
+                          ? 'Cash on Delivery'
+                          : 'Online',
+                      style: GoogleFonts.inter(
+                          fontSize: 11, color: Colors.grey[500]),
+                    ),
                   ),
+                  // Text(
+                  //   order.paymentMethod == 'cod'
+                  //       ? 'Cash on Delivery'
+                  //       : 'Online',
+                  //   style: GoogleFonts.inter(
+                  //       fontSize: 11, color: Colors.grey[500]),
+                  // ),
                 ],
               ),
             ],

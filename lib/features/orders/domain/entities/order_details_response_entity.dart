@@ -11,6 +11,7 @@ class OrderDetailsResponseEntity extends Equatable {
   final String orderStatus;
   final String bookingType;
   final String orderType;
+  final String paymentMethod;
   final DateTime createdAt;
   final double subtotal;
   final double tax;
@@ -30,6 +31,7 @@ class OrderDetailsResponseEntity extends Equatable {
     required this.orderStatus,
     required this.bookingType,
     required this.orderType,
+    required this.paymentMethod,
     required this.createdAt,
     required this.subtotal,
     required this.tax,
@@ -51,6 +53,7 @@ class OrderDetailsResponseEntity extends Equatable {
         orderStatus,
         bookingType,
         orderType,
+        paymentMethod,
         createdAt,
         subtotal,
         tax,

@@ -91,6 +91,7 @@ class OrderDetailsModel extends OrderDetailsEntity {
     required super.personType,
     super.doctorName,
     super.userDetails,
+    super.branchDetails,
     super.fixedDeposit = 0,
     super.serviceCharges = 0,
     super.returnCharge = 0,
@@ -122,6 +123,7 @@ class OrderDetailsModel extends OrderDetailsEntity {
       userDetails: json['userDetails'] != null
           ? UserDetailsModel.fromJson(json['userDetails'])
           : null,
+      branchDetails: json['branchDetails'],
       fixedDeposit: (json['fixedDeposit'] ?? 0).toDouble(),
       serviceCharges: (json['serviceCharges'] ?? 0).toDouble(),
       returnCharge: (json['returnCharge'] ?? 0).toDouble(),
@@ -238,6 +240,9 @@ class ProductDetailsModel extends ProductDetailsEntity {
     required super.id,
     required super.name,
     super.tabletDetails,
+    super.variantDetails,
+    super.imageUrl,
+    super.files,
   });
 
   factory ProductDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -245,6 +250,19 @@ class ProductDetailsModel extends ProductDetailsEntity {
       id: json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       tabletDetails: json['tabletDetails'] ?? json['tabletdetails'],
+      variantDetails: json['variantDetails'] ?? json['variantdetails'],
+      imageUrl: () {
+        final img = json['imageUrl'] ?? json['imageurl'];
+        if (img is List) return img.map((e) => e.toString()).toList();
+        if (img is String && img.isNotEmpty) return [img];
+        return <String>[];
+      }(),
+      files: () {
+        final f = json['files'];
+        if (f is List) return f.map((e) => e.toString()).toList();
+        if (f is String && f.isNotEmpty) return [f];
+        return <String>[];
+      }(),
     );
   }
 }
@@ -308,6 +326,7 @@ class OrdersListModel extends OrdersListEntity {
         'persontype': order['persontype'] ?? order['personType'],
         'doctorName': order['doctorName'],
         'userDetails': order['userDetails'],
+        'branchDetails': order['branchDetails'],
       };
 
       final List<dynamic> items = order['items'] ?? [];

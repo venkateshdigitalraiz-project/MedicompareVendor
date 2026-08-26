@@ -84,6 +84,7 @@ class OrderDetailsEntity extends Equatable {
   final String personType;
   final String? doctorName;
   final UserDetailsEntity? userDetails;
+  final dynamic branchDetails;
 
   // Rental specific fields
   final double fixedDeposit;
@@ -111,6 +112,7 @@ class OrderDetailsEntity extends Equatable {
     required this.personType,
     this.doctorName,
     this.userDetails,
+    this.branchDetails,
     this.fixedDeposit = 0,
     this.serviceCharges = 0,
     this.returnCharge = 0,
@@ -138,6 +140,7 @@ class OrderDetailsEntity extends Equatable {
         personType,
         doctorName,
         userDetails,
+        branchDetails,
         fixedDeposit,
         serviceCharges,
         returnCharge,
@@ -231,15 +234,21 @@ class ProductDetailsEntity extends Equatable {
   final String id;
   final String name;
   final dynamic tabletDetails;
+  final dynamic variantDetails;
+  final List<String> imageUrl;
+  final List<String> files;
 
   const ProductDetailsEntity({
     required this.id,
     required this.name,
     this.tabletDetails,
+    this.variantDetails,
+    this.imageUrl = const [],
+    this.files = const [],
   });
 
   @override
-  List<Object?> get props => [id, name, tabletDetails];
+  List<Object?> get props => [id, name, tabletDetails, variantDetails, imageUrl, files];
 }
 
 class PaginationEntity extends Equatable {

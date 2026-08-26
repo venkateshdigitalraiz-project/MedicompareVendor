@@ -100,10 +100,12 @@ class RentalDetailsModel extends RentalDetailsEntity {
     super.startDate,
     super.endDate,
     required super.paymentType,
+    required super.paymentMethod,
     required super.numberOfInstallments,
     required super.basePricePerDay,
     required super.totalDays,
     required super.totalAmount,
+    super.installmentAmount,
     super.serviceCharges,
     super.returnCharges,
     super.deposit,
@@ -119,16 +121,18 @@ class RentalDetailsModel extends RentalDetailsEntity {
           : null,
       endDate:
           json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
-      paymentType: json['paymentType']?.toString() ?? '',
+      paymentType: (json['paymentType'] ?? json['paymenttype'])?.toString() ?? '',
+      paymentMethod: (json['paymentMethod'] ?? json['paymentmethod'])?.toString() ?? '',
       numberOfInstallments: int.tryParse(json['numberOfInstallments']?.toString() ?? '0') ?? 0,
       basePricePerDay:
           double.tryParse((json['basePricePerDay'] ?? json['price'])?.toString() ?? '0') ?? 0.0,
       totalDays: int.tryParse(json['totalDays']?.toString() ?? '0') ?? 0,
       totalAmount: double.tryParse(json['totalAmount']?.toString() ?? '0') ?? 0.0,
+      installmentAmount: double.tryParse((json['installmentAmount'] ?? json['installmentamount'])?.toString() ?? '0') ?? 0.0,
       serviceCharges:
-          double.tryParse((json['serviceCharges'] ?? json['servicecharges'])?.toString() ?? '0') ?? 0.0,
+          double.tryParse((json['serviceCharges'] ?? json['servicecharges'] ?? json['serviceCharge'] ?? json['servicecharge'])?.toString() ?? '0') ?? 0.0,
       returnCharges:
-          double.tryParse((json['returnCharges'] ?? json['returncharges'])?.toString() ?? '0') ?? 0.0,
+          double.tryParse((json['returnCharges'] ?? json['returncharges'] ?? json['returnCharge'] ?? json['returncharge'])?.toString() ?? '0') ?? 0.0,
       deposit: double.tryParse((json['fixedDeposit'] ?? json['deposit'])?.toString() ?? '0') ?? 0.0,
       productSnapshot: json['productSnapshot'] != null
           ? RentalProductSnapshotModel.fromJson(json['productSnapshot'])

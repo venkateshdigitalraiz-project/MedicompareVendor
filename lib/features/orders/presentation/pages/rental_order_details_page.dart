@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../domain/entities/order_details_response_entity.dart';
 import '../bloc/order_details_bloc.dart';
 import '../bloc/order_details_event.dart';
@@ -349,51 +351,86 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     final totalRentalValue =
         subtotal + serviceCharges + returnCharges + deposit;
     final totalEarned = totalRentalValue - adminCommission;
-    final installamount = orderDetails.billingSummary.paidAmount;
+    final installamount = rentalDetails?.installmentAmount ?? 0.0;
 
     return _buildCard(
       title: "Order Summary",
       child: Column(
         children: [
           _buildSummaryRow("Subtotal (Inclusive of All Taxes)",
-              "₹ ${subtotal.toStringAsFixed(0)} ($basePrice x $totalDays days)"),
+              "${subtotal.toRupeeFormat()} ($basePrice x $totalDays days)"),
           const SizedBox(height: 12),
-          _buildSummaryRow("GST", "₹ ${gst.toStringAsFixed(0)}"),
-          const SizedBox(height: 12),
-          _buildSummaryRow(
-              "Service Charges", "₹ ${serviceCharges.toStringAsFixed(0)}"),
+          _buildSummaryRow("GST", gst.toRupeeFormat()),
           const SizedBox(height: 12),
           _buildSummaryRow(
-              "Return Charges", "₹ ${returnCharges.toStringAsFixed(0)}"),
+              "Service Charges", serviceCharges.toRupeeFormat()),
           const SizedBox(height: 12),
           _buildSummaryRow(
-              "Deposit (Returnable)", "₹ ${deposit.toStringAsFixed(0)}"),
+              "Return Charges", returnCharges.toRupeeFormat()),
           const SizedBox(height: 12),
           _buildSummaryRow(
-              "Admin Commission", "- ₹ ${adminCommission.toStringAsFixed(0)}",
+              "Deposit (Returnable)", deposit.toRupeeFormat()),
+          const SizedBox(height: 12),
+          _buildSummaryRow(
+              "Admin Commission", "-${adminCommission.toRupeeFormat()}",
               valueColor: Colors.red, labelColor: Colors.red),
           const Divider(height: 32),
           _buildSummaryRow(
-              "Total Rental Value", "₹ ${totalRentalValue.toStringAsFixed(0)}",
+              "Total Rental Value", totalRentalValue.toRupeeFormat(),
               isBold: true),
           const SizedBox(height: 16),
           _buildSummaryRow(
-              "Total Earned", "₹ ${totalEarned.toStringAsFixed(0)}",
+              "Total Earned", totalEarned.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const Divider(height: 32),
           _buildSummaryRow(
-              "1st Installment Amount", "₹ ${installamount.toStringAsFixed(0)}",
+              "1st Installment Amount", installamount.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const SizedBox(height: 16),
-          _buildSummaryRow(
-              "Payment Method: ${rentalDetails?.paymentType ?? 'Online'}", "",
-              isBold: false, labelSize: 11),
+          Builder(
+            builder: (context) {
+              final pm = orderDetails.paymentMethod.isNotEmpty ? orderDetails.paymentMethod : rentalDetails?.paymentMethod;
+              final paymentStr = (pm != null && pm.isNotEmpty)
+                  ? pm[0].toUpperCase() + pm.substring(1).toLowerCase()
+                  : 'Online';
+              return _buildSummaryRow("Payment Method: $paymentStr", "",
+                  isBold: false, labelSize: 11);
+            },
+          ),
           const SizedBox(height: 8),
-          _buildSummaryRow("Payment Type: Onetimepayment", "",
-              isBold: false, labelSize: 11),
+          Builder(
+            builder: (context) {
+              final pt = rentalDetails?.paymentType;
+              final typeStr = (pt != null && pt.isNotEmpty)
+                  ? pt[0].toUpperCase() + pt.substring(1).toLowerCase()
+                  : 'Onetimepayment';
+              return _buildSummaryRow("Payment Type: $typeStr", "",
+                  isBold: false, labelSize: 11);
+            },
+          ),
           const SizedBox(height: 8),
           _buildSummaryRow(
               "Rental Plan: ${rentalDetails?.rentalPlan ?? 'Monthly'}", "",
+              isBold: false, labelSize: 11),
+          const SizedBox(height: 8),
+          Builder(builder: (context) {
+            final dateFormatter = DateFormat('dd/MM/yyyy');
+            final startDateStr = rentalDetails?.startDate != null
+                ? dateFormatter.format(rentalDetails!.startDate!)
+                : '';
+            final endDateStr = rentalDetails?.endDate != null
+                ? dateFormatter.format(rentalDetails!.endDate!)
+                : '';
+            final rentalPeriod =
+                startDateStr.isNotEmpty && endDateStr.isNotEmpty
+                    ? '$startDateStr - $endDateStr'
+                    : 'N/A';
+            return _buildSummaryRow("Rental Period: $rentalPeriod", "",
+                isBold: false, labelSize: 11);
+          }),
+          const SizedBox(height: 8),
+          _buildSummaryRow(
+              "Installment Amount: ${installamount.toRupeeFormat()}", "",
               isBold: false, labelSize: 11),
         ],
       ),

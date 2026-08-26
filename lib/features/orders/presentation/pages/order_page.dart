@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/price_formatter.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../domain/entities/order_entity.dart';
 import '../bloc/orders_bloc.dart';
@@ -22,8 +23,6 @@ class _OrdersPageState extends State<OrdersPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
   // String _selectedDuration = 'No delivery Time';
-  int _currentPage = 1;
-  bool _isFetching = false;
   final ScrollController _scrollController = ScrollController();
 
   // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
@@ -47,33 +46,16 @@ class _OrdersPageState extends State<OrdersPage> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      if (_isFetching) return;
-      
       final state = context.read<OrdersBloc>().state;
       if (state is OrdersLoaded && !state.isLoadingMore) {
         if (state.ordersList.pagination.page <
             state.ordersList.pagination.totalPages) {
-          
-          setState(() {
-            _isFetching = true;
-          });
-          
-          _currentPage++;
           context.read<OrdersBloc>().add(GetOrdersEvent(
                 status: _selectedStatus,
                 search: _searchQuery,
-                page: _currentPage,
+                page: state.ordersList.pagination.page + 1,
                 isLoadMore: true,
               ));
-              
-          // Reset after a short delay to allow the bloc to emit the loading state
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              setState(() {
-                _isFetching = false;
-              });
-            }
-          });
         }
       }
     }
@@ -97,17 +79,24 @@ class _OrdersPageState extends State<OrdersPage> {
         children: [
           _buildFilters(),
           Expanded(
-            child: BlocBuilder<OrdersBloc, OrdersState>(
+            child: BlocConsumer<OrdersBloc, OrdersState>(
+              listener: (context, state) {
+                if (state is OrdersLoaded && state.loadMoreError != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.loadMoreError!)),
+                  );
+                }
+              },
               builder: (context, state) {
                 if (state is OrdersLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is OrdersLoaded) {
-                  return Column(
-                    children: [
-                      Expanded(
-                          child: _buildOrdersList(state.ordersList.orderItems,
-                              state.isLoadingMore)),
-                    ],
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      _onFilterChanged();
+                    },
+                    child: _buildOrdersList(
+                        state.ordersList.orderItems, state.isLoadingMore),
                   );
                 } else if (state is OrdersError) {
                   return Center(child: Text(state.message));
@@ -135,7 +124,6 @@ class _OrdersPageState extends State<OrdersPage> {
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value;
-                      _currentPage = 1;
                     });
                     _onFilterChanged();
                   },
@@ -176,7 +164,6 @@ class _OrdersPageState extends State<OrdersPage> {
                   onChanged: (val) {
                     setState(() {
                       _selectedStatus = val!;
-                      _currentPage = 1;
                     });
                     _onFilterChanged();
                   },
@@ -224,13 +211,20 @@ class _OrdersPageState extends State<OrdersPage> {
     context.read<OrdersBloc>().add(GetOrdersEvent(
           status: _selectedStatus,
           search: _searchQuery,
-          page: _currentPage,
+          page: 1,
         ));
   }
 
   Widget _buildOrdersList(List<OrderItemEntity> orders, bool isLoadingMore) {
     if (orders.isEmpty) {
-      return const Center(child: Text("No orders matching filters."));
+      return ListView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(height: 100),
+          Center(child: Text("No orders matching filters.")),
+        ],
+      );
     }
 
     final Map<String, List<OrderItemEntity>> groupedOrders = {};
@@ -244,6 +238,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
     return ListView.builder(
       controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: isLoadingMore ? uniqueOrders.length + 1 : uniqueOrders.length,
       itemBuilder: (context, index) {
@@ -364,6 +359,12 @@ class _OrdersPageState extends State<OrdersPage> {
                           style: GoogleFonts.inter(
                               fontSize: 12, color: Colors.grey),
                         ),
+                        if (item.orderDetails.branchDetails != null && item.orderDetails.branchDetails['name'] != null)
+                          Text(
+                            "Branch: ${item.orderDetails.branchDetails['name']}",
+                            style: GoogleFonts.inter(
+                                fontSize: 12, color: Colors.grey),
+                          ),
                         Text(
                           user?.phone ?? "No Phone",
                           style: GoogleFonts.inter(
@@ -383,7 +384,7 @@ class _OrdersPageState extends State<OrdersPage> {
                             fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       Text(
-                        "₹${item.totalPrice.toStringAsFixed(2)}",
+                        item.totalPrice.toRupeeFormat(decimalDigits: 2),
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,

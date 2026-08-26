@@ -1,4 +1,5 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 import 'package:MediCompare/features/medical_equipment/medical_equipment_injection.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_details_bloc.dart';
 import 'package:MediCompare/features/medical_equipment/presentation/bloc/medical_equipment_details_event.dart';
@@ -385,7 +386,7 @@ class _MedicalEquipmentDetailsPageState
                       fontSize: 9,
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold)),
-              Text("₹${item.price.toInt()}",
+              Text(item.price.toRupeeFormat(),
                   style: GoogleFonts.inter(
                       fontSize: 13,
                       color: Colors.grey[500],
@@ -400,7 +401,7 @@ class _MedicalEquipmentDetailsPageState
                       fontSize: 9,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.bold)),
-              Text("₹${item.discountPrice.toInt()}",
+              Text(item.discountPrice.toRupeeFormat(),
                   style: GoogleFonts.inter(
                       fontSize: 16,
                       color: Colors.green[700],
@@ -429,20 +430,20 @@ class _MedicalEquipmentDetailsPageState
       children: [
         Row(
           children: [
-            _infoItem("FIXED DEPOSIT", "₹${item.fixedDeposit?.toInt() ?? 0}",
+            _infoItem("FIXED DEPOSIT", (item.fixedDeposit ?? 0).toRupeeFormat(),
                 Icons.savings_outlined, Colors.orange),
             const SizedBox(width: 12),
-            _infoItem("PER DAY RENT", "₹${item.perDayRent?.toInt() ?? 0}",
+            _infoItem("PER DAY RENT", (item.perDayRent ?? 0).toRupeeFormat(),
                 Icons.calendar_today_outlined, Colors.purple),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            _infoItem("RETURN CHARGE", "₹${item.returnCharge?.toInt() ?? 0}",
+            _infoItem("RETURN CHARGE", (item.returnCharge ?? 0).toRupeeFormat(),
                 Icons.replay_outlined, Colors.blue),
             const SizedBox(width: 12),
-            _infoItem("SERVICE CHARGE", "₹${item.serviceCharges?.toInt() ?? 0}",
+            _infoItem("SERVICE CHARGE", (item.serviceCharges ?? 0).toRupeeFormat(),
                 Icons.design_services_outlined, Colors.green),
           ],
         ),

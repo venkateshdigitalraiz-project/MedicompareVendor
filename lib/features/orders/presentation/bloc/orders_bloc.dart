@@ -13,7 +13,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<GetOrdersEvent>((event, emit) async {
       final currentState = state;
       if (event.isLoadMore && currentState is OrdersLoaded) {
-        emit(currentState.copyWith(isLoadingMore: true));
+        emit(currentState.copyWith(isLoadingMore: true, clearError: true));
       } else {
         emit(OrdersLoading());
       }
@@ -41,7 +41,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           emit(OrdersLoaded(result));
         }
       } catch (e) {
-        emit(OrdersError(e.toString()));
+        if (event.isLoadMore && currentState is OrdersLoaded) {
+          emit(currentState.copyWith(
+              isLoadingMore: false, loadMoreError: e.toString()));
+        } else {
+          emit(OrdersError(e.toString()));
+        }
       }
     });
   }
