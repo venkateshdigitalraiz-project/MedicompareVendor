@@ -250,6 +250,9 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
     final product = item.rentalDetails?.productSnapshot;
     final productName =
         product?.tabletName ?? product?.name ?? "Unknown Product";
+    final productImages = product?.imageUrl ?? [];
+    final imageUrl = productImages.isNotEmpty ? productImages.first : null;
+    final hasImage = imageUrl != null && imageUrl.trim().isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -297,11 +300,6 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                           color: AppColors.primary,
                         ),
                       ),
-                      Text(
-                        "Type: ${item.type} • ${item.bookingType}",
-                        style:
-                            GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                      ),
                     ],
                   ),
                   _buildStatusBadge(
@@ -313,8 +311,11 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColors.primary.withOpacity(0.1),
-                    child: const Icon(Icons.person_outline,
-                        color: AppColors.primary),
+                    backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+                    child: !hasImage
+                        ? const Icon(Icons.person_outline,
+                            color: AppColors.primary)
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -327,13 +328,38 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                               : "Unknown Customer",
                           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                         ),
-                        Text(
-                          user?.email ?? "No Email",
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
+                        // Text(
+                        //   user?.email ?? "No Email",
+                        //   style: GoogleFonts.inter(
+                        //       fontSize: 12, color: Colors.grey),
+                        // ),
+                        // Text(
+                        //   user?.phone ?? "No Phone",
+                        //   style: GoogleFonts.inter(
+                        //       fontSize: 12, color: Colors.grey),
+                        // ),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today_outlined,
+                                size: 12, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateFormat('MMM d, yyyy')
+                                  .format(item.createdAt.toLocal()),
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: Colors.black87),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              DateFormat('hh:mm:ss a')
+                                  .format(item.createdAt.toLocal()),
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: Colors.black87),
+                            ),
+                          ],
                         ),
                         Text(
-                          user?.phone ?? "No Phone",
+                          "Type: ${item.type} • ${item.bookingType}",
                           style: GoogleFonts.inter(
                               fontSize: 12, color: Colors.grey),
                         ),
@@ -355,19 +381,6 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                           color: AppColors.primary,
                           fontSize: 15,
                         ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 12, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            DateFormat('MMM d, yyyy')
-                                .format(item.createdAt.toLocal()),
-                            style: GoogleFonts.inter(
-                                fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
                       ),
                     ],
                   ),

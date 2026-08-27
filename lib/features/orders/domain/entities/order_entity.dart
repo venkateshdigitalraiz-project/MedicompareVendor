@@ -172,6 +172,7 @@ class UserDetailsEntity extends Equatable {
 
 class FullUserDetailsEntity extends Equatable {
   final String id;
+  final String custId;
   final String firstName;
   final String lastName;
   final String email;
@@ -182,6 +183,7 @@ class FullUserDetailsEntity extends Equatable {
 
   const FullUserDetailsEntity({
     required this.id,
+    this.custId = '',
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -193,7 +195,7 @@ class FullUserDetailsEntity extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, firstName, lastName, email, phone, age, gender, files];
+      [id, custId, firstName, lastName, email, phone, age, gender, files];
 }
 
 class AddressDetailsEntity extends Equatable {

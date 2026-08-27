@@ -22,6 +22,8 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     super.userDetails,
     super.shippingAddressDetails,
     super.billingAddressDetails,
+    super.branchDetails,
+    super.subBranchDetails,
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -34,10 +36,12 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       orderStatus: json['orderStatus']?.toString() ?? '',
       bookingType: json['bookingType']?.toString() ?? '',
       orderType: json['orderType']?.toString() ?? '',
-      paymentMethod: (json['orderDetails']?['paymentmethod'] ?? 
-                      json['orderDetails']?['paymentMethod'] ?? 
-                      json['paymentMethod'] ?? 
-                      json['paymentmethod'])?.toString() ?? '',
+      paymentMethod: (json['orderDetails']?['paymentmethod'] ??
+                  json['orderDetails']?['paymentMethod'] ??
+                  json['paymentMethod'] ??
+                  json['paymentmethod'])
+              ?.toString() ??
+          '',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
@@ -52,15 +56,45 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
                   OrderDetailsItemModel.fromJson(e as Map<String, dynamic>))
               .toList()
           : [OrderDetailsItemModel.fromJson(json)],
-      userDetails: json['userDetails'] != null
-          ? FullUserDetailsModel.fromJson(json['userDetails'])
-          : null,
+      userDetails: () {
+        final u = json['userDetails'] ??
+            json['orderDetails']?['userDetails'] ??
+            json['user'] ??
+            json['customer'] ??
+            json['customerDetails'] ??
+            (json['items'] is List &&
+                    (json['items'] as List).isNotEmpty &&
+                    json['items'][0] is Map
+                ? (json['items'][0]['orderDetails']?['userDetails'] ??
+                    json['items'][0]['userDetails'])
+                : null);
+        if (u != null && u is Map) {
+          final map = Map<String, dynamic>.from(u);
+          if ((map['custId'] == null && map['cust_id'] == null) &&
+              (json['custId'] != null || json['customerId'] != null)) {
+            map['custId'] = json['custId'] ?? json['customerId'];
+          }
+          return FullUserDetailsModel.fromJson(map);
+        }
+        return null;
+      }(),
       shippingAddressDetails: json['shippingAddressDetails'] != null
           ? AddressDetailsModel.fromJson(json['shippingAddressDetails'])
           : null,
       billingAddressDetails: json['billingAddressDetails'] != null
           ? AddressDetailsModel.fromJson(json['billingAddressDetails'])
           : null,
+      branchDetails: json['branchDetails'] ??
+          json['branch'] ??
+          json['orderDetails']?['branchDetails'] ??
+          json['orderDetails']?['branch'],
+      subBranchDetails: json['subBranchDetails'] ??
+          json['subBranch'] ??
+          json['subbranch'] ??
+          json['sub_branch'] ??
+          json['subbranchDetails'] ??
+          json['orderDetails']?['subBranchDetails'] ??
+          json['orderDetails']?['subBranch'],
     );
   }
 }
@@ -73,6 +107,8 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
     required super.unitPrice,
     required super.gstAmount,
     super.paidAmount,
+    super.couponType,
+    super.couponDiscount,
   });
 
   factory OrderBillingSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -84,6 +120,16 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
       unitPrice: double.tryParse(json['unitPrice']?.toString() ?? '0') ?? 0.0,
       gstAmount: double.tryParse(json['gstAmount']?.toString() ?? '0') ?? 0.0,
       paidAmount: double.tryParse(json['paidAmount']?.toString() ?? '0') ?? 0.0,
+      couponType: (json['couponType'] ?? json['coupontype'])?.toString(),
+      couponDiscount: double.tryParse((json['couponDiscount'] ??
+                      json['couponAmount'] ??
+                      json['coupon_discount'] ??
+                      json['discountAmount'] ??
+                      json['discount'] ??
+                      json['couponValue'])
+                  ?.toString() ??
+              '0') ??
+          0.0,
     );
   }
 }

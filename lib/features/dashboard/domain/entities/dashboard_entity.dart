@@ -125,11 +125,13 @@ class DashboardUserEntity {
   final String firstName;
   final String lastName;
   final String? profileImageUrl;
+  final String? serviceType;
 
   DashboardUserEntity({
     required this.id,
     required this.firstName,
     required this.lastName,
     this.profileImageUrl,
+    this.serviceType,
   });
 }

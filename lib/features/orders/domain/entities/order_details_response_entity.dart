@@ -21,6 +21,8 @@ class OrderDetailsResponseEntity extends Equatable {
   final FullUserDetailsEntity? userDetails;
   final AddressDetailsEntity? shippingAddressDetails;
   final AddressDetailsEntity? billingAddressDetails;
+  final dynamic branchDetails;
+  final dynamic subBranchDetails;
 
   const OrderDetailsResponseEntity({
     required this.id,
@@ -41,6 +43,8 @@ class OrderDetailsResponseEntity extends Equatable {
     this.userDetails,
     this.shippingAddressDetails,
     this.billingAddressDetails,
+    this.branchDetails,
+    this.subBranchDetails,
   });
 
   @override
@@ -63,6 +67,8 @@ class OrderDetailsResponseEntity extends Equatable {
         userDetails,
         shippingAddressDetails,
         billingAddressDetails,
+        branchDetails,
+        subBranchDetails,
       ];
 }
 
@@ -73,6 +79,8 @@ class OrderBillingSummaryEntity extends Equatable {
   final double unitPrice;
   final double gstAmount;
   final double paidAmount;
+  final String? couponType;
+  final double couponDiscount;
 
   const OrderBillingSummaryEntity({
     required this.subtotal,
@@ -81,11 +89,21 @@ class OrderBillingSummaryEntity extends Equatable {
     required this.unitPrice,
     required this.gstAmount,
     this.paidAmount = 0.0,
+    this.couponType,
+    this.couponDiscount = 0.0,
   });
 
   @override
-  List<Object?> get props =>
-      [subtotal, totalGst, finalAmount, unitPrice, gstAmount, paidAmount];
+  List<Object?> get props => [
+        subtotal,
+        totalGst,
+        finalAmount,
+        unitPrice,
+        gstAmount,
+        paidAmount,
+        couponType,
+        couponDiscount,
+      ];
 }
 
 class OrderDetailsItemEntity extends Equatable {

@@ -181,6 +181,7 @@ class RentalOrderDetailsEntity extends Equatable {
 
 class RentalUserDetailsEntity extends Equatable {
   final String id;
+  final String custId;
   final String firstName;
   final String lastName;
   final String? email;
@@ -188,6 +189,7 @@ class RentalUserDetailsEntity extends Equatable {
 
   const RentalUserDetailsEntity({
     required this.id,
+    this.custId = '',
     required this.firstName,
     required this.lastName,
     this.email,
@@ -195,5 +197,5 @@ class RentalUserDetailsEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, firstName, lastName, email, phone];
+  List<Object?> get props => [id, custId, firstName, lastName, email, phone];
 }

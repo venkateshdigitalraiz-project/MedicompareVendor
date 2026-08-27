@@ -228,18 +228,23 @@ class DashboardPage extends StatelessWidget {
               return Column(
                 children: [
                   _buildSectionHeader(
-                      "Top Selling Orders", () => context.push('/orders')),
+                      "Top Selling Orders" // () => context.push('/orders')
+                      ),
                   const SizedBox(height: 12),
                   ...dashboard.topProducts
                       .take(5)
                       .map((product) => _buildTopProductItem(product)),
-                  const SizedBox(height: 32),
-                  _buildSectionHeader(
-                      "Recent Leads", () => context.push('/leads')),
-                  const SizedBox(height: 12),
-                  ...dashboard.recentLeads
-                      .take(5)
-                      .map((lead) => _buildRecentLeadItem(lead)),
+                  if (dashboard.user.serviceType?.toLowerCase() ==
+                      'surgeries') ...[
+                    const SizedBox(height: 32),
+                    _buildSectionHeader(
+                        "Recent Leads" // () => context.push('/leads')
+                        ),
+                    const SizedBox(height: 12),
+                    ...dashboard.recentLeads
+                        .take(5)
+                        .map((lead) => _buildRecentLeadItem(lead)),
+                  ],
                 ],
               );
             },
@@ -389,19 +394,30 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title, VoidCallback onViewAll) {
+  Widget _buildSectionHeader(
+    String title,
+    /*VoidCallback onViewAll*/
+  ) {
+    final bool isSelling = title.contains("Selling");
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            Icon(
-              title.contains("Selling")
-                  ? Icons.inventory_2_outlined
-                  : Icons.group_outlined,
-              size: 20,
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color:
+                    (isSelling ? Colors.green : Colors.purple).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isSelling ? Icons.inventory_2_outlined : Icons.group_outlined,
+                size: 18,
+                color: isSelling ? Colors.green : Colors.purple,
+              ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Text(
               title,
               style: GoogleFonts.inter(
@@ -411,23 +427,23 @@ class DashboardPage extends StatelessWidget {
             ),
           ],
         ),
-        TextButton(
-          onPressed: onViewAll,
-          child: Row(
-            children: [
-              Text(
-                "View All",
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Icon(Icons.chevron_right,
-                  size: 16, color: AppColors.primary),
-            ],
-          ),
-        ),
+        // TextButton(
+        //   onPressed: onViewAll,
+        //   child: Row(
+        //     children: [
+        //       Text(
+        //         "View All",
+        //         style: GoogleFonts.inter(
+        //           fontSize: 13,
+        //           color: AppColors.primary,
+        //           fontWeight: FontWeight.w600,
+        //         ),
+        //       ),
+        //       const Icon(Icons.chevron_right,
+        //           size: 16, color: AppColors.primary),
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }
@@ -449,8 +465,20 @@ class DashboardPage extends StatelessWidget {
               color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.shopping_cart_outlined,
-                color: Colors.blue, size: 24),
+            child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      product.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.shopping_cart_outlined,
+                          color: Colors.blue,
+                          size: 24),
+                    ),
+                  )
+                : const Icon(Icons.shopping_cart_outlined,
+                    color: Colors.blue, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(

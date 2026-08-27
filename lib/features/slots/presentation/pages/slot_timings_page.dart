@@ -234,7 +234,7 @@ class SlotTimingsPage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "${item.startTime} - ${item.endTime}",
+                        "${_formatTo12Hour(item.startTime)} - ${_formatTo12Hour(item.endTime)}",
                         style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -250,5 +250,24 @@ class SlotTimingsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatTo12Hour(String time) {
+    if (time.isEmpty) return time;
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        final minute = parts[1];
+        final period = hour >= 12 ? 'PM' : 'AM';
+        if (hour == 0) {
+          hour = 12;
+        } else if (hour > 12) {
+          hour -= 12;
+        }
+        return '$hour:$minute $period';
+      }
+    } catch (_) {}
+    return time;
   }
 }

@@ -4,6 +4,7 @@ import 'package:MediCompare/features/orders/domain/entities/order_details_respon
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/price_formatter.dart';
@@ -27,8 +28,8 @@ class OrderDetailPage extends StatefulWidget {
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
   // Keeping delivery state for updates even if hidden from this UI view for now
-  // String _selectedDeliveryPartner = 'medicompares';
-  // int _selectedParcelTime = 30;
+  final String _selectedDeliveryPartner = 'medicompares';
+  final int _selectedParcelTime = 30;
 
   @override
   void initState() {
@@ -75,29 +76,29 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ),
           ],
         ),
-        // actions: [
-        //   BlocBuilder<OrderDetailsBloc, OrderDetailsState>(
-        //     builder: (context, state) {
-        //       if (state is OrderDetailsLoaded) {
-        //         final orderDetails = state.orderDetails;
-        //         final status = orderDetails.orderStatus.toLowerCase();
-        //         if (status == 'new' || status == 'pending') {
-        //           return Row(
-        //             mainAxisSize: MainAxisSize.min,
-        //             children: [
-        //               _buildCompactActionButton(
-        //                   "Reject", Colors.red, () => _showRejectionDialog()),
-        //               _buildCompactActionButton("Accept", AppColors.primary,
-        //                   () => _handleUpdateStatus('confirmed')),
-        //             ],
-        //           );
-        //         }
-        //       }
-        //       return const SizedBox.shrink();
-        //     },
-        //   ),
-        //   const SizedBox(width: 8),
-        // ],
+        actions: [
+          BlocBuilder<OrderDetailsBloc, OrderDetailsState>(
+            builder: (context, state) {
+              if (state is OrderDetailsLoaded) {
+                final orderDetails = state.orderDetails;
+                final status = orderDetails.orderStatus.toLowerCase();
+                if (status == 'new' || status == 'pending') {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCompactActionButton(
+                          "Reject", Colors.red, () => _showRejectionDialog()),
+                      _buildCompactActionButton("Accept", AppColors.primary,
+                          () => _handleUpdateStatus('confirmed')),
+                    ],
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: BlocConsumer<OrderDetailsBloc, OrderDetailsState>(
         listener: (context, state) {
@@ -137,12 +138,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               final rightColumn = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  _buildOrderInformationSection(orderDetails),
+                  const SizedBox(height: 16),
                   _buildCustomerInformationSection(orderDetails),
                   const SizedBox(height: 16),
                   _buildShippingAddressSection(orderDetails),
                   if (orderDetails.shippingAddressDetails != null)
                     const SizedBox(height: 16),
-                  //  _buildBillingAddressSection(orderDetails),
+                  _buildBillingAddressSection(orderDetails),
                 ],
               );
 
@@ -161,6 +164,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildOrderItemsSection(orderDetails),
+                          const SizedBox(height: 16),
+                          _buildOrderInformationSection(orderDetails),
                           const SizedBox(height: 16),
                           _buildCustomerInformationSection(orderDetails),
                           const SizedBox(height: 16),
@@ -185,124 +190,124 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  // void _handleUpdateStatus(String status, {String? rejectionReason}) {
-  //   final state = context.read<OrderDetailsBloc>().state;
-  //   if (state is OrderDetailsLoaded) {
-  //     final orderDetails = state.orderDetails;
-  //     if (orderDetails.items.isEmpty) return;
-  //     final payload = {
-  //       "orderStatus": status,
-  //       "status": status,
-  //       "orderId": orderDetails.orderId,
-  //       "productIds":
-  //           orderDetails.items.map((item) => item.productDetails.id).toList(),
-  //       "packageIds": [],
-  //       "deliveryPartner": _selectedDeliveryPartner,
-  //       "readyTime": _selectedParcelTime.toString(),
-  //       "assignedPartnerId": null,
-  //       if (rejectionReason != null) "rejectionReason": rejectionReason,
-  //     };
+  void _handleUpdateStatus(String status, {String? rejectionReason}) {
+    final state = context.read<OrderDetailsBloc>().state;
+    if (state is OrderDetailsLoaded) {
+      final orderDetails = state.orderDetails;
+      if (orderDetails.items.isEmpty) return;
+      final payload = {
+        "orderStatus": status,
+        "status": status,
+        "orderId": orderDetails.orderId,
+        "productIds":
+            orderDetails.items.map((item) => item.productDetails.id).toList(),
+        "packageIds": [],
+        "deliveryPartner": _selectedDeliveryPartner,
+        "readyTime": _selectedParcelTime.toString(),
+        "assignedPartnerId": null,
+        if (rejectionReason != null) "rejectionReason": rejectionReason,
+      };
 
-  //     context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
-  //           orderItemId: orderDetails.items.first.orderItemId,
-  //           payload: payload,
-  //         ));
-  //   }
-  // }
+      context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
+            orderItemId: orderDetails.items.first.orderItemId,
+            payload: payload,
+          ));
+    }
+  }
 
-  // void _showRejectionDialog() {
-  //   final TextEditingController reasonController = TextEditingController();
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: Text(
-  //         "Reject Order",
-  //         style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-  //       ),
-  //       content: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             "Please provide a reason for rejecting this order.",
-  //             style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
-  //           ),
-  //           const SizedBox(height: 16),
-  //           TextField(
-  //             controller: reasonController,
-  //             maxLines: 3,
-  //             decoration: InputDecoration(
-  //               hintText: "Enter rejection reason...",
-  //               hintStyle: GoogleFonts.inter(fontSize: 13),
-  //               border: OutlineInputBorder(
-  //                 borderRadius: BorderRadius.circular(8),
-  //               ),
-  //             ),
-  //             style: GoogleFonts.inter(fontSize: 13),
-  //           ),
-  //         ],
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: Text(
-  //             "Cancel",
-  //             style: GoogleFonts.inter(color: Colors.grey),
-  //           ),
-  //         ),
-  //         ElevatedButton(
-  //           onPressed: () {
-  //             if (reasonController.text.trim().isNotEmpty) {
-  //               Navigator.pop(context);
-  //               _handleUpdateStatus('cancelled',
-  //                   rejectionReason: reasonController.text.trim());
-  //             } else {
-  //               ScaffoldMessenger.of(context).showSnackBar(
-  //                 const SnackBar(
-  //                   content: Text("Please enter a reason for rejection"),
-  //                   backgroundColor: Colors.red,
-  //                 ),
-  //               );
-  //             }
-  //           },
-  //           style: ElevatedButton.styleFrom(
-  //             backgroundColor: Colors.red,
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(8),
-  //             ),
-  //           ),
-  //           child: Text(
-  //             "Reject",
-  //             style: GoogleFonts.inter(
-  //                 color: Colors.white, fontWeight: FontWeight.bold),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  void _showRejectionDialog() {
+    final TextEditingController reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Reject Order",
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Please provide a reason for rejecting this order.",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: "Enter rejection reason...",
+                hintStyle: GoogleFonts.inter(fontSize: 13),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              style: GoogleFonts.inter(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.inter(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (reasonController.text.trim().isNotEmpty) {
+                Navigator.pop(context);
+                _handleUpdateStatus('cancelled',
+                    rejectionReason: reasonController.text.trim());
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter a reason for rejection"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              "Reject",
+              style: GoogleFonts.inter(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  // Widget _buildCompactActionButton(
-  //     String label, Color color, VoidCallback onTap) {
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-  //     child: ElevatedButton(
-  //       onPressed: onTap,
-  //       style: ElevatedButton.styleFrom(
-  //         backgroundColor: color,
-  //         foregroundColor: Colors.white,
-  //         padding: const EdgeInsets.symmetric(horizontal: 12),
-  //         elevation: 0,
-  //         shape:
-  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //         minimumSize: const Size(60, 32),
-  //       ),
-  //       child: Text(label,
-  //           style:
-  //               GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
-  //     ),
-  //   );
-  // }
+  Widget _buildCompactActionButton(
+      String label, Color color, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          minimumSize: const Size(60, 32),
+        ),
+        child: Text(label,
+            style:
+                GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
 
   Widget _buildOrderItemsSection(OrderDetailsResponseEntity orderDetails) {
     return _buildCard(
@@ -448,7 +453,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            item.vendorCommissionAmount.toRupeeFormat(decimalDigits: 2),
+                            item.vendorCommissionAmount
+                                .toRupeeFormat(decimalDigits: 2),
                             style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: AppColors.primary,
@@ -463,7 +469,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            item.billingSummary.gstAmount.toRupeeFormat(decimalDigits: 2),
+                            item.billingSummary.gstAmount
+                                .toRupeeFormat(decimalDigits: 2),
                             style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: Colors.black87,
@@ -478,7 +485,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                 fontSize: 10, color: Colors.grey[500])),
                         const SizedBox(height: 2),
                         Text(
-                            (item.billingSummary.finalAmount - item.billingSummary.gstAmount).toRupeeFormat(decimalDigits: 2),
+                            (item.billingSummary.finalAmount -
+                                    item.billingSummary.gstAmount)
+                                .toRupeeFormat(decimalDigits: 2),
                             style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -491,6 +500,197 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildOrderInformationSection(
+      OrderDetailsResponseEntity orderDetails) {
+    String branchName = "-";
+    if (orderDetails.branchDetails != null) {
+      if (orderDetails.branchDetails is Map) {
+        branchName = orderDetails.branchDetails['name']?.toString() ??
+            orderDetails.branchDetails['branchName']?.toString() ??
+            "-";
+      } else if (orderDetails.branchDetails is String) {
+        branchName = orderDetails.branchDetails;
+      }
+    }
+
+    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a')
+        .format(orderDetails.createdAt.toLocal());
+
+    return _buildCard(
+      title: "Order Information",
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoItemCard(
+                  icon: Icons.storefront_outlined,
+                  iconColor: AppColors.primary,
+                  label: "Branch",
+                  value: branchName,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildInfoItemCard(
+                  icon: Icons.receipt_long_outlined,
+                  iconColor: Colors.orange,
+                  label: "Order Status",
+                  valueWidget: _buildStatusBadge(orderDetails.orderStatus),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoItemCard(
+                  icon: Icons.account_balance_wallet_outlined,
+                  iconColor: Colors.green,
+                  label: "Payment Status",
+                  valueWidget:
+                      _buildPaymentStatusBadge(orderDetails.paymentStatus),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildInfoItemCard(
+                  icon: Icons.calendar_today_outlined,
+                  iconColor: Colors.blueGrey,
+                  label: "Order Date",
+                  value: formattedDate,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItemCard({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    String? value,
+    Widget? valueWidget,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: iconColor, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                if (valueWidget != null)
+                  valueWidget
+                else
+                  Text(
+                    value ?? "-",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'new':
+      case 'pending':
+        color = Colors.orange;
+        break;
+      case 'confirmed':
+      case 'accepted':
+      case 'delivered':
+      case 'completed':
+        color = Colors.green;
+        break;
+      case 'cancelled':
+      case 'rejected':
+        color = Colors.red;
+        break;
+      default:
+        color = AppColors.primary;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        status.isEmpty ? "N/A" : status.toUpperCase(),
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusBadge(String paymentStatus) {
+    final isPaid = paymentStatus.toLowerCase() == 'paid' ||
+        paymentStatus.toLowerCase() == 'completed';
+    final color = isPaid ? Colors.green : Colors.orange;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        paymentStatus.isEmpty ? "N/A" : paymentStatus.toUpperCase(),
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -524,7 +724,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             fontSize: 14,
                             color: Colors.black87)),
                     Text(
-                        "Customer ID: ${user.id.length > 10 ? user.id.substring(user.id.length - 10).toUpperCase() : user.id.toUpperCase()}",
+                        "Customer ID: ${user.custId.isNotEmpty ? user.custId.toUpperCase() : (user.id.length > 10 ? user.id.substring(user.id.length - 10).toUpperCase() : user.id.toUpperCase())}",
                         style: GoogleFonts.inter(
                             fontSize: 11, color: Colors.grey[500])),
                   ],
@@ -574,7 +774,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         .fold<double>(0.0, (sum, item) => sum + item.vendorCommissionAmount);
     final totalEarnings =
         details.billingSummary.subtotal - adminCommission; // Example formula
-    // (item.billingSummary.finalAmount - item.billingSummary.gstAmount);
+    final couponType = details.billingSummary.couponType;
+    final couponDiscount = details.billingSummary.couponDiscount;
+
     return _buildCard(
       title: "Order Summary",
       child: Column(
@@ -583,9 +785,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
           _buildSummaryRow("GST", gst.toRupeeFormat(decimalDigits: 2)),
+          if (couponType != null) ...[
+            const SizedBox(height: 16),
+            _buildSummaryRow(
+              "Coupon Discount",
+              "-${couponDiscount.toRupeeFormat(decimalDigits: 2)}",
+              valueColor: Colors.green,
+              labelColor: Colors.green,
+            ),
+          ],
           const SizedBox(height: 16),
-          _buildSummaryRow(
-              "Admin Commission", "-${adminCommission.toRupeeFormat(decimalDigits: 2)}",
+          _buildSummaryRow("Admin Commission",
+              "-${adminCommission.toRupeeFormat(decimalDigits: 2)}",
               valueColor: Colors.red, labelColor: Colors.red),
           const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),

@@ -65,6 +65,29 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
             ),
           ],
         ),
+        actions: [
+          BlocBuilder<OrderDetailsBloc, OrderDetailsState>(
+            builder: (context, state) {
+              if (state is OrderDetailsLoaded) {
+                final orderDetails = state.orderDetails;
+                final status = orderDetails.orderStatus.toLowerCase();
+                if (status == 'new' || status == 'pending') {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCompactActionButton(
+                          "Reject", Colors.red, () => _showRejectionDialog()),
+                      _buildCompactActionButton("Accept", AppColors.primary,
+                          () => _handleUpdateStatus('confirmed')),
+                    ],
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: BlocConsumer<OrderDetailsBloc, OrderDetailsState>(
         listener: (context, state) {
@@ -132,6 +155,129 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
           }
           return const Center(child: Text("Preparing details..."));
         },
+      ),
+    );
+  }
+
+  final String _selectedDeliveryPartner = 'medicompares';
+  final int _selectedParcelTime = 30;
+
+  void _handleUpdateStatus(String status, {String? rejectionReason}) {
+    final state = context.read<OrderDetailsBloc>().state;
+    if (state is OrderDetailsLoaded) {
+      final orderDetails = state.orderDetails;
+      if (orderDetails.items.isEmpty) return;
+      final payload = {
+        "orderStatus": status,
+        "status": status,
+        "orderId": orderDetails.orderId,
+        "productIds":
+            orderDetails.items.map((item) => item.productDetails.id).toList(),
+        "packageIds": [],
+        "deliveryPartner": _selectedDeliveryPartner,
+        "readyTime": _selectedParcelTime.toString(),
+        "assignedPartnerId": null,
+        if (rejectionReason != null) "rejectionReason": rejectionReason,
+      };
+
+      context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
+            orderItemId: orderDetails.items.first.orderItemId,
+            payload: payload,
+          ));
+    }
+  }
+
+  void _showRejectionDialog() {
+    final TextEditingController reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Reject Order",
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Please provide a reason for rejecting this order.",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: "Enter rejection reason...",
+                hintStyle: GoogleFonts.inter(fontSize: 13),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              style: GoogleFonts.inter(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.inter(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (reasonController.text.trim().isNotEmpty) {
+                Navigator.pop(context);
+                _handleUpdateStatus('cancelled',
+                    rejectionReason: reasonController.text.trim());
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter a reason for rejection"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              "Reject",
+              style: GoogleFonts.inter(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactActionButton(
+      String label, Color color, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -348,6 +494,8 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     final adminCommission = firstItem?.vendorCommissionAmount ?? 600.0;
 
     final gst = orderDetails.billingSummary.gstAmount;
+    final couponType = orderDetails.billingSummary.couponType;
+    final couponDiscount = orderDetails.billingSummary.couponDiscount;
     final totalRentalValue =
         subtotal + serviceCharges + returnCharges + deposit;
     final totalEarned = totalRentalValue - adminCommission;
@@ -361,15 +509,21 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
               "${subtotal.toRupeeFormat()} ($basePrice x $totalDays days)"),
           const SizedBox(height: 12),
           _buildSummaryRow("GST", gst.toRupeeFormat()),
+          if (couponType != null) ...[
+            const SizedBox(height: 12),
+            _buildSummaryRow(
+              "Coupon Discount",
+              "-${couponDiscount.toRupeeFormat()}",
+              valueColor: Colors.green,
+              labelColor: Colors.green,
+            ),
+          ],
           const SizedBox(height: 12),
-          _buildSummaryRow(
-              "Service Charges", serviceCharges.toRupeeFormat()),
+          _buildSummaryRow("Service Charges", serviceCharges.toRupeeFormat()),
           const SizedBox(height: 12),
-          _buildSummaryRow(
-              "Return Charges", returnCharges.toRupeeFormat()),
+          _buildSummaryRow("Return Charges", returnCharges.toRupeeFormat()),
           const SizedBox(height: 12),
-          _buildSummaryRow(
-              "Deposit (Returnable)", deposit.toRupeeFormat()),
+          _buildSummaryRow("Deposit (Returnable)", deposit.toRupeeFormat()),
           const SizedBox(height: 12),
           _buildSummaryRow(
               "Admin Commission", "-${adminCommission.toRupeeFormat()}",
@@ -379,8 +533,7 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
               "Total Rental Value", totalRentalValue.toRupeeFormat(),
               isBold: true),
           const SizedBox(height: 16),
-          _buildSummaryRow(
-              "Total Earned", totalEarned.toRupeeFormat(),
+          _buildSummaryRow("Total Earned", totalEarned.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const Divider(height: 32),
           _buildSummaryRow(
@@ -389,7 +542,9 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
           const SizedBox(height: 16),
           Builder(
             builder: (context) {
-              final pm = orderDetails.paymentMethod.isNotEmpty ? orderDetails.paymentMethod : rentalDetails?.paymentMethod;
+              final pm = orderDetails.paymentMethod.isNotEmpty
+                  ? orderDetails.paymentMethod
+                  : rentalDetails?.paymentMethod;
               final paymentStr = (pm != null && pm.isNotEmpty)
                   ? pm[0].toUpperCase() + pm.substring(1).toLowerCase()
                   : 'Online';
@@ -490,10 +645,27 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                     color: AppColors.primary, size: 16),
               ),
               const SizedBox(width: 12),
-              Text(
-                user != null ? "${user.firstName} ${user.lastName}" : "Unknown",
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600, fontSize: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user != null &&
+                              "${user.firstName} ${user.lastName}"
+                                  .trim()
+                                  .isNotEmpty
+                          ? "${user.firstName} ${user.lastName}".trim()
+                          : "Unknown",
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                    Text(
+                      "Customer ID: ${user != null && user.custId.isNotEmpty ? user.custId.toUpperCase() : (user != null && user.id.isNotEmpty ? (user.id.length > 10 ? user.id.substring(user.id.length - 10).toUpperCase() : user.id.toUpperCase()) : '-')}",
+                      style: GoogleFonts.inter(
+                          fontSize: 11, color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

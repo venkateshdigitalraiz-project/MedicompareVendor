@@ -172,6 +172,7 @@ class UserDetailsModel extends UserDetailsEntity {
 class FullUserDetailsModel extends FullUserDetailsEntity {
   const FullUserDetailsModel({
     required super.id,
+    super.custId = '',
     required super.firstName,
     required super.lastName,
     required super.email,
@@ -183,8 +184,8 @@ class FullUserDetailsModel extends FullUserDetailsEntity {
 
   factory FullUserDetailsModel.fromJson(Map<String, dynamic> json) {
     // Handle combined name if first/last not present
-    String firstName = json['first_name']?.toString() ?? '';
-    String lastName = json['last_name']?.toString() ?? '';
+    String firstName = json['first_name']?.toString() ?? json['firstName']?.toString() ?? '';
+    String lastName = json['last_name']?.toString() ?? json['lastName']?.toString() ?? '';
     if ((firstName.isEmpty && lastName.isEmpty) && json['name'] != null) {
       final fullName = json['name'].toString();
       final parts = fullName.split(' ');
@@ -196,12 +197,23 @@ class FullUserDetailsModel extends FullUserDetailsEntity {
       }
     }
     return FullUserDetailsModel(
-      id: json['_id']?.toString() ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      custId: (json['custId'] ??
+              json['customerId'] ??
+              json['cust_id'] ??
+              json['customer_id'] ??
+              json['customId'] ??
+              json['userId'] ??
+              json['user_id'] ??
+              '')
+          .toString(),
       firstName: firstName,
       lastName: lastName,
       email: json['email']?.toString() ?? '',
-      phone: json['phone']?.toString() ?? '',
-      age: json['age'] ?? 0,
+      phone: json['phone']?.toString() ?? json['mobile']?.toString() ?? '',
+      age: json['age'] is int
+          ? json['age']
+          : (int.tryParse(json['age']?.toString() ?? '0') ?? 0),
       gender: json['gender']?.toString() ?? '',
       files: (json['files'] as List?)?.map((e) => e.toString()).toList() ?? [],
     );

@@ -187,6 +187,7 @@ class RentalOrderDetailsModel extends RentalOrderDetailsEntity {
 class RentalUserDetailsModel extends RentalUserDetailsEntity {
   const RentalUserDetailsModel({
     required super.id,
+    super.custId = '',
     required super.firstName,
     required super.lastName,
     super.email,
@@ -196,6 +197,7 @@ class RentalUserDetailsModel extends RentalUserDetailsEntity {
   factory RentalUserDetailsModel.fromJson(Map<String, dynamic> json) {
     return RentalUserDetailsModel(
       id: json['_id']?.toString() ?? '',
+      custId: (json['custId'] ?? json['customerId'] ?? json['cust_id'] ?? '')?.toString() ?? '',
       firstName: json['first_name']?.toString() ?? '',
       lastName: json['last_name']?.toString() ?? '',
       email: json['email']?.toString(),

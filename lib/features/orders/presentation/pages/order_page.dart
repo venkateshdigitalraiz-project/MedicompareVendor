@@ -41,6 +41,7 @@ class _OrdersPageState extends State<OrdersPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _onFilterChanged();
   }
 
   void _onScroll() {
@@ -128,7 +129,7 @@ class _OrdersPageState extends State<OrdersPage> {
                     _onFilterChanged();
                   },
                   decoration: InputDecoration(
-                    hintText: "Search by order item name...",
+                    hintText: "Search by Order Id...",
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -340,8 +341,13 @@ class _OrdersPageState extends State<OrdersPage> {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColors.primary.withOpacity(0.1),
-                    child: const Icon(Icons.person_outline,
-                        color: AppColors.primary),
+                    backgroundImage: item.productDetails.imageUrl.isNotEmpty
+                        ? NetworkImage(item.productDetails.imageUrl.first)
+                        : null,
+                    child: item.productDetails.imageUrl.isEmpty
+                        ? const Icon(Icons.person_outline,
+                            color: AppColors.primary)
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -354,21 +360,42 @@ class _OrdersPageState extends State<OrdersPage> {
                               : "Unknown Customer",
                           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                         ),
-                        Text(
-                          user?.email ?? "No Email",
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
-                        ),
-                        if (item.orderDetails.branchDetails != null && item.orderDetails.branchDetails['name'] != null)
+                        // Text(
+                        //   user?.email ?? "No Email",
+                        //   style: GoogleFonts.inter(
+                        //       fontSize: 12, color: Colors.black87),
+                        // ),
+                        // Text(
+                        //   user?.phone ?? "No Phone",
+                        //   style: GoogleFonts.inter(
+                        //       fontSize: 12, color: Colors.black87),
+                        // ),
+                        if (item.orderDetails.branchDetails != null &&
+                            item.orderDetails.branchDetails['name'] != null)
                           Text(
                             "Branch: ${item.orderDetails.branchDetails['name']}",
                             style: GoogleFonts.inter(
-                                fontSize: 12, color: Colors.grey),
+                                fontSize: 12, color: Colors.black87),
                           ),
-                        Text(
-                          user?.phone ?? "No Phone",
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today_outlined,
+                                size: 12, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateFormat('MMM d, yyyy')
+                                  .format(item.createdAt.toLocal()),
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: Colors.black87),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              DateFormat('hh:mm:ss a')
+                                  .format(item.createdAt.toLocal()),
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: Colors.black87),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -390,19 +417,6 @@ class _OrdersPageState extends State<OrdersPage> {
                           color: AppColors.primary,
                           fontSize: 15,
                         ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 12, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            DateFormat('MMM d, yyyy')
-                                .format(item.createdAt.toLocal()),
-                            style: GoogleFonts.inter(
-                                fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
                       ),
                     ],
                   ),

@@ -133,6 +133,7 @@ class TopProductModel extends TopProductEntity {
   factory TopProductModel.fromJson(Map<String, dynamic> json) {
     final tabletDetails = json['tabletDetails'] ?? {};
     final files = (tabletDetails['files'] as List?) ?? [];
+    final fallbackImageUrls = (tabletDetails['imageUrl'] as List?) ?? [];
 
     // Prioritize main category name (Medicine, Nursing Care, etc.) as per user request
     final categoryDetails = tabletDetails['categoryDetails'] ?? {};
@@ -145,7 +146,9 @@ class TopProductModel extends TopProductEntity {
       orderCount: json['orderCount'] ?? 0,
       name: tabletDetails['name'] ?? 'Unknown',
       categoryName: catName,
-      imageUrl: files.isNotEmpty ? files.first : null,
+      imageUrl: files.isNotEmpty
+          ? files.first
+          : (fallbackImageUrls.isNotEmpty ? fallbackImageUrls.first : null),
     );
   }
 }
@@ -182,6 +185,7 @@ class DashboardUserModel extends DashboardUserEntity {
     required super.firstName,
     required super.lastName,
     super.profileImageUrl,
+    super.serviceType,
   });
 
   factory DashboardUserModel.fromJson(Map<String, dynamic> json) {
@@ -191,6 +195,7 @@ class DashboardUserModel extends DashboardUserEntity {
       lastName: json['lastName'] ?? '',
       profileImageUrl:
           json['profileImage'] != null ? json['profileImage']['url'] : null,
+      serviceType: json['serviceType'],
     );
   }
 }
