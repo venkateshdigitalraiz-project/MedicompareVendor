@@ -9,8 +9,29 @@ import 'package:intl/intl.dart';
 import '../../../../core/utils/invoice_generator.dart';
 import '../../../../core/utils/price_formatter.dart';
 
-class LeadPlanHistoryPage extends StatelessWidget {
+class LeadPlanHistoryPage extends StatefulWidget {
   const LeadPlanHistoryPage({super.key});
+
+  @override
+  State<LeadPlanHistoryPage> createState() => _LeadPlanHistoryPageState();
+}
+
+class _LeadPlanHistoryPageState extends State<LeadPlanHistoryPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch latest subscription history on page entry
+    context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent());
+  }
+
+  Future<void> _handleRefresh() async {
+    final bloc = context.read<SubscriptionBloc>();
+    final future = bloc.stream.firstWhere(
+      (s) => s is SubscriptionLoaded || s is SubscriptionError,
+    );
+    bloc.add(LoadSubscriptionDataEvent());
+    await future.timeout(const Duration(seconds: 8), onTimeout: () => bloc.state);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +50,32 @@ class LeadPlanHistoryPage extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Colors.white, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+            tooltip: "Refresh",
+            onPressed: () =>
+                context.read<SubscriptionBloc>().add(LoadSubscriptionDataEvent()),
+          ),
+        ],
       ),
       body: BlocBuilder<SubscriptionBloc, SubscriptionState>(
+        buildWhen: (previous, current) =>
+            current is SubscriptionLoading ||
+            current is SubscriptionLoaded ||
+            current is SubscriptionError,
         builder: (context, state) {
-          if (state is SubscriptionLoading) {
+          if (state is SubscriptionLoading || state is SubscriptionInitial) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is SubscriptionLoaded) {
             final currentPack = state.history.currentPack;
             return RefreshIndicator(
-              onRefresh: () async {
-                context
-                    .read<SubscriptionBloc>()
-                    .add(LoadSubscriptionDataEvent());
-              },
+              onRefresh: _handleRefresh,
+              color: AppColors.primary,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding:
@@ -61,8 +92,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
                     _buildPreviousPlansHeader(),
                     const SizedBox(height: 16),
                     ...state.history.planHistory
-                        .map((history) => _buildPreviousPlanCard(history))
-                        .toList(),
+                        .map((history) => _buildPreviousPlanCard(history)),
                     if (state.history.planHistory.isEmpty) _buildEmptyHistory(),
                     const SizedBox(height: 40),
                   ],
@@ -92,7 +122,7 @@ class LeadPlanHistoryPage extends StatelessWidget {
               ),
             );
           }
-          return const SizedBox.shrink();
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -142,7 +172,9 @@ class LeadPlanHistoryPage extends StatelessWidget {
     final int limit = pack.plan?.limit ?? 1;
     final int usage = pack.usage ?? 0;
     final double progress = limit > 0 ? (usage / limit).clamp(0.0, 1.0) : 0.0;
-    final String startDate = DateFormat('dd MMM, yyyy').format(pack.createdAt);
+    final String startDate = pack.createdAt != null
+        ? DateFormat('dd MMM, yyyy').format(pack.createdAt)
+        : 'N/A';
 
     return Container(
       width: double.infinity,
@@ -343,9 +375,16 @@ class LeadPlanHistoryPage extends StatelessWidget {
   }
 
   Widget _buildPreviousPlanCard(dynamic item) {
-    final date = DateFormat('dd MMM, yyyy').format(item.createdAt);
-    final month = DateFormat('MMMM yyyy').format(item.createdAt);
-    final String invNo = item.id.substring(item.id.length - 6).toUpperCase();
+    final date = item.createdAt != null
+        ? DateFormat('dd MMM, yyyy').format(item.createdAt)
+        : 'N/A';
+    final month = item.createdAt != null
+        ? DateFormat('MMMM yyyy').format(item.createdAt)
+        : 'N/A';
+    final String rawId = item.id?.toString() ?? '';
+    final String invNo = rawId.length >= 6
+        ? rawId.substring(rawId.length - 6).toUpperCase()
+        : (rawId.isNotEmpty ? rawId.toUpperCase() : 'INV001');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

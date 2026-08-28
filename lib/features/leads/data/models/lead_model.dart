@@ -24,6 +24,16 @@ class LeadModel extends LeadEntity {
       sName = tabletDetailsList[0]['name'] ?? 'Unknown Service';
     }
 
+    final num? discPrice = productDetails['discountprice'] is num
+        ? productDetails['discountprice']
+        : num.tryParse(productDetails['discountprice']?.toString() ?? '');
+    final num? origPrice = productDetails['price'] is num
+        ? productDetails['price']
+        : num.tryParse(productDetails['price']?.toString() ?? '');
+    final double parsedPrice = (discPrice != null && discPrice > 0)
+        ? discPrice.toDouble()
+        : (origPrice?.toDouble() ?? 0.0);
+
     return LeadModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? 'Unknown',
@@ -32,7 +42,7 @@ class LeadModel extends LeadEntity {
       age: json['age'] is int
           ? json['age']
           : int.tryParse(json['age']?.toString() ?? '0') ?? 0,
-      price: (productDetails['price'] ?? 0).toDouble(),
+      price: parsedPrice,
       leadSource: json['leadSource'] ?? 'Unknown',
       leadStage: json['leadStage'] ?? 'new',
       serviceType: json['serviceType'] ?? 'Unknown',

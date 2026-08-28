@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../domain/entities/medical_equipment_entity.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/price_formatter.dart';
@@ -105,11 +104,8 @@ class MedicalEquipmentCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (PermissionHandler()
-                          .hasPermission('medical-equipment', 'edit')) ...[
-                        _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
-                        const SizedBox(width: 4),
-                      ],
+                      _actionIcon(Icons.edit_outlined, const Color(0xFF6B48FF), onEdit),
+                      const SizedBox(width: 6),
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),

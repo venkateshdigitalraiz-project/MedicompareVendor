@@ -126,7 +126,7 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
                     _onFilterChanged();
                   },
                   decoration: InputDecoration(
-                    hintText: "Search appointments...",
+                    hintText: "Search by Id...",
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -243,6 +243,9 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
 
   Widget _buildAppointmentCard(AppointmentItemEntity item) {
     final user = item.userDetails;
+    final productFiles = item.productDetails.files;
+    final imageUrl = productFiles.isNotEmpty ? productFiles.first : null;
+    final hasImage = imageUrl != null && imageUrl.trim().isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -307,10 +310,27 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
               const Divider(height: 24),
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
-                    child: const Icon(Icons.person_outline,
-                        color: AppColors.primary),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: hasImage
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.image_not_supported_outlined,
+                                      color: AppColors.primary, size: 22),
+                            ),
+                          )
+                        : const Icon(Icons.person_outline,
+                            color: AppColors.primary, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -323,22 +343,36 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
                               : "Unknown Customer",
                           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                         ),
-                        Text(
-                          user?.email ?? "No Email",
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
-                        ),
-                        Text(
-                          user?.phone ?? "No Phone",
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
-                        ),
-                        if (item.branchName != null && item.branchName!.isNotEmpty)
+                        // Text(
+                        //   user?.email ?? "No Email",
+                        //   style: GoogleFonts.inter(
+                        //       fontSize: 12, color: Colors.grey),
+                        // ),
+                        // Text(
+                        //   user?.phone ?? "No Phone",
+                        //   style: GoogleFonts.inter(
+                        //       fontSize: 12, color: Colors.grey),
+                        // ),
+                        if (item.branchName != null &&
+                            item.branchName!.isNotEmpty)
                           Text(
                             "Branch: ${item.branchName}",
                             style: GoogleFonts.inter(
                                 fontSize: 12, color: Colors.grey),
                           ),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today_outlined,
+                                size: 12, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateFormat('MMM d, yyyy, hh:mm a')
+                                  .format(item.createdAt.toLocal()),
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -357,19 +391,6 @@ class _AppointmentBookingsPageState extends State<AppointmentBookingsPage> {
                           color: AppColors.primary,
                           fontSize: 15,
                         ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 12, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            DateFormat('MMM d, yyyy')
-                                .format(item.createdAt.toLocal()),
-                            style: GoogleFonts.inter(
-                                fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
                       ),
                     ],
                   ),

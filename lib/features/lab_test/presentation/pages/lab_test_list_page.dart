@@ -263,7 +263,7 @@ class _LabTestListPageState extends State<LabTestListPage> {
                   return [
                     DropdownMenuItem(
                         value: '',
-                        child: Text("All Categories",
+                        child: Text("",
                             style: GoogleFonts.inter(
                                 fontSize: 13, fontWeight: FontWeight.w500))),
                     ...state.categories.map((c) => DropdownMenuItem(

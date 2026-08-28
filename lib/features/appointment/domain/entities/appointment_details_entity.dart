@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 class AppointmentDetailsEntity extends Equatable {
+  final String id;
   final String orderId;
   final String orderRef;
+  final String patientId;
+  final String personType;
   final String orderStatus;
   final String paymentStatus;
   final String paymentMethod;
@@ -23,8 +26,11 @@ class AppointmentDetailsEntity extends Equatable {
   final AppointmentCouponDetailsEntity? couponDetails;
 
   const AppointmentDetailsEntity({
+    this.id = '',
     required this.orderId,
     required this.orderRef,
+    this.patientId = '',
+    this.personType = '',
     required this.orderStatus,
     required this.paymentStatus,
     required this.paymentMethod,
@@ -46,8 +52,11 @@ class AppointmentDetailsEntity extends Equatable {
 
   @override
   List<Object?> get props => [
+        id,
         orderId,
         orderRef,
+        patientId,
+        personType,
         orderStatus,
         paymentStatus,
         paymentMethod,
@@ -120,19 +129,24 @@ class AppointmentDetailsBillingSummaryEntity extends Equatable {
 }
 
 class AppointmentGroupDetailsEntity extends Equatable {
+  final String patientId;
+  final String selectType;
   final AppointmentPatientDetailsEntity? patientDetails;
   final List<AppointmentServiceItemEntity> items;
 
   const AppointmentGroupDetailsEntity({
+    this.patientId = '',
+    this.selectType = 'family',
     this.patientDetails,
     required this.items,
   });
 
   @override
-  List<Object?> get props => [patientDetails, items];
+  List<Object?> get props => [patientId, selectType, patientDetails, items];
 }
 
 class AppointmentPatientDetailsEntity extends Equatable {
+  final String patientId;
   final String name;
   final String age;
   final String gender;
@@ -140,6 +154,7 @@ class AppointmentPatientDetailsEntity extends Equatable {
   final String email;
 
   const AppointmentPatientDetailsEntity({
+    this.patientId = '',
     required this.name,
     required this.age,
     required this.gender,
@@ -148,11 +163,32 @@ class AppointmentPatientDetailsEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [name, age, gender, phone, email];
+  List<Object?> get props => [patientId, name, age, gender, phone, email];
+}
+
+class AppointmentReportEntity extends Equatable {
+  final String id;
+  final String reportType;
+  final String description;
+  final String file;
+  final DateTime? createdAt;
+
+  const AppointmentReportEntity({
+    this.id = '',
+    this.reportType = '',
+    this.description = '',
+    this.file = '',
+    this.createdAt,
+  });
+
+  @override
+  List<Object?> get props => [id, reportType, description, file, createdAt];
 }
 
 class AppointmentServiceItemEntity extends Equatable {
+  final String id;
   final String orderItemId;
+  final String patientId;
   final int quantity;
   final String type;
   final String bookingType;
@@ -165,9 +201,12 @@ class AppointmentServiceItemEntity extends Equatable {
   final String productName;
   final List<String> productImages;
   final double couponAmount;
+  final List<AppointmentReportEntity> reports;
 
   const AppointmentServiceItemEntity({
+    this.id = '',
     required this.orderItemId,
+    this.patientId = '',
     required this.quantity,
     required this.type,
     required this.bookingType,
@@ -180,11 +219,14 @@ class AppointmentServiceItemEntity extends Equatable {
     required this.productName,
     required this.productImages,
     required this.couponAmount,
+    this.reports = const [],
   });
 
   @override
   List<Object?> get props => [
+        id,
         orderItemId,
+        patientId,
         quantity,
         type,
         bookingType,
@@ -197,6 +239,7 @@ class AppointmentServiceItemEntity extends Equatable {
         productName,
         productImages,
         couponAmount,
+        reports,
       ];
 }
 

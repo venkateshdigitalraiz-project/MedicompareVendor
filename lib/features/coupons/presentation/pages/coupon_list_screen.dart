@@ -19,25 +19,50 @@ class CouponListScreen extends StatefulWidget {
 
 class _CouponListScreenState extends State<CouponListScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedStatus = ''; // '' for All, 'active', 'inactive'
+  final ScrollController _scrollController = ScrollController();
+  String _selectedStatus = '';
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
-    _fetchCoupons();
+    _scrollController.addListener(_onScroll);
+    _fetchCoupons(page: 1);
   }
 
-  void _fetchCoupons() {
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<CouponBloc>().state;
+      if (state is CouponListLoaded &&
+          !state.isFetchingMore &&
+          !state.hasReachedMax) {
+        final nextPage = _currentPage + 1;
+        _currentPage = nextPage;
+        _fetchCoupons(page: nextPage, isLoadMore: true);
+      }
+    }
+  }
+
+  void _fetchCoupons({int page = 1, bool isLoadMore = false}) {
+    if (!isLoadMore) {
+      _currentPage = 1;
+    }
     context.read<CouponBloc>().add(
           GetCouponsEvent(
-            search: _searchController.text,
+            page: page,
+            limit: 10,
+            search: _searchController.text.trim(),
             status: _selectedStatus,
+            isLoadMore: isLoadMore,
           ),
         );
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -69,7 +94,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 // Search bar
                 TextField(
                   controller: _searchController,
-                  onChanged: (_) => _fetchCoupons(),
+                  onChanged: (_) => _fetchCoupons(page: 1),
                   decoration: InputDecoration(
                     hintText: 'Search coupons...',
                     hintStyle: GoogleFonts.inter(
@@ -81,7 +106,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                             icon: const Icon(Icons.clear_rounded, size: 20),
                             onPressed: () {
                               _searchController.clear();
-                              _fetchCoupons();
+                              _fetchCoupons(page: 1);
                             },
                           )
                         : null,
@@ -106,6 +131,9 @@ class _CouponListScreenState extends State<CouponListScreen> {
                     _buildStatusChip('Active', 'active'),
                     const SizedBox(width: 8),
                     _buildStatusChip('Inactive', 'inactive'),
+                    const SizedBox(width: 8),
+                    _buildStatusChip('Expired', 'expired'),
+                    const SizedBox(width: 8),
                   ],
                 ),
               ],
@@ -114,7 +142,26 @@ class _CouponListScreenState extends State<CouponListScreen> {
 
           // Coupons list
           Expanded(
-            child: BlocBuilder<CouponBloc, CouponState>(
+            child: BlocConsumer<CouponBloc, CouponState>(
+              listener: (context, state) {
+                if (state is CouponDeleteSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message, style: GoogleFonts.inter()),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else if (state is CouponDeleteFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message, style: GoogleFonts.inter()),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
               builder: (context, state) {
                 if (state is CouponListLoading) {
                   return const Center(
@@ -147,7 +194,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: _fetchCoupons,
+                            onPressed: () => _fetchCoupons(page: 1),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF6B48FF),
                               shape: RoundedRectangleBorder(
@@ -163,26 +210,39 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 } else if (state is CouponListLoaded) {
                   final coupons = state.coupons;
                   if (coupons.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    return RefreshIndicator(
+                      onRefresh: () async => _fetchCoupons(page: 1),
+                      color: const Color(0xFF6B48FF),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          Icon(Icons.local_offer_outlined,
-                              size: 80, color: Colors.grey.shade300),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No Coupons Found',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade600,
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.45,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.local_offer_outlined,
+                                      size: 80, color: Colors.grey.shade300),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No Coupons Found',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Tap the button below to add your first coupon.',
+                                    style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: Colors.grey.shade400),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Tap the button below to add your first coupon.',
-                            style: GoogleFonts.inter(
-                                fontSize: 13, color: Colors.grey.shade400),
                           ),
                         ],
                       ),
@@ -190,12 +250,31 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   }
 
                   return RefreshIndicator(
-                    onRefresh: () async => _fetchCoupons(),
+                    onRefresh: () async => _fetchCoupons(page: 1),
                     color: const Color(0xFF6B48FF),
                     child: ListView.builder(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.all(16.0),
-                      itemCount: coupons.length,
+                      itemCount:
+                          coupons.length + (state.isFetchingMore ? 1 : 0),
                       itemBuilder: (context, index) {
+                        if (index == coupons.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16.0),
+                            child: Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Color(0xFF6B48FF)),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                         final coupon = coupons[index];
                         return GestureDetector(
                           onTap: () async {
@@ -208,7 +287,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                               ),
                             );
                             if (result == true) {
-                              _fetchCoupons();
+                              _fetchCoupons(page: 1);
                             }
                           },
                           child: _buildCouponCard(coupon),
@@ -234,7 +313,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
             ),
           );
           if (result == true) {
-            _fetchCoupons();
+            _fetchCoupons(page: 1);
           }
         },
         backgroundColor: const Color(0xFF6B48FF),
@@ -251,7 +330,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
         setState(() {
           _selectedStatus = statusValue;
         });
-        _fetchCoupons();
+        _fetchCoupons(page: 1);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -282,7 +361,6 @@ class _CouponListScreenState extends State<CouponListScreen> {
     final endDateStr = DateFormat('dd MMM yyyy').format(coupon.validTo);
     final computedStatus = coupon.computedStatus;
     final isActive = computedStatus == 'Active';
-    final isUpcoming = computedStatus == 'Upcoming';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -349,7 +427,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header: Code and Status
+                      // Header: Code, Status, and Delete Icon
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -372,25 +450,46 @@ class _CouponListScreenState extends State<CouponListScreen> {
                               ),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: isActive
-                                  ? const Color(0xFFDCFCE7)
-                                  : const Color(0xFFFEE2E2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              computedStatus,
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: isActive
-                                    ? const Color(0xFF15803D)
-                                    : const Color(0xFFB91C1C),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? const Color(0xFFDCFCE7)
+                                      : const Color(0xFFFEE2E2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  computedStatus,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: isActive
+                                        ? const Color(0xFF15803D)
+                                        : const Color(0xFFB91C1C),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (coupon.id != null && coupon.id!.isNotEmpty) ...[
+                                const SizedBox(width: 4),
+                                InkWell(
+                                  onTap: () =>
+                                      _showDeleteConfirmation(context, coupon),
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Icon(
+                                      Icons.delete_outline,
+                                      size: 18,
+                                      color: Colors.red.shade400,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
@@ -457,6 +556,49 @@ class _CouponListScreenState extends State<CouponListScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, Coupon coupon) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'Delete Coupon',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        content: Text(
+          'Are you sure you want to delete coupon "${coupon.couponCode}"?',
+          style: GoogleFonts.inter(fontSize: 14),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(color: Colors.grey.shade700),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              if (coupon.id != null && coupon.id!.isNotEmpty) {
+                context
+                    .read<CouponBloc>()
+                    .add(DeleteCouponEvent(id: coupon.id!));
+              }
+            },
+            child: Text(
+              'Delete',
+              style: GoogleFonts.inter(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

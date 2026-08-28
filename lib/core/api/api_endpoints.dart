@@ -28,6 +28,7 @@ class ApiEndpoints {
   static const String couponList = '/vendor/coupon/list';
   static const String couponCreate = '/vendor/coupon/create';
   static String updateCoupon(String id) => '/vendor/coupon/update/$id';
+  static String deleteCoupon(String id) => '/vendor/coupon/delete/$id';
   static const String customersList = '/vendor/notifications/customers-list';
   
   // Pincodes
@@ -44,6 +45,8 @@ class ApiEndpoints {
   static const String rentalOrderDetails = '/vendor/order/rental/details';
   static const String appointmentOrderDetails = '/vendor/order/appointment/details';
   static String updateOrderStatus(String id) => '/vendor/order/update-status/$id';
+  static String updateAppointmentOrderStatus(String id) => '/vendor/order/orderstatusupdate/$id';
+  static String uploadReport(String id) => '/vendor/order/reportupload/$id';
 
   // Leads
   static const String leadsList = '/vendor/leads/list';
@@ -160,6 +163,7 @@ class ApiEndpoints {
   static const String ambulanceBookingList = '/vendor/ambulance-booking/list';
   static String ambulanceBookingSingle(String id) => '/vendor/ambulance-booking/single/$id';
   static const String branchList = '/vendor/branch/list';
+  static const String createBranch = '/vendor/branch/create';
   static String branchDetails(String id) => '/vendor/branch/details/$id';
   static String updateBranch(String id) => '/vendor/branch/update/$id';
 

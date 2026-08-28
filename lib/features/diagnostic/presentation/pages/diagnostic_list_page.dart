@@ -249,7 +249,7 @@ class _DiagnosticListPageState extends State<DiagnosticListPage> {
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text("All Categories",
+                    child: Text("",
                         style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,

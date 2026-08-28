@@ -24,6 +24,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     super.billingAddressDetails,
     super.branchDetails,
     super.subBranchDetails,
+    super.installmentList = const [],
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -95,6 +96,94 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
           json['subbranchDetails'] ??
           json['orderDetails']?['subBranchDetails'] ??
           json['orderDetails']?['subBranch'],
+      installmentList: () {
+        final list = json['installmentlist'] ??
+            json['installmentList'] ??
+            json['installment_list'] ??
+            json['installments'] ??
+            json['orderDetails']?['installmentlist'] ??
+            json['orderDetails']?['installmentList'];
+        if (list is List) {
+          return list
+              .whereType<Map<String, dynamic>>()
+              .map((e) => InstallmentItemModel.fromJson(e))
+              .toList();
+        }
+        if (list is List<dynamic>) {
+          return list
+              .where((e) => e is Map)
+              .map((e) => InstallmentItemModel.fromJson(
+                  Map<String, dynamic>.from(e as Map)))
+              .toList();
+        }
+        return <InstallmentItemModel>[];
+      }(),
+    );
+  }
+}
+
+class InstallmentItemModel extends InstallmentItemEntity {
+  const InstallmentItemModel({
+    required super.id,
+    required super.orderId,
+    super.userId = '',
+    required super.installmentNumber,
+    required super.amount,
+    super.dueDate,
+    super.paidDate,
+    required super.status,
+    required super.paymentMethod,
+    super.paymentId,
+    super.transactionId,
+    super.lateFee = 0.0,
+    super.reminderSent = false,
+    super.createdAt,
+    super.updatedAt,
+  });
+
+  factory InstallmentItemModel.fromJson(Map<String, dynamic> json) {
+    return InstallmentItemModel(
+      id: (json['_id'] ?? json['id'])?.toString() ?? '',
+      orderId: (json['orderId'] ?? json['order_id'])?.toString() ?? '',
+      userId: (json['userId'] ?? json['user_id'])?.toString() ?? '',
+      installmentNumber: int.tryParse((json['installmentNumber'] ??
+                  json['installment_number'] ??
+                  json['sno'] ??
+                  0)
+              .toString()) ??
+          0,
+      amount: double.tryParse((json['amount'] ?? 0).toString()) ?? 0.0,
+      dueDate: json['dueDate'] != null
+          ? DateTime.tryParse(json['dueDate'].toString())
+          : (json['due_date'] != null
+              ? DateTime.tryParse(json['due_date'].toString())
+              : null),
+      paidDate: json['paidDate'] != null
+          ? DateTime.tryParse(json['paidDate'].toString())
+          : (json['paid_date'] != null
+              ? DateTime.tryParse(json['paid_date'].toString())
+              : null),
+      status: (json['status'] ?? '').toString(),
+      paymentMethod: (json['paymentMethod'] ??
+              json['paymentmethod'] ??
+              json['payment_method'] ??
+              json['type'] ??
+              '')
+          .toString(),
+      paymentId: json['paymentId']?.toString(),
+      transactionId:
+          (json['transactionId'] ?? json['transaction_id'])?.toString(),
+      lateFee: double.tryParse(
+              (json['lateFee'] ?? json['late_fee'] ?? 0).toString()) ??
+          0.0,
+      reminderSent:
+          json['reminderSent'] == true || json['reminder_sent'] == true,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
     );
   }
 }

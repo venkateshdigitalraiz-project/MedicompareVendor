@@ -110,15 +110,21 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
       }
 
       final coupon = Coupon(
-        couponCode: _couponCodeController.text,
+        couponCode: _couponCodeController.text.trim(),
         selectionType: _selectionType,
-        userLimit: int.tryParse(_userLimitController.text),
+        userLimit: _userLimitController.text.trim().isNotEmpty
+            ? int.tryParse(_userLimitController.text.trim())
+            : null,
         renewalCycle: _renewalCycle,
-        couponName: _couponNameController.text,
+        couponName: _couponNameController.text.trim(),
         discountType: _discountType,
-        discountValue: double.parse(_discountValueController.text),
-        minimumPurchaseAmount: double.tryParse(_minPurchaseController.text),
-        maximumDiscountAmount: double.tryParse(_maxDiscountController.text),
+        discountValue: double.parse(_discountValueController.text.trim()),
+        minimumPurchaseAmount: _minPurchaseController.text.trim().isNotEmpty
+            ? double.tryParse(_minPurchaseController.text.trim())
+            : null,
+        maximumDiscountAmount: _maxDiscountController.text.trim().isNotEmpty
+            ? double.tryParse(_maxDiscountController.text.trim())
+            : null,
         validFrom: _validFrom!,
         validTo: _validTo!,
         status: _status,
@@ -227,7 +233,9 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
           if (state is CustomersLoaded) {
             setState(() {
               _customers = List.from(state.customers)
-                ..sort((a, b) => a.fullName.toLowerCase().compareTo(b.fullName.toLowerCase()));
+                ..sort((a, b) => a.fullName
+                    .toLowerCase()
+                    .compareTo(b.fullName.toLowerCase()));
             });
           } else if (state is CouponSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -486,7 +494,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                             'Never (One-time)',
                             'Every Week',
                             'Every 10 days',
-                            'Every Month'
+                            'Every Month',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -502,47 +510,118 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                       if (_selectionType == 'User' ||
                           _selectionType == 'Multiple') ...[
                         _buildLabel('Select Customer(s)'),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            return DropdownMenu<Customer>(
-                              width: constraints.maxWidth,
-                              menuHeight: 250,
-                              enableSearch: true,
-                              enableFilter: true,
-                              requestFocusOnTap: true,
-                              initialSelection: _selectedCustomer,
-                              hintText: 'Search customer...',
-                              textStyle: GoogleFonts.inter(fontSize: 14),
-                              inputDecorationTheme: InputDecorationTheme(
-                                filled: true,
-                                fillColor: const Color(0xFFF9FAFB),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: _primaryColor, width: 1.5),
-                                ),
+                        InkWell(
+                          onTap: () => _openCustomerPickerModal(context),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _selectedCustomer != null
+                                    ? const Color(0xFF6B48FF).withOpacity(0.5)
+                                    : Colors.grey.shade200,
+                                width: 1.2,
                               ),
-                              dropdownMenuEntries: _customers.map((Customer customer) {
-                                return DropdownMenuEntry<Customer>(
-                                  value: customer,
-                                  label: customer.fullName,
-                                );
-                              }).toList(),
-                              onSelected: (newValue) {
-                                setState(() {
-                                  _selectedCustomer = newValue;
-                                });
-                              },
-                            );
-                          },
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: _selectedCustomer != null
+                                        ? const Color(0xFFEEF2FF)
+                                        : const Color(0xFFF3F4F6),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Center(
+                                    child: _selectedCustomer != null
+                                        ? Text(
+                                            _selectedCustomer!.fullName.isNotEmpty
+                                                ? _selectedCustomer!.fullName[0]
+                                                    .toUpperCase()
+                                                : '?',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF6B48FF),
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.person_search_rounded,
+                                            size: 20,
+                                            color: Colors.grey,
+                                          ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _selectedCustomer != null
+                                      ? Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _selectedCustomer!.fullName,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              _selectedCustomer!.phone.isNotEmpty
+                                                  ? _selectedCustomer!.phone
+                                                  : (_selectedCustomer!.email ??
+                                                      'ID: ${_selectedCustomer!.custId}'),
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        )
+                                      : Text(
+                                          'Tap to search & select customer...',
+                                          style: GoogleFonts.inter(
+                                            color: Colors.grey.shade400,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                ),
+                                if (_selectedCustomer != null)
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedCustomer = null;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Icon(
+                                        Icons.close_rounded,
+                                        size: 20,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: Colors.grey,
+                                    size: 22,
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 16),
                       ],
@@ -990,6 +1069,257 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _openCustomerPickerModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        String searchQuery = '';
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final filtered = _customers.where((c) {
+              final query = searchQuery.toLowerCase().trim();
+              if (query.isEmpty) return true;
+              return c.fullName.toLowerCase().contains(query) ||
+                  c.phone.toLowerCase().contains(query) ||
+                  (c.email?.toLowerCase().contains(query) ?? false) ||
+                  c.custId.toLowerCase().contains(query);
+            }).toList();
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  // Handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Title Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 12, 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Select Customer',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEEF2FF),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${_customers.length}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF4F46E5),
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.of(modalContext).pop(),
+                          splashRadius: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Search field
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 6.0),
+                    child: TextField(
+                      onChanged: (val) {
+                        setModalState(() {
+                          searchQuery = val;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search by name, phone, or ID...',
+                        hintStyle: GoogleFonts.inter(
+                            fontSize: 13, color: Colors.grey.shade400),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: Colors.grey, size: 20),
+                        suffixIcon: searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  setModalState(() {
+                                    searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: const Color(0xFFF3F4F6),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: GoogleFonts.inter(fontSize: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Customer List
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.person_off_outlined,
+                                      size: 48, color: Colors.grey.shade300),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No customers found',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Try searching with a different name or phone number.',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            itemCount: filtered.length,
+                            separatorBuilder: (context, index) =>
+                                Divider(height: 1, color: Colors.grey.shade100),
+                            itemBuilder: (context, index) {
+                              final customer = filtered[index];
+                              final isSelected =
+                                  _selectedCustomer?.id == customer.id;
+
+                              return ListTile(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedCustomer = customer;
+                                  });
+                                  Navigator.of(modalContext).pop();
+                                },
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 4),
+                                leading: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFF6B48FF)
+                                        : const Color(0xFFEEF2FF),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      customer.fullName.isNotEmpty
+                                          ? customer.fullName[0].toUpperCase()
+                                          : '?',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : const Color(0xFF4F46E5),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  customer.fullName,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.w600,
+                                    color: isSelected
+                                        ? const Color(0xFF6B48FF)
+                                        : Colors.black87,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  customer.phone.isNotEmpty
+                                      ? customer.phone
+                                      : (customer.email ?? ''),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                                trailing: isSelected
+                                    ? const Icon(Icons.check_circle_rounded,
+                                        color: Color(0xFF6B48FF), size: 22)
+                                    : (customer.custId.isNotEmpty
+                                        ? Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF3F4F6),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              customer.custId,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 11,
+                                                color: Colors.grey.shade700,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          )
+                                        : null),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -147,7 +147,7 @@ class _LeadsPageState extends State<LeadsPage> {
                     _onFilterChanged();
                   },
                   decoration: InputDecoration(
-                    hintText: "Search by lead ID, customer name...",
+                    hintText: "Search by customer name...",
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),

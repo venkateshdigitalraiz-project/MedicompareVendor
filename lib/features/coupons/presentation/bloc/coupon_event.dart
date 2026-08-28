@@ -32,16 +32,18 @@ class GetCouponsEvent extends CouponEvent {
   final int limit;
   final String search;
   final String status;
+  final bool isLoadMore;
 
   const GetCouponsEvent({
     this.page = 1,
     this.limit = 10,
     this.search = '',
     this.status = '',
+    this.isLoadMore = false,
   });
 
   @override
-  List<Object> get props => [page, limit, search, status];
+  List<Object> get props => [page, limit, search, status, isLoadMore];
 }
 
 class FetchCustomersEvent extends CouponEvent {
@@ -51,4 +53,13 @@ class FetchCustomersEvent extends CouponEvent {
 
   @override
   List<Object> get props => [search];
+}
+
+class DeleteCouponEvent extends CouponEvent {
+  final String id;
+
+  const DeleteCouponEvent({required this.id});
+
+  @override
+  List<Object> get props => [id];
 }

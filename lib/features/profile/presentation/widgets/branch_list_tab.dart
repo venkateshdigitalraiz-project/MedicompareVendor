@@ -15,10 +15,10 @@ class BranchListTab extends StatefulWidget {
   const BranchListTab({super.key});
 
   @override
-  State<BranchListTab> createState() => _BranchListTabState();
+  State<BranchListTab> createState() => BranchListTabState();
 }
 
-class _BranchListTabState extends State<BranchListTab> {
+class BranchListTabState extends State<BranchListTab> {
   final TextEditingController _searchController = TextEditingController();
   final BranchService _branchService =
       BranchService(CoreInjection.provideApiService());
@@ -31,10 +31,10 @@ class _BranchListTabState extends State<BranchListTab> {
   @override
   void initState() {
     super.initState();
-    _fetchBranches();
+    fetchBranches();
   }
 
-  Future<void> _fetchBranches({String search = ''}) async {
+  Future<void> fetchBranches({String search = ''}) async {
     final trimmedSearch = search.trim();
     setState(() {
       _isLoading = true;
@@ -74,7 +74,7 @@ class _BranchListTabState extends State<BranchListTab> {
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      _fetchBranches(search: query);
+      fetchBranches(search: query);
     });
   }
 
@@ -158,7 +158,7 @@ class _BranchListTabState extends State<BranchListTab> {
           else
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => _fetchBranches(search: _searchController.text),
+                onRefresh: () => fetchBranches(search: _searchController.text),
                 child: ListView.builder(
                   itemCount: _branches.length,
                   itemBuilder: (context, index) {
@@ -174,7 +174,7 @@ class _BranchListTabState extends State<BranchListTab> {
                           builder: (ctx) => EditBranchSheet(
                             branch: _branches[index],
                             onSuccess: () =>
-                                _fetchBranches(search: _searchController.text),
+                                fetchBranches(search: _searchController.text),
                           ),
                         );
                       },

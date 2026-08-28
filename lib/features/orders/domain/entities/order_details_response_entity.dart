@@ -23,6 +23,7 @@ class OrderDetailsResponseEntity extends Equatable {
   final AddressDetailsEntity? billingAddressDetails;
   final dynamic branchDetails;
   final dynamic subBranchDetails;
+  final List<InstallmentItemEntity> installmentList;
 
   const OrderDetailsResponseEntity({
     required this.id,
@@ -45,6 +46,7 @@ class OrderDetailsResponseEntity extends Equatable {
     this.billingAddressDetails,
     this.branchDetails,
     this.subBranchDetails,
+    this.installmentList = const [],
   });
 
   @override
@@ -69,6 +71,62 @@ class OrderDetailsResponseEntity extends Equatable {
         billingAddressDetails,
         branchDetails,
         subBranchDetails,
+        installmentList,
+      ];
+}
+
+class InstallmentItemEntity extends Equatable {
+  final String id;
+  final String orderId;
+  final String userId;
+  final int installmentNumber;
+  final double amount;
+  final DateTime? dueDate;
+  final DateTime? paidDate;
+  final String status;
+  final String paymentMethod;
+  final String? paymentId;
+  final String? transactionId;
+  final double lateFee;
+  final bool reminderSent;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  const InstallmentItemEntity({
+    required this.id,
+    required this.orderId,
+    this.userId = '',
+    required this.installmentNumber,
+    required this.amount,
+    this.dueDate,
+    this.paidDate,
+    required this.status,
+    required this.paymentMethod,
+    this.paymentId,
+    this.transactionId,
+    this.lateFee = 0.0,
+    this.reminderSent = false,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        orderId,
+        userId,
+        installmentNumber,
+        amount,
+        dueDate,
+        paidDate,
+        status,
+        paymentMethod,
+        paymentId,
+        transactionId,
+        lateFee,
+        reminderSent,
+        createdAt,
+        updatedAt,
       ];
 }
 

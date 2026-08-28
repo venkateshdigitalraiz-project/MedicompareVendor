@@ -2,8 +2,11 @@ import '../../domain/entities/appointment_details_entity.dart';
 
 class AppointmentDetailsModel extends AppointmentDetailsEntity {
   const AppointmentDetailsModel({
+    super.id,
     required super.orderId,
     required super.orderRef,
+    super.patientId,
+    super.personType,
     required super.orderStatus,
     required super.paymentStatus,
     required super.paymentMethod,
@@ -24,14 +27,32 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
   });
 
   factory AppointmentDetailsModel.fromJson(Map<String, dynamic> json) {
-    final isGroup = json['isGroup'] == true || json['isGroup'] == 'true';
+    final isGroup = json['isGroup'] == true ||
+        json['isGroup'] == 'true' ||
+        (json['groupDetails'] != null &&
+            json['groupDetails'] is List &&
+            (json['groupDetails'] as List).isNotEmpty);
 
     return AppointmentDetailsModel(
+      id: json['_id']?.toString() ??
+          json['id']?.toString() ??
+          json['orderId']?.toString() ??
+          '',
       orderId: json['orderId']?.toString() ??
           json['orderRef']?.toString() ??
           json['_id']?.toString() ??
           '',
       orderRef: json['orderRef']?.toString() ?? '',
+      patientId: json['patientId']?.toString() ??
+          json['userId']?.toString() ??
+          json['customerId']?.toString() ??
+          '',
+      personType: json['persontype']?.toString() ??
+          json['personType']?.toString() ??
+          json['person_type']?.toString() ??
+          json['selectType']?.toString() ??
+          json['selecttype']?.toString() ??
+          '',
       orderStatus: json['orderStatus']?.toString() ?? 'pending',
       paymentStatus: json['paymentStatus']?.toString() ??
           json['paymentstatus']?.toString() ??
@@ -53,9 +74,45 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())?.toLocal()
           : null,
-      referredDoctor: json['referredDoctor']?.toString() ??
-          json['referreddoctor']?.toString() ??
-          'Self Referral',
+      referredDoctor: (() {
+        if (json['doctorName'] != null &&
+            json['doctorName'].toString().trim().isNotEmpty) {
+          return json['doctorName'].toString().trim();
+        }
+        if (json['doctorname'] != null &&
+            json['doctorname'].toString().trim().isNotEmpty) {
+          return json['doctorname'].toString().trim();
+        }
+        if (json['doctor_name'] != null &&
+            json['doctor_name'].toString().trim().isNotEmpty) {
+          return json['doctor_name'].toString().trim();
+        }
+        if (json['referredDoctor'] != null &&
+            json['referredDoctor'].toString().trim().isNotEmpty) {
+          return json['referredDoctor'].toString().trim();
+        }
+        if (json['referreddoctor'] != null &&
+            json['referreddoctor'].toString().trim().isNotEmpty) {
+          return json['referreddoctor'].toString().trim();
+        }
+        if (json['referred_doctor'] != null &&
+            json['referred_doctor'].toString().trim().isNotEmpty) {
+          return json['referred_doctor'].toString().trim();
+        }
+        if (json['doctor'] != null) {
+          if (json['doctor'] is Map) {
+            final docMap = json['doctor'] as Map;
+            return docMap['name']?.toString() ??
+                docMap['doctorName']?.toString() ??
+                docMap['fullName']?.toString() ??
+                'Self Referral';
+          }
+          if (json['doctor'].toString().trim().isNotEmpty) {
+            return json['doctor'].toString().trim();
+          }
+        }
+        return 'Self Referral';
+      })(),
       billingSummary: AppointmentDetailsBillingSummaryModel.fromJson(
           json['billingSummary'] ?? json['billingsummary'] ?? {}),
       groupDetails: json['groupDetails'] != null && json['groupDetails'] is List
@@ -157,17 +214,44 @@ class AppointmentCouponDetailsModel extends AppointmentCouponDetailsEntity {
 
 class AppointmentGroupDetailsModel extends AppointmentGroupDetailsEntity {
   const AppointmentGroupDetailsModel({
+    super.patientId,
+    super.selectType,
     super.patientDetails,
     required super.items,
   });
 
   factory AppointmentGroupDetailsModel.fromJson(Map<String, dynamic> json) {
+    final rawPatient = json['patientDetails'] ??
+        json['patientdetails'] ??
+        json['patient_details'] ??
+        json['patient'];
+
+    final patientId = json['patientId']?.toString() ??
+        json['_id']?.toString() ??
+        json['id']?.toString() ??
+        (rawPatient is Map
+            ? (rawPatient['_id']?.toString() ??
+                rawPatient['patientId']?.toString() ??
+                rawPatient['id']?.toString() ??
+                '')
+            : '');
+
+    final selectType = json['selectType']?.toString() ??
+        json['selecttype']?.toString() ??
+        json['select_type']?.toString() ??
+        json['persontype']?.toString() ??
+        json['personType']?.toString() ??
+        json['person_type']?.toString() ??
+        json['type']?.toString() ??
+        'family';
+
     return AppointmentGroupDetailsModel(
-      patientDetails:
-          json['patientDetails'] != null && json['patientDetails'] is Map
-              ? AppointmentPatientDetailsModel.fromJson(
-                  json['patientDetails'] as Map<String, dynamic>)
-              : null,
+      patientId: patientId,
+      selectType: selectType,
+      patientDetails: rawPatient != null && rawPatient is Map
+          ? AppointmentPatientDetailsModel.fromJson(
+              rawPatient as Map<String, dynamic>)
+          : null,
       items: json['items'] != null && json['items'] is List
           ? (json['items'] as List)
               .map((e) => AppointmentServiceItemModel.fromJson(
@@ -180,6 +264,7 @@ class AppointmentGroupDetailsModel extends AppointmentGroupDetailsEntity {
 
 class AppointmentPatientDetailsModel extends AppointmentPatientDetailsEntity {
   const AppointmentPatientDetailsModel({
+    super.patientId,
     required super.name,
     required super.age,
     required super.gender,
@@ -188,19 +273,76 @@ class AppointmentPatientDetailsModel extends AppointmentPatientDetailsEntity {
   });
 
   factory AppointmentPatientDetailsModel.fromJson(Map<String, dynamic> json) {
+    final patientId = json['patientId']?.toString() ??
+        json['_id']?.toString() ??
+        json['id']?.toString() ??
+        json['userId']?.toString() ??
+        '';
+
     return AppointmentPatientDetailsModel(
-      name: json['name']?.toString() ?? json['firstName']?.toString() ?? '',
-      age: json['age']?.toString() ?? '',
-      gender: json['gender']?.toString() ?? '',
-      phone: json['phone']?.toString() ?? json['mobile']?.toString() ?? '',
-      email: json['email']?.toString() ?? '',
+      patientId: patientId,
+      name: json['name']?.toString() ??
+          json['fullName']?.toString() ??
+          json['patientName']?.toString() ??
+          json['firstName']?.toString() ??
+          '',
+      age: json['age']?.toString() ??
+          json['patientAge']?.toString() ??
+          json['Age']?.toString() ??
+          '',
+      gender: json['gender']?.toString() ??
+          json['patientGender']?.toString() ??
+          json['Gender']?.toString() ??
+          json['sex']?.toString() ??
+          '',
+      phone: json['phone']?.toString() ??
+          json['mobile']?.toString() ??
+          json['phoneNumber']?.toString() ??
+          json['contactNumber']?.toString() ??
+          '',
+      email:
+          json['email']?.toString() ?? json['patientEmail']?.toString() ?? '',
+    );
+  }
+}
+
+class AppointmentReportModel extends AppointmentReportEntity {
+  const AppointmentReportModel({
+    super.id,
+    super.reportType,
+    super.description,
+    super.file,
+    super.createdAt,
+  });
+
+  factory AppointmentReportModel.fromJson(Map<String, dynamic> json) {
+    return AppointmentReportModel(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      reportType: json['reportType']?.toString() ??
+          json['reporttype']?.toString() ??
+          json['type']?.toString() ??
+          '',
+      description: json['description']?.toString() ?? '',
+      file: json['reportFile']?.toString() ??
+          json['reportfile']?.toString() ??
+          json['report_file']?.toString() ??
+          json['file']?.toString() ??
+          json['report']?.toString() ??
+          json['url']?.toString() ??
+          json['path']?.toString() ??
+          '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())?.toLocal()
+          : null,
     );
   }
 }
 
 class AppointmentServiceItemModel extends AppointmentServiceItemEntity {
   const AppointmentServiceItemModel({
+    super.id,
     required super.orderItemId,
+    super.patientId,
     required super.quantity,
     required super.type,
     required super.bookingType,
@@ -213,6 +355,7 @@ class AppointmentServiceItemModel extends AppointmentServiceItemEntity {
     required super.productName,
     required super.productImages,
     required super.couponAmount,
+    super.reports,
   });
 
   factory AppointmentServiceItemModel.fromJson(Map<String, dynamic> json) {
@@ -259,9 +402,31 @@ class AppointmentServiceItemModel extends AppointmentServiceItemEntity {
       }
     }
 
+    final List<AppointmentReportModel> reports = [];
+    if (json['reports'] != null && json['reports'] is List) {
+      reports.addAll(
+        (json['reports'] as List)
+            .map((e) => AppointmentReportModel.fromJson(e as Map<String, dynamic>)),
+      );
+    } else if (json['report'] != null && json['report'] is Map) {
+      reports.add(
+        AppointmentReportModel.fromJson(json['report'] as Map<String, dynamic>),
+      );
+    }
+
+    final id = json['_id']?.toString() ??
+        json['id']?.toString() ??
+        json['orderItemId']?.toString() ??
+        '';
+
     return AppointmentServiceItemModel(
-      orderItemId:
-          json['orderItemId']?.toString() ?? json['_id']?.toString() ?? '',
+      id: id,
+      orderItemId: id.isNotEmpty
+          ? id
+          : (json['orderItemId']?.toString() ?? ''),
+      patientId: json['patientId']?.toString() ??
+          json['userId']?.toString() ??
+          '',
       quantity: json['quantity'] is int
           ? json['quantity']
           : int.tryParse(json['quantity']?.toString() ?? '0') ?? 0,
@@ -275,18 +440,48 @@ class AppointmentServiceItemModel extends AppointmentServiceItemEntity {
               json['discountPrice']?.toString() ??
               '0') ??
           0.0,
-      totalPrice: double.tryParse(json['totalPrice']?.toString() ?? '0') ?? 0.0,
-      adminCommission: double.tryParse(json['vendorCommission']?.toString() ??
-              json['vendorcommission']?.toString() ??
-              json['adminCommission']?.toString() ??
-              json['admincommission']?.toString() ??
+      totalPrice: double.tryParse(json['totalPrice']?.toString() ??
+              json['totalprice']?.toString() ??
+              json['price']?.toString() ??
               '0') ??
           0.0,
+      adminCommission: (() {
+        final billing = json['billingSummary'] ??
+            json['billingsummary'] ??
+            json['billing_summary'];
+        if (billing != null && billing is Map) {
+          final amt = billing['vendorCommissionAmount'] ??
+              billing['vendorcommissionamount'] ??
+              billing['vendor_commission_amount'] ??
+              billing['vendorCommission'] ??
+              billing['vendorcommission'] ??
+              billing['adminCommissionAmount'] ??
+              billing['admincommissionamount'] ??
+              billing['adminCommission'] ??
+              billing['admincommission'] ??
+              billing['commission'];
+          if (amt != null && double.tryParse(amt.toString()) != null) {
+            return double.tryParse(amt.toString())!;
+          }
+        }
+        final rawAmt = json['vendorCommissionAmount'] ??
+            json['vendorcommissionamount'] ??
+            json['vendorCommission'] ??
+            json['vendorcommission'] ??
+            json['adminCommissionAmount'] ??
+            json['adminCommission'] ??
+            json['admincommission'];
+        if (rawAmt != null && double.tryParse(rawAmt.toString()) != null) {
+          return double.tryParse(rawAmt.toString())!;
+        }
+        return 0.0;
+      })(),
       status: json['status']?.toString() ?? 'Pending',
       productName: productName,
       productImages: productImages,
       couponAmount:
           double.tryParse(json['couponAmount']?.toString() ?? '0') ?? 0.0,
+      reports: reports,
     );
   }
 }

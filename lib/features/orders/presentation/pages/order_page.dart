@@ -28,7 +28,7 @@ class _OrdersPageState extends State<OrdersPage> {
   // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
-    {'label': 'New', 'value': 'new'},
+    // {'label': 'New', 'value': 'new'},
     {'label': 'Pending', 'value': 'pending'},
     {'label': 'Confirmed', 'value': 'confirmed'},
     {'label': 'Processing', 'value': 'processing'},

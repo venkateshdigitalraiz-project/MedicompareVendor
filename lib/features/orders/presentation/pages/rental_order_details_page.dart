@@ -120,6 +120,10 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildCustomerInformationSection(orderDetails),
+                  if (orderDetails.installmentList.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildInstallmentListSection(orderDetails),
+                  ],
                   const SizedBox(height: 16),
                   _buildShippingAddressSection(),
                   const SizedBox(height: 16),
@@ -692,6 +696,206 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInstallmentListSection(
+      OrderDetailsResponseEntity orderDetails) {
+    final installments = orderDetails.installmentList;
+    if (installments.isEmpty) return const SizedBox.shrink();
+
+    final firstItem =
+        orderDetails.items.isNotEmpty ? orderDetails.items.first : null;
+    final rentalPlan = firstItem?.rentalDetails?.rentalPlan ?? 'Monthly';
+
+    return _buildCard(
+      title: "Installment List",
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DataTable(
+                  headingRowColor:
+                      WidgetStateProperty.all(const Color(0xFFF9FAFB)),
+                  horizontalMargin: 16,
+                  columnSpacing: 24,
+                  headingRowHeight: 40,
+                  dataRowMinHeight: 48,
+                  dataRowMaxHeight: 52,
+                  columns: [
+                    DataColumn(
+                      label: Text(
+                        "S.no",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        "Amount",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        "Due Date",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        "Plan",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        "Status",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        "Type",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: installments.map((inst) {
+                    final dueDateStr = inst.dueDate != null
+                        ? DateFormat('dd/MM/yyyy').format(inst.dueDate!)
+                        : '-';
+                    final paymentTypeStr = inst.paymentMethod.isNotEmpty
+                        ? inst.paymentMethod[0].toUpperCase() +
+                            inst.paymentMethod.substring(1).toLowerCase()
+                        : '-';
+
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          Text(
+                            "${inst.installmentNumber}",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            inst.amount.toRupeeFormat(),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            dueDateStr,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            rentalPlan,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          _buildInstallmentStatusBadge(inst.status),
+                        ),
+                        DataCell(
+                          Text(
+                            paymentTypeStr,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildInstallmentStatusBadge(String status) {
+    Color bgColor;
+    Color textColor;
+
+    switch (status.toLowerCase()) {
+      case 'paid':
+        bgColor = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF2E7D32);
+        break;
+      case 'pending':
+        bgColor = const Color(0xFFFFF3E0);
+        textColor = const Color(0xFFEF6C00);
+        break;
+      case 'overdue':
+      case 'failed':
+        bgColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFFC62828);
+        break;
+      default:
+        bgColor = Colors.grey[100]!;
+        textColor = Colors.grey[700]!;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status.isNotEmpty
+            ? status[0].toUpperCase() + status.substring(1).toLowerCase()
+            : '-',
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
       ),
     );
   }

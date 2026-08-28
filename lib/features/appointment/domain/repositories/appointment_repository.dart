@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../entities/appointment_entity.dart';
 import '../entities/appointment_details_entity.dart';
 
@@ -11,4 +12,18 @@ abstract class AppointmentRepository {
   });
 
   Future<AppointmentDetailsEntity> getAppointmentDetails(String id);
+
+  Future<void> uploadReport({
+    required String orderId,
+    required String reportType,
+    required String patientId,
+    required String selectType,
+    String? description,
+    required File file,
+  });
+
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required String orderStatus,
+  });
 }

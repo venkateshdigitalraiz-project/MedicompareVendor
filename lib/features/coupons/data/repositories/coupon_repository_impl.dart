@@ -15,7 +15,7 @@ class CouponRepositoryImpl implements CouponRepository {
       final couponModel = CouponModel.fromEntity(coupon);
       await remoteDataSource.addCoupon(couponModel);
     } catch (e) {
-      throw Exception('Failed to add coupon: $e');
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
 
@@ -25,7 +25,16 @@ class CouponRepositoryImpl implements CouponRepository {
       final couponModel = CouponModel.fromEntity(coupon);
       await remoteDataSource.updateCoupon(id, couponModel);
     } catch (e) {
-      throw Exception('Failed to update coupon: $e');
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  @override
+  Future<void> deleteCoupon(String id) async {
+    try {
+      await remoteDataSource.deleteCoupon(id);
+    } catch (e) {
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
 

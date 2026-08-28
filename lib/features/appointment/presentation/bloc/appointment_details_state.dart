@@ -29,3 +29,53 @@ class AppointmentDetailsError extends AppointmentDetailsState {
   @override
   List<Object?> get props => [message];
 }
+
+class ReportUploadingState extends AppointmentDetailsState {
+  final String orderItemId;
+
+  const ReportUploadingState(this.orderItemId);
+
+  @override
+  List<Object?> get props => [orderItemId];
+}
+
+class ReportUploadSuccessState extends AppointmentDetailsState {
+  final String message;
+  final String orderItemId;
+
+  const ReportUploadSuccessState(this.message, this.orderItemId);
+
+  @override
+  List<Object?> get props => [message, orderItemId];
+}
+
+class ReportUploadErrorState extends AppointmentDetailsState {
+  final String message;
+  final String orderItemId;
+
+  const ReportUploadErrorState(this.message, this.orderItemId);
+
+  @override
+  List<Object?> get props => [message, orderItemId];
+}
+
+class AppointmentStatusUpdatingState extends AppointmentDetailsState {}
+
+class AppointmentStatusUpdatedState extends AppointmentDetailsState {
+  final String message;
+
+  const AppointmentStatusUpdatedState({this.message = 'Status updated successfully'});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AppointmentStatusUpdateErrorState extends AppointmentDetailsState {
+  final String message;
+
+  const AppointmentStatusUpdateErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+

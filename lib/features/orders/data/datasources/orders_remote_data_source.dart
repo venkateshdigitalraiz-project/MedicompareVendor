@@ -73,8 +73,20 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         decoded['data']['Order'] == null) {
       throw Exception('Order details not found');
     }
+
+    final data = decoded['data'];
+    final orderMap = Map<String, dynamic>.from(data['Order'] as Map);
+    if (data['installmentlist'] != null && orderMap['installmentlist'] == null) {
+      orderMap['installmentlist'] = data['installmentlist'];
+    }
+    if (data['installmentList'] != null && orderMap['installmentList'] == null) {
+      orderMap['installmentList'] = data['installmentList'];
+    }
+    if (data['installment_list'] != null && orderMap['installment_list'] == null) {
+      orderMap['installment_list'] = data['installment_list'];
+    }
     
-    return OrderDetailsResponseModel.fromJson(decoded['data']['Order']);
+    return OrderDetailsResponseModel.fromJson(orderMap);
   }
 
   @override

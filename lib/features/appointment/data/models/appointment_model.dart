@@ -102,25 +102,99 @@ class AppointmentItemModel extends AppointmentItemEntity {
         return json['orderType']?.toString() ?? json['bookingType']?.toString() ?? json['type']?.toString() ?? '';
       })(),
       quantity: (() {
-        final isGroup = json['isGroup'] == true || json['isGroup'] == 'true';
-        if (isGroup) {
-          if (json['groupDetails'] != null && json['groupDetails'] is List) {
-            return (json['groupDetails'] as List).length;
+        if (json['groupDetails'] != null && json['groupDetails'] is List) {
+          final list = json['groupDetails'] as List;
+          if (list.isEmpty) return 0;
+          int totalQty = 0;
+          for (var item in list) {
+            if (item is Map) {
+              final rawQty = item['qty'] ?? item['quantity'];
+              if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
+                totalQty += int.tryParse(rawQty.toString())!;
+              } else if (item['items'] != null && item['items'] is List) {
+                for (var sub in (item['items'] as List)) {
+                  if (sub is Map) {
+                    final subQty = sub['qty'] ?? sub['quantity'];
+                    if (subQty != null && int.tryParse(subQty.toString()) != null) {
+                      totalQty += int.tryParse(subQty.toString())!;
+                    }
+                  }
+                }
+              }
+            }
           }
-          return 0;
-        } else {
-          if (json['items'] != null && json['items'] is List) {
-            return (json['items'] as List).length;
-          }
-          return 0;
+          return totalQty;
         }
+
+        if (json['groups'] != null && json['groups'] is List) {
+          final list = json['groups'] as List;
+          if (list.isEmpty) return 0;
+          int totalQty = 0;
+          for (var item in list) {
+            if (item is Map) {
+              final rawQty = item['qty'] ?? item['quantity'];
+              if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
+                totalQty += int.tryParse(rawQty.toString())!;
+              } else if (item['items'] != null && item['items'] is List) {
+                for (var sub in (item['items'] as List)) {
+                  if (sub is Map) {
+                    final subQty = sub['qty'] ?? sub['quantity'];
+                    if (subQty != null && int.tryParse(subQty.toString()) != null) {
+                      totalQty += int.tryParse(subQty.toString())!;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          return totalQty;
+        }
+
+        if (json['items'] != null && json['items'] is List) {
+          final list = json['items'] as List;
+          if (list.isEmpty) return 0;
+          int totalQty = 0;
+          for (var item in list) {
+            if (item is Map) {
+              final rawQty = item['qty'] ?? item['quantity'];
+              if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
+                totalQty += int.tryParse(rawQty.toString())!;
+              } else {
+                totalQty += 1;
+              }
+            } else {
+              totalQty += 1;
+            }
+          }
+          return totalQty;
+        }
+
+        final rootQty = json['qty'] ?? json['quantity'] ?? json['totalQuantity'] ?? json['totalQty'];
+        if (rootQty != null && int.tryParse(rootQty.toString()) != null) {
+          return int.tryParse(rootQty.toString())!;
+        }
+
+        return 0;
       })(),
       totalPrice: (() {
-        final billing = json['billingSummary'] ?? json['billingsummary'];
+        final billing = json['billingSummary'] ?? json['billingsummary'] ?? json['billing_summary'];
         if (billing != null && billing is Map) {
-            if (billing['subtotal'] != null) return double.tryParse(billing['subtotal'].toString()) ?? 0.0;
-            if (billing['finalAmount'] != null) return double.tryParse(billing['finalAmount'].toString()) ?? 0.0;
-            if (billing['unitPrice'] != null) return double.tryParse(billing['unitPrice'].toString()) ?? 0.0;
+          final finalAmount = billing['finalAmount'] ?? billing['finalamount'] ?? billing['final_amount'];
+          if (finalAmount != null && double.tryParse(finalAmount.toString()) != null) {
+            return double.tryParse(finalAmount.toString())!;
+          }
+          final subtotal = billing['subtotal'] ?? billing['subTotal'] ?? billing['sub_total'];
+          if (subtotal != null && double.tryParse(subtotal.toString()) != null) {
+            return double.tryParse(subtotal.toString())!;
+          }
+          final unitPrice = billing['unitPrice'] ?? billing['unitprice'] ?? billing['unit_price'];
+          if (unitPrice != null && double.tryParse(unitPrice.toString()) != null) {
+            return double.tryParse(unitPrice.toString())!;
+          }
+        }
+        final finalAmount = json['finalAmount'] ?? json['finalamount'] ?? json['final_amount'];
+        if (finalAmount != null && double.tryParse(finalAmount.toString()) != null) {
+          return double.tryParse(finalAmount.toString())!;
         }
         if (json['totalPrice'] != null) return double.tryParse(json['totalPrice'].toString()) ?? 0.0;
         if (json['totalprice'] != null) return double.tryParse(json['totalprice'].toString()) ?? 0.0;
@@ -208,6 +282,27 @@ class AppointmentProductDetailsModel extends AppointmentProductDetailsEntity {
         parsedFiles.addAll((json['imageUrl'] as List).map((e) => e.toString()));
       } else if (json['imageUrl'] is String) {
         parsedFiles.add(json['imageUrl'].toString());
+      }
+    }
+    if (json['imageurl'] != null) {
+      if (json['imageurl'] is List) {
+        parsedFiles.addAll((json['imageurl'] as List).map((e) => e.toString()));
+      } else if (json['imageurl'] is String) {
+        parsedFiles.add(json['imageurl'].toString());
+      }
+    }
+    if (json['images'] != null) {
+      if (json['images'] is List) {
+        parsedFiles.addAll((json['images'] as List).map((e) => e.toString()));
+      } else if (json['images'] is String) {
+        parsedFiles.add(json['images'].toString());
+      }
+    }
+    if (json['image'] != null) {
+      if (json['image'] is List) {
+        parsedFiles.addAll((json['image'] as List).map((e) => e.toString()));
+      } else if (json['image'] is String) {
+        parsedFiles.add(json['image'].toString());
       }
     }
     

@@ -1,6 +1,5 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/medical_equipment/medical_equipment_injection.dart';
-import '../../domain/usecases/delete_medical_equipment_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +11,8 @@ import '../../domain/entities/medical_equipment_entity.dart';
 import '../widgets/medical_equipment_card.dart';
 import '../widgets/add_medical_equipment_sheet.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
+
+import 'edit_medical_equipment_page.dart';
 
 class MedicalEquipmentListPage extends StatefulWidget {
   const MedicalEquipmentListPage({super.key});
@@ -29,22 +30,22 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
   @override
   void initState() {
     super.initState();
+    context
+        .read<MedicalEquipmentBloc>()
+        .add(const LoadMedicalEquipmentCategoriesEvent());
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     final state = context.read<MedicalEquipmentBloc>().state;
-    if (state is MedicalEquipmentLoaded && !state.isLoadingMore && !_isFetchingMore) {
+    if (state is MedicalEquipmentLoaded &&
+        !state.isLoadingMore &&
+        !_isFetchingMore) {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         final pagination = state.response.pagination;
         if (pagination.page < pagination.totalPages) {
-          setState(() {
-            _isFetchingMore = true;
-          });
-          context
-              .read<MedicalEquipmentBloc>()
-              .add(LoadMedicalEquipmentListEvent(
+          context.read<MedicalEquipmentBloc>().add(LoadMedicalEquipmentListEvent(
                 page: pagination.page + 1,
                 isLoadMore: true,
               ));
@@ -53,7 +54,34 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
     }
   }
 
+  Future<void> _openEditEquipment(MedicalEquipmentItem item) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditMedicalEquipmentPage(
+          item: item,
+          onSuccess: () {
+            if (mounted) {
+              context
+                  .read<MedicalEquipmentBloc>()
+                  .add(const LoadMedicalEquipmentCategoriesEvent());
+            }
+          },
+        ),
+      ),
+    );
+    if (result == true && mounted) {
+      context
+          .read<MedicalEquipmentBloc>()
+          .add(const LoadMedicalEquipmentCategoriesEvent());
+    }
+  }
+
   void _showAddEditSheet({MedicalEquipmentItem? item}) {
+    if (item != null) {
+      _openEditEquipment(item);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -266,7 +294,7 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text("All Categories",
+                    child: Text("",
                         style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -274,7 +302,10 @@ class _MedicalEquipmentListPageState extends State<MedicalEquipmentListPage> {
                   ),
                   ...state.categories.map((c) => DropdownMenuItem(
                         value: c.id,
-                        child: Text(c.slug != null && c.slug!.isNotEmpty ? "${c.name} (${c.slug})" : c.name,
+                        child: Text(
+                            c.slug != null && c.slug!.isNotEmpty
+                                ? "${c.name} (${c.slug})"
+                                : c.name,
                             style: GoogleFonts.inter(
                                 fontSize: 13, color: Colors.black87)),
                       )),

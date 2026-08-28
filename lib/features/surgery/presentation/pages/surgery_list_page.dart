@@ -309,7 +309,7 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
                   return [
                     DropdownMenuItem(
                         value: '',
-                        child: Text("All Categories",
+                        child: Text("",
                             style: GoogleFonts.inter(
                                 fontSize: 13, fontWeight: FontWeight.w500))),
                     ...state.categories.map((c) => DropdownMenuItem(

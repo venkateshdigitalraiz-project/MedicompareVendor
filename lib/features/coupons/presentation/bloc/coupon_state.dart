@@ -41,11 +41,19 @@ class CouponListLoading extends CouponState {}
 
 class CouponListLoaded extends CouponState {
   final List<Coupon> coupons;
+  final bool hasReachedMax;
+  final bool isFetchingMore;
+  final int currentPage;
 
-  const CouponListLoaded({required this.coupons});
+  const CouponListLoaded({
+    required this.coupons,
+    this.hasReachedMax = false,
+    this.isFetchingMore = false,
+    this.currentPage = 1,
+  });
 
   @override
-  List<Object> get props => [coupons];
+  List<Object> get props => [coupons, hasReachedMax, isFetchingMore, currentPage];
 }
 
 class CouponListError extends CouponState {
@@ -75,4 +83,39 @@ class CustomersError extends CouponState {
 
   @override
   List<Object> get props => [message];
+}
+
+class CouponDeleteLoading extends CouponState {
+  final String id;
+
+  const CouponDeleteLoading({required this.id});
+
+  @override
+  List<Object> get props => [id];
+}
+
+class CouponDeleteSuccess extends CouponState {
+  final String id;
+  final String message;
+
+  const CouponDeleteSuccess({
+    required this.id,
+    this.message = 'Coupon deleted successfully',
+  });
+
+  @override
+  List<Object> get props => [id, message];
+}
+
+class CouponDeleteFailure extends CouponState {
+  final String id;
+  final String message;
+
+  const CouponDeleteFailure({
+    required this.id,
+    required this.message,
+  });
+
+  @override
+  List<Object> get props => [id, message];
 }

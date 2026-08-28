@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/appointment_entity.dart';
 import '../../domain/entities/appointment_details_entity.dart';
@@ -42,6 +43,48 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
       throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> uploadReport({
+    required String orderId,
+    required String reportType,
+    required String patientId,
+    required String selectType,
+    String? description,
+    required File file,
+  }) async {
+    try {
+      await remoteDataSource.uploadReport(
+        orderId: orderId,
+        reportType: reportType,
+        patientId: patientId,
+        selectType: selectType,
+        description: description,
+        file: file,
+      );
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  @override
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required String orderStatus,
+  }) async {
+    try {
+      await remoteDataSource.updateOrderStatus(
+        orderId: orderId,
+        orderStatus: orderStatus,
+      );
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString().replaceAll('Exception: ', ''));
     }
   }
 }

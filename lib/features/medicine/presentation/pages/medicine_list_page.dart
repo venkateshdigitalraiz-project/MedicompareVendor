@@ -388,7 +388,7 @@ class _MedicineListPageState extends State<MedicineListPage> {
                   Expanded(
                     child: Text(
                       state.selectedCategoryId.isEmpty
-                          ? "All Categories"
+                          ? ""
                           : (state.categories
                                       .where((c) =>
                                           c.id == state.selectedCategoryId)

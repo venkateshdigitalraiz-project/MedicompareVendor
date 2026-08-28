@@ -66,25 +66,38 @@ class CouponModel extends Coupon {
     return CouponModel(
       id: json['id'] ?? json['_id'],
       couponCode: json['couponCode'] ?? json['code'] ?? '',
-      selectionType: parseSelectionType(json['selectionType'] ?? json['categoryType']),
+      selectionType:
+          parseSelectionType(json['selectionType'] ?? json['categoryType']),
       userLimit: parseInt(json['userLimit'] ?? json['usageLimit']),
-      renewalCycle: parseRenewalCycle(json['renewalCycle'] ?? json['userRenewal']),
+      renewalCycle:
+          parseRenewalCycle(json['renewalCycle'] ?? json['userRenewal']),
       couponName: json['couponName'] ?? json['name'] ?? '',
       discountType: parseDiscountType(json['discountType']),
-      discountValue: parseDouble(json['discountValue'] ?? json['discount']) ?? 0.0,
-      minimumPurchaseAmount: parseDouble(json['minimumPurchaseAmount'] ?? json['minimumPurchase']),
-      maximumDiscountAmount: parseDouble(json['maximumDiscountAmount'] ?? json['maximumDiscount']),
-      validFrom: json['validFrom'] != null 
-          ? DateTime.parse(json['validFrom']) 
-          : (json['startDate'] != null ? DateTime.parse(json['startDate']) : DateTime.now()),
-      validTo: json['validTo'] != null 
-          ? DateTime.parse(json['validTo']) 
-          : (json['endDate'] != null ? DateTime.parse(json['endDate']) : DateTime.now()),
+      discountValue:
+          parseDouble(json['discountValue'] ?? json['discount']) ?? 0.0,
+      minimumPurchaseAmount:
+          parseDouble(json['minimumPurchaseAmount'] ?? json['minimumPurchase']),
+      maximumDiscountAmount:
+          parseDouble(json['maximumDiscountAmount'] ?? json['maximumDiscount']),
+      validFrom: json['validFrom'] != null
+          ? DateTime.parse(json['validFrom'])
+          : (json['startDate'] != null
+              ? DateTime.parse(json['startDate'])
+              : DateTime.now()),
+      validTo: json['validTo'] != null
+          ? DateTime.parse(json['validTo'])
+          : (json['endDate'] != null
+              ? DateTime.parse(json['endDate'])
+              : DateTime.now()),
       status: parseStatus(json['status']),
       hiddenCoupon: json['hiddenCoupon'] ?? json['isHidden'] ?? false,
       description: json['description']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? (json['customerId'] is Map ? json['customerId']['_id']?.toString() : json['customerId']?.toString()),
-      applicableType: json['applicableType']?.toString() ?? json['selectionType']?.toString(),
+      userId: json['userId']?.toString() ??
+          (json['customerId'] is Map
+              ? json['customerId']['_id']?.toString()
+              : json['customerId']?.toString()),
+      applicableType: json['applicableType']?.toString() ??
+          json['selectionType']?.toString(),
       category: json['category']?.toString() ?? 'all',
     );
   }
@@ -92,24 +105,41 @@ class CouponModel extends Coupon {
   Map<String, dynamic> toJson() {
     String mapSelectionType(String val) {
       switch (val) {
-        case 'User': return 'user';
-        case 'Branch': return 'branch';
-        case 'All': return 'all';
-        default: return val.toLowerCase();
+        case 'User':
+          return 'user';
+        case 'Branch':
+          return 'branch';
+        case 'All':
+          return 'all';
+        default:
+          return val.toLowerCase();
       }
     }
 
     String mapRenewalCycle(String val) {
-      if (val.contains('Never')) return '1';
-      if (val.contains('Daily')) return '1';
-      if (val.contains('Weekly')) return '7';
-      if (val.contains('Monthly')) return '30';
-      if (val.contains('Yearly')) return '365';
-      return '1';
+      final v = val.toLowerCase().trim();
+      if (v.contains('never') || v.contains('one-time') || v == '1') {
+        return '1';
+      }
+      if (v.contains('month')) {
+        return '28';
+      }
+      if (v.contains('week')) {
+        return '7';
+      }
+      if (v.contains('10')) {
+        return '10';
+      }
+      if (v.contains('year')) {
+        return 'yearly';
+      }
+
+      return 'never';
     }
 
     String mapDiscountType(String val) {
-      if (val.contains('Percentage') || val.contains('Percent')) return 'percentage';
+      if (val.contains('Percentage') || val.contains('Percent'))
+        return 'percentage';
       if (val.contains('Fixed') || val.contains('Flat')) return 'fixed';
       return val.toLowerCase();
     }
@@ -125,11 +155,14 @@ class CouponModel extends Coupon {
       'discountType': mapDiscountType(discountType),
       'discount': discountValue,
       'minimumPurchase': minimumPurchaseAmount ?? 0.0,
-      'maximumDiscount': maximumDiscountAmount,
+      if (maximumDiscountAmount != null)
+        'maximumDiscount': maximumDiscountAmount,
       'startDate': validFrom.toIso8601String(),
       'endDate': validTo.toIso8601String(),
       'selectionType': mapSelectionType(selectionType),
-      'usageLimit': userLimit ?? 10,
+      if (userLimit != null) 'usageLimit': userLimit,
+      if (userLimit != null) 'userLimit': userLimit,
+      'renewalCycle': mapRenewalCycle(renewalCycle),
       'userRenewal': mapRenewalCycle(renewalCycle),
       if (userId != null) 'userId': userId,
       'applicableType': applicableType ?? mapSelectionType(selectionType),

@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:printing/printing.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/price_formatter.dart';
@@ -28,22 +29,103 @@ class AppointmentDetailsPage extends StatefulWidget {
 
 class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   final Map<String, PlatformFile> _pickedFiles = {};
+  AppointmentDetailsEntity? _cachedDetails;
 
-  Future<void> _pickPdf(String itemId) async {
+  Future<void> _pickPdf({
+    required AppointmentServiceItemEntity item,
+    required AppointmentPatientDetailsEntity? patient,
+    String? patientId,
+    String? selectType,
+    required String orderId,
+    required bool isGroup,
+  }) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
         withData: true,
       );
-      if (result != null) {
-        setState(() {
-          _pickedFiles[itemId] = result.files.single;
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('PDF attached successfully')),
-          );
+      if (result != null && result.files.isNotEmpty) {
+        final platformFile = result.files.single;
+        if (platformFile.path != null) {
+          final extension = platformFile.path!.split('.').last.toLowerCase();
+          if (extension != 'pdf') {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please select a valid PDF file'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            return;
+          }
+
+          final file = File(platformFile.path!);
+
+          final String resolvedOrderId = orderId.isNotEmpty
+              ? orderId
+              : (item.id.isNotEmpty
+                  ? item.id
+                  : (item.orderItemId.isNotEmpty
+                      ? item.orderItemId
+                      : widget.appointmentId));
+
+          final String resolvedPatientId = (patientId != null && patientId.isNotEmpty)
+              ? patientId
+              : (patient?.patientId.isNotEmpty == true
+                  ? patient!.patientId
+                  : (item.patientId.isNotEmpty
+                      ? item.patientId
+                      : ''));
+
+          final String reportType = item.reports.isNotEmpty &&
+                  item.reports.first.reportType.isNotEmpty
+              ? item.reports.first.reportType
+              : (item.type.toLowerCase().contains('lab') ||
+                      item.serviceTypes.toLowerCase().contains('lab')
+                  ? 'labtests'
+                  : (item.type.isNotEmpty ? item.type.toLowerCase() : 'labtests'));
+
+          final String resolvedSelectType =
+              (selectType != null && selectType.isNotEmpty)
+                  ? selectType
+                  : (isGroup ? 'family' : 'family');
+
+          final String description = item.reports.isNotEmpty
+              ? item.reports.first.description
+              : '';
+
+          if (resolvedOrderId.isEmpty) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'Unable to upload report: missing item or order reference'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            return;
+          }
+
+          setState(() {
+            _pickedFiles[item.orderItemId] = platformFile;
+          });
+
+          if (mounted) {
+            context.read<AppointmentDetailsBloc>().add(
+                  UploadReportEvent(
+                    orderId: resolvedOrderId,
+                    orderItemId: item.orderItemId,
+                    reportType: reportType,
+                    patientId: resolvedPatientId,
+                    selectType: resolvedSelectType,
+                    description: description,
+                    file: file,
+                  ),
+                );
+          }
         }
       }
     } catch (e) {
@@ -72,6 +154,33 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     }
   }
 
+  String _resolveFileUrl(String fileUrl) {
+    if (fileUrl.trim().isEmpty) return '';
+    final trimmed = fileUrl.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/')) {
+      return 'https://api.medicompares.com$trimmed';
+    }
+    return 'https://api.medicompares.com/$trimmed';
+  }
+
+  Future<void> _viewReportFile(String fileUrl, String title) async {
+    final resolvedUrl = _resolveFileUrl(fileUrl);
+    if (resolvedUrl.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PdfViewerPage(
+            url: resolvedUrl,
+            title: title,
+          ),
+        ),
+      );
+    }
+  }
+
   void _removePdf(String itemId) {
     setState(() {
       _pickedFiles.remove(itemId);
@@ -86,6 +195,185 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         .add(GetAppointmentDetailsEvent(widget.appointmentId));
   }
 
+  String? _selectedStatus;
+
+  String _normalizeStatus(String status) {
+    final s = status.trim().toLowerCase().replaceAll(' ', '_');
+    if (s == 'not_collected') return 'sample_not_collected';
+    if (['pending', 'sample_collected', 'sample_not_collected', 'completed']
+        .contains(s)) {
+      return s;
+    }
+    return 'pending';
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF2E7D32);
+      case 'sample_collected':
+        return const Color(0xFF1565C0);
+      case 'sample_not_collected':
+        return const Color(0xFFD32F2F);
+      case 'pending':
+      default:
+        return const Color(0xFFEF6C00);
+    }
+  }
+
+  Color _getStatusBgColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFFE8F5E9);
+      case 'sample_collected':
+        return const Color(0xFFE3F2FD);
+      case 'sample_not_collected':
+        return const Color(0xFFFFEBEE);
+      case 'pending':
+      default:
+        return const Color(0xFFFFF3E0);
+    }
+  }
+
+  Widget _buildStatusDropdown() {
+    return BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
+      builder: (context, state) {
+        String currentStatus = _selectedStatus ??
+            (state is AppointmentDetailsLoaded
+                ? _normalizeStatus(state.appointmentDetails.orderStatus)
+                : 'pending');
+
+        final activeColor = _getStatusColor(currentStatus);
+        final activeBgColor = _getStatusBgColor(currentStatus);
+
+        final items = [
+          {'label': 'Pending', 'value': 'pending'},
+          {'label': 'Sample Collected', 'value': 'sample_collected'},
+          {'label': 'Not Collected', 'value': 'sample_not_collected'},
+          {'label': 'Completed', 'value': 'completed'},
+        ];
+
+        final currentLabel = items.firstWhere(
+          (e) => e['value'] == currentStatus,
+          orElse: () => {'label': 'Pending', 'value': 'pending'},
+        )['label']!;
+
+        return PopupMenuButton<String>(
+          tooltip: 'Change Status',
+          padding: EdgeInsets.zero,
+          position: PopupMenuPosition.under,
+          color: Colors.white,
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          onSelected: (newStatus) {
+            setState(() {
+              _selectedStatus = newStatus;
+            });
+            final orderId = state is AppointmentDetailsLoaded
+                ? (state.appointmentDetails.id.isNotEmpty
+                    ? state.appointmentDetails.id
+                    : (state.appointmentDetails.orderId.isNotEmpty
+                        ? state.appointmentDetails.orderId
+                        : widget.appointmentId))
+                : widget.appointmentId;
+            context.read<AppointmentDetailsBloc>().add(
+                  UpdateAppointmentOrderStatusEvent(
+                    orderId: orderId,
+                    orderStatus: newStatus,
+                  ),
+                );
+          },
+          itemBuilder: (context) => items.map((item) {
+            final itemColor = _getStatusColor(item['value']!);
+            final itemBg = _getStatusBgColor(item['value']!);
+            final isSelected = item['value'] == currentStatus;
+
+            return PopupMenuItem<String>(
+              value: item['value'],
+              height: 38,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? itemBg : Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: itemColor,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      item['label']!,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected ? itemColor : Colors.black87,
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      Icon(Icons.check, size: 14, color: itemColor),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+          child: Container(
+            height: 30,
+            margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: activeBgColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: activeColor.withOpacity(0.4), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: activeColor,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 105),
+                  child: Text(
+                    currentLabel,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: activeColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(Icons.keyboard_arrow_down_rounded,
+                    size: 16, color: activeColor),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,40 +381,74 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 40,
+        leadingWidth: 36,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Row(
+        titleSpacing: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(width: 30),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Appointment Details",
-                  style: GoogleFonts.inter(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  "ID: ${widget.appointmentId.length > 15 ? widget.appointmentId.substring(0, 15) + "..." : widget.appointmentId}",
-                  style: GoogleFonts.inter(
-                    color: Colors.grey,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
+            Text(
+              "Appointment Details",
+              style: GoogleFonts.inter(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              "ID: ${widget.appointmentId.length > 12 ? '${widget.appointmentId.substring(0, 12)}...' : widget.appointmentId}",
+              style: GoogleFonts.inter(
+                color: Colors.grey,
+                fontSize: 10,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
+        actions: [
+          _buildStatusDropdown(),
+          const SizedBox(width: 8),
+        ],
       ),
       body: BlocConsumer<AppointmentDetailsBloc, AppointmentDetailsState>(
         listener: (context, state) {
-          if (state is AppointmentDetailsError) {
+          if (state is AppointmentDetailsLoaded) {
+            _cachedDetails = state.appointmentDetails;
+            _selectedStatus = _normalizeStatus(state.appointmentDetails.orderStatus);
+          } else if (state is AppointmentStatusUpdatedState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (state is AppointmentStatusUpdateErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is ReportUploadSuccessState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (state is ReportUploadErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is AppointmentDetailsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(state.message), backgroundColor: Colors.red),
@@ -134,16 +456,19 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           }
         },
         builder: (context, state) {
-          if (state is AppointmentDetailsLoading) {
+          if (state is AppointmentDetailsLoading && _cachedDetails == null) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is AppointmentDetailsLoaded) {
-            final details = state.appointmentDetails;
+          }
+          final details = state is AppointmentDetailsLoaded
+              ? state.appointmentDetails
+              : _cachedDetails;
 
+          if (details != null) {
             return LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth > 600;
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -158,6 +483,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                       _buildCustomerAddressSection(details),
                       const SizedBox(height: 24),
                       _buildOrderTimelineSection(details),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 );
@@ -178,32 +504,59 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
       child: Column(
         children: details.isGroup
             ? details.groupDetails.map((group) {
+                final patient = group.patientDetails;
+                final patientId = patient?.patientId.isNotEmpty == true
+                    ? patient!.patientId
+                    : group.patientId;
+                final selectType = group.selectType.isNotEmpty
+                    ? group.selectType
+                    : (details.personType.isNotEmpty
+                        ? details.personType
+                        : 'family');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Patient: ${group.patientDetails!.name}",
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    ...group.items
-                        .map((item) => _buildItemRow(
-                            item, details.billingSummary.adminCommission))
-                        .toList(),
+                    if (patient != null) ...[
+                      Text(
+                        "Patient: ${patient.name}",
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    ...group.items.map((item) => _buildItemRow(
+                        item,
+                        details: details,
+                        patient: patient,
+                        patientId: patientId,
+                        selectType: selectType)),
                   ],
                 );
               }).toList()
             : details.normalItems
                 .map((item) =>
-                    _buildItemRow(item, details.billingSummary.adminCommission))
+                    _buildItemRow(item,
+                        details: details,
+                        patientId: details.groupDetails.isNotEmpty
+                            ? details.groupDetails.first.patientId
+                            : details.patientId,
+                        selectType: details.groupDetails.isNotEmpty &&
+                                details.groupDetails.first.selectType.isNotEmpty
+                            ? details.groupDetails.first.selectType
+                            : (details.personType.isNotEmpty
+                                ? details.personType
+                                : 'family')))
                 .toList(),
       ),
     );
   }
 
   Widget _buildItemRow(
-      AppointmentServiceItemEntity item, double adminCommission) {
+      AppointmentServiceItemEntity item, {
+      required AppointmentDetailsEntity details,
+      AppointmentPatientDetailsEntity? patient,
+      String? patientId,
+      String? selectType}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -251,16 +604,51 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                           fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      "Type: ${item.type}",
-                      style:
-                          GoogleFonts.inter(color: Colors.grey, fontSize: 12),
+                    Row(
+                      children: [
+                        Text(
+                          "Type: ${item.type}",
+                          style: GoogleFonts.inter(
+                              color: Colors.grey, fontSize: 12),
+                        ),
+                        if (item.serviceTypes.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            "Service: ${item.serviceTypes}",
+                            style: GoogleFonts.inter(
+                                color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
+                      ],
                     ),
-                    Text(
-                      "Service: ${item.serviceTypes}",
-                      style:
-                          GoogleFonts.inter(color: Colors.grey, fontSize: 12),
-                    ),
+                    if (patient != null &&
+                        (patient.age.isNotEmpty ||
+                            patient.gender.isNotEmpty)) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (patient.age.isNotEmpty) ...[
+                            Text(
+                              "Age: ${patient.age}",
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            if (patient.gender.isNotEmpty)
+                              const SizedBox(width: 8),
+                          ],
+                          if (patient.gender.isNotEmpty)
+                            Text(
+                              "Gender: ${patient.gender}",
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -273,7 +661,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           _buildSummaryRow("Price", "₹${item.totalPrice.toStringAsFixed(2)}"),
           _buildSummaryRow(
             "Admin Commission",
-            "₹${adminCommission.toStringAsFixed(2)}",
+            "₹${item.adminCommission.toStringAsFixed(2)}",
             labelColor: Colors.black,
             valueColor: Colors.black,
           ),
@@ -281,65 +669,129 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           const SizedBox(height: 8),
           Divider(height: 1, color: Colors.grey.shade200),
           const SizedBox(height: 8),
-          _pickedFiles.containsKey(item.orderItemId)
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: InkWell(
-                        onTap: () => _viewPdf(item.orderItemId),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.picture_as_pdf,
-                                color: Colors.red.shade400, size: 20),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                _pickedFiles[item.orderItemId]!.name,
-                                style: GoogleFonts.inter(
-                                  color: Colors.blue.shade700,
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+          if (item.reports.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: item.reports.asMap().entries.map((entry) {
+                final int index = entry.key;
+                final report = entry.value;
+                final String fileName = report.file.isNotEmpty
+                    ? (report.file.split('/').last.split('\\').last)
+                    : "Report ${index + 1}";
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: InkWell(
+                    onTap: () => _viewReportFile(report.file, fileName),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.picture_as_pdf,
+                            color: Colors.red.shade400, size: 20),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            fileName,
+                            style: GoogleFonts.inter(
+                              color: Colors.blue.shade700,
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
                             ),
-                          ],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () => _removePdf(item.orderItemId),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                  ),
+                );
+              }).toList(),
+            )
+          else if (_pickedFiles.containsKey(item.orderItemId))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: InkWell(
+                    onTap: () => _viewPdf(item.orderItemId),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.picture_as_pdf,
+                            color: Colors.red.shade400, size: 20),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            _pickedFiles[item.orderItemId]!.name,
+                            style: GoogleFonts.inter(
+                              color: Colors.blue.shade700,
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                )
-              : Row(
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: () => _removePdf(item.orderItemId),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            )
+          else
+            BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
+              builder: (context, state) {
+                final isUploading = state is ReportUploadingState &&
+                    state.orderItemId == item.orderItemId;
+                return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Upload",
+                      isUploading ? "Uploading..." : "Upload",
                       style: GoogleFonts.inter(
                           color: Colors.grey.shade700, fontSize: 14),
                     ),
-                    InkWell(
-                      onTap: () => _pickPdf(item.orderItemId),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
+                    if (isUploading)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      InkWell(
+                        onTap: () => _pickPdf(
+                          item: item,
+                          patient: patient,
+                          patientId: patientId,
+                          selectType: selectType,
+                          orderId: item.id.isNotEmpty
+                              ? item.id
+                              : (item.orderItemId.isNotEmpty
+                                  ? item.orderItemId
+                                  : (details.id.isNotEmpty
+                                      ? details.id
+                                      : widget.appointmentId)),
+                          isGroup: details.isGroup,
                         ),
-                        child: Icon(Icons.attach_file,
-                            size: 20, color: Colors.blue.shade700),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.attach_file,
+                              size: 20, color: Colors.blue.shade700),
+                        ),
                       ),
-                    ),
                   ],
-                ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -378,7 +830,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               ? details.paymentMethod[0].toUpperCase() +
                   details.paymentMethod.substring(1)
               : 'Online'),
-      _buildInfoBlock("Reffered Doctor", details.referredDoctor),
+      _buildInfoBlock("Referred Doctor", details.referredDoctor),
       _buildInfoBlock("Group Order", groupOrderText),
     ];
 
@@ -453,8 +905,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             details.orderStatus.substring(1)
         : 'Pending';
 
-    final String? createdType = details.couponDetails?.createdType?.toLowerCase();
-    
+    final String? createdType =
+        details.couponDetails?.createdType?.toLowerCase();
+
     double couponAmount = 0.0;
     if (createdType == 'vendor') {
       couponAmount = details.billingSummary.couponAmount;
@@ -478,14 +931,18 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           _buildSummaryRow("Subtotal (Inclusive all Taxes)",
               details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
           if (details.billingSummary.sampleCollection > 0)
-            _buildSummaryRow("Sample Collection",
-                details.billingSummary.sampleCollection.toRupeeFormat(decimalDigits: 2)),
-          if (details.billingSummary.tax > 0)
             _buildSummaryRow(
-                "Tax", details.billingSummary.tax.toRupeeFormat(decimalDigits: 2)),
+                "Sample Collection",
+                details.billingSummary.sampleCollection
+                    .toRupeeFormat(decimalDigits: 2)),
+          if (details.billingSummary.tax > 0)
+            _buildSummaryRow("Tax",
+                details.billingSummary.tax.toRupeeFormat(decimalDigits: 2)),
           if (details.billingSummary.deliveryCharges > 0)
-            _buildSummaryRow("Delivery Charges",
-                details.billingSummary.deliveryCharges.toRupeeFormat(decimalDigits: 2)),
+            _buildSummaryRow(
+                "Delivery Charges",
+                details.billingSummary.deliveryCharges
+                    .toRupeeFormat(decimalDigits: 2)),
           if (couponAmount > 0)
             _buildSummaryRow("Coupon Discount",
                 "-${couponAmount.toRupeeFormat(decimalDigits: 2)}",
@@ -500,8 +957,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               Text("Grand Total",
                   style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold, fontSize: 16)),
-              Text(
-                  grandTotal.toRupeeFormat(decimalDigits: 2),
+              Text(grandTotal.toRupeeFormat(decimalDigits: 2),
                   style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -584,26 +1040,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         ),
       ],
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'paid':
-      case 'completed':
-      case 'delivered':
-      case 'confirmed':
-        return Colors.green;
-      case 'pending':
-      case 'new':
-      case 'processing':
-        return Colors.orange;
-      case 'cancelled':
-      case 'rejected':
-      case 'failed':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 
   Widget _buildCustomerAddressSection(AppointmentDetailsEntity details) {
@@ -801,9 +1237,16 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
 class PdfViewerPage extends StatefulWidget {
   final String? path;
   final Uint8List? bytes;
+  final String? url;
   final String title;
 
-  const PdfViewerPage({super.key, this.path, this.bytes, required this.title});
+  const PdfViewerPage({
+    super.key,
+    this.path,
+    this.bytes,
+    this.url,
+    required this.title,
+  });
 
   @override
   State<PdfViewerPage> createState() => _PdfViewerPageState();
@@ -830,6 +1273,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
           _pdfBytes = await file.readAsBytes();
         } else {
           _error = "File does not exist: ${widget.path}";
+        }
+      } else if (widget.url != null && widget.url!.isNotEmpty) {
+        final response = await http.get(Uri.parse(widget.url!));
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          _pdfBytes = response.bodyBytes;
+        } else {
+          _error = "Failed to load PDF from server (HTTP ${response.statusCode})";
         }
       } else {
         _error = "No PDF data provided";

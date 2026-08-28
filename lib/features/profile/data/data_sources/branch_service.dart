@@ -83,4 +83,35 @@ class BranchService {
       throw ServerException(e.toString());
     }
   }
+
+  Future<void> createBranch(Map<String, dynamic> data, {File? image}) async {
+    try {
+      if (image != null) {
+        final Map<String, String> fields = {};
+        data.forEach((key, value) {
+          fields[key] = value.toString();
+        });
+
+        final response = await _apiService.post(
+          ApiEndpoints.createBranch,
+          fields: fields,
+          files: {'image': image},
+        );
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to create branch');
+        }
+      } else {
+        final response =
+            await _apiService.post(ApiEndpoints.createBranch, body: data);
+        final body = jsonDecode(response.body);
+        if (body['success'] != true) {
+          throw ServerException(body['message'] ?? 'Failed to create branch');
+        }
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
 }
