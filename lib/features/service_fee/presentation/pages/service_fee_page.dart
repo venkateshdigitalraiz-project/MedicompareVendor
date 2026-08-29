@@ -44,8 +44,72 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
             color: AppColors.white,
           ),
         ),
+        actions: [
+          BlocBuilder<ServiceFeeBloc, ServiceFeeState>(
+            builder: (context, state) {
+              if (state is ServiceFeeActionLoading) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+              return Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      if (state is ServiceFeeSuccess) {
+                        context.read<ServiceFeeBloc>().add(SaveServiceFee(state.serviceFee));
+                      }
+                    },
+                    child: Text(
+                      "Save",
+                      style: GoogleFonts.inter(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => _showResetDialog(),
+                    child: Text(
+                      "Reset",
+                      style: GoogleFonts.inter(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
-      body: BlocBuilder<ServiceFeeBloc, ServiceFeeState>(
+      body: BlocConsumer<ServiceFeeBloc, ServiceFeeState>(
+        listener: (context, state) {
+          if (state is ServiceFeeUpdateSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+            context.read<ServiceFeeBloc>().add(LoadServiceFee());
+          } else if (state is ServiceFeeFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.red,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           if (state is ServiceFeeInitial || state is ServiceFeeLoading) {
             return const Center(
@@ -229,6 +293,43 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showResetDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "vendor medicompare.com says",
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            "Are you sure you want to reset all service fee parameters to defaults?",
+            style: GoogleFonts.inter(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.inter(color: AppColors.greyText),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.read<ServiceFeeBloc>().add(ResetServiceFee());
+              },
+              child: Text(
+                "OK",
+                style: GoogleFonts.inter(color: AppColors.primaryDark, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

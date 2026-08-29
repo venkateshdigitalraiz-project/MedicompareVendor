@@ -291,49 +291,49 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
           const SizedBox(height: 12),
 
           // Lab Test Dropdown Filter
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                menuMaxHeight: 400,
-                borderRadius: BorderRadius.circular(12),
-                dropdownColor: Colors.white,
-                value: state.selectedLabTestId.isEmpty
-                    ? null
-                    : state.selectedLabTestId,
-                hint: Text("All Lab Tests",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text("All Lab Tests",
-                        style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary)),
-                  ),
-                  ..._allLabTests.map((t) => DropdownMenuItem(
-                        value: t.id,
-                        child: Text(t.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 13, color: Colors.black87)),
-                      )),
-                ],
-                onChanged: (val) {
-                  if (val != null)
-                    context
-                        .read<LabTestPackageBloc>()
-                        .add(SelectLabTestForPackageFilterEvent(val));
-                },
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12),
+          //   decoration: BoxDecoration(
+          //     color: const Color(0xFFF8FAFF),
+          //     borderRadius: BorderRadius.circular(12),
+          //   ),
+          //   child: DropdownButtonHideUnderline(
+          //     child: DropdownButton<String>(
+          //       isExpanded: true,
+          //       menuMaxHeight: 400,
+          //       borderRadius: BorderRadius.circular(12),
+          //       dropdownColor: Colors.white,
+          //       value: state.selectedLabTestId.isEmpty
+          //           ? null
+          //           : state.selectedLabTestId,
+          //       hint: Text("All Lab Tests",
+          //           style: GoogleFonts.inter(
+          //               fontSize: 13, color: Colors.grey[600])),
+          //       items: [
+          //         DropdownMenuItem(
+          //           value: '',
+          //           child: Text("All Lab Tests",
+          //               style: GoogleFonts.inter(
+          //                   fontSize: 14,
+          //                   fontWeight: FontWeight.bold,
+          //                   color: AppColors.primary)),
+          //         ),
+          //         ..._allLabTests.map((t) => DropdownMenuItem(
+          //               value: t.id,
+          //               child: Text(t.name,
+          //                   style: GoogleFonts.inter(
+          //                       fontSize: 13, color: Colors.black87)),
+          //             )),
+          //       ],
+          //       onChanged: (val) {
+          //         if (val != null)
+          //           context
+          //               .read<LabTestPackageBloc>()
+          //               .add(SelectLabTestForPackageFilterEvent(val));
+          //       },
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

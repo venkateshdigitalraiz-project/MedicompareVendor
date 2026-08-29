@@ -20,4 +20,16 @@ class ServiceFeeRepositoryImpl implements ServiceFeeRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> updateServiceSettings(Map<String, dynamic> payload) async {
+    try {
+      final result = await remoteDataSource.updateServiceSettings(payload);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

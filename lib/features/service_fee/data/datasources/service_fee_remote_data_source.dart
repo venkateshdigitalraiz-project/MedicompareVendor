@@ -7,6 +7,7 @@ import '../models/service_fee_response_model.dart';
 
 abstract class ServiceFeeRemoteDataSource {
   Future<ServiceFeeModel> getServiceFee();
+  Future<bool> updateServiceSettings(Map<String, dynamic> payload);
 }
 
 class ServiceFeeRemoteDataSourceImpl implements ServiceFeeRemoteDataSource {
@@ -27,6 +28,24 @@ class ServiceFeeRemoteDataSourceImpl implements ServiceFeeRemoteDataSource {
       throw ServerException(responseModel.message.isNotEmpty
           ? responseModel.message
           : 'Failed to fetch service fee');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<bool> updateServiceSettings(Map<String, dynamic> payload) async {
+    try {
+      final response = await apiService.post(
+        ApiEndpoints.updateServiceSettings,
+        body: payload,
+      );
+      final body = jsonDecode(response.body);
+      if (body['success'] == true) {
+        return true;
+      }
+      throw ServerException(body['message'] ?? 'Failed to update service settings');
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(e.toString());

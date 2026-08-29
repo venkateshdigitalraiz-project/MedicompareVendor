@@ -91,7 +91,15 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
       ),
       body: BlocConsumer<OrderDetailsBloc, OrderDetailsState>(
         listener: (context, state) {
-          if (state is OrderDetailsError) {
+          if (state is OrderStatusUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.green),
+            );
+            context
+                .read<OrderDetailsBloc>()
+                .add(GetOrderDetailsEvent(widget.orderId, orderType: 'rental'));
+          } else if (state is OrderDetailsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(state.message), backgroundColor: Colors.red),
@@ -172,20 +180,20 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
       final orderDetails = state.orderDetails;
       if (orderDetails.items.isEmpty) return;
       final payload = {
+        "assignedPartnerId": null,
+        "deliveryPartner": _selectedDeliveryPartner,
+        "orderId": orderDetails.id,
         "orderStatus": status,
-        "status": status,
-        "orderId": orderDetails.orderId,
+        "packageIds": [],
         "productIds":
             orderDetails.items.map((item) => item.productDetails.id).toList(),
-        "packageIds": [],
-        "deliveryPartner": _selectedDeliveryPartner,
         "readyTime": _selectedParcelTime.toString(),
-        "assignedPartnerId": null,
-        if (rejectionReason != null) "rejectionReason": rejectionReason,
+        "rejectionReason": rejectionReason,
+        "status": status,
       };
 
       context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
-            orderItemId: orderDetails.items.first.orderItemId,
+            orderItemId: orderDetails.id,
             payload: payload,
           ));
     }
@@ -274,14 +282,13 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          minimumSize: const Size(60, 32),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold),
-        ),
+        child: Text(label,
+            style:
+                GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
       ),
     );
   }

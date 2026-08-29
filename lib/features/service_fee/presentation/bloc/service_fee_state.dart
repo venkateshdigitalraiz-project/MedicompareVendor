@@ -35,3 +35,13 @@ class ServiceFeeRefreshing extends ServiceFeeState {
   @override
   List<Object?> get props => [serviceFee];
 }
+
+class ServiceFeeActionLoading extends ServiceFeeState {}
+
+class ServiceFeeUpdateSuccess extends ServiceFeeState {
+  final String message;
+  const ServiceFeeUpdateSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

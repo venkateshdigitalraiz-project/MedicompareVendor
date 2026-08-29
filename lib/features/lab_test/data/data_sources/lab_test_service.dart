@@ -332,6 +332,20 @@ class LabTestService {
     }
   }
 
+  Future<LabTestPackageItem> getAdminPackageDetails(String id) async {
+    try {
+      final response = await _apiService.post(ApiEndpoints.adminPackageDetails(id), body: {});
+      final body = jsonDecode(response.body);
+      if (body['success'] == true) {
+        return LabTestPackageItem.fromJson(body['data']['package']);
+      }
+      throw ServerException(body['message'] ?? 'Failed to fetch admin package details');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<void> deletePackage(String id) async {
     try {
       final response = await _apiService.post(ApiEndpoints.deletePackage(id));

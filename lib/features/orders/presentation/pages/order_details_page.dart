@@ -196,20 +196,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       final orderDetails = state.orderDetails;
       if (orderDetails.items.isEmpty) return;
       final payload = {
+        "assignedPartnerId": null,
+        "deliveryPartner": _selectedDeliveryPartner,
+        "orderId": orderDetails.id,
         "orderStatus": status,
-        "status": status,
-        "orderId": orderDetails.orderId,
+        "packageIds": [],
         "productIds":
             orderDetails.items.map((item) => item.productDetails.id).toList(),
-        "packageIds": [],
-        "deliveryPartner": _selectedDeliveryPartner,
         "readyTime": _selectedParcelTime.toString(),
-        "assignedPartnerId": null,
-        if (rejectionReason != null) "rejectionReason": rejectionReason,
+        "rejectionReason": rejectionReason,
+        "status": status,
       };
 
       context.read<OrderDetailsBloc>().add(UpdateOrderStatusEvent(
-            orderItemId: orderDetails.items.first.orderItemId,
+            orderItemId: orderDetails.id,
             payload: payload,
           ));
     }

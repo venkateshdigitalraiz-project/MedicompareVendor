@@ -98,11 +98,8 @@ class LabTestPackageCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (PermissionHandler()
-                          .hasPermission('lab-tests', 'edit')) ...[
-                        _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
-                        const SizedBox(width: 4),
-                      ],
+                      _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
+                      const SizedBox(width: 4),
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),

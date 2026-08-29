@@ -131,12 +131,12 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
     setState(() => _isLoading = true);
     try {
       final Map<String, dynamic> payload = {
+        "description": "Lab test procedure",
+        "discount": double.tryParse(_discountController.text) ?? 0,
+        "fastingRequired": false,
         "name": _selectedTest!.id,
+        "normalRange": "",
         "price": double.tryParse(_priceController.text) ?? 0,
-        "discountprice": double.tryParse(_discountController.text) ?? 0,
-        "status": _selectedStatus,
-        "files": [],
-        "facilities": [],
       };
 
       if (isEditMode) {
@@ -254,65 +254,127 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
                       _buildLabel("Test Name",
                           isRequired: true, icon: Icons.science_outlined),
                       const SizedBox(height: 8),
+                      // Column(
+                      //   children: [
+                      //     TextFormField(
+                      //       controller: _searchController,
+                      //       style: GoogleFonts.poppins(fontSize: 14),
+                      //       onTap: () {
+                      //         if (_searchController.text.isEmpty)
+                      //           _onSearchChanged('');
+                      //       },
+                      //       decoration: _inputDecoration(
+                      //               hint: "Search for lab test...")
+                      //           .copyWith(
+                      //               suffixIcon:
+                      //                   const Icon(Icons.keyboard_arrow_down)),
+                      //       onChanged: (val) {
+                      //         setState(() {
+                      //           _selectedTest = null;
+                      //         });
+                      //         _onSearchChanged(val);
+                      //       },
+                      //       validator: (value) =>
+                      //           _selectedTest == null ? "Required" : null,
+                      //     ),
+                      //     if (_selectedTest == null &&
+                      //         _searchResults.isNotEmpty)
+                      //       Container(
+                      //         constraints: const BoxConstraints(maxHeight: 200),
+                      //         margin: const EdgeInsets.only(top: 4),
+                      //         decoration: BoxDecoration(
+                      //           color: Colors.white,
+                      //           borderRadius: BorderRadius.circular(8),
+                      //           border: Border.all(color: Colors.grey[200]!),
+                      //           boxShadow: [
+                      //             BoxShadow(
+                      //                 color:
+                      //                     Colors.black.withValues(alpha: 0.05),
+                      //                 blurRadius: 8)
+                      //           ],
+                      //         ),
+                      //         child: ListView.builder(
+                      //           padding: EdgeInsets.zero,
+                      //           shrinkWrap: true,
+                      //           itemCount: _searchResults.length,
+                      //           itemBuilder: (BuildContext context, int index) {
+                      //             final option = _searchResults[index];
+                      //             return InkWell(
+                      //               onTap: () {
+                      //                 setState(() {
+                      //                   _selectedTest = option;
+                      //                   _searchController.text = option.name;
+                      //                   _searchResults = [];
+                      //                 });
+                      //               },
+                      //               child: Padding(
+                      //                 padding: const EdgeInsets.all(16.0),
+                      //                 child: Text(option.name,
+                      //                     style: GoogleFonts.poppins(
+                      //                         fontSize: 14)),
+                      //               ),
+                      //             );
+                      //           },
+                      //         ),
+                      //       ),
+                      //   ],
+                      // ),
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TextFormField(
                             controller: _searchController,
                             style: GoogleFonts.poppins(fontSize: 14),
                             onTap: () {
-                              if (_searchController.text.isEmpty)
-                                _onSearchChanged('');
+                              _onSearchChanged(_searchController.text);
                             },
                             decoration: _inputDecoration(
-                                    hint: "Search for lab test...")
-                                .copyWith(
-                                    suffixIcon:
-                                        const Icon(Icons.keyboard_arrow_down)),
+                              hint: "Search for lab test...",
+                            ).copyWith(
+                              suffixIcon: const Icon(Icons.keyboard_arrow_down),
+                            ),
                             onChanged: (val) {
                               setState(() {
                                 _selectedTest = null;
                               });
+
                               _onSearchChanged(val);
                             },
                             validator: (value) =>
                                 _selectedTest == null ? "Required" : null,
                           ),
-                          if (_selectedTest == null &&
-                              _searchResults.isNotEmpty)
+
+                          // Search results directly below TextFormField
+                          if (_searchResults.isNotEmpty &&
+                              _selectedTest == null)
                             Container(
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              margin: const EdgeInsets.only(top: 4),
+                              constraints: const BoxConstraints(
+                                maxHeight: 250,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
+                                border: Border.all(color: Colors.grey.shade300),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey[200]!),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 8)
-                                ],
                               ),
                               child: ListView.builder(
-                                padding: EdgeInsets.zero,
                                 shrinkWrap: true,
                                 itemCount: _searchResults.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final option = _searchResults[index];
-                                  return InkWell(
+                                itemBuilder: (context, index) {
+                                  final test = _searchResults[index];
+
+                                  return ListTile(
+                                    title: Text(
+                                      test.name ?? '',
+                                      style: GoogleFonts.poppins(fontSize: 14),
+                                    ),
                                     onTap: () {
                                       setState(() {
-                                        _selectedTest = option;
-                                        _searchController.text = option.name;
-                                        _searchResults = [];
+                                        _selectedTest = test;
+                                        _searchController.text =
+                                            test.name ?? '';
+                                        _searchResults.clear();
                                       });
                                     },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(option.name,
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 14)),
-                                    ),
                                   );
                                 },
                               ),

@@ -27,7 +27,6 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
 
   AmbulanceNameOptionEntity? _selectedAmbulance;
   List<String> _selectedFacilities = [];
-  List<AmbulanceFacilityEntity> _availableFacilities = []; // cached locally
 
   final _priceController = TextEditingController();
   final _discountPriceController = TextEditingController();
@@ -55,7 +54,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
     _priceController.text = amb.price.toString();
     _discountPriceController.text = amb.discountPrice.toString();
-    _selectedFacilities = amb.facilities.map((e) => e.id).toList();
+    _selectedFacilities = amb.facilities.map((e) => e.name).toList();
     _status = amb.status.toLowerCase();
   }
 
@@ -112,9 +111,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
   Widget build(BuildContext context) {
     return BlocConsumer<AmbulanceBloc, AmbulanceState>(
       listener: (context, state) {
-        if (state is AmbulanceFormOptionsLoaded) {
-          if (mounted) setState(() => _availableFacilities = state.facilities);
-        } else if (state is AmbulanceOperationSuccess) {
+        if (state is AmbulanceOperationSuccess) {
           final messenger = ScaffoldMessenger.of(context);
           Navigator.pop(context);
           messenger.showSnackBar(
@@ -202,11 +199,11 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                           ),
                           const SizedBox(height: 20),
                            if (isEditMode) ...[
-                            _buildStatusDropdown(),
-                            const SizedBox(height: 20),
-                          ],
-                          _buildFacilitiesDropdown(_availableFacilities),
-                          const SizedBox(height: 24),
+                          _buildStatusDropdown(),
+                          const SizedBox(height: 20),
+                        ],
+                        _buildFacilitiesDropdown(),
+                        const SizedBox(height: 24),
                         ],
                       ),
                     ),
@@ -430,14 +427,26 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
   }
 
-  Widget _buildFacilitiesDropdown(List<AmbulanceFacilityEntity> facilities) {
+  final List<String> _staticFacilities = [
+    "Oxygen",
+    "Wheel Chair",
+    "Stretcher",
+    "Medical Kit",
+    "Equipment Technician",
+    "Ventilator",
+    "Cardiac Monitor",
+    "Defibrillator",
+    "Oxygen Support"
+  ];
+
+  Widget _buildFacilitiesDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel("Facilities", isRequired: false, icon: Icons.domain),
         const SizedBox(height: 8),
         GestureDetector(
-          onTap: () => _showFacilitiesPicker(facilities),
+          onTap: () => _showFacilitiesPicker(),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
@@ -468,7 +477,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
   }
 
-  void _showFacilitiesPicker(List<AmbulanceFacilityEntity> facilities) {
+  void _showFacilitiesPicker() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -500,20 +509,20 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                 Expanded(
                   child: ListView.builder(
                     controller: controller,
-                    itemCount: facilities.length,
+                    itemCount: _staticFacilities.length,
                     itemBuilder: (ctx, i) {
-                      final f = facilities[i];
-                      final isSelected = _selectedFacilities.contains(f.id);
+                      final facility = _staticFacilities[i];
+                      final isSelected = _selectedFacilities.contains(facility);
                       return CheckboxListTile(
-                        title: Text(f.name,
+                        title: Text(facility,
                             style: GoogleFonts.poppins(fontSize: 14)),
                         value: isSelected,
                         onChanged: (val) {
                           setModalState(() {
                             if (val == true) {
-                              _selectedFacilities.add(f.id);
+                              _selectedFacilities.add(facility);
                             } else {
-                              _selectedFacilities.remove(f.id);
+                              _selectedFacilities.remove(facility);
                             }
                           });
                           setState(() {});

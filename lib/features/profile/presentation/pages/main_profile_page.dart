@@ -474,19 +474,17 @@ class _ProfilePageState extends State<MainprofileScreen> {
               _menuTile("Diagnostics", Icons.biotech_outlined, () {
                 context.push('/diagnostic-list');
               }),
-            if (_hasPermission('home-care'))
-              _menuTile(
-                  "Home Care Services", Icons.home_repair_service_outlined, () {
-                context.push('/homecare-list');
-              }),
+            // if (_hasPermission('home-care'))
+            _menuTile("Home Care Services", Icons.home_repair_service_outlined,
+                () {
+              context.push('/homecare-list');
+            }),
             if (_hasPermission('nursingcare'))
-              _menuTile("Care Taker Services", Icons.person_search_outlined,
-                  () {
+              _menuTile("Clinic & Rehabs", Icons.person_search_outlined, () {
                 context.push('/nursing-list');
               }),
             if (_hasPermission('dentalservice'))
-              _menuTile(
-                  "Odontogram Services", Icons.sentiment_satisfied_alt_outlined,
+              _menuTile("Dental Care", Icons.sentiment_satisfied_alt_outlined,
                   () {
                 context.push('/dental-list');
               }),

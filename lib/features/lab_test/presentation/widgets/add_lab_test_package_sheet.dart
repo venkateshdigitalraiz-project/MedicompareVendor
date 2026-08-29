@@ -1,9 +1,14 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/lab_test/data/data_sources/lab_test_service.dart';
 import 'package:MediCompare/features/lab_test/data/models/lab_test_model.dart';
 import 'package:MediCompare/features/lab_test/data/models/lab_test_package_model.dart';
 import 'package:MediCompare/features/lab_test/lab_test_injection.dart';
+import 'package:MediCompare/features/lab_test/presentation/bloc/search_lab_tests_bloc.dart';
+import 'package:MediCompare/features/lab_test/presentation/bloc/search_lab_tests_event.dart';
+import 'package:MediCompare/features/lab_test/presentation/bloc/search_lab_tests_state.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,6 +34,8 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
+  final _searchController = TextEditingController();
+  Timer? _debounce;
 
   String _selectedStatus = 'active';
   File? _selectedImage;
@@ -70,9 +77,10 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     } finally {
       if (mounted) setState(() => _isFetchingTests = false);
     }
@@ -89,23 +97,52 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     } finally {
       if (mounted) setState(() => _isFetchingTemplates = false);
     }
   }
 
-  void _onTemplateSelected(String? templateId) {
+  Future<void> _onTemplateSelected(String? templateId) async {
     if (templateId == null) return;
-    final template = _adminTemplates.firstWhere((t) => t.id == templateId);
+    
     setState(() {
       _selectedTemplateId = templateId;
-      _nameController.text = template.name;
-      _descriptionController.text = template.description ?? "";
-      _selectedProductIds = List<String>.from(template.products);
     });
+
+    try {
+      final details = await _labTestService.getAdminPackageDetails(templateId);
+      setState(() {
+        _nameController.text = details.name;
+        _descriptionController.text = details.description ?? "";
+        _selectedProductIds = List<String>.from(details.products);
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * 0.4,
+              left: 20,
+              right: 20,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -158,7 +195,24 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * 0.4,
+              left: 20,
+              right: 20,
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -340,8 +394,9 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                   keyboardType: TextInputType.number,
                                   decoration: _inputDecoration(hint: "0.00"),
                                   validator: (val) {
-                                    if (val == null || val.isEmpty)
+                                    if (val == null || val.isEmpty) {
                                       return "Required";
+                                    }
                                     final discount = double.tryParse(val);
                                     final price =
                                         double.tryParse(_priceController.text);
@@ -357,37 +412,37 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                        if (isEditMode)
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel("Status",
-                                    isRequired: true, icon: Icons.show_chart),
-                                const SizedBox(height: 8),
-                                DropdownButtonFormField<String>(
-                                  value: _selectedStatus,
-                                  isExpanded: true,
-                                  items: [
-                                    DropdownMenuItem(
-                                        value: 'active',
-                                        child: Text("Active",
-                                            style: GoogleFonts.inter(
-                                                fontSize: 13))),
-                                    DropdownMenuItem(
-                                        value: 'inactive',
-                                        child: Text("Inactive",
-                                            style: GoogleFonts.inter(
-                                                fontSize: 13))),
-                                  ],
-                                  onChanged: (val) =>
-                                      setState(() => _selectedStatus = val!),
-                                  decoration:
-                                      _inputDecoration(hint: "Select Status"),
-                                ),
-                              ],
+                          if (isEditMode)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel("Status",
+                                      isRequired: true, icon: Icons.show_chart),
+                                  const SizedBox(height: 8),
+                                  DropdownButtonFormField<String>(
+                                    initialValue: _selectedStatus,
+                                    isExpanded: true,
+                                    items: [
+                                      DropdownMenuItem(
+                                          value: 'active',
+                                          child: Text("Active",
+                                              style: GoogleFonts.inter(
+                                                  fontSize: 13))),
+                                      DropdownMenuItem(
+                                          value: 'inactive',
+                                          child: Text("Inactive",
+                                              style: GoogleFonts.inter(
+                                                  fontSize: 13))),
+                                    ],
+                                    onChanged: (val) =>
+                                        setState(() => _selectedStatus = val!),
+                                    decoration:
+                                        _inputDecoration(hint: "Select Status"),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                         ],
                       ),
 
@@ -584,89 +639,147 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
   }
 
   Widget _buildTestSelector() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 200,
-            child: _allLabTests.isEmpty
-                ? Center(
-                    child: Text("No tests found",
-                        style: GoogleFonts.inter(color: Colors.grey)))
-                : ListView.separated(
-                    shrinkWrap: true,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: _allLabTests.length,
-                    separatorBuilder: (context, index) =>
-                        const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final test = _allLabTests[index];
-                      final isSelected = _selectedProductIds.contains(test.id);
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              _selectedProductIds.remove(test.id);
-                            } else {
-                              _selectedProductIds.add(test.id);
-                            }
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          color: isSelected
-                              ? const Color(0xFFF8FAFF)
-                              : Colors.transparent,
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: isSelected,
-                                activeColor: AppColors.primary,
-                                onChanged: (val) {
-                                  setState(() {
-                                    if (val == true) {
-                                      _selectedProductIds.add(test.id);
-                                    } else {
-                                      _selectedProductIds.remove(test.id);
-                                    }
-                                  });
-                                },
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4)),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(test.name,
-                                        style: GoogleFonts.inter(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF1E1B4B))),
-                                    Text(
-                                      "${test.sampleType ?? 'N/A'} • ${test.reportsDuration ?? 'N/A'}",
-                                      style: GoogleFonts.inter(
-                                          fontSize: 11,
-                                          color: Colors.grey[500]),
-                                    ),
-                                  ],
+    return BlocProvider(
+      create: (_) => LabTestInjection.provideSearchLabTestsBloc(),
+      child: Builder(builder: (context) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: "Search for lab test...",
+                hintStyle: GoogleFonts.inter(
+                    fontSize: 13, color: Colors.grey[500]),
+                suffixIcon: const Icon(Icons.keyboard_arrow_down,
+                    color: Colors.grey),
+                filled: true,
+                fillColor: const Color(0xFFF9FAFB),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: AppColors.primary),
+                ),
+              ),
+              onChanged: (val) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  context
+                      .read<SearchLabTestsBloc>()
+                      .add(SearchQueryChangedEvent(val));
+                });
+              },
+            ),
+            const SizedBox(height: 4),
+            BlocBuilder<SearchLabTestsBloc, SearchLabTestsState>(
+              builder: (context, state) {
+                if (state is SearchLabTestsLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                } else if (state is SearchLabTestsLoaded &&
+                    state.results.isNotEmpty) {
+                  return Container(
+                    constraints: const BoxConstraints(maxHeight: 250),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: state.results.length,
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final test = state.results[index];
+                        final isSelected =
+                            _selectedProductIds.contains(test.id);
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                _selectedProductIds.remove(test.id);
+                              } else {
+                                _selectedProductIds.add(test.id);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            color: isSelected
+                                ? const Color(0xFFF8FAFF)
+                                : Colors.transparent,
+                            child: Row(
+                              children: [
+                                Checkbox(
+                                  value: isSelected,
+                                  activeColor: AppColors.primary,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        _selectedProductIds.add(test.id);
+                                      } else {
+                                        _selectedProductIds.remove(test.id);
+                                      }
+                                    });
+                                  },
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(4)),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(test.name,
+                                          style: GoogleFonts.inter(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(
+                                                  0xFF1E1B4B))),
+                                      Text(
+                                        "${test.sampleType ?? 'N/A'} • ${test.reportsDuration ?? 'N/A'}",
+                                        style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            color: Colors.grey[500]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                        );
+                      },
+                    ),
+                  );
+                } else if (state is SearchLabTestsLoaded &&
+                    state.results.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Text("No tests found",
+                        style: GoogleFonts.inter(color: Colors.grey)),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        );
+      }),
     );
   }
 

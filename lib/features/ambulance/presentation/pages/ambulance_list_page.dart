@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/ambulance_card.dart';
-import 'package:MediCompare/core/utils/permission_handler.dart';
+// import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../widgets/add_ambulance_sheet.dart';
 
 class AmbulanceListPage extends StatefulWidget {
@@ -137,24 +137,24 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
           ),
         ),
         actions: [
-          if (PermissionHandler().hasPermission('ambulance-service', 'add'))
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: ElevatedButton.icon(
-                onPressed: _openAddSheet,
-                icon: const Icon(Icons.add, size: 18),
-                label: Text("Add Service",
-                    style: GoogleFonts.inter(
-                        fontSize: 12, fontWeight: FontWeight.w600)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primaryDark,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
+          // if (PermissionHandler().hasPermission('ambulance-service', 'add'))
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: ElevatedButton.icon(
+              onPressed: _openAddSheet,
+              icon: const Icon(Icons.add, size: 18),
+              label: Text("Add Service",
+                  style: GoogleFonts.inter(
+                      fontSize: 12, fontWeight: FontWeight.w600)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primaryDark,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
               ),
             ),
+          ),
         ],
       ),
       body: BlocConsumer<AmbulanceBloc, AmbulanceState>(
@@ -220,12 +220,19 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
             children: [
               _buildFilters(displayState),
               Expanded(
-                child: items.isEmpty
-                    ? _buildEmptyState()
-                    : RefreshIndicator(
-                        onRefresh: () async => _reloadList(),
-                        child: ListView.builder(
+                child: RefreshIndicator(
+                  onRefresh: () async => _reloadList(),
+                  child: items.isEmpty
+                      ? SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: _buildEmptyState(),
+                          ),
+                        )
+                      : ListView.builder(
                           controller: _scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           itemCount: displayState.isLoadingMore
@@ -250,7 +257,7 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
                             );
                           },
                         ),
-                      ),
+                ),
               ),
             ],
           );
@@ -308,7 +315,6 @@ class _AmbulanceListPageState extends State<AmbulanceListPage> {
               ),
             ),
           ),
-
         ],
       ),
     );

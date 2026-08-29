@@ -107,9 +107,10 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
           _loadInitial();
         }
       } catch (e) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(e.toString()), backgroundColor: Colors.red));
+        }
       }
     }
   }
@@ -141,21 +142,21 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
           ],
         ),
         actions: [
-          if (PermissionHandler().hasPermission('home-care', 'add'))
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text("Add Service"),
-                onPressed: () => _showAddEditSheet(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.white,
-                  foregroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
+          // if (PermissionHandler().hasPermission('home-care', 'add'))
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text("Add Service"),
+              onPressed: () => _showAddEditSheet(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.white,
+                foregroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
             ),
+          ),
         ],
       ),
       body: BlocBuilder<HomeCareBloc, HomeCareState>(
@@ -202,32 +203,32 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
                     ),
                     const SizedBox(height: 12),
                     // Category Row
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: state.selectedCategoryId ?? '',
-                          isExpanded: true,
-                          items: [
-                            DropdownMenuItem(
-                                value: '',
-                                child: Text("All Categories",
-                                    style: GoogleFonts.inter(fontSize: 14))),
-                            ...state.categories.map((c) => DropdownMenuItem(
-                                value: c.id,
-                                child: Text(c.name,
-                                    style: GoogleFonts.inter(fontSize: 14)))),
-                          ],
-                          onChanged: (val) => context
-                              .read<HomeCareBloc>()
-                              .add(SelectHomeCareCategoryEvent(val ?? '')),
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 12),
+                    //   decoration: BoxDecoration(
+                    //     color: Colors.white,
+                    //     borderRadius: BorderRadius.circular(12),
+                    //   ),
+                    //   child: DropdownButtonHideUnderline(
+                    //     child: DropdownButton<String>(
+                    //       value: state.selectedCategoryId ?? '',
+                    //       isExpanded: true,
+                    //       items: [
+                    //         DropdownMenuItem(
+                    //             value: '',
+                    //             child: Text("All Categories",
+                    //                 style: GoogleFonts.inter(fontSize: 14))),
+                    //         ...state.categories.map((c) => DropdownMenuItem(
+                    //             value: c.id,
+                    //             child: Text(c.name,
+                    //                 style: GoogleFonts.inter(fontSize: 14)))),
+                    //       ],
+                    //       onChanged: (val) => context
+                    //           .read<HomeCareBloc>()
+                    //           .add(SelectHomeCareCategoryEvent(val ?? '')),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

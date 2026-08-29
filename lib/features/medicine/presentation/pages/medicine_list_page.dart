@@ -374,47 +374,47 @@ class _MedicineListPageState extends State<MedicineListPage> {
             ),
           ),
           const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => _showCategoryPicker(state),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFF),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      state.selectedCategoryId.isEmpty
-                          ? ""
-                          : (state.categories
-                                      .where((c) =>
-                                          c.id == state.selectedCategoryId)
-                                      .firstOrNull
-                                      ?.name ??
-                                  "Selected Category")
-                              .replaceAll('|', ', '),
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: state.selectedCategoryId.isEmpty
-                            ? Colors.grey[600]
-                            : Colors.black87,
-                        fontWeight: state.selectedCategoryId.isEmpty
-                            ? FontWeight.normal
-                            : FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Icon(Icons.keyboard_arrow_down,
-                      size: 20, color: Colors.grey),
-                ],
-              ),
-            ),
-          ),
+          // GestureDetector(
+          //   onTap: () => _showCategoryPicker(state),
+          //   child: Container(
+          //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          //     decoration: BoxDecoration(
+          //       color: const Color(0xFFF8FAFF),
+          //       borderRadius: BorderRadius.circular(12),
+          //       border: Border.all(color: Colors.grey[200]!),
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         Expanded(
+          //           child: Text(
+          //             state.selectedCategoryId.isEmpty
+          //                 ? ""
+          //                 : (state.categories
+          //                             .where((c) =>
+          //                                 c.id == state.selectedCategoryId)
+          //                             .firstOrNull
+          //                             ?.name ??
+          //                         "Selected Category")
+          //                     .replaceAll('|', ', '),
+          //             style: GoogleFonts.inter(
+          //               fontSize: 13,
+          //               color: state.selectedCategoryId.isEmpty
+          //                   ? Colors.grey[600]
+          //                   : Colors.black87,
+          //               fontWeight: state.selectedCategoryId.isEmpty
+          //                   ? FontWeight.normal
+          //                   : FontWeight.w500,
+          //             ),
+          //             maxLines: 1,
+          //             overflow: TextOverflow.ellipsis,
+          //           ),
+          //         ),
+          //         const Icon(Icons.keyboard_arrow_down,
+          //             size: 20, color: Colors.grey),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -482,38 +482,38 @@ class _MedicineListPageState extends State<MedicineListPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filtered.length + 1,
-                    itemBuilder: (ctx, index) {
-                      if (index == 0) {
-                        return ListTile(
-                          title: const Text("All Categories",
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          onTap: () {
-                            context
-                                .read<MedicineBloc>()
-                                .add(const SelectCategoryEvent(''));
-                            Navigator.pop(context);
-                          },
-                        );
-                      }
-                      final cat = filtered[index - 1];
-                      return ListTile(
-                        title: Text((cat.name).replaceAll('|', ', ')),
-                        trailing: state.selectedCategoryId == cat.id
-                            ? const Icon(Icons.check, color: AppColors.primary)
-                            : null,
-                        onTap: () {
-                          context
-                              .read<MedicineBloc>()
-                              .add(SelectCategoryEvent(cat.id));
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  ),
-                ),
+                // Expanded(
+                //   child: ListView.builder(
+                //     itemCount: filtered.length + 1,
+                //     itemBuilder: (ctx, index) {
+                //       if (index == 0) {
+                //         return ListTile(
+                //           title: const Text("All Categories",
+                //               style: TextStyle(fontWeight: FontWeight.bold)),
+                //           onTap: () {
+                //             context
+                //                 .read<MedicineBloc>()
+                //                 .add(const SelectCategoryEvent(''));
+                //             Navigator.pop(context);
+                //           },
+                //         );
+                //       }
+                //       final cat = filtered[index - 1];
+                //       return ListTile(
+                //         title: Text((cat.name).replaceAll('|', ', ')),
+                //         trailing: state.selectedCategoryId == cat.id
+                //             ? const Icon(Icons.check, color: AppColors.primary)
+                //             : null,
+                //         onTap: () {
+                //           context
+                //               .read<MedicineBloc>()
+                //               .add(SelectCategoryEvent(cat.id));
+                //           Navigator.pop(context);
+                //         },
+                //       );
+                //     },
+                //   ),
+                // ),
               ],
             ),
           );

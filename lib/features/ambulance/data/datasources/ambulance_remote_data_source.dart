@@ -114,13 +114,23 @@ class AmbulanceRemoteDataSourceImpl implements AmbulanceRemoteDataSource {
     );
     final decoded = json.decode(response.body);
 
-    if (decoded == null ||
-        decoded['data'] == null ||
-        decoded['data']['facilities'] == null) {
+    if (decoded == null || decoded['data'] == null) {
       return [];
     }
 
-    final list = decoded['data']['facilities'] as List;
+    List list = [];
+    if (decoded['data'] is List) {
+      list = decoded['data'];
+    } else if (decoded['data']['facilities'] is List) {
+      list = decoded['data']['facilities'];
+    } else if (decoded['data']['tablets'] is List) {
+      list = decoded['data']['tablets'];
+    } else if (decoded['data']['items'] is List) {
+      list = decoded['data']['items'];
+    } else if (decoded['data']['data'] is List) {
+      list = decoded['data']['data'];
+    }
+
     return list.map((e) => AmbulanceFacilityModel.fromJson(e)).toList();
   }
 

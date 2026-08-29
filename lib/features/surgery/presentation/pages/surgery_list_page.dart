@@ -286,92 +286,92 @@ class _SurgeryListPageState extends State<SurgeryListPage> {
           const SizedBox(height: 12),
 
           // Category Dropdown
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                itemHeight: null, // Allow expanding for multiple lines
-                menuMaxHeight: 400,
-                borderRadius: BorderRadius.circular(12),
-                dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty
-                    ? null
-                    : state.selectedCategoryId,
-                hint: Text("All Categories",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                selectedItemBuilder: (BuildContext context) {
-                  return [
-                    DropdownMenuItem(
-                        value: '',
-                        child: Text("",
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500))),
-                    ...state.categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name.replaceAll('|', ', '),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500)))),
-                  ].map((e) {
-                    return Container(
-                      alignment: Alignment.centerLeft,
-                      child: e.child,
-                    );
-                  }).toList();
-                },
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(color: Colors.grey[100]!))),
-                      child: Text("All Categories",
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryDark)),
-                    ),
-                  ),
-                  ...state.categories.map((c) {
-                    return DropdownMenuItem(
-                      value: c.id,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(color: Colors.grey[100]!))),
-                        child: Text(
-                          c.name.replaceAll('|', ', '),
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: Colors.black87, height: 1.4),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    context
-                        .read<SurgeryBloc>()
-                        .add(SelectSurgeryCategoryEvent(val));
-                  }
-                },
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12),
+          //   decoration: BoxDecoration(
+          //     color: const Color(0xFFF8FAFF),
+          //     borderRadius: BorderRadius.circular(12),
+          //   ),
+          //   child: DropdownButtonHideUnderline(
+          //     child: DropdownButton<String>(
+          //       isExpanded: true,
+          //       itemHeight: null, // Allow expanding for multiple lines
+          //       menuMaxHeight: 400,
+          //       borderRadius: BorderRadius.circular(12),
+          //       dropdownColor: Colors.white,
+          //       value: state.selectedCategoryId.isEmpty
+          //           ? null
+          //           : state.selectedCategoryId,
+          //       hint: Text("All Categories",
+          //           style: GoogleFonts.inter(
+          //               fontSize: 13, color: Colors.grey[600])),
+          //       selectedItemBuilder: (BuildContext context) {
+          //         return [
+          //           DropdownMenuItem(
+          //               value: '',
+          //               child: Text("",
+          //                   style: GoogleFonts.inter(
+          //                       fontSize: 13, fontWeight: FontWeight.w500))),
+          //           ...state.categories.map((c) => DropdownMenuItem(
+          //               value: c.id,
+          //               child: Text(c.name.replaceAll('|', ', '),
+          //                   maxLines: 1,
+          //                   overflow: TextOverflow.ellipsis,
+          //                   style: GoogleFonts.inter(
+          //                       fontSize: 13, fontWeight: FontWeight.w500)))),
+          //         ].map((e) {
+          //           return Container(
+          //             alignment: Alignment.centerLeft,
+          //             child: e.child,
+          //           );
+          //         }).toList();
+          //       },
+          //       items: [
+          //         DropdownMenuItem(
+          //           value: '',
+          //           child: Container(
+          //             width: double.infinity,
+          //             padding: const EdgeInsets.symmetric(vertical: 12),
+          //             decoration: BoxDecoration(
+          //                 border: Border(
+          //                     bottom: BorderSide(color: Colors.grey[100]!))),
+          //             child: Text("All Categories",
+          //                 style: GoogleFonts.inter(
+          //                     fontSize: 14,
+          //                     fontWeight: FontWeight.bold,
+          //                     color: AppColors.primaryDark)),
+          //           ),
+          //         ),
+          //         ...state.categories.map((c) {
+          //           return DropdownMenuItem(
+          //             value: c.id,
+          //             child: Container(
+          //               width: double.infinity,
+          //               padding: const EdgeInsets.symmetric(vertical: 12),
+          //               decoration: BoxDecoration(
+          //                   border: Border(
+          //                       bottom: BorderSide(color: Colors.grey[100]!))),
+          //               child: Text(
+          //                 c.name.replaceAll('|', ', '),
+          //                 style: GoogleFonts.inter(
+          //                     fontSize: 13, color: Colors.black87, height: 1.4),
+          //                 maxLines: 2,
+          //                 overflow: TextOverflow.ellipsis,
+          //               ),
+          //             ),
+          //           );
+          //         }),
+          //       ],
+          //       onChanged: (val) {
+          //         if (val != null) {
+          //           context
+          //               .read<SurgeryBloc>()
+          //               .add(SelectSurgeryCategoryEvent(val));
+          //         }
+          //       },
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

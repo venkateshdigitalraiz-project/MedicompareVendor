@@ -95,7 +95,7 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Care Taker Services",
+            Text("Clinic & Rehabs",
                 style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -104,24 +104,23 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
           ],
         ),
         actions: [
-          if (PermissionHandler().hasPermission('nursing-care', 'add'))
-            Padding(
-              padding: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
-              child: ElevatedButton.icon(
-                onPressed: () => _showAddEditSheet(),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text("Add Service",
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primary,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
+            child: ElevatedButton.icon(
+              onPressed: () => _showAddEditSheet(),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text("Add Service",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
             ),
+          ),
         ],
       ),
       body: BlocBuilder<NursingCareBloc, NursingCareState>(
@@ -230,42 +229,42 @@ class _NursingCareListPageState extends State<NursingCareListPage> {
             ),
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFF),
-                borderRadius: BorderRadius.circular(12)),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty
-                    ? null
-                    : state.selectedCategoryId,
-                hint: Text("All Categories",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                items: [
-                  DropdownMenuItem(
-                      value: '',
-                      child: Text("All Categories",
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: Colors.black87))),
-                  ...state.categories.map((c) => DropdownMenuItem(
-                      value: c.id,
-                      child: Text(c.name,
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: Colors.black87)))),
-                ],
-                onChanged: (val) {
-                  if (val != null)
-                    context
-                        .read<NursingCareBloc>()
-                        .add(SelectNursingCareCategoryEvent(val));
-                },
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12),
+          //   decoration: BoxDecoration(
+          //       color: const Color(0xFFF8FAFF),
+          //       borderRadius: BorderRadius.circular(12)),
+          //   child: DropdownButtonHideUnderline(
+          //     child: DropdownButton<String>(
+          //       isExpanded: true,
+          //       dropdownColor: Colors.white,
+          //       value: state.selectedCategoryId.isEmpty
+          //           ? null
+          //           : state.selectedCategoryId,
+          //       hint: Text("All Categories",
+          //           style: GoogleFonts.inter(
+          //               fontSize: 13, color: Colors.grey[600])),
+          //       items: [
+          //         DropdownMenuItem(
+          //             value: '',
+          //             child: Text("All Categories",
+          //                 style: GoogleFonts.inter(
+          //                     fontSize: 13, color: Colors.black87))),
+          //         ...state.categories.map((c) => DropdownMenuItem(
+          //             value: c.id,
+          //             child: Text(c.name,
+          //                 style: GoogleFonts.inter(
+          //                     fontSize: 13, color: Colors.black87)))),
+          //       ],
+          //       onChanged: (val) {
+          //         if (val != null)
+          //           context
+          //               .read<NursingCareBloc>()
+          //               .add(SelectNursingCareCategoryEvent(val));
+          //       },
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

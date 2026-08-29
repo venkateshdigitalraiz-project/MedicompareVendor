@@ -12,6 +12,7 @@ import '../widgets/add_lab_test_sheet.dart';
 import 'package:MediCompare/core/utils/permission_handler.dart';
 import '../../lab_test_injection.dart';
 import '../widgets/lab_test_card.dart';
+import 'edit_lead_screen.dart';
 
 class LabTestListPage extends StatefulWidget {
   const LabTestListPage({super.key});
@@ -241,85 +242,85 @@ class _LabTestListPageState extends State<LabTestListPage> {
           const SizedBox(height: 12),
 
           // Category Dropdown
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                menuMaxHeight: 400,
-                borderRadius: BorderRadius.circular(12),
-                dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty
-                    ? null
-                    : state.selectedCategoryId,
-                hint: Text("All Categories",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                selectedItemBuilder: (BuildContext context) {
-                  return [
-                    DropdownMenuItem(
-                        value: '',
-                        child: Text("",
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500))),
-                    ...state.categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                                fontSize: 13, fontWeight: FontWeight.w500)))),
-                  ].map((e) {
-                    return Container(
-                      alignment: Alignment.centerLeft,
-                      child: e.child,
-                    );
-                  }).toList();
-                },
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(color: Colors.grey[100]!))),
-                      child: Text("All Categories",
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary)),
-                    ),
-                  ),
-                  ...state.categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                              border: Border(
-                                  bottom:
-                                      BorderSide(color: Colors.grey[100]!))),
-                          child: Text(c.name,
-                              style: GoogleFonts.inter(
-                                  fontSize: 13, color: Colors.black87)),
-                        ),
-                      )),
-                ],
-                onChanged: (val) {
-                  if (val != null)
-                    context
-                        .read<LabTestBloc>()
-                        .add(SelectLabTestCategoryEvent(val));
-                },
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12),
+          //   decoration: BoxDecoration(
+          //     color: const Color(0xFFF8FAFF),
+          //     borderRadius: BorderRadius.circular(12),
+          //   ),
+          //   child: DropdownButtonHideUnderline(
+          //     child: DropdownButton<String>(
+          //       isExpanded: true,
+          //       menuMaxHeight: 400,
+          //       borderRadius: BorderRadius.circular(12),
+          //       dropdownColor: Colors.white,
+          //       value: state.selectedCategoryId.isEmpty
+          //           ? null
+          //           : state.selectedCategoryId,
+          //       hint: Text("All Categories",
+          //           style: GoogleFonts.inter(
+          //               fontSize: 13, color: Colors.grey[600])),
+          //       selectedItemBuilder: (BuildContext context) {
+          //         return [
+          //           DropdownMenuItem(
+          //               value: '',
+          //               child: Text("",
+          //                   style: GoogleFonts.inter(
+          //                       fontSize: 13, fontWeight: FontWeight.w500))),
+          //           ...state.categories.map((c) => DropdownMenuItem(
+          //               value: c.id,
+          //               child: Text(c.name,
+          //                   maxLines: 1,
+          //                   overflow: TextOverflow.ellipsis,
+          //                   style: GoogleFonts.inter(
+          //                       fontSize: 13, fontWeight: FontWeight.w500)))),
+          //         ].map((e) {
+          //           return Container(
+          //             alignment: Alignment.centerLeft,
+          //             child: e.child,
+          //           );
+          //         }).toList();
+          //       },
+          //       items: [
+          //         DropdownMenuItem(
+          //           value: '',
+          //           child: Container(
+          //             width: double.infinity,
+          //             padding: const EdgeInsets.symmetric(vertical: 12),
+          //             decoration: BoxDecoration(
+          //                 border: Border(
+          //                     bottom: BorderSide(color: Colors.grey[100]!))),
+          //             child: Text("All Categories",
+          //                 style: GoogleFonts.inter(
+          //                     fontSize: 14,
+          //                     fontWeight: FontWeight.bold,
+          //                     color: AppColors.primary)),
+          //           ),
+          //         ),
+          //         ...state.categories.map((c) => DropdownMenuItem(
+          //               value: c.id,
+          //               child: Container(
+          //                 width: double.infinity,
+          //                 padding: const EdgeInsets.symmetric(vertical: 12),
+          //                 decoration: BoxDecoration(
+          //                     border: Border(
+          //                         bottom:
+          //                             BorderSide(color: Colors.grey[100]!))),
+          //                 child: Text(c.name,
+          //                     style: GoogleFonts.inter(
+          //                         fontSize: 13, color: Colors.black87)),
+          //               ),
+          //             )),
+          //       ],
+          //       onChanged: (val) {
+          //         if (val != null)
+          //           context
+          //               .read<LabTestBloc>()
+          //               .add(SelectLabTestCategoryEvent(val));
+          //       },
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -329,26 +330,23 @@ class _LabTestListPageState extends State<LabTestListPage> {
     return LabTestCard(
       item: item,
       onTap: () => context.push('/lab-test-details', extra: item),
-      onEdit: () {
-        showModalBottomSheet(
+      onEdit: () async {
+        final result = await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (ctx) => Padding(
-            padding:
-                EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(ctx).size.height * 0.9),
-              child: AddLabTestSheet(
-                editItem: item,
-                onSuccess: () {
-                  context.read<LabTestBloc>().add(const LoadLabTestsEvent());
-                },
-              ),
+          builder: (_) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
+            child: EditLeadScreen(productId: item.id),
           ),
         );
+        if (result == true) {
+          if (context.mounted) {
+            context.read<LabTestBloc>().add(const LoadLabTestsEvent());
+          }
+        }
       },
       onDelete: () {
         showDialog(

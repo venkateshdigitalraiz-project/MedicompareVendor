@@ -108,11 +108,8 @@ class NursingCareCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (PermissionHandler()
-                          .hasPermission('nursing-care', 'edit')) ...[
-                        _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
-                        const SizedBox(width: 4),
-                      ],
+                      _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
+                      const SizedBox(width: 4),
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),

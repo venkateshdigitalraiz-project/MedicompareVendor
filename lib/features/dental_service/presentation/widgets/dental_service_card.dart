@@ -94,25 +94,19 @@ class DentalServiceCard extends StatelessWidget {
                     if (details.treatmentType != null &&
                         details.treatmentType!.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            " Type : ${details.treatmentType!}",
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.blue[700],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(
-                            width: 30,
-                          ),
-                          _statusBadge(item.status),
-                        ],
+                      Text(
+                        " Type : ${details.treatmentType!}",
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue[700],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
+                    const SizedBox(height: 8),
+                    _statusBadge(item.status),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -125,11 +119,11 @@ class DentalServiceCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (PermissionHandler()
-                          .hasPermission('dental-service', 'edit')) ...[
-                        _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
-                        const SizedBox(width: 4),
-                      ],
+                      // if (PermissionHandler()
+                      //     .hasPermission('dental-service', 'edit')) ...[
+                      _actionIcon(Icons.edit_outlined, Colors.indigo, onEdit),
+                      const SizedBox(width: 4),
+                      //  ],
                       _actionIcon(Icons.delete_outline, Colors.red, onDelete),
                     ],
                   ),

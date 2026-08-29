@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/ambulance_entity.dart';
 import '../../domain/usecases/get_ambulance_list_usecase.dart';
@@ -144,8 +145,12 @@ class AmbulanceBloc extends Bloc<AmbulanceEvent, AmbulanceState> {
         facilities: facilities,
         categories: categories,
       ));
-    } catch (_) {
-      // Silently fail — the sheet handles this via its local cached state
+    } catch (e) {
+      debugPrint("Error fetching form options: $e");
+      emit(const AmbulanceFormOptionsLoaded(
+        facilities: [],
+        categories: [],
+      ));
     }
   }
 

@@ -102,25 +102,25 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
           ),
         ),
         actions: [
-          if (PermissionHandler().hasPermission('dental-service', 'add'))
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: ElevatedButton.icon(
-                onPressed: () => _showAddEditSheet(),
-                icon: const Icon(Icons.add, size: 16),
-                label: Text("Add Treatment",
-                    style: GoogleFonts.inter(
-                        fontSize: 12, fontWeight: FontWeight.w600)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primaryDark,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
+          // if (PermissionHandler().hasPermission('dental-service', 'add'))
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: ElevatedButton.icon(
+              onPressed: () => _showAddEditSheet(),
+              icon: const Icon(Icons.add, size: 16),
+              label: Text("Add Service",
+                  style: GoogleFonts.inter(
+                      fontSize: 12, fontWeight: FontWeight.w600)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primaryDark,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
             ),
+          ),
         ],
       ),
       body: BlocBuilder<DentalServiceBloc, DentalServiceState>(
@@ -153,14 +153,21 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
               children: [
                 _buildSearchAndFilter(state),
                 Expanded(
-                  child: list.isEmpty
-                      ? _buildEmptyState()
-                      : RefreshIndicator(
-                          onRefresh: () async => context
-                              .read<DentalServiceBloc>()
-                              .add(const LoadDentalServiceCategoriesEvent()),
-                          child: ListView.builder(
+                  child: RefreshIndicator(
+                    onRefresh: () async => context
+                        .read<DentalServiceBloc>()
+                        .add(const LoadDentalServiceCategoriesEvent()),
+                    child: list.isEmpty
+                        ? SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.6,
+                              child: _buildEmptyState(),
+                            ),
+                          )
+                        : ListView.builder(
                             controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             itemCount: state.isLoadingMore
@@ -184,7 +191,7 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
                               );
                             },
                           ),
-                        ),
+                  ),
                 ),
               ],
             );
@@ -241,47 +248,47 @@ class _DentalServiceListPageState extends State<DentalServiceListPage> {
           ),
           const SizedBox(height: 12),
           // Category Dropdown
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFF),
-                borderRadius: BorderRadius.circular(12)),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                dropdownColor: Colors.white,
-                value: state.selectedCategoryId.isEmpty
-                    ? null
-                    : state.selectedCategoryId,
-                hint: Text("All Categories",
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.grey[600])),
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text("All Categories",
-                        style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark)),
-                  ),
-                  ...state.categories.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 13, color: Colors.black87)),
-                      )),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    context
-                        .read<DentalServiceBloc>()
-                        .add(SelectDentalServiceCategoryEvent(val));
-                  }
-                },
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12),
+          //   decoration: BoxDecoration(
+          //       color: const Color(0xFFF8FAFF),
+          //       borderRadius: BorderRadius.circular(12)),
+          //   child: DropdownButtonHideUnderline(
+          //     child: DropdownButton<String>(
+          //       isExpanded: true,
+          //       dropdownColor: Colors.white,
+          //       value: state.selectedCategoryId.isEmpty
+          //           ? null
+          //           : state.selectedCategoryId,
+          //       hint: Text("All Categories",
+          //           style: GoogleFonts.inter(
+          //               fontSize: 13, color: Colors.grey[600])),
+          //       items: [
+          //         DropdownMenuItem(
+          //           value: '',
+          //           child: Text("All Categories",
+          //               style: GoogleFonts.inter(
+          //                   fontSize: 13,
+          //                   fontWeight: FontWeight.bold,
+          //                   color: AppColors.primaryDark)),
+          //         ),
+          //         ...state.categories.map((c) => DropdownMenuItem(
+          //               value: c.id,
+          //               child: Text(c.name,
+          //                   style: GoogleFonts.inter(
+          //                       fontSize: 13, color: Colors.black87)),
+          //             )),
+          //       ],
+          //       onChanged: (val) {
+          //         if (val != null) {
+          //           context
+          //               .read<DentalServiceBloc>()
+          //               .add(SelectDentalServiceCategoryEvent(val));
+          //         }
+          //       },
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

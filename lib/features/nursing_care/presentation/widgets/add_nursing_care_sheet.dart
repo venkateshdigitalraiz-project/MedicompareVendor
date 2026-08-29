@@ -171,15 +171,15 @@ class _AddNursingCareSheetState extends State<AddNursingCareSheet> {
                     children: [
                       Text(
                         isEditMode
-                            ? 'Edit Care Taker Service'
-                            : 'Add New Care Taker Service',
+                            ? 'Edit Clinic & Rehabs'
+                            : 'Add New Clinic & Rehabs',
                         style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF1E1B4B)),
                       ),
                       Text(
-                        'Fill in the details to ${isEditMode ? 'update' : 'add'} a care taker service',
+                        'Fill in the details to ${isEditMode ? 'update' : 'add'} a Clinic & Rehabs',
                         style: GoogleFonts.inter(
                             fontSize: 12, color: Colors.grey[500]),
                       ),
@@ -202,7 +202,7 @@ class _AddNursingCareSheetState extends State<AddNursingCareSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Care Taker Information",
+                    Text("Clinic & Rehabs Information",
                         style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
