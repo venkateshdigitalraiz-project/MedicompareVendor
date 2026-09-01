@@ -104,50 +104,72 @@ class AppointmentItemModel extends AppointmentItemEntity {
       quantity: (() {
         if (json['groupDetails'] != null && json['groupDetails'] is List) {
           final list = json['groupDetails'] as List;
-          if (list.isEmpty) return 0;
-          int totalQty = 0;
-          for (var item in list) {
-            if (item is Map) {
-              final rawQty = item['qty'] ?? item['quantity'];
-              if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
-                totalQty += int.tryParse(rawQty.toString())!;
-              } else if (item['items'] != null && item['items'] is List) {
-                for (var sub in (item['items'] as List)) {
-                  if (sub is Map) {
-                    final subQty = sub['qty'] ?? sub['quantity'];
-                    if (subQty != null && int.tryParse(subQty.toString()) != null) {
-                      totalQty += int.tryParse(subQty.toString())!;
+          if (list.isNotEmpty) {
+            int totalQty = 0;
+            for (var item in list) {
+              if (item is Map) {
+                if (item['items'] != null && item['items'] is List) {
+                  for (var sub in (item['items'] as List)) {
+                    if (sub is Map) {
+                      final subQty = sub['qty'] ?? sub['quantity'];
+                      if (subQty != null && int.tryParse(subQty.toString()) != null) {
+                        totalQty += int.tryParse(subQty.toString())!;
+                      } else {
+                        totalQty += 1;
+                      }
+                    } else {
+                      totalQty += 1;
                     }
                   }
+                } else {
+                  final rawQty = item['qty'] ?? item['quantity'];
+                  if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
+                    totalQty += int.tryParse(rawQty.toString())!;
+                  } else {
+                    totalQty += 1;
+                  }
                 }
+              } else {
+                totalQty += 1;
               }
             }
+            return totalQty;
           }
-          return totalQty;
         }
 
         if (json['groups'] != null && json['groups'] is List) {
           final list = json['groups'] as List;
-          if (list.isEmpty) return 0;
-          int totalQty = 0;
-          for (var item in list) {
-            if (item is Map) {
-              final rawQty = item['qty'] ?? item['quantity'];
-              if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
-                totalQty += int.tryParse(rawQty.toString())!;
-              } else if (item['items'] != null && item['items'] is List) {
-                for (var sub in (item['items'] as List)) {
-                  if (sub is Map) {
-                    final subQty = sub['qty'] ?? sub['quantity'];
-                    if (subQty != null && int.tryParse(subQty.toString()) != null) {
-                      totalQty += int.tryParse(subQty.toString())!;
+          if (list.isNotEmpty) {
+            int totalQty = 0;
+            for (var item in list) {
+              if (item is Map) {
+                if (item['items'] != null && item['items'] is List) {
+                  for (var sub in (item['items'] as List)) {
+                    if (sub is Map) {
+                      final subQty = sub['qty'] ?? sub['quantity'];
+                      if (subQty != null && int.tryParse(subQty.toString()) != null) {
+                        totalQty += int.tryParse(subQty.toString())!;
+                      } else {
+                        totalQty += 1;
+                      }
+                    } else {
+                      totalQty += 1;
                     }
                   }
+                } else {
+                  final rawQty = item['qty'] ?? item['quantity'];
+                  if (rawQty != null && int.tryParse(rawQty.toString()) != null) {
+                    totalQty += int.tryParse(rawQty.toString())!;
+                  } else {
+                    totalQty += 1;
+                  }
                 }
+              } else {
+                totalQty += 1;
               }
             }
+            return totalQty;
           }
-          return totalQty;
         }
 
         if (json['items'] != null && json['items'] is List) {

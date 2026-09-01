@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:MediCompare/features/coupons/domain/entities/customer_entity.dart';
 import 'package:MediCompare/features/coupons/presentation/bloc/coupon_bloc.dart';
 import 'package:MediCompare/features/coupons/presentation/bloc/coupon_event.dart';
@@ -35,7 +36,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   bool _hiddenCoupon = false;
 
   List<Customer> _customers = [];
-  Customer? _selectedCustomer;
+  List<Customer> _selectedCustomers = [];
 
   final DateFormat _dateFormat = DateFormat('MM/dd/yyyy');
 
@@ -129,7 +130,9 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
         validTo: _validTo!,
         status: _status,
         hiddenCoupon: _hiddenCoupon,
-        userId: _selectedCustomer?.id,
+        userId: _selectedCustomers.isNotEmpty
+            ? _selectedCustomers.map((c) => c.id).join(',')
+            : null,
       );
 
       context.read<CouponBloc>().add(SubmitAddCouponEvent(coupon: coupon));
@@ -520,7 +523,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                               color: const Color(0xFFF9FAFB),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: _selectedCustomer != null
+                                color: _selectedCustomers.isNotEmpty
                                     ? const Color(0xFF6B48FF).withOpacity(0.5)
                                     : Colors.grey.shade200,
                                 width: 1.2,
@@ -532,24 +535,27 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
-                                    color: _selectedCustomer != null
+                                    color: _selectedCustomers.isNotEmpty
                                         ? const Color(0xFFEEF2FF)
                                         : const Color(0xFFF3F4F6),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Center(
-                                    child: _selectedCustomer != null
-                                        ? Text(
-                                            _selectedCustomer!.fullName.isNotEmpty
-                                                ? _selectedCustomer!.fullName[0]
-                                                    .toUpperCase()
-                                                : '?',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF6B48FF),
-                                            ),
-                                          )
+                                    child: _selectedCustomers.isNotEmpty
+                                        ? (_selectedCustomers.length > 1
+                                            ? const Icon(Icons.people_alt,
+                                                color: Color(0xFF6B48FF), size: 20)
+                                            : Text(
+                                                _selectedCustomers.first.fullName.isNotEmpty
+                                                    ? _selectedCustomers.first.fullName[0]
+                                                        .toUpperCase()
+                                                    : '?',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: const Color(0xFF6B48FF),
+                                                ),
+                                              ))
                                         : const Icon(
                                             Icons.person_search_rounded,
                                             size: 20,
@@ -559,14 +565,16 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _selectedCustomer != null
+                                  child: _selectedCustomers.isNotEmpty
                                       ? Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              _selectedCustomer!.fullName,
+                                              _selectedCustomers
+                                                  .map((c) => c.fullName)
+                                                  .join(', '),
                                               style: GoogleFonts.inter(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
@@ -576,10 +584,12 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
-                                              _selectedCustomer!.phone.isNotEmpty
-                                                  ? _selectedCustomer!.phone
-                                                  : (_selectedCustomer!.email ??
-                                                      'ID: ${_selectedCustomer!.custId}'),
+                                              _selectedCustomers.length == 1
+                                                  ? (_selectedCustomers.first.phone.isNotEmpty
+                                                      ? _selectedCustomers.first.phone
+                                                      : (_selectedCustomers.first.email ??
+                                                          'ID: ${_selectedCustomers.first.custId}'))
+                                                  : '${_selectedCustomers.length} customers selected',
                                               style: GoogleFonts.inter(
                                                 fontSize: 12,
                                                 color: Colors.grey.shade600,
@@ -596,11 +606,11 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                           ),
                                         ),
                                 ),
-                                if (_selectedCustomer != null)
+                                if (_selectedCustomers.isNotEmpty)
                                   InkWell(
                                     onTap: () {
                                       setState(() {
-                                        _selectedCustomer = null;
+                                        _selectedCustomers.clear();
                                       });
                                     },
                                     borderRadius: BorderRadius.circular(20),
@@ -1073,154 +1083,198 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   }
 
   void _openCustomerPickerModal(BuildContext context) {
+    Timer? debounceTimer;
+    final couponBloc = context.read<CouponBloc>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalContext) {
         String searchQuery = '';
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final filtered = _customers.where((c) {
-              final query = searchQuery.toLowerCase().trim();
-              if (query.isEmpty) return true;
-              return c.fullName.toLowerCase().contains(query) ||
-                  c.phone.toLowerCase().contains(query) ||
-                  (c.email?.toLowerCase().contains(query) ?? false) ||
-                  c.custId.toLowerCase().contains(query);
-            }).toList();
-
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.75,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: Column(
-                children: [
-                  // Handle
-                  Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+        return BlocProvider.value(
+            value: couponBloc,
+            child: StatefulBuilder(
+              builder: (context, setModalState) {
+                return Container(
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
-                  // Title Header
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 12, 8),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Select Customer',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEEF2FF),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${_customers.length}',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF4F46E5),
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.close_rounded),
-                          onPressed: () => Navigator.of(modalContext).pop(),
-                          splashRadius: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Search field
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 6.0),
-                    child: TextField(
-                      onChanged: (val) {
-                        setModalState(() {
-                          searchQuery = val;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search by name, phone, or ID...',
-                        hintStyle: GoogleFonts.inter(
-                            fontSize: 13, color: Colors.grey.shade400),
-                        prefixIcon: const Icon(Icons.search_rounded,
-                            color: Colors.grey, size: 20),
-                        suffixIcon: searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18),
-                                onPressed: () {
-                                  setModalState(() {
-                                    searchQuery = '';
-                                  });
-                                },
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: const Color(0xFFF3F4F6),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
+                  child: Column(
+                    children: [
+                      // Handle
+                      Container(
+                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      style: GoogleFonts.inter(fontSize: 14),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Customer List
-                  Expanded(
-                    child: filtered.isEmpty
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.person_off_outlined,
-                                      size: 48, color: Colors.grey.shade300),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'No customers found',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Try searching with a different name or phone number.',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade400,
-                                    ),
-                                  ),
-                                ],
+                      // Title Header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 12, 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Select Customer',
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
                             ),
-                          )
-                        : ListView.separated(
+                            const SizedBox(width: 8),
+                            BlocBuilder<CouponBloc, CouponState>(
+                              builder: (context, state) {
+                                int count = _customers.length;
+                                if (state is CustomersLoaded)
+                                  count = state.customers.length;
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEEF2FF),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '$count',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF4F46E5),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () => Navigator.of(modalContext).pop(),
+                              splashRadius: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Search field
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 6.0),
+                        child: TextField(
+                          onChanged: (val) {
+                            setModalState(() {
+                              searchQuery = val;
+                            });
+
+                            if (debounceTimer?.isActive ?? false) {
+                              debounceTimer!.cancel();
+                            }
+                            debounceTimer =
+                                Timer(const Duration(milliseconds: 500), () {
+                              context
+                                  .read<CouponBloc>()
+                                  .add(FetchCustomersEvent(search: val));
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search by name, phone, or ID...',
+                            hintStyle: GoogleFonts.inter(
+                                fontSize: 13, color: Colors.grey.shade400),
+                            prefixIcon: const Icon(Icons.search_rounded,
+                                color: Colors.grey, size: 20),
+                            suffixIcon: searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear_rounded,
+                                        size: 18),
+                                    onPressed: () {
+                                      setModalState(() {
+                                        searchQuery = '';
+                                      });
+                                      if (debounceTimer?.isActive ?? false) {
+                                        debounceTimer!.cancel();
+                                      }
+                                      context.read<CouponBloc>().add(
+                                          const FetchCustomersEvent(
+                                              search: ''));
+                                    },
+                                  )
+                                : null,
+                            filled: true,
+                            fillColor: const Color(0xFFF3F4F6),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Customer List
+                      Expanded(
+                        child: BlocBuilder<CouponBloc, CouponState>(
+                            builder: (context, state) {
+                          if (state is CustomersLoading) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+
+                          List<Customer> displayList = _customers;
+                          if (state is CustomersLoaded) {
+                            displayList = state.customers;
+                          }
+
+                          final filtered = displayList.where((c) {
+                            final query = searchQuery.toLowerCase().trim();
+                            if (query.isEmpty) return true;
+                            return c.fullName.toLowerCase().contains(query) ||
+                                c.phone.toLowerCase().contains(query) ||
+                                (c.email?.toLowerCase().contains(query) ??
+                                    false) ||
+                                c.custId.toLowerCase().contains(query);
+                          }).toList();
+
+                          if (filtered.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.person_off_outlined,
+                                        size: 48, color: Colors.grey.shade300),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'No customers found',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Try searching with a different name or phone number.',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return ListView.separated(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             itemCount: filtered.length,
@@ -1228,15 +1282,27 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                 Divider(height: 1, color: Colors.grey.shade100),
                             itemBuilder: (context, index) {
                               final customer = filtered[index];
-                              final isSelected =
-                                  _selectedCustomer?.id == customer.id;
+                              final isSelected = _selectedCustomers
+                                  .any((c) => c.id == customer.id);
 
                               return ListTile(
                                 onTap: () {
-                                  setState(() {
-                                    _selectedCustomer = customer;
+                                  setModalState(() {
+                                    if (_selectionType == 'Multiple') {
+                                      if (isSelected) {
+                                        _selectedCustomers.removeWhere(
+                                            (c) => c.id == customer.id);
+                                      } else {
+                                        _selectedCustomers.add(customer);
+                                      }
+                                    } else {
+                                      _selectedCustomers = [customer];
+                                    }
                                   });
-                                  Navigator.of(modalContext).pop();
+                                  setState(() {});
+                                  if (_selectionType != 'Multiple') {
+                                    Navigator.of(modalContext).pop();
+                                  }
                                 },
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -1312,13 +1378,14 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                         : null),
                               );
                             },
-                          ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        );
+                );
+              },
+            ));
       },
     );
   }

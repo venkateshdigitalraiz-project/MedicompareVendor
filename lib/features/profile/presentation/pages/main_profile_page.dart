@@ -318,6 +318,25 @@ class _ProfilePageState extends State<MainprofileScreen> {
                       ],
                     ),
                   ),
+
+                  // Edit Profile Button
+                  IconButton(
+                    onPressed: () {
+                      context.push('/edit-profile');
+                    },
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

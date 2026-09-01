@@ -27,6 +27,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
 
   AmbulanceNameOptionEntity? _selectedAmbulance;
   List<String> _selectedFacilities = [];
+  List<AmbulanceFacilityEntity> _dynamicFacilities = [];
 
   final _priceController = TextEditingController();
   final _discountPriceController = TextEditingController();
@@ -54,7 +55,7 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
     _priceController.text = amb.price.toString();
     _discountPriceController.text = amb.discountPrice.toString();
-    _selectedFacilities = amb.facilities.map((e) => e.name).toList();
+    _selectedFacilities = amb.facilities.map((e) => e.id).toList();
     _status = amb.status.toLowerCase();
   }
 
@@ -87,16 +88,16 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
 
     final payload = {
       "name":
-          isEditMode ? widget.editAmbulance!.tabletId : _selectedAmbulance!.id,
+          isEditMode ? widget.editAmbulance!.id : _selectedAmbulance!.id,
       "price": double.tryParse(_priceController.text) ?? 0,
-      "discountprice": double.tryParse(_discountPriceController.text) ?? 0,
+      "discount": double.tryParse(_discountPriceController.text) ?? 0,
       "facilities": _selectedFacilities,
       "status": _status,
+      "ambulanceType": "basic",
+      "category": "General",
+      "description": "Ambulance service",
+      "equipment": [],
     };
-
-    if (!isEditMode) {
-      payload["categoryId"] = _selectedAmbulance!.categoryId;
-    }
 
     if (isEditMode) {
       context
@@ -111,6 +112,11 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
   Widget build(BuildContext context) {
     return BlocConsumer<AmbulanceBloc, AmbulanceState>(
       listener: (context, state) {
+        if (state is AmbulanceFormOptionsLoaded) {
+          setState(() {
+            _dynamicFacilities = state.facilities;
+          });
+        }
         if (state is AmbulanceOperationSuccess) {
           final messenger = ScaffoldMessenger.of(context);
           Navigator.pop(context);
@@ -427,18 +433,6 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
     );
   }
 
-  final List<String> _staticFacilities = [
-    "Oxygen",
-    "Wheel Chair",
-    "Stretcher",
-    "Medical Kit",
-    "Equipment Technician",
-    "Ventilator",
-    "Cardiac Monitor",
-    "Defibrillator",
-    "Oxygen Support"
-  ];
-
   Widget _buildFacilitiesDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,20 +503,20 @@ class _AddAmbulanceSheetState extends State<AddAmbulanceSheet> {
                 Expanded(
                   child: ListView.builder(
                     controller: controller,
-                    itemCount: _staticFacilities.length,
+                    itemCount: _dynamicFacilities.length,
                     itemBuilder: (ctx, i) {
-                      final facility = _staticFacilities[i];
-                      final isSelected = _selectedFacilities.contains(facility);
+                      final facility = _dynamicFacilities[i];
+                      final isSelected = _selectedFacilities.contains(facility.id);
                       return CheckboxListTile(
-                        title: Text(facility,
+                        title: Text(facility.name,
                             style: GoogleFonts.poppins(fontSize: 14)),
                         value: isSelected,
                         onChanged: (val) {
                           setModalState(() {
                             if (val == true) {
-                              _selectedFacilities.add(facility);
+                              _selectedFacilities.add(facility.id);
                             } else {
-                              _selectedFacilities.remove(facility);
+                              _selectedFacilities.remove(facility.id);
                             }
                           });
                           setState(() {});

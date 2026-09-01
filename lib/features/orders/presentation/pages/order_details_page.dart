@@ -196,13 +196,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       final orderDetails = state.orderDetails;
       if (orderDetails.items.isEmpty) return;
       final payload = {
-        "assignedPartnerId": null,
+        "deliveryManType": "admin",
         "deliveryPartner": _selectedDeliveryPartner,
+        "deliveryPartnerId": null,
         "orderId": orderDetails.id,
         "orderStatus": status,
         "packageIds": [],
-        "productIds":
-            orderDetails.items.map((item) => item.productDetails.id).toList(),
+        "productIds": [],
         "readyTime": _selectedParcelTime.toString(),
         "rejectionReason": rejectionReason,
         "status": status,
@@ -785,7 +785,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
           _buildSummaryRow("GST", gst.toRupeeFormat(decimalDigits: 2)),
-          if (couponType != null) ...[
+          if (couponType != "admin") ...[
             const SizedBox(height: 16),
             _buildSummaryRow(
               "Coupon Discount",

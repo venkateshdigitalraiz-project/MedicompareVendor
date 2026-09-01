@@ -11,6 +11,10 @@ class HomeCareBloc extends Bloc<HomeCareEvent, HomeCareState> {
     on<LoadHomeCareListEvent>(_onLoadList);
     on<SelectHomeCareCategoryEvent>(_onSelectCategory);
     on<SearchHomeCareEvent>(_onSearch);
+    on<CreateHomeCareEvent>(_onCreate);
+    on<UpdateHomeCareEvent>(_onUpdate);
+    on<SearchHomeCareDropdownEvent>(_onSearchDropdown);
+    on<FetchHomeCareDetailsEvent>(_onFetchDetails);
   }
 
   Future<void> _onLoadCategories(
@@ -64,5 +68,46 @@ class HomeCareBloc extends Bloc<HomeCareEvent, HomeCareState> {
         categoryId: state.selectedCategoryId ?? '',
         search: event.query,
         page: 1));
+  }
+
+  Future<void> _onCreate(
+      CreateHomeCareEvent event, Emitter<HomeCareState> emit) async {
+    try {
+      await _service.createHomeCare(event.payload);
+      event.onSuccess();
+      add(const LoadHomeCareListEvent(isRefresh: true));
+    } catch (e) {
+      event.onError(e.toString());
+    }
+  }
+
+  Future<void> _onUpdate(
+      UpdateHomeCareEvent event, Emitter<HomeCareState> emit) async {
+    try {
+      await _service.updateHomeCare(event.id, event.payload);
+      event.onSuccess();
+      add(const LoadHomeCareListEvent(isRefresh: true));
+    } catch (e) {
+      event.onError(e.toString());
+    }
+  }
+
+  Future<void> _onSearchDropdown(
+      SearchHomeCareDropdownEvent event, Emitter<HomeCareState> emit) async {
+    emit(state.copyWith(isSearchingDropdown: true));
+    try {
+      final results = await _service.searchHomeCareDropdown(event.query);
+      emit(state.copyWith(searchResults: results, isSearchingDropdown: false));
+    } catch (_) {
+      emit(state.copyWith(searchResults: [], isSearchingDropdown: false));
+    }
+  }
+
+  Future<void> _onFetchDetails(
+      FetchHomeCareDetailsEvent event, Emitter<HomeCareState> emit) async {
+    try {
+      final details = await _service.getTabletDetails(event.id);
+      event.onSuccess(details);
+    } catch (_) {}
   }
 }

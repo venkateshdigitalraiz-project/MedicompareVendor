@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:async';
 import 'package:intl/intl.dart';
 
 class SupportHelpCenterPage extends StatefulWidget {
@@ -19,15 +20,24 @@ class SupportHelpCenterPage extends StatefulWidget {
 
 class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
   final TextEditingController _messageController = TextEditingController();
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     context.read<TicketsBloc>().add(LoadTicketsEvent());
+
+    // Set up polling to fetch new messages automatically every 3 seconds for near real-time chat
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (mounted) {
+        context.read<TicketsBloc>().add(LoadTicketsEvent());
+      }
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _messageController.dispose();
     super.dispose();
   }
@@ -132,7 +142,7 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
         // Sidebar
         SizedBox(
           width: 300,
-          child: _buildTicketList(state),
+          child: _buildTicketList(context, state),
         ),
         const VerticalDivider(width: 1),
         // Chat Area
@@ -154,10 +164,10 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
         child: _buildChatArea(state.selectedTicket),
       );
     }
-    return _buildTicketList(state);
+    return _buildTicketList(context, state);
   }
 
-  Widget _buildTicketList(TicketsLoaded state) {
+  Widget _buildTicketList(BuildContext context, TicketsLoaded state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,17 +204,39 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
         ),
         Expanded(
           child: state.tickets.isEmpty
-              ? Center(
-                  child: Text("No tickets found",
-                      style: GoogleFonts.inter(color: Colors.grey)))
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: state.tickets.length,
-                  itemBuilder: (context, index) {
-                    final ticket = state.tickets[index];
-                    final isSelected = state.selectedTicket?.id == ticket.id;
-                    return _buildTicketCard(ticket, isSelected);
+              ? RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<TicketsBloc>().add(LoadTicketsEvent());
+                    await Future.delayed(const Duration(milliseconds: 500));
                   },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: 300,
+                        child: Center(
+                          child: Text("No tickets found",
+                              style: GoogleFonts.inter(color: Colors.grey)),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<TicketsBloc>().add(LoadTicketsEvent());
+                    await Future.delayed(const Duration(milliseconds: 500));
+                  },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: state.tickets.length,
+                    itemBuilder: (context, index) {
+                      final ticket = state.tickets[index];
+                      final isSelected = state.selectedTicket?.id == ticket.id;
+                      return _buildTicketCard(ticket, isSelected);
+                    },
+                  ),
                 ),
         ),
       ],
@@ -254,7 +286,7 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
                   ),
                 ),
                 Text(
-                  DateFormat('h:mm a').format(ticket.createdAt),
+                  DateFormat('h:mm a').format(ticket.createdAt.toLocal()),
                   style: GoogleFonts.inter(fontSize: 10, color: Colors.grey),
                 ),
               ],
@@ -385,6 +417,7 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
             ),
           ),
         ),
+
         // Input Area
         if (ticket.status.toLowerCase() != 'closed')
           Container(
@@ -528,7 +561,7 @@ class _SupportHelpCenterPageState extends State<SupportHelpCenterPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              DateFormat('h:mm a').format(message.createdAt),
+              DateFormat('h:mm a').format(message.createdAt.toLocal()),
               style: GoogleFonts.inter(fontSize: 10, color: Colors.grey),
             ),
           ),

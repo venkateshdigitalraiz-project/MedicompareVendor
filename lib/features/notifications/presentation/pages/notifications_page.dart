@@ -16,20 +16,18 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  late NotificationsBloc _bloc;
-
   @override
   void initState() {
     super.initState();
-    _bloc = NotificationsBloc(CoreInjection.provideApiService())
-      ..add(LoadNotificationsEvent(refresh: true));
+    final bloc = context.read<NotificationsBloc>();
+    if (bloc.state is! NotificationsLoaded) {
+      bloc.add(LoadNotificationsEvent(refresh: true));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: const Color(0xFFF8FAFB),
         appBar: AppBar(
           backgroundColor: AppColors.primary,
@@ -46,7 +44,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           actions: [
             TextButton(
               onPressed: () {
-                _bloc.add(MarkAllNotificationsReadEvent());
+                context.read<NotificationsBloc>().add(MarkAllNotificationsReadEvent());
               },
               child: Text(
                 "Mark all as read",
@@ -70,7 +68,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               }
               return RefreshIndicator(
                 onRefresh: () async =>
-                    _bloc.add(LoadNotificationsEvent(refresh: true)),
+                    context.read<NotificationsBloc>().add(LoadNotificationsEvent(refresh: true)),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount:
@@ -78,7 +76,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     if (index == state.notifications.length) {
-                      _bloc.add(LoadNotificationsEvent());
+                      context.read<NotificationsBloc>().add(LoadNotificationsEvent());
                       return const Center(
                           child: Padding(
                               padding: EdgeInsets.all(16.0),
@@ -93,34 +91,50 @@ class _NotificationsPageState extends State<NotificationsPage> {
             return const SizedBox();
           },
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey[100]!)),
-            child: Icon(Icons.notifications_none,
-                size: 64, color: Colors.grey[300]),
-          ),
-          const SizedBox(height: 24),
-          Text("No notifications yet",
-              style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700])),
-          const SizedBox(height: 8),
-          Text("We'll notify you when something important happens",
-              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[500])),
-        ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<NotificationsBloc>().add(LoadNotificationsEvent(refresh: true));
+        await Future.delayed(const Duration(milliseconds: 500));
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey[100]!)),
+                      child: Icon(Icons.notifications_none,
+                          size: 64, color: Colors.grey[300]),
+                    ),
+                    const SizedBox(height: 24),
+                    Text("No notifications yet",
+                        style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[700])),
+                    const SizedBox(height: 8),
+                    Text("We'll notify you when something important happens",
+                        style: GoogleFonts.inter(
+                            fontSize: 14, color: Colors.grey[500])),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

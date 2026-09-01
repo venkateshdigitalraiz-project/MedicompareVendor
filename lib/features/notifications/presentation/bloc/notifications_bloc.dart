@@ -120,10 +120,26 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     try {
       final response =
           await apiService.post(ApiEndpoints.markAllNotificationsRead);
-      final json = jsonDecode(response.body);
-      if (json['success'] == true) {
-        // Refresh local state without reload? No, just reload.
-        add(LoadNotificationsEvent(refresh: true));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (state is NotificationsLoaded) {
+          final loadedState = state as NotificationsLoaded;
+          final updated = loadedState.notifications.map((n) {
+            return NotificationEntity(
+              id: n.id,
+              title: n.title,
+              message: n.message,
+              read: true,
+              createdAt: n.createdAt,
+              platform: n.platform,
+            );
+          }).toList();
+          emit(NotificationsLoaded(
+            notifications: updated,
+            unreadCount: 0,
+            hasMore: loadedState.hasMore,
+            pagination: loadedState.pagination,
+          ));
+        }
       }
     } catch (_) {}
   }

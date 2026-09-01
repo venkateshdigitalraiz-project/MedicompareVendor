@@ -56,7 +56,6 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
   @override
   void initState() {
     super.initState();
-    _fetchLabTests();
     if (isEditMode) {
       _nameController.text = widget.editItem!.name;
       _descriptionController.text = widget.editItem!.description ?? "";
@@ -108,7 +107,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
 
   Future<void> _onTemplateSelected(String? templateId) async {
     if (templateId == null) return;
-    
+
     setState(() {
       _selectedTemplateId = templateId;
     });
@@ -446,17 +445,13 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                         ],
                       ),
 
-                      const SizedBox(height: 24),
-                      _buildLabel("Select Lab Tests",
-                          isRequired: true, icon: Icons.science_outlined),
-                      const SizedBox(height: 8),
-                      _isFetchingTests
-                          ? const Center(
-                              child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2)))
-                          : _buildTestSelector(),
+                      if (!_isTemplatesMode) ...[
+                        const SizedBox(height: 24),
+                        _buildLabel("Select Lab Tests",
+                            isRequired: true, icon: Icons.science_outlined),
+                        const SizedBox(height: 8),
+                        _buildTestSelector(),
+                      ],
 
                       const SizedBox(height: 16),
                       _buildLabel("Description",
@@ -640,7 +635,8 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
 
   Widget _buildTestSelector() {
     return BlocProvider(
-      create: (_) => LabTestInjection.provideSearchLabTestsBloc(),
+      create: (_) => LabTestInjection.provideSearchLabTestsBloc()
+        ..add(const SearchQueryChangedEvent('')),
       child: Builder(builder: (context) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -649,10 +645,10 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: "Search for lab test...",
-                hintStyle: GoogleFonts.inter(
-                    fontSize: 13, color: Colors.grey[500]),
-                suffixIcon: const Icon(Icons.keyboard_arrow_down,
-                    color: Colors.grey),
+                hintStyle:
+                    GoogleFonts.inter(fontSize: 13, color: Colors.grey[500]),
+                suffixIcon:
+                    const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
                 filled: true,
                 fillColor: const Color(0xFFF9FAFB),
                 border: OutlineInputBorder(
@@ -735,8 +731,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                     });
                                   },
                                   shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(4)),
+                                      borderRadius: BorderRadius.circular(4)),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -748,8 +743,7 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
                                           style: GoogleFonts.inter(
                                               fontSize: 13,
                                               fontWeight: FontWeight.bold,
-                                              color: const Color(
-                                                  0xFF1E1B4B))),
+                                              color: const Color(0xFF1E1B4B))),
                                       Text(
                                         "${test.sampleType ?? 'N/A'} • ${test.reportsDuration ?? 'N/A'}",
                                         style: GoogleFonts.inter(

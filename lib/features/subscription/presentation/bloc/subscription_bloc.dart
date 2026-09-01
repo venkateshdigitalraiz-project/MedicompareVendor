@@ -28,9 +28,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
       emit(OrderProcessing());
       try {
         final orderId = await repository.createOrder(
-          amount: event.amount,
-          currency: event.currency,
-          receipt: event.receipt,
+          planId: event.plan.id,
         );
         emit(OrderCreated(
             orderId: orderId, amount: event.amount, plan: event.plan));

@@ -48,7 +48,7 @@ class ApiEndpoints {
   static const String appointmentOrderDetails =
       '/vendor/order/appointment/details';
   static String updateOrderStatus(String id) =>
-      '/vendor/order/update-status/$id';
+      '/vendor/order/orderstatusupdate/$id';
   static String updateAppointmentOrderStatus(String id) =>
       '/vendor/order/orderstatusupdate/$id';
   static String uploadReport(String id) => '/vendor/order/reportupload/$id';
@@ -69,7 +69,7 @@ class ApiEndpoints {
       '/vendor/leads-subscription/history';
   static const String leadsSubscriptionList = '/vendor/leads-subscription/list';
   static const String leadsSubscriptionCreateOrder =
-      '/vendor/leads-subscription/payment/create-order';
+      '/vendor/leads-subscription/payment/create-subscription';
   static const String leadsSubscriptionPurchase =
       '/vendor/leads-subscription/purchase';
 
@@ -139,9 +139,9 @@ class ApiEndpoints {
   static String homeCareDetails(String id) =>
       '/vendor/product/homecare/details/$id';
   static const String createHomeCare =
-      '/vendor/product/healthcareservice/create';
+      '/vendor/product/homecare/create';
   static String updateHomeCare(String id) =>
-      '/vendor/product/healthcareservice/update/$id';
+      '/vendor/product/homecare/update/$id';
   static String deleteHomeCare(String id) =>
       '/vendor/product/homecare/delete/$id';
 

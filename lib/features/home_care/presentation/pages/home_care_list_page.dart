@@ -10,7 +10,6 @@ import 'package:MediCompare/features/home_care/presentation/widgets/add_home_car
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:MediCompare/core/utils/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeCareListPage extends StatefulWidget {
@@ -56,22 +55,21 @@ class _HomeCareListPageState extends State<HomeCareListPage> {
   }
 
   void _showAddEditSheet([dynamic item]) {
+    final bloc = context.read<HomeCareBloc>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: AddHomeCareSheet(
-          editItem: item,
-          existingIds: context
-              .read<HomeCareBloc>()
-              .state
-              .items
-              .map((m) => m.details.id)
-              .toList(),
-          onSuccess: _loadInitial,
+      builder: (sheetContext) => BlocProvider.value(
+        value: bloc,
+        child: Padding(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
+          child: AddHomeCareSheet(
+            editItem: item,
+            existingIds: bloc.state.items.map((m) => m.details.id).toList(),
+            onSuccess: _loadInitial,
+          ),
         ),
       ),
     );

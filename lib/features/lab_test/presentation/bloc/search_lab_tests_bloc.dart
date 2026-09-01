@@ -13,10 +13,6 @@ class SearchLabTestsBloc extends Bloc<SearchLabTestsEvent, SearchLabTestsState> 
 
   Future<void> _onSearchQueryChanged(
       SearchQueryChangedEvent event, Emitter<SearchLabTestsState> emit) async {
-    if (event.query.isEmpty) {
-      emit(SearchLabTestsInitial());
-      return;
-    }
 
     emit(SearchLabTestsLoading());
     try {

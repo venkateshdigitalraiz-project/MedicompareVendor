@@ -29,15 +29,18 @@ class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
     String leadStage = '',
     String search = '',
   }) async {
+    final Map<String, dynamic> queryParams = {
+      'page': page,
+      'limit': limit,
+    };
+    
+    if (status.isNotEmpty) queryParams['status'] = status;
+    if (leadStage.isNotEmpty) queryParams['leadStage'] = leadStage;
+    if (search.isNotEmpty) queryParams['search'] = search;
+
     final response = await apiService.get(
       ApiEndpoints.leadsList,
-      queryParameters: {
-        'page': page,
-        'limit': limit,
-        'status': status,
-        'leadStage': leadStage,
-        'search': search,
-      },
+      queryParameters: queryParams,
     );
 
     final decoded = json.decode(response.body);

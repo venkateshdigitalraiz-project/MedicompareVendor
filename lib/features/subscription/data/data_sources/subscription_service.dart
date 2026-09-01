@@ -51,49 +51,26 @@ class SubscriptionService {
     }
   }
 
-  Future<String> createOrder(
-      {required int amount,
-      required String currency,
-      required String receipt}) async {
-    final candidateEndpoints = [
-      ApiEndpoints.leadsSubscriptionCreateOrder,
-      '/vendor/leads-subscription/create-order',
-      '/vendor/leads-subscription/order/create',
-      '/vendor/leads-subscription/create_order',
-      '/vendor/payment/create-order',
-    ];
-
-    for (final endpoint in candidateEndpoints) {
-      try {
-        final response = await apiService.post(
-          endpoint,
-          body: {
-            'amount': amount,
-            'currency': currency,
-            'receipt': receipt,
-          },
-        );
-        final decoded = jsonDecode(response.body);
-        if (decoded['success'] == true && decoded['data'] != null) {
-          final orderId = (decoded['data'] as Map<String, dynamic>?)?['orderId'] ??
-              (decoded['data'] as Map<String, dynamic>?)?['id'] ??
-              decoded['orderId'];
-          if (orderId != null && orderId.toString().isNotEmpty) {
-            return orderId.toString();
-          }
-        }
-      } catch (e) {
-        // If 404 router not found, attempt next endpoint or fallback
-        final errStr = e.toString().toLowerCase();
-        if (errStr.contains('router not found') ||
-            errStr.contains('not found') ||
-            errStr.contains('404')) {
-          continue;
+  Future<String> createOrder({required String planId}) async {
+    try {
+      final response = await apiService.post(
+        ApiEndpoints.leadsSubscriptionCreateOrder,
+        body: {
+          'planId': planId,
+        },
+      );
+      final decoded = jsonDecode(response.body);
+      if (decoded['success'] == true && decoded['data'] != null) {
+        final orderId = (decoded['data'] as Map<String, dynamic>?)?['orderId'] ??
+            (decoded['data'] as Map<String, dynamic>?)?['id'] ??
+            decoded['orderId'];
+        if (orderId != null && orderId.toString().isNotEmpty) {
+          return orderId.toString();
         }
       }
+    } catch (e) {
+      throw Exception('Failed to create order: $e');
     }
-
-    // Direct standard Razorpay checkout fallback (does not require pre-created order ID)
     return '';
   }
 

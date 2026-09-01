@@ -19,12 +19,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }
 
   @override
-  Future<String> createOrder(
-      {required int amount,
-      required String currency,
-      required String receipt}) {
-    return service.createOrder(
-        amount: amount, currency: currency, receipt: receipt);
+  Future<String> createOrder({required String planId}) {
+    return service.createOrder(planId: planId);
   }
 
   @override

@@ -50,7 +50,7 @@ class HomeCareItem extends Equatable {
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: (json['discountprice'] ?? 0).toDouble(),
       status: json['status'] ?? 'inactive',
-      details: HomeCareDetails.fromJson(json['tablets'] ?? {}),
+      details: HomeCareDetails.fromJson(json['healthcareservice'] ?? json['tablets'] ?? {}),
     );
   }
 

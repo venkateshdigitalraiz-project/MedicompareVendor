@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,8 @@ class _LeadsPageState extends State<LeadsPage> {
   bool _isFetchingMore = false;
   final ScrollController _scrollController = ScrollController();
 
+  Timer? _debounceTimer;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +38,7 @@ class _LeadsPageState extends State<LeadsPage> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -59,12 +63,12 @@ class _LeadsPageState extends State<LeadsPage> {
     }
   }
 
-  final List<Map<String, String>> _statusFilters = [
-    {'label': 'All Status', 'value': ''},
-    {'label': 'Pending', 'value': 'pending'},
-    {'label': 'Approved', 'value': 'accepted'},
-    {'label': 'Rejected', 'value': 'rejected'},
-  ];
+  // final List<Map<String, String>> _statusFilters = [
+  //   {'label': 'All Status', 'value': ''},
+  //   {'label': 'Pending', 'value': 'pending'},
+  //   {'label': 'Approved', 'value': 'accepted'},
+  //   {'label': 'Rejected', 'value': 'rejected'},
+  // ];
 
   final List<Map<String, String>> _statusOptions = [
     {'label': 'Pending', 'value': 'pending'},
@@ -142,9 +146,14 @@ class _LeadsPageState extends State<LeadsPage> {
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value;
-                      _currentPage = 1;
                     });
-                    _onFilterChanged();
+                    
+                    if (_debounceTimer?.isActive ?? false) {
+                      _debounceTimer!.cancel();
+                    }
+                    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+                      _onFilterChanged();
+                    });
                   },
                   decoration: InputDecoration(
                     hintText: "Search by customer name...",
@@ -157,22 +166,22 @@ class _LeadsPageState extends State<LeadsPage> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: _buildDropdown(
-                  value: _selectedStage,
-                  items: _statusFilters.map((s) => s['value']!).toList(),
-                  labels: _statusFilters.map((s) => s['label']!).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      _selectedStage = val!;
-                      _currentPage = 1;
-                    });
-                    _onFilterChanged();
-                  },
-                ),
-              ),
+              // const SizedBox(width: 8),
+              // Expanded(
+              //   flex: 2,
+              //   child: _buildDropdown(
+              //     value: _selectedStage,
+              //     items: _statusFilters.map((s) => s['value']!).toList(),
+              //     labels: _statusFilters.map((s) => s['label']!).toList(),
+              //     onChanged: (val) {
+              //       setState(() {
+              //         _selectedStage = val!;
+              //         _currentPage = 1;
+              //       });
+              //       _onFilterChanged();
+              //     },
+              //   ),
+              // ),
             ],
           ),
         ],
@@ -180,36 +189,36 @@ class _LeadsPageState extends State<LeadsPage> {
     );
   }
 
-  Widget _buildDropdown({
-    required String value,
-    required List<String> items,
-    List<String>? labels,
-    required void Function(String?) onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          items: List.generate(items.length, (index) {
-            return DropdownMenuItem(
-              value: items[index],
-              child: Text(
-                labels != null ? labels[index] : items[index],
-                style: GoogleFonts.inter(fontSize: 14),
-              ),
-            );
-          }),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
+  // Widget _buildDropdown({
+  //   required String value,
+  //   required List<String> items,
+  //   List<String>? labels,
+  //   required void Function(String?) onChanged,
+  // }) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 12),
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: Colors.grey[300]!),
+  //       borderRadius: BorderRadius.circular(8),
+  //     ),
+  //     child: DropdownButtonHideUnderline(
+  //       child: DropdownButton<String>(
+  //         value: value,
+  //         isExpanded: true,
+  //         items: List.generate(items.length, (index) {
+  //           return DropdownMenuItem(
+  //             value: items[index],
+  //             child: Text(
+  //               labels != null ? labels[index] : items[index],
+  //               style: GoogleFonts.inter(fontSize: 14),
+  //             ),
+  //           );
+  //         }),
+  //         onChanged: onChanged,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _onFilterChanged() {
     // Reset pagination and scroll when filter changes
@@ -498,6 +507,27 @@ class _LeadsPageState extends State<LeadsPage> {
     }
 
     final Color color = getStatusColor(currentStatus);
+
+    if (currentStatus == 'accepted') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Text(
+          "APPROVED",
+          style: GoogleFonts.inter(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),

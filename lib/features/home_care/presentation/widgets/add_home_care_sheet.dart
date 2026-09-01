@@ -3,8 +3,12 @@ import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/features/home_care/data/data_sources/home_care_service.dart';
 import 'package:MediCompare/features/home_care/data/models/home_care_model.dart';
 import 'package:MediCompare/features/home_care/home_care_injection.dart';
+import 'package:MediCompare/features/home_care/presentation/bloc/home_care_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:MediCompare/features/home_care/presentation/bloc/home_care_bloc.dart';
+import 'package:MediCompare/features/home_care/presentation/bloc/home_care_event.dart';
 
 class AddHomeCareSheet extends StatefulWidget {
   final HomeCareItem? editItem;
@@ -24,7 +28,6 @@ class AddHomeCareSheet extends StatefulWidget {
 
 class _AddHomeCareSheetState extends State<AddHomeCareSheet> {
   final _formKey = GlobalKey<FormState>();
-  final HomeCareService _service = HomeCareInjection.provideHomeCareService();
 
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
@@ -37,7 +40,6 @@ class _AddHomeCareSheetState extends State<AddHomeCareSheet> {
   String? _selectedCategory;
   bool _isSubmitting = false;
 
-  List<HomeCareDropdownItem> _searchResults = [];
   Timer? _debounce;
 
   bool get isEditMode => widget.editItem != null;
@@ -60,11 +62,10 @@ class _AddHomeCareSheetState extends State<AddHomeCareSheet> {
 
   void _onSearchChanged(String query) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () async {
-      try {
-        final results = await _service.searchHomeCareDropdown(query);
-        if (mounted) setState(() => _searchResults = results);
-      } catch (_) {}
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        context.read<HomeCareBloc>().add(SearchHomeCareDropdownEvent(query));
+      }
     });
   }
 
@@ -90,27 +91,26 @@ class _AddHomeCareSheetState extends State<AddHomeCareSheet> {
     }
 
     setState(() => _isSubmitting = true);
-    try {
-      final payload = {
-        'name': _selectedTabletId,
-        'category': _selectedCategory ?? 'General',
-        'price': double.tryParse(_priceController.text) ?? 0,
-        'discount': double.tryParse(_discountController.text) ?? 0,
-        'status': _selectedStatus,
-        'duration': _durationController.text,
-        'description': _descriptionController.text,
-        'serviceType': [], // Backend expectation
-      };
 
-      if (isEditMode) {
-        await _service.updateHomeCare(widget.editItem!.id, payload);
-      } else {
-        await _service.createHomeCare(payload);
-      }
-      widget.onSuccess();
+    final payload = {
+      'name': _selectedTabletId,
+      'category': _selectedCategory ?? 'General',
+      'price': double.tryParse(_priceController.text) ?? 0,
+      'discount': double.tryParse(_discountController.text) ?? 0,
+      'status': _selectedStatus,
+      'duration': _durationController.text,
+      'description': _descriptionController.text,
+      'serviceType': [], // Empty array as requested in the payload example
+    };
+
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final onSuccess = () {
       if (mounted) {
-        final messenger = ScaffoldMessenger.of(context);
-        Navigator.pop(context);
+        setState(() => _isSubmitting = false);
+        widget.onSuccess();
+        navigator.pop();
         messenger.showSnackBar(
           SnackBar(
             content: Text(isEditMode
@@ -120,12 +120,30 @@ class _AddHomeCareSheetState extends State<AddHomeCareSheet> {
           ),
         );
       }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+    };
+
+    final onError = (String error) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        messenger.showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+      }
+    };
+
+    if (isEditMode) {
+      context.read<HomeCareBloc>().add(UpdateHomeCareEvent(
+            widget.editItem!.id,
+            payload,
+            onSuccess: onSuccess,
+            onError: onError,
+          ));
+    } else {
+      context.read<HomeCareBloc>().add(CreateHomeCareEvent(
+            payload,
+            onSuccess: onSuccess,
+            onError: onError,
+          ));
     }
   }
 
@@ -428,64 +446,89 @@ class _AddHomeCareSheetState extends State<AddHomeCareSheet> {
           },
           validator: (_) => _selectedTabletId == null ? "Required" : null,
         ),
-        if (_selectedTabletId == null && _searchResults.isNotEmpty)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 200),
-            margin: const EdgeInsets.only(top: 4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[200]!),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)
-              ],
-            ),
-            child: _searchResults.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text("No services found",
-                        style: GoogleFonts.inter(
-                            color: Colors.grey, fontSize: 13)),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _searchResults.length,
-                    itemBuilder: (_, i) {
-                      final item = _searchResults[i];
-                      return InkWell(
-                        onTap: () async {
-                          setState(() {
-                            _selectedTabletId = item.id;
-                            _searchController.text = item.name;
-                            _durationController.text = item.duration ?? "";
-                            _searchResults = [];
-                          });
+        BlocBuilder<HomeCareBloc, HomeCareState>(
+          builder: (context, state) {
+            if (_selectedTabletId != null ||
+                state.searchResults.isEmpty &&
+                    !state.isSearchingDropdown &&
+                    _searchController.text.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
-                          try {
-                            final details =
-                                await _service.getTabletDetails(item.id);
-                            if (mounted) {
-                              setState(() {
-                                _selectedCategory = details.subcategory?.name;
-                                _descriptionController.text =
-                                    details.description ?? "";
-                              });
-                            }
-                          } catch (_) {}
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          child: Text(item.name,
+            return Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              margin: const EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8)
+                ],
+              ),
+              child: state.isSearchingDropdown
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                    )
+                  : state.searchResults.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text("No services found",
                               style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  color: const Color(0xFF1E1B4B))),
+                                  color: Colors.grey, fontSize: 13)),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: state.searchResults.length,
+                          itemBuilder: (_, i) {
+                            final item = state.searchResults[i];
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedTabletId = item.id;
+                                  _searchController.text = item.name;
+                                  _durationController.text =
+                                      item.duration ?? "";
+                                });
+                                // Clear search results in bloc
+                                context
+                                    .read<HomeCareBloc>()
+                                    .add(const SearchHomeCareDropdownEvent(''));
+
+                                context
+                                    .read<HomeCareBloc>()
+                                    .add(FetchHomeCareDetailsEvent(
+                                      item.id,
+                                      onSuccess: (details) {
+                                        if (mounted) {
+                                          setState(() {
+                                            _selectedCategory =
+                                                details.subcategory?.name;
+                                            _descriptionController.text =
+                                                details.description ?? "";
+                                          });
+                                        }
+                                      },
+                                    ));
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                child: Text(item.name,
+                                    style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: const Color(0xFF1E1B4B))),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-          ),
+            );
+          },
+        ),
       ],
     );
   }

@@ -31,12 +31,15 @@ class CouponModel extends Coupon {
     }
 
     String parseRenewalCycle(String? val) {
-      if (val == 'never' || val == '1') return 'Never (One-time)';
-      if (val == 'daily') return 'Daily';
-      if (val == 'weekly' || val == '7') return 'Weekly';
-      if (val == 'monthly') return 'Monthly';
-      if (val == 'yearly') return 'Yearly';
-      return val ?? 'Never (One-time)';
+      if (val == null || val.isEmpty) return 'Never (One-time)';
+      final v = val.toLowerCase();
+      if (v == 'never' || v == '1' || v.contains('one-time')) return 'Never (One-time)';
+      if (v == 'daily') return 'Daily';
+      if (v == 'weekly' || v == '7' || v.contains('week')) return 'Every Week';
+      if (v == 'monthly' || v == '28' || v.contains('month')) return 'Every Month';
+      if (v == '10' || v.contains('10')) return 'Every 10 days';
+      if (v == 'yearly' || v.contains('year')) return 'Yearly';
+      return val;
     }
 
     String parseDiscountType(String? val) {
@@ -117,24 +120,8 @@ class CouponModel extends Coupon {
     }
 
     String mapRenewalCycle(String val) {
-      final v = val.toLowerCase().trim();
-      if (v.contains('never') || v.contains('one-time') || v == '1') {
-        return '1';
-      }
-      if (v.contains('month')) {
-        return '28';
-      }
-      if (v.contains('week')) {
-        return '7';
-      }
-      if (v.contains('10')) {
-        return '10';
-      }
-      if (v.contains('year')) {
-        return 'yearly';
-      }
-
-      return 'never';
+      // Just pass the exact dropdown value to the API
+      return val;
     }
 
     String mapDiscountType(String val) {

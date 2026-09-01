@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:MediCompare/features/home_care/data/models/home_care_model.dart';
 
 abstract class HomeCareEvent extends Equatable {
   const HomeCareEvent();
@@ -39,4 +40,47 @@ class SearchHomeCareEvent extends HomeCareEvent {
   const SearchHomeCareEvent(this.query);
   @override
   List<Object?> get props => [query];
+}
+
+class CreateHomeCareEvent extends HomeCareEvent {
+  final Map<String, dynamic> payload;
+  final Function onSuccess;
+  final Function(String) onError;
+
+  const CreateHomeCareEvent(this.payload,
+      {required this.onSuccess, required this.onError});
+
+  @override
+  List<Object?> get props => [payload];
+}
+
+class UpdateHomeCareEvent extends HomeCareEvent {
+  final String id;
+  final Map<String, dynamic> payload;
+  final Function onSuccess;
+  final Function(String) onError;
+
+  const UpdateHomeCareEvent(this.id, this.payload,
+      {required this.onSuccess, required this.onError});
+
+  @override
+  List<Object?> get props => [id, payload];
+}
+
+class SearchHomeCareDropdownEvent extends HomeCareEvent {
+  final String query;
+  const SearchHomeCareDropdownEvent(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
+
+class FetchHomeCareDetailsEvent extends HomeCareEvent {
+  final String id;
+  final Function(HomeCareDropdownItem details) onSuccess;
+  
+  const FetchHomeCareDetailsEvent(this.id, {required this.onSuccess});
+
+  @override
+  List<Object?> get props => [id];
 }

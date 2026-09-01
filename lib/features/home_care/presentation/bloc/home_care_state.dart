@@ -11,6 +11,10 @@ class HomeCareState extends Equatable {
   final String? selectedCategoryId;
   final String? searchQuery;
   final String? errorMessage;
+  
+  // Dropdown Search State
+  final List<HomeCareDropdownItem> searchResults;
+  final bool isSearchingDropdown;
 
   const HomeCareState({
     this.status = HomeCareStatus.initial,
@@ -20,6 +24,8 @@ class HomeCareState extends Equatable {
     this.selectedCategoryId,
     this.searchQuery,
     this.errorMessage,
+    this.searchResults = const [],
+    this.isSearchingDropdown = false,
   });
 
   HomeCareState copyWith({
@@ -30,6 +36,8 @@ class HomeCareState extends Equatable {
     String? selectedCategoryId,
     String? searchQuery,
     String? errorMessage,
+    List<HomeCareDropdownItem>? searchResults,
+    bool? isSearchingDropdown,
   }) {
     return HomeCareState(
       status: status ?? this.status,
@@ -39,6 +47,8 @@ class HomeCareState extends Equatable {
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
       searchQuery: searchQuery ?? this.searchQuery,
       errorMessage: errorMessage ?? this.errorMessage,
+      searchResults: searchResults ?? this.searchResults,
+      isSearchingDropdown: isSearchingDropdown ?? this.isSearchingDropdown,
     );
   }
 
@@ -50,6 +60,8 @@ class HomeCareState extends Equatable {
         pagination,
         selectedCategoryId,
         searchQuery,
-        errorMessage
+        errorMessage,
+        searchResults,
+        isSearchingDropdown,
       ];
 }

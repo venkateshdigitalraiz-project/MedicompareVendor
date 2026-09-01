@@ -71,13 +71,12 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                       ? item.orderItemId
                       : widget.appointmentId));
 
-          final String resolvedPatientId = (patientId != null && patientId.isNotEmpty)
-              ? patientId
-              : (patient?.patientId.isNotEmpty == true
-                  ? patient!.patientId
-                  : (item.patientId.isNotEmpty
-                      ? item.patientId
-                      : ''));
+          final String resolvedPatientId =
+              (patientId != null && patientId.isNotEmpty)
+                  ? patientId
+                  : (patient?.patientId.isNotEmpty == true
+                      ? patient!.patientId
+                      : (item.patientId.isNotEmpty ? item.patientId : ''));
 
           final String reportType = item.reports.isNotEmpty &&
                   item.reports.first.reportType.isNotEmpty
@@ -85,16 +84,17 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               : (item.type.toLowerCase().contains('lab') ||
                       item.serviceTypes.toLowerCase().contains('lab')
                   ? 'labtests'
-                  : (item.type.isNotEmpty ? item.type.toLowerCase() : 'labtests'));
+                  : (item.type.isNotEmpty
+                      ? item.type.toLowerCase()
+                      : 'labtests'));
 
           final String resolvedSelectType =
               (selectType != null && selectType.isNotEmpty)
                   ? selectType
                   : (isGroup ? 'family' : 'family');
 
-          final String description = item.reports.isNotEmpty
-              ? item.reports.first.description
-              : '';
+          final String description =
+              item.reports.isNotEmpty ? item.reports.first.description : '';
 
           if (resolvedOrderId.isEmpty) {
             if (mounted) {
@@ -419,7 +419,8 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         listener: (context, state) {
           if (state is AppointmentDetailsLoaded) {
             _cachedDetails = state.appointmentDetails;
-            _selectedStatus = _normalizeStatus(state.appointmentDetails.orderStatus);
+            _selectedStatus =
+                _normalizeStatus(state.appointmentDetails.orderStatus);
           } else if (state is AppointmentStatusUpdatedState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -502,58 +503,58 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
       title: "Patients & Services ($totalPatients patients)",
       icon: Icons.medical_services_outlined,
       child: Column(
-        children: details.isGroup
-            ? details.groupDetails.map((group) {
-                final patient = group.patientDetails;
-                final patientId = patient?.patientId.isNotEmpty == true
-                    ? patient!.patientId
-                    : group.patientId;
-                final selectType = group.selectType.isNotEmpty
-                    ? group.selectType
-                    : (details.personType.isNotEmpty
-                        ? details.personType
-                        : 'family');
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (patient != null) ...[
-                      Text(
-                        "Patient: ${patient.name}",
-                        style: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      const SizedBox(height: 8),
+        children: [
+          ...(details.isGroup
+              ? details.groupDetails.map((group) {
+                  final patient = group.patientDetails;
+                  final patientId = patient?.patientId.isNotEmpty == true
+                      ? patient!.patientId
+                      : group.patientId;
+                  final selectType = group.selectType.isNotEmpty
+                      ? group.selectType
+                      : (details.personType.isNotEmpty
+                          ? details.personType
+                          : 'family');
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (patient != null) ...[
+                        Text(
+                          "Patient: ${patient.name}",
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      ...group.items.map((item) => _buildItemRow(item,
+                          details: details,
+                          patient: patient,
+                          patientId: patientId,
+                          selectType: selectType)),
                     ],
-                    ...group.items.map((item) => _buildItemRow(
-                        item,
-                        details: details,
-                        patient: patient,
-                        patientId: patientId,
-                        selectType: selectType)),
-                  ],
-                );
-              }).toList()
-            : details.normalItems
-                .map((item) =>
-                    _buildItemRow(item,
-                        details: details,
-                        patientId: details.groupDetails.isNotEmpty
-                            ? details.groupDetails.first.patientId
-                            : details.patientId,
-                        selectType: details.groupDetails.isNotEmpty &&
-                                details.groupDetails.first.selectType.isNotEmpty
-                            ? details.groupDetails.first.selectType
-                            : (details.personType.isNotEmpty
-                                ? details.personType
-                                : 'family')))
-                .toList(),
+                  );
+                }).toList()
+              : details.normalItems
+                  .map((item) => _buildItemRow(item,
+                      details: details,
+                      patientId: details.groupDetails.isNotEmpty
+                          ? details.groupDetails.first.patientId
+                          : details.patientId,
+                      selectType: details.groupDetails.isNotEmpty &&
+                              details.groupDetails.first.selectType.isNotEmpty
+                          ? details.groupDetails.first.selectType
+                          : (details.personType.isNotEmpty
+                              ? details.personType
+                              : 'family')))
+                  .toList()),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }
 
-  Widget _buildItemRow(
-      AppointmentServiceItemEntity item, {
-      required AppointmentDetailsEntity details,
+  Widget _buildItemRow(AppointmentServiceItemEntity item,
+      {required AppointmentDetailsEntity details,
       AppointmentPatientDetailsEntity? patient,
       String? patientId,
       String? selectType}) {
@@ -735,12 +736,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: () => _removePdf(item.orderItemId),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
               ],
             )
           else
@@ -752,7 +747,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isUploading ? "Uploading..." : "Upload",
+                      isUploading ? "Uploading..." : "Upload Report",
                       style: GoogleFonts.inter(
                           color: Colors.grey.shade700, fontSize: 14),
                     ),
@@ -1279,7 +1274,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           _pdfBytes = response.bodyBytes;
         } else {
-          _error = "Failed to load PDF from server (HTTP ${response.statusCode})";
+          _error =
+              "Failed to load PDF from server (HTTP ${response.statusCode})";
         }
       } else {
         _error = "No PDF data provided";

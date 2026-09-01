@@ -103,8 +103,17 @@ class _LoginFormState extends State<LoginForm> {
         setState(() {
           isLoading = false;
         });
+        String errorMsg = e.toString();
+        if (errorMsg.startsWith('ServerException: ')) {
+          errorMsg = errorMsg.substring('ServerException: '.length);
+        } else if (errorMsg.startsWith('Exception: ')) {
+          errorMsg = errorMsg.substring('Exception: '.length);
+        } else if (errorMsg == 'UNAUTHORIZED_ACCESS_401') {
+          errorMsg = 'Incorrect email/password';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          SnackBar(content: Text(errorMsg)),
         );
       }
     }
