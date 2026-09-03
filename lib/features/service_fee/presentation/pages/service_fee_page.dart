@@ -4,12 +4,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import '../../domain/entities/service_fee_user.dart';
+import '../../domain/entities/service_fee.dart';
 import '../bloc/service_fee_bloc.dart';
 import '../bloc/service_fee_event.dart';
 import '../bloc/service_fee_state.dart';
 import '../widgets/medicine_delivery_fee_card.dart';
 import '../widgets/medical_equipment_fee_card.dart';
 import '../widgets/lab_test_visit_fee_card.dart';
+import '../widgets/medicine_delivery_fee_bottom_sheet.dart';
+
 
 class ServiceFeePage extends StatefulWidget {
   const ServiceFeePage({super.key});
@@ -60,7 +63,46 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                 );
               }
               return Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  if ((state is ServiceFeeSuccess && state.serviceFee.medicine != null) || 
+                      (state is ServiceFeeRefreshing && state.serviceFee.medicine != null))
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: AppColors.white),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (sheetContext) {
+                            final currentFee = state is ServiceFeeSuccess 
+                                ? state.serviceFee 
+                                : (state as ServiceFeeRefreshing).serviceFee;
+                                
+                            return MedicineDeliveryFeeBottomSheet(
+                              fee: currentFee.medicine!,
+                              onSave: (updatedMedicineFee) {
+                                final updatedServiceFee = ServiceFee(
+                                  id: currentFee.id,
+                                  vendorId: currentFee.vendorId,
+                                  createdAt: currentFee.createdAt,
+                                  updatedAt: currentFee.updatedAt,
+                                  user: currentFee.user,
+                                  labTests: currentFee.labTests,
+                                  medicalEquipment: currentFee.medicalEquipment,
+                                  branchOverrides: currentFee.branchOverrides,
+                                  medicine: updatedMedicineFee,
+                                );
+                                context.read<ServiceFeeBloc>().add(SaveServiceFee(updatedServiceFee));
+                                Navigator.pop(sheetContext); // Close the bottom sheet
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   TextButton(
                     onPressed: () {
                       if (state is ServiceFeeSuccess) {

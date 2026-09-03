@@ -670,123 +670,142 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           const SizedBox(height: 8),
           Divider(height: 1, color: Colors.grey.shade200),
           const SizedBox(height: 8),
-          if (item.reports.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: item.reports.asMap().entries.map((entry) {
-                final int index = entry.key;
-                final report = entry.value;
-                final String fileName = report.file.isNotEmpty
-                    ? (report.file.split('/').last.split('\\').last)
-                    : "Report ${index + 1}";
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: InkWell(
-                    onTap: () => _viewReportFile(report.file, fileName),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.picture_as_pdf,
-                            color: Colors.red.shade400, size: 20),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            fileName,
-                            style: GoogleFonts.inter(
-                              color: Colors.blue.shade700,
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
+          Builder(
+            builder: (context) {
+              final String pType = patient?.type.trim().toLowerCase() ?? '';
+              final String effectivePatientType = pType.isNotEmpty
+                  ? pType
+                  : (selectType?.trim().toLowerCase() ?? '');
+              final matchingReports = item.reports.where((report) {
+                return report.selectType.trim().toLowerCase() ==
+                    effectivePatientType;
+              }).toList();
+
+              final validReports = matchingReports.where((report) {
+                return report.file.trim().isNotEmpty;
+              }).toList();
+
+              if (validReports.isNotEmpty) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: validReports.asMap().entries.map((entry) {
+                    final int index = entry.key;
+                    final report = entry.value;
+                    final String fileName = report.file.isNotEmpty
+                        ? (report.file.split('/').last.split('\\').last)
+                        : "Report ${index + 1}";
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: InkWell(
+                        onTap: () => _viewReportFile(report.file, fileName),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.picture_as_pdf,
+                                color: Colors.red.shade400, size: 20),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                fileName,
+                                style: GoogleFonts.inter(
+                                  color: Colors.blue.shade700,
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 );
-              }).toList(),
-            )
-          else if (_pickedFiles.containsKey(item.orderItemId))
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: InkWell(
-                    onTap: () => _viewPdf(item.orderItemId),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.picture_as_pdf,
-                            color: Colors.red.shade400, size: 20),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            _pickedFiles[item.orderItemId]!.name,
-                            style: GoogleFonts.inter(
-                              color: Colors.blue.shade700,
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            )
-          else
-            BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
-              builder: (context, state) {
-                final isUploading = state is ReportUploadingState &&
-                    state.orderItemId == item.orderItemId;
+              } else if (_pickedFiles.containsKey(item.orderItemId)) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      isUploading ? "Uploading..." : "Upload Report",
-                      style: GoogleFonts.inter(
-                          color: Colors.grey.shade700, fontSize: 14),
-                    ),
-                    if (isUploading)
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    else
-                      InkWell(
-                        onTap: () => _pickPdf(
-                          item: item,
-                          patient: patient,
-                          patientId: patientId,
-                          selectType: selectType,
-                          orderId: item.id.isNotEmpty
-                              ? item.id
-                              : (item.orderItemId.isNotEmpty
-                                  ? item.orderItemId
-                                  : (details.id.isNotEmpty
-                                      ? details.id
-                                      : widget.appointmentId)),
-                          isGroup: details.isGroup,
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.attach_file,
-                              size: 20, color: Colors.blue.shade700),
+                    Flexible(
+                      child: InkWell(
+                        onTap: () => _viewPdf(item.orderItemId),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.picture_as_pdf,
+                                color: Colors.red.shade400, size: 20),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                _pickedFiles[item.orderItemId]!.name,
+                                style: GoogleFonts.inter(
+                                  color: Colors.blue.shade700,
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                    ),
                   ],
                 );
-              },
-            ),
+              } else {
+                return BlocBuilder<AppointmentDetailsBloc,
+                    AppointmentDetailsState>(
+                  builder: (context, state) {
+                    final isUploading = state is ReportUploadingState &&
+                        state.orderItemId == item.orderItemId;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isUploading ? "Uploading..." : "Upload Report",
+                          style: GoogleFonts.inter(
+                              color: Colors.grey.shade700, fontSize: 14),
+                        ),
+                        if (isUploading)
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        else
+                          InkWell(
+                            onTap: () => _pickPdf(
+                              item: item,
+                              patient: patient,
+                              patientId: patientId,
+                              selectType: selectType,
+                              orderId: item.id.isNotEmpty
+                                  ? item.id
+                                  : (item.orderItemId.isNotEmpty
+                                      ? item.orderItemId
+                                      : (details.id.isNotEmpty
+                                          ? details.id
+                                          : widget.appointmentId)),
+                              isGroup: details.isGroup,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(Icons.attach_file,
+                                  size: 20, color: Colors.blue.shade700),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+          ),
         ],
       ),
     );
@@ -1334,3 +1353,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     );
   }
 }
+/*
+ "selectType": "self", and  "type": "self" both matched  then consider patientDetails  {name} compare both  but UI display URl but real ti display upload file with icon. please cross check it  
+ */

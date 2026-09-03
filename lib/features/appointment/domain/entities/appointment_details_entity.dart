@@ -152,6 +152,7 @@ class AppointmentPatientDetailsEntity extends Equatable {
   final String gender;
   final String phone;
   final String email;
+  final String type;
 
   const AppointmentPatientDetailsEntity({
     this.patientId = '',
@@ -160,10 +161,11 @@ class AppointmentPatientDetailsEntity extends Equatable {
     required this.gender,
     required this.phone,
     required this.email,
+    this.type = '',
   });
 
   @override
-  List<Object?> get props => [patientId, name, age, gender, phone, email];
+  List<Object?> get props => [patientId, name, age, gender, phone, email, type];
 }
 
 class AppointmentReportEntity extends Equatable {
@@ -171,6 +173,7 @@ class AppointmentReportEntity extends Equatable {
   final String reportType;
   final String description;
   final String file;
+  final String selectType;
   final DateTime? createdAt;
 
   const AppointmentReportEntity({
@@ -178,11 +181,12 @@ class AppointmentReportEntity extends Equatable {
     this.reportType = '',
     this.description = '',
     this.file = '',
+    this.selectType = '',
     this.createdAt,
   });
 
   @override
-  List<Object?> get props => [id, reportType, description, file, createdAt];
+  List<Object?> get props => [id, reportType, description, file, selectType, createdAt];
 }
 
 class AppointmentServiceItemEntity extends Equatable {

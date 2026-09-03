@@ -270,6 +270,7 @@ class AppointmentPatientDetailsModel extends AppointmentPatientDetailsEntity {
     required super.gender,
     required super.phone,
     required super.email,
+    super.type,
   });
 
   factory AppointmentPatientDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -302,6 +303,7 @@ class AppointmentPatientDetailsModel extends AppointmentPatientDetailsEntity {
           '',
       email:
           json['email']?.toString() ?? json['patientEmail']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
     );
   }
 }
@@ -312,6 +314,7 @@ class AppointmentReportModel extends AppointmentReportEntity {
     super.reportType,
     super.description,
     super.file,
+    super.selectType,
     super.createdAt,
   });
 
@@ -330,6 +333,9 @@ class AppointmentReportModel extends AppointmentReportEntity {
           json['report']?.toString() ??
           json['url']?.toString() ??
           json['path']?.toString() ??
+          '',
+      selectType: json['selectType']?.toString() ??
+          json['selecttype']?.toString() ??
           '',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())?.toLocal()
