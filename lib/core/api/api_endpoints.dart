@@ -52,6 +52,7 @@ class ApiEndpoints {
   static String updateAppointmentOrderStatus(String id) =>
       '/vendor/order/orderstatusupdate/$id';
   static String uploadReport(String id) => '/vendor/order/reportupload/$id';
+  static const String deliverymanAdminList = '/vendor/deliveryman/adminlist';
 
   // Leads
   static const String leadsList = '/vendor/leads/list';

@@ -24,6 +24,7 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
     super.shippingAddress,
     super.billingAddress,
     super.couponDetails,
+    super.deliveries,
   });
 
   factory AppointmentDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -140,6 +141,34 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
           ? AppointmentAddressModel.fromJson(
               json['billingAddressDetails'] as Map<String, dynamic>)
           : null,
+      deliveries: (() {
+        if (json['deliveries'] != null && json['deliveries'] is List) {
+          return (json['deliveries'] as List)
+              .where((e) => e != null && e is Map)
+              .map((e) => AppointmentDeliveryModel.fromJson(
+                  Map<String, dynamic>.from(e as Map)))
+              .toList();
+        }
+        if (json['deliveries'] != null && json['deliveries'] is Map) {
+          return [
+            AppointmentDeliveryModel.fromJson(
+                Map<String, dynamic>.from(json['deliveries'] as Map))
+          ];
+        }
+        if (json['delivery'] != null && json['delivery'] is Map) {
+          return [
+            AppointmentDeliveryModel.fromJson(
+                Map<String, dynamic>.from(json['delivery'] as Map))
+          ];
+        }
+        if (json['assignedDelivery'] != null && json['assignedDelivery'] is Map) {
+          return [
+            AppointmentDeliveryModel.fromJson(
+                Map<String, dynamic>.from(json['assignedDelivery'] as Map))
+          ];
+        }
+        return <AppointmentDeliveryModel>[];
+      })(),
     );
   }
 }
@@ -515,6 +544,68 @@ class AppointmentAddressModel extends AppointmentAddressEntity {
       locationAddress: locationStr,
       pincode: json['pincode']?.toString() ?? '',
       addressType: json['addressType']?.toString() ?? '',
+    );
+  }
+}
+
+class AppointmentDeliveryModel extends AppointmentDeliveryEntity {
+  const AppointmentDeliveryModel({
+    required super.vendorId,
+    required super.deliveryPartnerType,
+    required super.deliveryPartnerId,
+    required super.deliveryFee,
+    super.deliveryNotes,
+    super.deliveryAssignedAt,
+    super.deliveryCompletedAt,
+    required super.deliveryOtp,
+    required super.isDeliveryVerified,
+    required super.id,
+    super.deliveryPartnerDetails,
+  });
+
+  factory AppointmentDeliveryModel.fromJson(Map<String, dynamic> json) {
+    return AppointmentDeliveryModel(
+      vendorId: json['vendorId']?.toString() ?? '',
+      deliveryPartnerType: json['deliveryPartnerType']?.toString() ?? '',
+      deliveryPartnerId: json['deliveryPartnerId']?.toString() ?? '',
+      deliveryFee: double.tryParse(json['deliveryFee']?.toString() ?? '0') ?? 0.0,
+      deliveryNotes: json['deliveryNotes']?.toString(),
+      deliveryAssignedAt: json['deliveryAssignedAt'] != null
+          ? DateTime.tryParse(json['deliveryAssignedAt'].toString())?.toLocal()
+          : null,
+      deliveryCompletedAt: json['deliveryCompletedAt'] != null
+          ? DateTime.tryParse(json['deliveryCompletedAt'].toString())?.toLocal()
+          : null,
+      deliveryOtp: json['deliveryOtp']?.toString() ?? '',
+      isDeliveryVerified: json['isDeliveryVerified'] == true ||
+          json['isDeliveryVerified'] == 'true',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      deliveryPartnerDetails: json['deliveryPartnerDetails'] != null
+          ? AppointmentDeliveryPartnerDetailsModel.fromJson(
+              json['deliveryPartnerDetails'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}
+
+class AppointmentDeliveryPartnerDetailsModel extends AppointmentDeliveryPartnerDetailsEntity {
+  const AppointmentDeliveryPartnerDetailsModel({
+    required super.id,
+    required super.name,
+    required super.email,
+    required super.phone,
+    required super.vehicleNumber,
+    super.profileImage,
+  });
+
+  factory AppointmentDeliveryPartnerDetailsModel.fromJson(Map<String, dynamic> json) {
+    return AppointmentDeliveryPartnerDetailsModel(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      vehicleNumber: json['vehicleNumber']?.toString() ?? '',
+      profileImage: json['profileImage']?.toString(),
     );
   }
 }

@@ -6,6 +6,8 @@ import 'domain/usecases/get_appointments_usecase.dart';
 import 'domain/usecases/get_appointment_details_usecase.dart';
 import 'domain/usecases/upload_report_usecase.dart';
 import 'domain/usecases/update_appointment_order_status_usecase.dart';
+import 'domain/usecases/get_delivery_partners_usecase.dart';
+import 'domain/usecases/assign_delivery_partner_usecase.dart';
 import 'presentation/bloc/appointment_booking_bloc.dart';
 import 'presentation/bloc/appointment_details_bloc.dart';
 
@@ -16,7 +18,17 @@ class AppointmentInjection {
       uploadReportUseCase: provideUploadReportUseCase(),
       updateAppointmentOrderStatusUseCase:
           provideUpdateAppointmentOrderStatusUseCase(),
+      getDeliveryPartnersUseCase: provideGetDeliveryPartnersUseCase(),
+      assignDeliveryPartnerUseCase: provideAssignDeliveryPartnerUseCase(),
     );
+  }
+
+  static GetDeliveryPartnersUseCase provideGetDeliveryPartnersUseCase() {
+    return GetDeliveryPartnersUseCase(provideAppointmentRepository());
+  }
+
+  static AssignDeliveryPartnerUseCase provideAssignDeliveryPartnerUseCase() {
+    return AssignDeliveryPartnerUseCase(provideAppointmentRepository());
   }
 
   static GetAppointmentDetailsUseCase provideGetAppointmentDetailsUseCase() {

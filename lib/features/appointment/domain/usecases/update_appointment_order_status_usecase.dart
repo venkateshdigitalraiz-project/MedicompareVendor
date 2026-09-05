@@ -8,10 +8,12 @@ class UpdateAppointmentOrderStatusUseCase {
   Future<void> call({
     required String orderId,
     required String orderStatus,
+    String? rejectionReason,
   }) async {
     return await repository.updateOrderStatus(
       orderId: orderId,
       orderStatus: orderStatus,
+      rejectionReason: rejectionReason,
     );
   }
 }

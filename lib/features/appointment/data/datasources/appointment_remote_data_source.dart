@@ -5,6 +5,8 @@ import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
 import '../models/appointment_model.dart';
 
+import '../models/delivery_partner_model.dart';
+
 abstract class AppointmentRemoteDataSource {
   Future<AppointmentsListModel> getAppointments({
     int page = 1,
@@ -28,6 +30,23 @@ abstract class AppointmentRemoteDataSource {
   Future<void> updateOrderStatus({
     required String orderId,
     required String orderStatus,
+    String? rejectionReason,
+  });
+
+  Future<DeliveryPartnersResultModel> getDeliveryPartners({
+    String deliveryManType = 'admin',
+    int page = 1,
+    int limit = 10,
+    String status = 'active',
+    String search = '',
+  });
+
+  Future<void> assignDeliveryPartner({
+    required String orderId,
+    required String deliveryPartnerId,
+    String deliveryManType = 'vendor',
+    String deliveryPartner = 'self',
+    String? readyTime,
   });
 }
 
@@ -39,18 +58,31 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
   @override
   Future<AppointmentDetailsModel> getAppointmentDetails(String id) async {
     final response = await apiService.get('${ApiEndpoints.appointmentOrderDetails}/$id');
+
     final decoded = json.decode(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (decoded == null || decoded['data'] == null) {
+        throw Exception('Failed to load appointment details');
+      }
 
-    if (decoded == null || decoded['data'] == null || decoded['data']['orders'] == null) {
-      throw Exception('Failed to load appointment details');
-    }
-    
-    final List<dynamic> orders = decoded['data']['orders'];
-    if (orders.isEmpty) {
-      throw Exception('Appointment not found');
-    }
+      Map<String, dynamic> orderJson;
+      if (decoded['data']['orders'] is List &&
+          (decoded['data']['orders'] as List).isNotEmpty) {
+        orderJson = Map<String, dynamic>.from(
+            (decoded['data']['orders'] as List).first as Map);
+      } else if (decoded['data'] is Map) {
+        orderJson = Map<String, dynamic>.from(decoded['data'] as Map);
+      } else {
+        throw Exception('Appointment not found');
+      }
 
-    return AppointmentDetailsModel.fromJson(orders.first as Map<String, dynamic>);
+      return AppointmentDetailsModel.fromJson(orderJson);
+    } else {
+      final message = decoded != null && decoded is Map && decoded['message'] != null
+          ? decoded['message'].toString()
+          : 'Failed to load appointment details';
+      throw Exception(message);
+    }
   }
 
   @override
@@ -63,16 +95,18 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
     required File file,
   }) async {
     final fields = <String, String>{
-      'reportType': reportType.isNotEmpty ? reportType : 'labtests',
+      'reportType': reportType,
       'patientId': patientId,
-      'selectType': selectType.isNotEmpty ? selectType : 'family',
-      'description': description ?? '',
+      'selectType': selectType,
     };
+    if (description != null && description.isNotEmpty) {
+      fields['description'] = description;
+    }
 
     final response = await apiService.post(
       ApiEndpoints.uploadReport(orderId),
       fields: fields,
-      files: {'file': file},
+      files: {'reportFiles': file},
     );
 
     final decoded = json.decode(response.body);
@@ -94,10 +128,19 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
   Future<void> updateOrderStatus({
     required String orderId,
     required String orderStatus,
+    String? rejectionReason,
   }) async {
+    final body = <String, dynamic>{
+      'orderStatus': orderStatus,
+      'status': orderStatus,
+    };
+    if (rejectionReason != null && rejectionReason.isNotEmpty) {
+      body['rejectionReason'] = rejectionReason;
+    }
+
     final response = await apiService.post(
       ApiEndpoints.updateAppointmentOrderStatus(orderId),
-      body: {'orderStatus': orderStatus},
+      body: body,
     );
 
     final decoded = json.decode(response.body);
@@ -142,5 +185,148 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
       );
     }
     return AppointmentsListModel.fromJson(decoded['data']);
+  }
+
+  @override
+  Future<DeliveryPartnersResultModel> getDeliveryPartners({
+    String deliveryManType = 'admin',
+    int page = 1,
+    int limit = 10,
+    String status = 'active',
+    String search = '',
+  }) async {
+    final queryParams = <String, dynamic>{
+      'deliveryManType': deliveryManType,
+      'page': page,
+      'limit': limit,
+      'status': status,
+    };
+    if (search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+
+    final response = await apiService.get(
+      ApiEndpoints.deliverymanAdminList,
+      queryParameters: queryParams,
+    );
+
+    final decoded = json.decode(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (decoded == null) return const DeliveryPartnersResultModel();
+
+      List<dynamic> items = [];
+      DeliveryPartnerModel? ownUser;
+
+      if (decoded is List) {
+        items = decoded;
+      } else if (decoded is Map) {
+        if (decoded['users'] is Map) {
+          ownUser = DeliveryPartnerModel.fromUserJson(
+              Map<String, dynamic>.from(decoded['users'] as Map));
+        } else if (decoded['user'] is Map) {
+          ownUser = DeliveryPartnerModel.fromUserJson(
+              Map<String, dynamic>.from(decoded['user'] as Map));
+        }
+
+        if (decoded['data'] is Map) {
+          final dataMap = decoded['data'] as Map;
+          for (final key in [
+            'deliveryMans',
+            'deliverymen',
+            'deliveryMen',
+            'deliveryMan',
+            'adminList',
+            'adminlist',
+            'list',
+            'partners',
+            'deliveryPartners',
+            'items',
+            'docs',
+          ]) {
+            if (dataMap[key] is List) {
+              items = dataMap[key] as List;
+              break;
+            }
+          }
+        } else if (decoded['data'] is List) {
+          items = decoded['data'] as List;
+        }
+
+        if (items.isEmpty) {
+          for (final key in [
+            'deliveryMans',
+            'deliverymen',
+            'deliveryMen',
+            'deliveryMan',
+            'adminList',
+            'adminlist',
+            'list',
+            'partners',
+            'deliveryPartners',
+            'items',
+            'docs',
+          ]) {
+            if (decoded[key] is List) {
+              items = decoded[key] as List;
+              break;
+            }
+          }
+        }
+      }
+
+      final deliveryMans = items
+          .where((e) => e != null && e is Map)
+          .map((e) => DeliveryPartnerModel.fromJson(
+              Map<String, dynamic>.from(e as Map)))
+          .toList();
+
+      return DeliveryPartnersResultModel(
+        deliveryMans: deliveryMans,
+        ownDeliveryUser: ownUser,
+      );
+    } else {
+      final message = decoded != null && decoded is Map && decoded['message'] != null
+          ? decoded['message'].toString()
+          : 'Failed to load delivery partners';
+      throw Exception(message);
+    }
+  }
+
+  @override
+  Future<void> assignDeliveryPartner({
+    required String orderId,
+    required String deliveryPartnerId,
+    String deliveryManType = 'vendor',
+    String deliveryPartner = 'self',
+    String? readyTime,
+  }) async {
+    final body = <String, dynamic>{
+      'deliveryManType': deliveryManType,
+      'deliveryPartner': deliveryPartner,
+      'deliveryPartnerId': deliveryPartnerId,
+      'orderId': orderId,
+      'orderStatus': 'assigned',
+      'readyTime': readyTime,
+      'status': 'assigned',
+    };
+
+    final response = await apiService.post(
+      ApiEndpoints.updateAppointmentOrderStatus(orderId),
+      body: body,
+    );
+
+    final decoded = json.decode(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (decoded is Map &&
+          (decoded['status'] == false || decoded['success'] == false)) {
+        throw Exception(decoded['message'] ?? 'Failed to assign delivery partner');
+      }
+      return;
+    } else {
+      final message = decoded != null && decoded is Map && decoded['message'] != null
+          ? decoded['message'].toString()
+          : 'Failed to assign delivery partner';
+      throw Exception(message);
+    }
   }
 }

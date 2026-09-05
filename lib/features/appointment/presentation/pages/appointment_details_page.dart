@@ -31,6 +31,40 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   final Map<String, PlatformFile> _pickedFiles = {};
   AppointmentDetailsEntity? _cachedDetails;
 
+  int _selectedDeliveryTab = 0; // 0: Medicompares, 1: Own Deliveryman
+  final TextEditingController _partnerSearchController =
+      TextEditingController();
+  String? _selectedDeliveryPartnerId;
+  String _selectedReadyTime = '30 min';
+  final List<String> _readyTimeOptions = [
+    '15 min',
+    '30 min',
+    '45 min',
+    '60 min',
+    '90 min',
+  ];
+
+  bool _isPendingStatus(String status) {
+    final s = status.trim().toLowerCase();
+    return s == 'pending' || s == 'new' || s.isEmpty;
+  }
+
+  bool _isConfirmedStatus(String status) =>
+      status.trim().toLowerCase() == 'confirmed';
+
+  bool _isAssignedStatus(String status) {
+    final s = status.trim().toLowerCase();
+    return s == 'assigned' ||
+        s == 'assigned_technician' ||
+        s == 'assigned technician';
+  }
+
+  @override
+  void dispose() {
+    _partnerSearchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickPdf({
     required AppointmentServiceItemEntity item,
     required AppointmentPatientDetailsEntity? patient,
@@ -181,12 +215,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     }
   }
 
-  void _removePdf(String itemId) {
-    setState(() {
-      _pickedFiles.remove(itemId);
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -200,11 +228,18 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   String _normalizeStatus(String status) {
     final s = status.trim().toLowerCase().replaceAll(' ', '_');
     if (s == 'not_collected') return 'sample_not_collected';
-    if (['pending', 'sample_collected', 'sample_not_collected', 'completed']
-        .contains(s)) {
+    if (s == 'assigned_technician') return 'assigned';
+    if ([
+      'pending',
+      'confirmed',
+      'assigned',
+      'sample_collected',
+      'sample_not_collected',
+      'completed',
+    ].contains(s)) {
       return s;
     }
-    return 'pending';
+    return s;
   }
 
   Color _getStatusColor(String status) {
@@ -215,12 +250,23 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         return const Color(0xFF1565C0);
       case 'sample_not_collected':
         return const Color(0xFFD32F2F);
+      case 'confirmed':
+        return const Color(0xFF0284C7);
+      case 'assigned':
+      case 'assigned_technician':
+        return const Color(0xFF059669);
+      case 'cancelled':
+      case 'rejected':
+      case 'failed':
+        return const Color(0xFFDC2626);
       case 'pending':
       default:
         return const Color(0xFFEF6C00);
     }
   }
 
+  // Dropdown background helper - commented out with status dropdown
+  /*
   Color _getStatusBgColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -229,150 +275,333 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         return const Color(0xFFE3F2FD);
       case 'sample_not_collected':
         return const Color(0xFFFFEBEE);
+      case 'confirmed':
+        return const Color(0xFFE0F2FE);
+      case 'assigned':
+      case 'assigned_technician':
+        return const Color(0xFFECFDF5);
+      case 'cancelled':
+      case 'rejected':
+      case 'failed':
+        return const Color(0xFFFEE2E2);
       case 'pending':
       default:
         return const Color(0xFFFFF3E0);
     }
   }
+  */
 
-  Widget _buildStatusDropdown() {
+  Widget _buildAppBarActions() {
     return BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
       builder: (context, state) {
-        String currentStatus = _selectedStatus ??
-            (state is AppointmentDetailsLoaded
-                ? _normalizeStatus(state.appointmentDetails.orderStatus)
-                : 'pending');
-
-        final activeColor = _getStatusColor(currentStatus);
-        final activeBgColor = _getStatusBgColor(currentStatus);
-
-        final items = [
-          {'label': 'Pending', 'value': 'pending'},
-          {'label': 'Sample Collected', 'value': 'sample_collected'},
-          {'label': 'Not Collected', 'value': 'sample_not_collected'},
-          {'label': 'Completed', 'value': 'completed'},
-        ];
-
-        final currentLabel = items.firstWhere(
-          (e) => e['value'] == currentStatus,
-          orElse: () => {'label': 'Pending', 'value': 'pending'},
-        )['label']!;
-
-        return PopupMenuButton<String>(
-          tooltip: 'Change Status',
-          padding: EdgeInsets.zero,
-          position: PopupMenuPosition.under,
-          color: Colors.white,
-          elevation: 6,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          onSelected: (newStatus) {
-            setState(() {
-              _selectedStatus = newStatus;
-            });
-            final orderId = state is AppointmentDetailsLoaded
-                ? (state.appointmentDetails.id.isNotEmpty
-                    ? state.appointmentDetails.id
-                    : (state.appointmentDetails.orderId.isNotEmpty
-                        ? state.appointmentDetails.orderId
-                        : widget.appointmentId))
-                : widget.appointmentId;
-            context.read<AppointmentDetailsBloc>().add(
-                  UpdateAppointmentOrderStatusEvent(
-                    orderId: orderId,
-                    orderStatus: newStatus,
-                  ),
-                );
-          },
-          itemBuilder: (context) => items.map((item) {
-            final itemColor = _getStatusColor(item['value']!);
-            final itemBg = _getStatusBgColor(item['value']!);
-            final isSelected = item['value'] == currentStatus;
-
-            return PopupMenuItem<String>(
-              value: item['value'],
-              height: 38,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isSelected ? itemBg : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: itemColor,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      item['label']!,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? itemColor : Colors.black87,
-                      ),
-                    ),
-                    if (isSelected) ...[
-                      const SizedBox(width: 8),
-                      Icon(Icons.check, size: 14, color: itemColor),
-                    ],
-                  ],
+        if (state is AppointmentStatusUpdatingState) {
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            child: const Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
                 ),
               ),
-            );
-          }).toList(),
-          child: Container(
-            height: 30,
-            margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: activeBgColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: activeColor.withOpacity(0.4), width: 1),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: activeColor,
-                  ),
-                ),
-                const SizedBox(width: 5),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 105),
-                  child: Text(
-                    currentLabel,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: activeColor,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Icon(Icons.keyboard_arrow_down_rounded,
-                    size: 16, color: activeColor),
-              ],
+          );
+        }
+
+        // Do not show any buttons while loading or if details are not yet loaded
+        if (state is! AppointmentDetailsLoaded) {
+          return const SizedBox.shrink();
+        }
+
+        final details = state.appointmentDetails;
+        final orderStatus = details.orderStatus.trim().toLowerCase();
+        final isPending = orderStatus == 'pending';
+
+        // Only show Cancel and Accept buttons when the API orderStatus is strictly pending
+        if (!isPending) {
+          return const SizedBox.shrink();
+        }
+
+        final orderId = details.id.isNotEmpty
+            ? details.id
+            : (details.orderId.isNotEmpty
+                ? details.orderId
+                : widget.appointmentId);
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildCompactAppBarButton(
+              label: "Cancel Order",
+              color: const Color(0xFFDC2626),
+              onTap: () => _showCancelOrderDialog(orderId),
             ),
-          ),
+            const SizedBox(width: 6),
+            _buildCompactAppBarButton(
+              label: "Accept Order",
+              color: AppColors.primary,
+              onTap: () {
+                context.read<AppointmentDetailsBloc>().add(
+                      UpdateAppointmentOrderStatusEvent(
+                        orderId: orderId,
+                        orderStatus: 'confirmed',
+                      ),
+                    );
+              },
+            ),
+          ],
         );
       },
     );
   }
+
+  Widget _buildCompactAppBarButton({
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          minimumSize: const Size(0, 30),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCancelOrderDialog(String orderId) {
+    final TextEditingController reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          "Cancel Order",
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Please provide a reason for cancelling this appointment order.",
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: "Enter cancellation reason...",
+                hintStyle: GoogleFonts.inter(fontSize: 13, color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.all(12),
+              ),
+              style: GoogleFonts.inter(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              "Close",
+              style: GoogleFonts.inter(
+                  color: Colors.grey[600], fontWeight: FontWeight.w500),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final reason = reasonController.text.trim();
+              if (reason.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter a cancellation reason"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(ctx);
+              context.read<AppointmentDetailsBloc>().add(
+                    UpdateAppointmentOrderStatusEvent(
+                      orderId: orderId,
+                      orderStatus: 'cancelled',
+                      rejectionReason: reason,
+                    ),
+                  );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              "Cancel Order",
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget _buildStatusDropdown(
+  //     {required String orderId, required String currentStatus}) {
+  //   final activeColor = _getStatusColor(currentStatus);
+  //   final activeBgColor = _getStatusBgColor(currentStatus);
+
+  //   final items = [
+  //     {'label': 'Pending', 'value': 'pending'},
+  //     {'label': 'Confirmed', 'value': 'confirmed'},
+  //     {'label': 'Assigned', 'value': 'assigned'},
+  //     {'label': 'Sample Collected', 'value': 'sample_collected'},
+  //     {'label': 'Not Collected', 'value': 'sample_not_collected'},
+  //     {'label': 'Completed', 'value': 'completed'},
+  //     {'label': 'Cancelled', 'value': 'cancelled'},
+  //   ];
+
+  //   final currentLabel = items.firstWhere(
+  //     (e) => e['value'] == currentStatus,
+  //     orElse: () => {'label': 'Pending', 'value': 'pending'},
+  //   )['label']!;
+
+  //   return PopupMenuButton<String>(
+  //     tooltip: 'Change Status',
+  //     padding: EdgeInsets.zero,
+  //     position: PopupMenuPosition.under,
+  //     color: Colors.white,
+  //     elevation: 6,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     onSelected: (newStatus) {
+  //       if (newStatus == 'cancelled') {
+  //         _showCancelOrderDialog(orderId);
+  //         return;
+  //       }
+  //       setState(() {
+  //         _selectedStatus = newStatus;
+  //       });
+  //       context.read<AppointmentDetailsBloc>().add(
+  //             UpdateAppointmentOrderStatusEvent(
+  //               orderId: orderId,
+  //               orderStatus: newStatus,
+  //             ),
+  //           );
+  //     },
+  //     // itemBuilder: (context) => items.map((item) {
+  //     //   final itemColor = _getStatusColor(item['value']!);
+  //     // //  final itemBg = _getStatusBgColor(item['value']!);
+  //     //   final isSelected = item['value'] == currentStatus;
+
+  //     //   return PopupMenuItem<String>(
+  //     //     value: item['value'],
+  //     //     height: 38,
+  //     //     child: Container(
+  //     //       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //     //       decoration: BoxDecoration(
+  //     //         color: isSelected ? itemBg : Colors.transparent,
+  //     //         borderRadius: BorderRadius.circular(6),
+  //     //       ),
+  //     //       child: Row(
+  //     //         mainAxisSize: MainAxisSize.min,
+  //     //         children: [
+  //     //           Container(
+  //     //             width: 7,
+  //     //             height: 7,
+  //     //             decoration: BoxDecoration(
+  //     //               shape: BoxShape.circle,
+  //     //               color: itemColor,
+  //     //             ),
+  //     //           ),
+  //     //           const SizedBox(width: 8),
+  //     //           Text(
+  //     //             item['label']!,
+  //     //             style: GoogleFonts.inter(
+  //     //               fontSize: 12,
+  //     //               fontWeight:
+  //     //                   isSelected ? FontWeight.bold : FontWeight.w500,
+  //     //               color: isSelected ? itemColor : Colors.black87,
+  //     //             ),
+  //     //           ),
+  //     //           if (isSelected) ...[
+  //     //             const SizedBox(width: 8),
+  //     //             Icon(Icons.check, size: 14, color: itemColor),
+  //     //           ],
+  //     //         ],
+  //     //       ),
+  //     //     ),
+  //     //   );
+  //     // }).toList(),
+  //     child: Container(
+  //       height: 30,
+  //       margin: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
+  //       padding: const EdgeInsets.symmetric(horizontal: 8),
+  //       decoration: BoxDecoration(
+  //         color: activeBgColor,
+  //         borderRadius: BorderRadius.circular(16),
+  //         border: Border.all(color: activeColor.withOpacity(0.4), width: 1),
+  //       ),
+  //       child: Row(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Container(
+  //             width: 6,
+  //             height: 6,
+  //             decoration: BoxDecoration(
+  //               shape: BoxShape.circle,
+  //               color: activeColor,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 5),
+  //           ConstrainedBox(
+  //             constraints: const BoxConstraints(maxWidth: 105),
+  //             child: Text(
+  //               currentLabel,
+  //               style: GoogleFonts.inter(
+  //                 fontSize: 11,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: activeColor,
+  //               ),
+  //               overflow: TextOverflow.ellipsis,
+  //               maxLines: 1,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 2),
+  //           Icon(Icons.keyboard_arrow_down_rounded,
+  //               size: 16, color: activeColor),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -411,7 +640,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           ],
         ),
         actions: [
-          _buildStatusDropdown(),
+          _buildAppBarActions(),
           const SizedBox(width: 8),
         ],
       ),
@@ -419,9 +648,17 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         listener: (context, state) {
           if (state is AppointmentDetailsLoaded) {
             _cachedDetails = state.appointmentDetails;
-            _selectedStatus =
+            final normalized =
                 _normalizeStatus(state.appointmentDetails.orderStatus);
+            _selectedStatus = normalized;
           } else if (state is AppointmentStatusUpdatedState) {
+            setState(() {
+              _cachedDetails = null;
+              _selectedStatus = null;
+            });
+            context
+                .read<AppointmentDetailsBloc>()
+                .add(GetAppointmentDetailsEvent(widget.appointmentId));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -457,7 +694,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           }
         },
         builder: (context, state) {
-          if (state is AppointmentDetailsLoading && _cachedDetails == null) {
+          if ((state is AppointmentDetailsLoading ||
+                  state is AppointmentStatusUpdatingState) &&
+              _cachedDetails == null) {
             return const Center(child: CircularProgressIndicator());
           }
           final details = state is AppointmentDetailsLoaded
@@ -465,6 +704,11 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               : _cachedDetails;
 
           if (details != null) {
+            final activeStatus =
+                (_selectedStatus ?? _normalizeStatus(details.orderStatus))
+                    .trim()
+                    .toLowerCase();
+
             return LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth > 600;
@@ -473,6 +717,19 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (_isPendingStatus(activeStatus)) ...[
+                        // Pending status: no delivery cards displayed
+                      ] else if (_isConfirmedStatus(activeStatus)) ...[
+                        _buildDeliveryAssignmentSection(state, details),
+                        const SizedBox(height: 24),
+                      ] else if (_isAssignedStatus(activeStatus)) ...[
+                        _buildAssignedDeliveryPartnerSection(
+                          details.deliveries.isNotEmpty
+                              ? details.deliveries.first
+                              : null,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                       _buildAppointmentInformationSection(details, isWide),
                       const SizedBox(height: 24),
                       // _buildCustomerInformationSection(details),
@@ -914,9 +1171,11 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             details.paymentStatus.substring(1)
         : 'Pending';
 
-    String ordStatus = details.orderStatus.isNotEmpty
-        ? details.orderStatus[0].toUpperCase() +
-            details.orderStatus.substring(1)
+    final effectiveOrdStatus =
+        _selectedStatus ?? _normalizeStatus(details.orderStatus);
+    String ordStatus = effectiveOrdStatus.isNotEmpty
+        ? effectiveOrdStatus[0].toUpperCase() +
+            effectiveOrdStatus.substring(1).replaceAll('_', ' ')
         : 'Pending';
 
     final String? createdType =
@@ -1009,6 +1268,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     required String title,
     required IconData icon,
     required Widget child,
+    Widget? trailing,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1024,14 +1284,17 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               child: Icon(icon, color: AppColors.primary, size: 20),
             ),
             const SizedBox(width: 12),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: Colors.black87,
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
               ),
             ),
+            if (trailing != null) trailing,
           ],
         ),
         const SizedBox(height: 16),
@@ -1136,6 +1399,917 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     );
   }
 
+  Widget _buildAssignedDeliveryPartnerSection(
+      AppointmentDeliveryEntity? delivery) {
+    String formattedAssignedDate = 'N/A';
+    if (delivery?.deliveryAssignedAt != null) {
+      formattedAssignedDate = DateFormat('MMM d, yyyy, hh:mm a')
+          .format(delivery!.deliveryAssignedAt!);
+    }
+
+    final partner = delivery?.deliveryPartnerDetails;
+    final partnerName =
+        partner?.name.isNotEmpty == true ? partner!.name : 'Delivery Partner';
+    final initialLetter =
+        partnerName.isNotEmpty ? partnerName[0].toUpperCase() : 'M';
+    final vehicleNumber = partner?.vehicleNumber.isNotEmpty == true
+        ? partner!.vehicleNumber
+        : 'N/A';
+    final phone = partner?.phone.isNotEmpty == true ? partner!.phone : 'N/A';
+    final email = partner?.email.isNotEmpty == true ? partner!.email : 'N/A';
+    final otp = delivery?.deliveryOtp.isNotEmpty == true
+        ? delivery!.deliveryOtp
+        : 'N/A';
+
+    return _buildCard(
+      title: "Assigned Delivery Partner",
+      icon: Icons.local_shipping_outlined,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFECFDF5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFA7F3D0)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF10B981),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              "Our Deliveryman",
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF059669),
+              ),
+            ),
+          ],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE2E8F0),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: partner?.profileImage != null &&
+                        partner!.profileImage!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.network(
+                          partner.profileImage!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Text(
+                            initialLetter,
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Text(
+                        initialLetter,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      partnerName,
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Vehicle: $vehicleNumber",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFBEB),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFFDE68A)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "DELIVERY OTP",
+                      style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFD97706),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      otp,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFB45309),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Divider(color: Colors.grey.shade200, height: 1),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.phone_outlined,
+                          size: 15, color: Color(0xFF64748B)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          phone,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF334155),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.email_outlined,
+                          size: 15, color: Color(0xFF64748B)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          email,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF334155),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Assigned At: $formattedAssignedDate",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: const Color(0xFF64748B),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryAssignmentSection(
+      AppointmentDetailsState state, AppointmentDetailsEntity details) {
+    final loadedState = state is AppointmentDetailsLoaded ? state : null;
+    final partners = loadedState?.deliveryPartners ?? [];
+    final ownPartner = loadedState?.ownDeliveryPartner;
+    final isLoadingPartners = loadedState?.isLoadingPartners ?? false;
+    final partnersError = loadedState?.partnersError;
+    final isAssigning = loadedState?.isAssigningPartner ?? false;
+
+    if (_selectedDeliveryPartnerId == null && partners.isNotEmpty) {
+      _selectedDeliveryPartnerId = partners.first.id;
+    }
+
+    return _buildCard(
+      title: "Delivery Assignment",
+      icon: Icons.local_shipping_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Segmented Tabs: Medicompares vs Own Deliveryman
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDeliveryTab = 0;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selectedDeliveryTab == 0
+                            ? Colors.white
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: _selectedDeliveryTab == 0
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                )
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Medicompares",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: _selectedDeliveryTab == 0
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: _selectedDeliveryTab == 0
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDeliveryTab = 1;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selectedDeliveryTab == 1
+                            ? Colors.white
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: _selectedDeliveryTab == 1
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                )
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Own Deliveryman",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: _selectedDeliveryTab == 1
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: _selectedDeliveryTab == 1
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Tab content
+          if (_selectedDeliveryTab == 0) ...[
+            // Search Input
+            Container(
+              height: 42,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: TextField(
+                controller: _partnerSearchController,
+                decoration: InputDecoration(
+                  hintText: "Search Medicompares partner...",
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: const Color(0xFF94A3B8),
+                  ),
+                  prefixIcon: const Icon(Icons.search,
+                      size: 18, color: Color(0xFF94A3B8)),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                  suffixIcon: _partnerSearchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear,
+                              size: 16, color: Color(0xFF94A3B8)),
+                          onPressed: () {
+                            _partnerSearchController.clear();
+                            context.read<AppointmentDetailsBloc>().add(
+                                  const GetDeliveryPartnersEvent(
+                                      search: '', forceRefresh: true),
+                                );
+                          },
+                        )
+                      : null,
+                ),
+                style: GoogleFonts.inter(
+                    fontSize: 13, color: const Color(0xFF1E293B)),
+                onSubmitted: (value) {
+                  context.read<AppointmentDetailsBloc>().add(
+                        GetDeliveryPartnersEvent(
+                            search: value.trim(), forceRefresh: true),
+                      );
+                },
+                onChanged: (value) {
+                  if (value.isEmpty) {
+                    context.read<AppointmentDetailsBloc>().add(
+                          const GetDeliveryPartnersEvent(
+                              search: '', forceRefresh: true),
+                        );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Delivery Partner List
+            if (isLoadingPartners && partners.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (partnersError != null && partners.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        partnersError,
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.red.shade600),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () {
+                          context.read<AppointmentDetailsBloc>().add(
+                                const GetDeliveryPartnersEvent(
+                                    forceRefresh: true),
+                              );
+                        },
+                        child: const Text("Retry"),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (partners.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 28),
+                child: Center(
+                  child: Text(
+                    "No active delivery partners found",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: partners.length,
+                separatorBuilder: (_, __) =>
+                    Divider(color: Colors.grey.shade100, height: 1),
+                itemBuilder: (context, index) {
+                  final partner = partners[index];
+                  final isSelected = _selectedDeliveryPartnerId == partner.id;
+
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedDeliveryPartnerId = partner.id;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withOpacity(0.06)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: isSelected
+                            ? Border.all(
+                                color: AppColors.primary.withOpacity(0.4),
+                                width: 1)
+                            : Border.all(color: Colors.transparent, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  partner.name,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                if (partner.phone.isNotEmpty)
+                                  Text(
+                                    partner.phone,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "ID: ${partner.partnerId}",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    color: const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star,
+                                  size: 15, color: Color(0xFFF59E0B)),
+                              const SizedBox(width: 4),
+                              Text(
+                                partner.rating > 0
+                                    ? partner.rating.toStringAsFixed(1)
+                                    : '4.5',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF475569),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+            const SizedBox(height: 16),
+
+            // Ready In Dropdown
+            Row(
+              children: [
+                Text(
+                  "Ready in: ",
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: const Color(0xFF475569),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedReadyTime,
+                      icon: const Icon(Icons.keyboard_arrow_down,
+                          size: 18, color: Color(0xFF64748B)),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: const Color(0xFF1E293B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      items: _readyTimeOptions.map((opt) {
+                        return DropdownMenuItem<String>(
+                          value: opt,
+                          child: Text(opt),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedReadyTime = val;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Assign Medicompares Partner Button
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: isAssigning
+                    ? null
+                    : () {
+                        if (_selectedDeliveryPartnerId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "Please select a delivery partner to assign"),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+                        final orderId = details.id.isNotEmpty
+                            ? details.id
+                            : (details.orderId.isNotEmpty
+                                ? details.orderId
+                                : widget.appointmentId);
+                        context.read<AppointmentDetailsBloc>().add(
+                              AssignDeliveryPartnerEvent(
+                                orderId: orderId,
+                                deliveryPartnerId: _selectedDeliveryPartnerId!,
+                                deliveryManType: 'vendor',
+                                deliveryPartner: 'self',
+                                readyTime: null,
+                              ),
+                            );
+                      },
+                child: isAssigning
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "Assign Medicompares Partner",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+          ] else ...[
+            // Own Deliveryman tab
+            if (isLoadingPartners && ownPartner == null)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (ownPartner != null) ...[
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE2E8F0),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: ownPartner.profileImage != null &&
+                              ownPartner.profileImage!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(22),
+                              child: Image.network(
+                                ownPartner.profileImage!,
+                                width: 44,
+                                height: 44,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Text(
+                                  ownPartner.name.isNotEmpty
+                                      ? ownPartner.name[0].toUpperCase()
+                                      : 'O',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Text(
+                              ownPartner.name.isNotEmpty
+                                  ? ownPartner.name[0].toUpperCase()
+                                  : 'O',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  ownPartner.name,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: const Color(0xFFA7F3D0)),
+                                ),
+                                child: Text(
+                                  "Internal",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF059669),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          if (ownPartner.phone.isNotEmpty)
+                            Text(
+                              ownPartner.phone,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Vendor ID: ${ownPartner.partnerId}",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Ready In Dropdown
+              Row(
+                children: [
+                  Text(
+                    "Ready in: ",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF475569),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedReadyTime,
+                        icon: const Icon(Icons.keyboard_arrow_down,
+                            size: 18, color: Color(0xFF64748B)),
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: const Color(0xFF1E293B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        items: _readyTimeOptions.map((opt) {
+                          return DropdownMenuItem<String>(
+                            value: opt,
+                            child: Text(opt),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedReadyTime = val;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Assign Own Deliveryman Button
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: isAssigning
+                      ? null
+                      : () {
+                          final orderId = details.id.isNotEmpty
+                              ? details.id
+                              : (details.orderId.isNotEmpty
+                                  ? details.orderId
+                                  : widget.appointmentId);
+                          final readyMinutes =
+                              _selectedReadyTime.replaceAll(' min', '');
+                          context.read<AppointmentDetailsBloc>().add(
+                                AssignDeliveryPartnerEvent(
+                                  orderId: orderId,
+                                  deliveryPartnerId: ownPartner.id,
+                                  deliveryManType: 'vendor',
+                                  deliveryPartner: 'vendor',
+                                  readyTime: readyMinutes,
+                                ),
+                              );
+                        },
+                  child: isAssigning
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "Assign Own Deliveryman",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ] else ...[
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    Icon(Icons.person_pin_circle_outlined,
+                        size: 40, color: Colors.grey.shade400),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Own Deliveryman",
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "No internal delivery personnel registered.",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildOrderTimelineSection(AppointmentDetailsEntity details) {
     String formattedDate = 'N/A';
     if (details.createdAt != null) {
@@ -1148,9 +2322,11 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             details.paymentStatus.substring(1)
         : 'Pending';
 
-    String ordStatus = details.orderStatus.isNotEmpty
-        ? details.orderStatus[0].toUpperCase() +
-            details.orderStatus.substring(1)
+    final effectiveOrdStatus =
+        _selectedStatus ?? _normalizeStatus(details.orderStatus);
+    String ordStatus = effectiveOrdStatus.isNotEmpty
+        ? effectiveOrdStatus[0].toUpperCase() +
+            effectiveOrdStatus.substring(1).replaceAll('_', ' ')
         : 'Pending';
 
     return _buildCard(

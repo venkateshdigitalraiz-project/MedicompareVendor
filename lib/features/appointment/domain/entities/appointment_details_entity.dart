@@ -20,6 +20,7 @@ class AppointmentDetailsEntity extends Equatable {
   final AppointmentDetailsBillingSummaryEntity billingSummary;
   final List<AppointmentGroupDetailsEntity> groupDetails;
   final List<AppointmentServiceItemEntity> normalItems;
+  final List<AppointmentDeliveryEntity> deliveries;
 
   final AppointmentAddressEntity? shippingAddress;
   final AppointmentAddressEntity? billingAddress;
@@ -48,6 +49,7 @@ class AppointmentDetailsEntity extends Equatable {
     this.shippingAddress,
     this.billingAddress,
     this.couponDetails,
+    this.deliveries = const [],
   });
 
   @override
@@ -74,6 +76,7 @@ class AppointmentDetailsEntity extends Equatable {
         shippingAddress,
         billingAddress,
         couponDetails,
+        deliveries,
       ];
 }
 
@@ -272,5 +275,76 @@ class AppointmentAddressEntity extends Equatable {
         locationAddress,
         pincode,
         addressType,
+      ];
+}
+
+class AppointmentDeliveryEntity extends Equatable {
+  final String vendorId;
+  final String deliveryPartnerType;
+  final String deliveryPartnerId;
+  final double deliveryFee;
+  final String? deliveryNotes;
+  final DateTime? deliveryAssignedAt;
+  final DateTime? deliveryCompletedAt;
+  final String deliveryOtp;
+  final bool isDeliveryVerified;
+  final String id;
+  final AppointmentDeliveryPartnerDetailsEntity? deliveryPartnerDetails;
+
+  const AppointmentDeliveryEntity({
+    required this.vendorId,
+    required this.deliveryPartnerType,
+    required this.deliveryPartnerId,
+    required this.deliveryFee,
+    this.deliveryNotes,
+    this.deliveryAssignedAt,
+    this.deliveryCompletedAt,
+    required this.deliveryOtp,
+    required this.isDeliveryVerified,
+    required this.id,
+    this.deliveryPartnerDetails,
+  });
+
+  @override
+  List<Object?> get props => [
+        vendorId,
+        deliveryPartnerType,
+        deliveryPartnerId,
+        deliveryFee,
+        deliveryNotes,
+        deliveryAssignedAt,
+        deliveryCompletedAt,
+        deliveryOtp,
+        isDeliveryVerified,
+        id,
+        deliveryPartnerDetails,
+      ];
+}
+
+class AppointmentDeliveryPartnerDetailsEntity extends Equatable {
+  final String id;
+  final String name;
+  final String email;
+  final String phone;
+  final String vehicleNumber;
+  final String? profileImage;
+
+  const AppointmentDeliveryPartnerDetailsEntity({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.vehicleNumber,
+    this.profileImage,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        email,
+        phone,
+        vehicleNumber,
+        profileImage,
       ];
 }
