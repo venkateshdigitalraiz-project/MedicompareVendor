@@ -1,107 +1,115 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/ambulance_order_entity.dart';
 import '../../../appointment/domain/entities/delivery_partner_entity.dart';
-import '../../domain/entities/order_details_response_entity.dart';
 
-abstract class OrderDetailsState extends Equatable {
-  const OrderDetailsState();
+abstract class AmbulanceOrderDetailsState extends Equatable {
+  const AmbulanceOrderDetailsState();
 
   @override
   List<Object?> get props => [];
 }
 
-class OrderDetailsInitial extends OrderDetailsState {}
+class AmbulanceOrderDetailsInitial extends AmbulanceOrderDetailsState {}
 
-class OrderDetailsLoading extends OrderDetailsState {}
+class AmbulanceOrderDetailsLoading extends AmbulanceOrderDetailsState {}
 
-class OrderDetailsLoaded extends OrderDetailsState {
-  final OrderDetailsResponseEntity orderDetails;
+class AmbulanceOrderDetailsLoaded extends AmbulanceOrderDetailsState {
+  final AmbulanceOrderEntity order;
   final List<DeliveryPartnerEntity> deliveryPartners;
   final DeliveryPartnerEntity? ownDeliveryPartner;
   final bool isLoadingPartners;
   final bool hasLoadedPartners;
   final String? partnersError;
+  final bool isAssigningPartner;
+  final String? lastPartnersSearch;
   final int partnersPage;
   final bool hasMorePartners;
   final bool isLoadingMorePartners;
-  final bool isAssigningPartner;
-  final String? lastPartnersSearch;
 
-  const OrderDetailsLoaded(
-    this.orderDetails, {
+  const AmbulanceOrderDetailsLoaded(
+    this.order, {
     this.deliveryPartners = const [],
     this.ownDeliveryPartner,
     this.isLoadingPartners = false,
     this.hasLoadedPartners = false,
     this.partnersError,
+    this.isAssigningPartner = false,
+    this.lastPartnersSearch,
     this.partnersPage = 1,
     this.hasMorePartners = true,
     this.isLoadingMorePartners = false,
-    this.isAssigningPartner = false,
-    this.lastPartnersSearch,
   });
 
-  OrderDetailsLoaded copyWith({
-    OrderDetailsResponseEntity? orderDetails,
+  AmbulanceOrderDetailsLoaded copyWith({
+    AmbulanceOrderEntity? order,
     List<DeliveryPartnerEntity>? deliveryPartners,
     DeliveryPartnerEntity? ownDeliveryPartner,
     bool? isLoadingPartners,
     bool? hasLoadedPartners,
     String? partnersError,
+    bool? isAssigningPartner,
+    String? lastPartnersSearch,
     int? partnersPage,
     bool? hasMorePartners,
     bool? isLoadingMorePartners,
-    bool? isAssigningPartner,
-    String? lastPartnersSearch,
   }) {
-    return OrderDetailsLoaded(
-      orderDetails ?? this.orderDetails,
+    return AmbulanceOrderDetailsLoaded(
+      order ?? this.order,
       deliveryPartners: deliveryPartners ?? this.deliveryPartners,
       ownDeliveryPartner: ownDeliveryPartner ?? this.ownDeliveryPartner,
       isLoadingPartners: isLoadingPartners ?? this.isLoadingPartners,
       hasLoadedPartners: hasLoadedPartners ?? this.hasLoadedPartners,
       partnersError: partnersError,
+      isAssigningPartner: isAssigningPartner ?? this.isAssigningPartner,
+      lastPartnersSearch: lastPartnersSearch ?? this.lastPartnersSearch,
       partnersPage: partnersPage ?? this.partnersPage,
       hasMorePartners: hasMorePartners ?? this.hasMorePartners,
       isLoadingMorePartners:
           isLoadingMorePartners ?? this.isLoadingMorePartners,
-      isAssigningPartner: isAssigningPartner ?? this.isAssigningPartner,
-      lastPartnersSearch: lastPartnersSearch ?? this.lastPartnersSearch,
     );
   }
 
   @override
   List<Object?> get props => [
-        orderDetails,
+        order,
         deliveryPartners,
         ownDeliveryPartner,
         isLoadingPartners,
         hasLoadedPartners,
         partnersError,
+        isAssigningPartner,
+        lastPartnersSearch,
         partnersPage,
         hasMorePartners,
         isLoadingMorePartners,
-        isAssigningPartner,
-        lastPartnersSearch,
       ];
 }
 
-class OrderActionLoading extends OrderDetailsState {}
-
-class OrderStatusUpdated extends OrderDetailsState {
+class AmbulanceOrderDetailsError extends AmbulanceOrderDetailsState {
   final String message;
 
-  const OrderStatusUpdated({this.message = 'Order status updated successfully'});
+  const AmbulanceOrderDetailsError(this.message);
 
   @override
   List<Object?> get props => [message];
 }
 
-class OrderDetailsError extends OrderDetailsState {
+class AmbulanceBookingStatusUpdatingState extends AmbulanceOrderDetailsState {}
+
+class AmbulanceBookingStatusUpdatedState extends AmbulanceOrderDetailsState {
   final String message;
 
-  const OrderDetailsError(this.message);
+  const AmbulanceBookingStatusUpdatedState({this.message = 'Booking status updated successfully'});
 
   @override
   List<Object?> get props => [message];
 }
 
+class AmbulanceBookingStatusUpdateErrorState extends AmbulanceOrderDetailsState {
+  final String message;
+
+  const AmbulanceBookingStatusUpdateErrorState(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

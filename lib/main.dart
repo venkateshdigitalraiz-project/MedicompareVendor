@@ -176,4 +176,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-/*email":"tester@digitalraiz.com","password":"123456 */
+/*email":"tester@digitalraiz.com","password":"123456 
+this delete option in branch details page
+https://api.medicompares.com/api/v1/vendor/branch/delete/69eb62a6e232ad31d4abf67f
+*/

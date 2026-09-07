@@ -242,6 +242,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     return s;
   }
 
+  // ignore: unused_element
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -1166,17 +1167,17 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   }
 
   Widget _buildBillingSummarySection(AppointmentDetailsEntity details) {
-    String payStatus = details.paymentStatus.isNotEmpty
-        ? details.paymentStatus[0].toUpperCase() +
-            details.paymentStatus.substring(1)
-        : 'Pending';
+    // String payStatus = details.paymentStatus.isNotEmpty
+    //     ? details.paymentStatus[0].toUpperCase() +
+    //         details.paymentStatus.substring(1)
+    //     : 'Pending';
 
-    final effectiveOrdStatus =
-        _selectedStatus ?? _normalizeStatus(details.orderStatus);
-    String ordStatus = effectiveOrdStatus.isNotEmpty
-        ? effectiveOrdStatus[0].toUpperCase() +
-            effectiveOrdStatus.substring(1).replaceAll('_', ' ')
-        : 'Pending';
+    // final effectiveOrdStatus =
+    //     _selectedStatus ?? _normalizeStatus(details.orderStatus);
+    // String ordStatus = effectiveOrdStatus.isNotEmpty
+    //     ? effectiveOrdStatus[0].toUpperCase() +
+    //         effectiveOrdStatus.substring(1).replaceAll('_', ' ')
+    //     : 'Pending';
 
     final String? createdType =
         details.couponDetails?.createdType?.toLowerCase();
@@ -1196,11 +1197,11 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
       icon: Icons.receipt_long_outlined,
       child: Column(
         children: [
-          _buildSummaryRow("Payment Status", payStatus,
-              valueColor: _getStatusColor(payStatus)),
-          _buildSummaryRow("Order Status", ordStatus,
-              valueColor: _getStatusColor(ordStatus)),
-          const Divider(height: 24),
+          // _buildSummaryRow("Payment Status", payStatus,
+          //     valueColor: _getStatusColor(payStatus)),
+          // _buildSummaryRow("Order Status", ordStatus,
+          //     valueColor: _getStatusColor(ordStatus)),
+          // const Divider(height: 24),
           _buildSummaryRow("Subtotal (Inclusive all Taxes)",
               details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
           if (details.billingSummary.sampleCollection > 0)
@@ -1219,7 +1220,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           if (couponAmount > 0)
             _buildSummaryRow("Coupon Discount",
                 "-${couponAmount.toRupeeFormat(decimalDigits: 2)}",
-                valueColor: Colors.green),
+                valueColor: Colors.red, labelColor: Colors.red),
           _buildSummaryRow("Admin Commission",
               "-${details.billingSummary.adminCommission.toRupeeFormat(decimalDigits: 2)}",
               valueColor: Colors.red, labelColor: Colors.red),

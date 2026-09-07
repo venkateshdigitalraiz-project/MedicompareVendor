@@ -24,6 +24,7 @@ class OrderDetailsResponseEntity extends Equatable {
   final dynamic branchDetails;
   final dynamic subBranchDetails;
   final List<InstallmentItemEntity> installmentList;
+  final List<OrderDeliveryEntity> deliveries;
 
   const OrderDetailsResponseEntity({
     required this.id,
@@ -47,6 +48,7 @@ class OrderDetailsResponseEntity extends Equatable {
     this.branchDetails,
     this.subBranchDetails,
     this.installmentList = const [],
+    this.deliveries = const [],
   });
 
   @override
@@ -72,6 +74,7 @@ class OrderDetailsResponseEntity extends Equatable {
         branchDetails,
         subBranchDetails,
         installmentList,
+        deliveries,
       ];
 }
 
@@ -198,5 +201,88 @@ class OrderDetailsItemEntity extends Equatable {
         productDetails,
         vendorCommissionAmount,
         rentalDetails,
+      ];
+}
+
+class OrderDeliveryPartnerDetailsEntity extends Equatable {
+  final String id;
+  final String name;
+  final String phone;
+  final String email;
+  final String vehicleNumber;
+  final String? profileImage;
+  final double rating;
+  final String partnerId;
+  final String deliveryManType;
+
+  const OrderDeliveryPartnerDetailsEntity({
+    this.id = '',
+    required this.name,
+    this.phone = '',
+    this.email = '',
+    this.vehicleNumber = '',
+    this.profileImage,
+    this.rating = 0.0,
+    this.partnerId = '',
+    this.deliveryManType = 'admin',
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        phone,
+        email,
+        vehicleNumber,
+        profileImage,
+        rating,
+        partnerId,
+        deliveryManType,
+      ];
+}
+
+class OrderDeliveryEntity extends Equatable {
+  final String id;
+  final String vendorId;
+  final String deliveryPartnerType;
+  final String deliveryPartner;
+  final String deliveryPartnerId;
+  final double deliveryFee;
+  final String? deliveryNotes;
+  final DateTime? deliveryAssignedAt;
+  final DateTime? deliveryCompletedAt;
+  final String deliveryOtp;
+  final bool isDeliveryVerified;
+  final OrderDeliveryPartnerDetailsEntity? deliveryPartnerDetails;
+
+  const OrderDeliveryEntity({
+    this.id = '',
+    this.vendorId = '',
+    this.deliveryPartnerType = 'admin',
+    this.deliveryPartner = 'medicompares',
+    this.deliveryPartnerId = '',
+    this.deliveryFee = 0.0,
+    this.deliveryNotes,
+    this.deliveryAssignedAt,
+    this.deliveryCompletedAt,
+    this.deliveryOtp = '',
+    this.isDeliveryVerified = false,
+    this.deliveryPartnerDetails,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        vendorId,
+        deliveryPartnerType,
+        deliveryPartner,
+        deliveryPartnerId,
+        deliveryFee,
+        deliveryNotes,
+        deliveryAssignedAt,
+        deliveryCompletedAt,
+        deliveryOtp,
+        isDeliveryVerified,
+        deliveryPartnerDetails,
       ];
 }

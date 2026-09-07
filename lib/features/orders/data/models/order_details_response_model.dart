@@ -25,6 +25,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     super.branchDetails,
     super.subBranchDetails,
     super.installmentList = const [],
+    super.deliveries = const [],
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -111,13 +112,193 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
         }
         if (list is List<dynamic>) {
           return list
-              .where((e) => e is Map)
+              .whereType<Map>()
               .map((e) => InstallmentItemModel.fromJson(
-                  Map<String, dynamic>.from(e as Map)))
+                  Map<String, dynamic>.from(e)))
               .toList();
         }
         return <InstallmentItemModel>[];
       }(),
+      deliveries: () {
+        final dList = json['deliveries'] ??
+            json['delivery'] ??
+            json['orderDetails']?['deliveries'] ??
+            json['orderDetails']?['delivery'];
+        if (dList is List && dList.isNotEmpty) {
+          return dList
+              .whereType<Map>()
+              .map((e) => OrderDeliveryModel.fromJson(
+                  Map<String, dynamic>.from(e)))
+              .toList();
+        } else if (dList is Map) {
+          return [
+            OrderDeliveryModel.fromJson(Map<String, dynamic>.from(dList))
+          ];
+        }
+        final directPartner = json['deliveryPartnerDetails'] ??
+            json['deliveryPartner'] ??
+            json['driverDetails'] ??
+            json['assignedDriver'] ??
+            json['deliveryman'] ??
+            json['orderDetails']?['deliveryPartnerDetails'] ??
+            json['orderDetails']?['deliveryPartner'];
+        if (directPartner is Map) {
+          return [
+            OrderDeliveryModel(
+              id: json['_id']?.toString() ?? '',
+              vendorId: json['vendorId']?.toString() ?? '',
+              deliveryPartnerType: (json['deliveryPartnerType'] ??
+                      json['deliveryManType'] ??
+                      directPartner['deliveryManType'] ??
+                      'admin')
+                  .toString(),
+              deliveryPartner: (json['deliveryPartner'] is String
+                      ? json['deliveryPartner']
+                      : 'medicompares')
+                  .toString(),
+              deliveryPartnerId: (json['deliveryPartnerId'] ??
+                      directPartner['_id'] ??
+                      directPartner['id'] ??
+                      '')
+                  .toString(),
+              deliveryOtp: (json['deliveryOtp'] ??
+                      json['otp'] ??
+                      directPartner['otp'] ??
+                      '')
+                  .toString(),
+              deliveryAssignedAt: json['deliveryAssignedAt'] != null
+                  ? DateTime.tryParse(json['deliveryAssignedAt'].toString())
+                  : (json['assignedAt'] != null
+                      ? DateTime.tryParse(json['assignedAt'].toString())
+                      : null),
+              deliveryPartnerDetails: OrderDeliveryPartnerDetailsModel.fromJson(
+                  Map<String, dynamic>.from(directPartner)),
+            )
+          ];
+        }
+        return <OrderDeliveryModel>[];
+      }(),
+    );
+  }
+}
+
+class OrderDeliveryPartnerDetailsModel
+    extends OrderDeliveryPartnerDetailsEntity {
+  const OrderDeliveryPartnerDetailsModel({
+    super.id,
+    required super.name,
+    super.phone,
+    super.email,
+    super.vehicleNumber,
+    super.profileImage,
+    super.rating,
+    super.partnerId,
+    super.deliveryManType,
+  });
+
+  factory OrderDeliveryPartnerDetailsModel.fromJson(
+      Map<String, dynamic> json) {
+    final files = json['files'] is List ? (json['files'] as List) : [];
+    final img = files.isNotEmpty
+        ? files.first.toString()
+        : (json['profileImage'] ?? json['image'])?.toString();
+
+    return OrderDeliveryPartnerDetailsModel(
+      id: (json['_id'] ?? json['id'])?.toString() ?? '',
+      name: (json['name'] ??
+              json['fullName'] ??
+              json['firstName'] ??
+              'Delivery Partner')
+          .toString(),
+      phone: (json['phone'] ?? json['mobile'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
+      vehicleNumber: (json['vehicleNumber'] ??
+              json['vehicle_number'] ??
+              json['vehicleNo'] ??
+              '')
+          .toString(),
+      profileImage: img,
+      rating: double.tryParse((json['rating'] ?? 0).toString()) ?? 0.0,
+      partnerId: (json['partnerId'] ??
+              json['partner_id'] ??
+              json['deliveryManId'] ??
+              '')
+          .toString(),
+      deliveryManType: (json['deliveryManType'] ??
+              json['delivery_man_type'] ??
+              json['deliveryPartnerType'] ??
+              'admin')
+          .toString(),
+    );
+  }
+}
+
+class OrderDeliveryModel extends OrderDeliveryEntity {
+  const OrderDeliveryModel({
+    super.id,
+    super.vendorId,
+    super.deliveryPartnerType,
+    super.deliveryPartner,
+    super.deliveryPartnerId,
+    super.deliveryFee,
+    super.deliveryNotes,
+    super.deliveryAssignedAt,
+    super.deliveryCompletedAt,
+    super.deliveryOtp,
+    super.isDeliveryVerified,
+    super.deliveryPartnerDetails,
+  });
+
+  factory OrderDeliveryModel.fromJson(Map<String, dynamic> json) {
+    OrderDeliveryPartnerDetailsModel? partner;
+    final pMap = json['deliveryPartnerDetails'] ??
+        json['deliveryPartner'] ??
+        json['deliveryman'] ??
+        json['partner'];
+    if (pMap is Map<String, dynamic>) {
+      partner = OrderDeliveryPartnerDetailsModel.fromJson(pMap);
+    } else if (pMap is Map) {
+      partner = OrderDeliveryPartnerDetailsModel.fromJson(
+          Map<String, dynamic>.from(pMap));
+    }
+
+    return OrderDeliveryModel(
+      id: (json['_id'] ?? json['id'])?.toString() ?? '',
+      vendorId: (json['vendorId'] ?? json['vendor_id'])?.toString() ?? '',
+      deliveryPartnerType: (json['deliveryPartnerType'] ??
+              json['deliveryManType'] ??
+              partner?.deliveryManType ??
+              'admin')
+          .toString(),
+      deliveryPartner: (json['deliveryPartner'] is String
+              ? json['deliveryPartner']
+              : 'medicompares')
+          .toString(),
+      deliveryPartnerId: (json['deliveryPartnerId'] ??
+              json['delivery_partner_id'] ??
+              partner?.id ??
+              '')
+          .toString(),
+      deliveryFee: double.tryParse(
+              (json['deliveryFee'] ?? json['delivery_fee'] ?? 0).toString()) ??
+          0.0,
+      deliveryNotes: json['deliveryNotes']?.toString(),
+      deliveryAssignedAt: json['deliveryAssignedAt'] != null
+          ? DateTime.tryParse(json['deliveryAssignedAt'].toString())
+          : (json['assignedAt'] != null
+              ? DateTime.tryParse(json['assignedAt'].toString())
+              : null),
+      deliveryCompletedAt: json['deliveryCompletedAt'] != null
+          ? DateTime.tryParse(json['deliveryCompletedAt'].toString())
+          : null,
+      deliveryOtp: (json['deliveryOtp'] ??
+              json['delivery_otp'] ??
+              json['otp'] ??
+              '')
+          .toString(),
+      isDeliveryVerified: json['isDeliveryVerified'] == true ||
+          json['is_delivery_verified'] == true,
+      deliveryPartnerDetails: partner,
     );
   }
 }

@@ -106,8 +106,9 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
             );
           }
           final displayState = _cachedState;
-          if (displayState == null)
+          if (displayState == null) {
             return const Center(child: CircularProgressIndicator());
+          }
 
           return Column(
             children: [

@@ -111,7 +111,8 @@ class AmbulanceCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (item.discountPrice > 0 && item.discountPrice < item.price) ...[
+                      if (item.discountPrice > 0 &&
+                          item.discountPrice < item.price) ...[
                         Text(
                           "₹${item.price.toFormattedPrice()}",
                           style: GoogleFonts.inter(

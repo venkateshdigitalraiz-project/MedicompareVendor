@@ -8,6 +8,15 @@ abstract class BranchEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class DeleteBranchEvent extends BranchEvent {
+  final String branchId;
+
+  const DeleteBranchEvent(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
 class CreateBranchEvent extends BranchEvent {
   final Map<String, dynamic> data;
   final File? image;

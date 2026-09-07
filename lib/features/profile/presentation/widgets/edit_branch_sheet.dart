@@ -32,6 +32,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
   late final TextEditingController _stateController;
   late final TextEditingController _mobileController;
   late final TextEditingController _emailController;
+  late final TextEditingController _pincodeController;
 
   String _selectedStatus = 'active';
   String _selectedRole = 'Manager';
@@ -54,6 +55,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
     _selectedStatus = widget.branch.status;
     // Assuming roleId or some other string matches. Default to 'Manager'
     _selectedRole = 'Manager';
+    _pincodeController = TextEditingController(text: widget.branch.deliveryPinCodes);
   }
 
   @override
@@ -64,6 +66,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
     _stateController.dispose();
     _mobileController.dispose();
     _emailController.dispose();
+    _pincodeController.dispose();
     super.dispose();
   }
 
@@ -121,6 +124,7 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
         "email": _emailController.text,
         "mobile": _mobileController.text,
         "address": _addressController.text,
+        "pincode": _pincodeController.text,
         "state": _stateController.text,
         "status": _selectedStatus,
         "roleId": widget.branch.roleId, // Should match what backend expects
@@ -247,6 +251,16 @@ class _EditBranchSheetState extends State<EditBranchSheet> {
                       ],
                     ),
                     const SizedBox(height: 24),
+                    _buildLabel("Pincode", isRequired: true),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _pincodeController,
+                      decoration:
+                          _inputDecoration(hint: "Enter branch Pincode"),
+                      validator: (val) =>
+                          (val == null || val.isEmpty) ? "Required" : null,
+                    ),
+                    const SizedBox(height: 16),
                     _buildLabel("Branch Address", isRequired: true),
                     const SizedBox(height: 8),
                     TextFormField(

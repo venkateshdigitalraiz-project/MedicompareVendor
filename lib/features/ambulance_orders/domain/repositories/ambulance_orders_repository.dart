@@ -1,19 +1,22 @@
 import '../../../appointment/domain/entities/delivery_partner_entity.dart';
-import '../entities/order_entity.dart';
-import '../entities/order_details_response_entity.dart';
+import '../entities/ambulance_order_entity.dart';
 
-abstract class OrdersRepository {
-  Future<OrdersListEntity> getOrders({
+abstract class AmbulanceOrdersRepository {
+  Future<AmbulanceOrdersListEntity> getOrders({
     int page = 1,
     int limit = 10,
     String status = '',
     String search = '',
-    String orderType = 'normal',
   });
-  Future<OrderDetailsResponseEntity> getOrderDetails(String orderId,
-      {String orderType = 'normal'});
-  Future<bool> updateOrderStatus(
-      String orderItemId, Map<String, dynamic> payload);
+
+  Future<AmbulanceOrderEntity> getOrderDetails(String id);
+
+  Future<void> updateBookingStatus({
+    required String orderId,
+    required String bookingStatus,
+    String? reason,
+  });
+
   Future<DeliveryPartnersResultEntity> getDeliveryPartners({
     String deliveryManType = 'admin',
     int page = 1,
@@ -21,6 +24,7 @@ abstract class OrdersRepository {
     String status = 'active',
     String search = '',
   });
+
   Future<void> assignDeliveryPartner({
     required String orderId,
     required String deliveryPartnerId,

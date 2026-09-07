@@ -1,42 +1,43 @@
 import 'package:equatable/equatable.dart';
 
-abstract class OrderDetailsEvent extends Equatable {
-  const OrderDetailsEvent();
+abstract class AmbulanceOrderDetailsEvent extends Equatable {
+  const AmbulanceOrderDetailsEvent();
 
   @override
   List<Object?> get props => [];
 }
 
-class GetOrderDetailsEvent extends OrderDetailsEvent {
+class GetAmbulanceOrderDetailsEvent extends AmbulanceOrderDetailsEvent {
   final String orderId;
-  final String orderType;
 
-  const GetOrderDetailsEvent(this.orderId, {this.orderType = 'normal'});
+  const GetAmbulanceOrderDetailsEvent(this.orderId);
 
   @override
-  List<Object?> get props => [orderId, orderType];
+  List<Object?> get props => [orderId];
 }
 
-class UpdateOrderStatusEvent extends OrderDetailsEvent {
-  final String orderItemId;
-  final Map<String, dynamic> payload;
+class UpdateAmbulanceBookingStatusEvent extends AmbulanceOrderDetailsEvent {
+  final String orderId;
+  final String bookingStatus;
+  final String? reason;
 
-  const UpdateOrderStatusEvent({
-    required this.orderItemId,
-    required this.payload,
+  const UpdateAmbulanceBookingStatusEvent({
+    required this.orderId,
+    required this.bookingStatus,
+    this.reason,
   });
 
   @override
-  List<Object?> get props => [orderItemId, payload];
+  List<Object?> get props => [orderId, bookingStatus, reason];
 }
 
-class GetOrderDeliveryPartnersEvent extends OrderDetailsEvent {
+class GetAmbulanceDeliveryPartnersEvent extends AmbulanceOrderDetailsEvent {
   final String search;
   final bool forceRefresh;
   final int page;
   final bool isLoadMore;
 
-  const GetOrderDeliveryPartnersEvent({
+  const GetAmbulanceDeliveryPartnersEvent({
     this.search = '',
     this.forceRefresh = false,
     this.page = 1,
@@ -47,19 +48,19 @@ class GetOrderDeliveryPartnersEvent extends OrderDetailsEvent {
   List<Object?> get props => [search, forceRefresh, page, isLoadMore];
 }
 
-class AssignOrderDeliveryPartnerEvent extends OrderDetailsEvent {
+class AssignAmbulanceDeliveryPartnerEvent extends AmbulanceOrderDetailsEvent {
   final String orderId;
   final String deliveryPartnerId;
   final String deliveryManType;
   final String deliveryPartner;
   final String? readyTime;
 
-  const AssignOrderDeliveryPartnerEvent({
+  const AssignAmbulanceDeliveryPartnerEvent({
     required this.orderId,
     required this.deliveryPartnerId,
     this.deliveryManType = 'admin',
     this.deliveryPartner = 'medicompares',
-    this.readyTime,
+    this.readyTime = '30',
   });
 
   @override
@@ -71,4 +72,3 @@ class AssignOrderDeliveryPartnerEvent extends OrderDetailsEvent {
         readyTime,
       ];
 }
-

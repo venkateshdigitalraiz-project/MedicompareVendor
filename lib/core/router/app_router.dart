@@ -360,8 +360,37 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         ),
         GoRoute(
           path: '/ambulance-order-details',
-          builder: (context, state) => AmbulanceOrderDetailsPage(
-              order: state.extra as AmbulanceOrderEntity),
+          builder: (context, state) {
+            String orderId = '';
+            AmbulanceOrderEntity? initialOrder;
+            if (state.extra is AmbulanceOrderEntity) {
+              initialOrder = state.extra as AmbulanceOrderEntity;
+              orderId = initialOrder.id;
+            } else if (state.extra is String) {
+              orderId = state.extra as String;
+            }
+            return BlocProvider(
+              create: (_) =>
+                  AmbulanceOrdersInjection.provideAmbulanceOrderDetailsBloc(),
+              child: AmbulanceOrderDetailsPage(
+                orderId: orderId,
+                initialOrder: initialOrder,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/ambulance-order-details/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return BlocProvider(
+              create: (_) =>
+                  AmbulanceOrdersInjection.provideAmbulanceOrderDetailsBloc(),
+              child: AmbulanceOrderDetailsPage(
+                orderId: id,
+              ),
+            );
+          },
         ),
         GoRoute(
           path: '/notifications',

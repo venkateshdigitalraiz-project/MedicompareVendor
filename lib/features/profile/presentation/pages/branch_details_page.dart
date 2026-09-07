@@ -1,11 +1,17 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/core_injection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../data/data_sources/branch_service.dart';
 import '../../data/models/branch_model.dart';
+import '../../profile_branch_injection.dart';
+import '../bloc/branch_bloc.dart';
+import '../bloc/branch_event.dart';
+import '../bloc/branch_state.dart';
 import '../widgets/edit_branch_sheet.dart';
+import 'branches_list_page.dart';
 
 class BranchDetailsPage extends StatefulWidget {
   final String branchId;
@@ -20,17 +26,42 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
   final BranchService _branchService =
       BranchService(CoreInjection.provideApiService());
   late Future<BranchDetailsResponse> _branchFuture;
+  late final BranchBloc _branchBloc;
 
   @override
   void initState() {
     super.initState();
+    _branchBloc = ProfileBranchInjection.provideBranchBloc();
     _branchFuture = _branchService.getBranchDetails(widget.branchId);
   }
 
   @override
+  void dispose() {
+    _branchBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F4FB),
+    return BlocListener<BranchBloc, BranchState>(
+      bloc: _branchBloc,
+      listener: (context, state) {
+        if (state is BranchDeleteSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.green),
+          );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const BranchesListPage()),
+            (route) => route.isFirst,
+          );
+        } else if (state is BranchDeleteFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF1F4FB),
       appBar: AppBar(
         backgroundColor: AppColors.primaryDark,
         elevation: 0,
@@ -77,7 +108,32 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
               return const SizedBox.shrink();
             },
           ),
-          const SizedBox(width: 8),
+          //  const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Delete Branch'),
+                  content: const Text('Are you sure you want to delete this branch? This action cannot be undone.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        _branchBloc.add(DeleteBranchEvent(widget.branchId));
+                      },
+                      child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: FutureBuilder<BranchDetailsResponse>(
@@ -95,7 +151,7 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
           return _buildContent(branch);
         },
       ),
-    );
+    ));
   }
 
   Widget _buildContent(Branch branch) {
@@ -189,6 +245,14 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
                   child: Divider(height: 1),
                 ),
                 _infoField("State", branch.state, Icons.location_city_outlined),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  child: Divider(height: 1),
+                ),
+                // _infoField(
+                //     "Delivery Pin Code",
+                //     branch.deliveryPinCodes,
+                //     Icons.location_city_outlined),
               ],
             ),
           ),

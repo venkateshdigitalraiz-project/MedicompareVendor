@@ -8,14 +8,14 @@ abstract class RentalBookingEvent extends Equatable {
 }
 
 class GetRentalBookingsEvent extends RentalBookingEvent {
-  final String? status;
-  final String? search;
+  final String status;
+  final String search;
   final int page;
   final bool isLoadMore;
 
   const GetRentalBookingsEvent({
-    this.status,
-    this.search,
+    this.status = '',
+    this.search = '',
     this.page = 1,
     this.isLoadMore = false,
   });

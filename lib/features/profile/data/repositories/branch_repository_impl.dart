@@ -35,4 +35,9 @@ class BranchRepositoryImpl implements BranchRepository {
   Future<void> updateBranch(String id, Map<String, dynamic> data, {File? image}) async {
     return await branchService.updateBranch(id, data, image: image);
   }
+
+  @override
+  Future<void> deleteBranch(String id) async {
+    return await branchService.deleteBranch(id);
+  }
 }

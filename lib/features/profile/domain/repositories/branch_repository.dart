@@ -10,4 +10,5 @@ abstract class BranchRepository {
   Future<BranchDetailsResponse> getBranchDetails(String id);
   Future<void> createBranch(Map<String, dynamic> data, {File? image});
   Future<void> updateBranch(String id, Map<String, dynamic> data, {File? image});
+  Future<void> deleteBranch(String id);
 }

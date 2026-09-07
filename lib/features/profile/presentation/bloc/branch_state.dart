@@ -47,3 +47,21 @@ class BranchListFailure extends BranchState {
   @override
   List<Object?> get props => [message];
 }
+
+class BranchDeleteSuccess extends BranchState {
+  final String message;
+
+  const BranchDeleteSuccess({this.message = 'Branch deleted successfully!'});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class BranchDeleteFailure extends BranchState {
+  final String message;
+
+  const BranchDeleteFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

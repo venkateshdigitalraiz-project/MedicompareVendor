@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/create_branch_usecase.dart';
+import '../../domain/usecases/delete_branch_usecase.dart';
 import '../../domain/repositories/branch_repository.dart';
 import 'branch_event.dart';
 import 'branch_state.dart';
@@ -8,12 +9,16 @@ class BranchBloc extends Bloc<BranchEvent, BranchState> {
   final CreateBranchUseCase createBranchUseCase;
   final BranchRepository? branchRepository;
 
+  final DeleteBranchUseCase? deleteBranchUseCase;
+
   BranchBloc({
     required this.createBranchUseCase,
+    this.deleteBranchUseCase,
     this.branchRepository,
   }) : super(BranchInitial()) {
     on<CreateBranchEvent>(_onCreateBranchEvent);
     on<FetchBranchListEvent>(_onFetchBranchListEvent);
+    on<DeleteBranchEvent>(_onDeleteBranchEvent);
   }
 
   Future<void> _onCreateBranchEvent(
@@ -42,6 +47,22 @@ class BranchBloc extends Bloc<BranchEvent, BranchState> {
       emit(BranchListLoaded(branches: response.data.list));
     } catch (e) {
       emit(BranchListFailure(
+        message: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
+      ));
+    }
+  }
+
+  Future<void> _onDeleteBranchEvent(
+    DeleteBranchEvent event,
+    Emitter<BranchState> emit,
+  ) async {
+    if (deleteBranchUseCase == null) return;
+    emit(BranchLoading());
+    try {
+      await deleteBranchUseCase!.call(event.branchId);
+      emit(const BranchDeleteSuccess());
+    } catch (e) {
+      emit(BranchDeleteFailure(
         message: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       ));
     }

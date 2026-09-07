@@ -5,6 +5,8 @@ import 'domain/repositories/orders_repository.dart';
 import 'domain/usecases/get_orders_usecase.dart';
 import 'domain/usecases/get_order_details_usecase.dart';
 import 'domain/usecases/update_order_status_usecase.dart';
+import 'domain/usecases/get_order_delivery_partners_usecase.dart';
+import 'domain/usecases/assign_order_delivery_partner_usecase.dart';
 import 'presentation/bloc/orders_bloc.dart';
 import 'presentation/bloc/order_details_bloc.dart';
 import 'domain/repositories/rental_booking_repository.dart';
@@ -24,6 +26,8 @@ class OrdersInjection {
     return OrderDetailsBloc(
       getOrderDetailsUseCase: provideGetOrderDetailsUseCase(),
       updateOrderStatusUseCase: provideUpdateOrderStatusUseCase(),
+      getOrderDeliveryPartnersUseCase: provideGetOrderDeliveryPartnersUseCase(),
+      assignOrderDeliveryPartnerUseCase: provideAssignOrderDeliveryPartnerUseCase(),
     );
   }
 
@@ -37,6 +41,14 @@ class OrdersInjection {
 
   static UpdateOrderStatusUseCase provideUpdateOrderStatusUseCase() {
     return UpdateOrderStatusUseCase(provideOrdersRepository());
+  }
+
+  static GetOrderDeliveryPartnersUseCase provideGetOrderDeliveryPartnersUseCase() {
+    return GetOrderDeliveryPartnersUseCase(provideOrdersRepository());
+  }
+
+  static AssignOrderDeliveryPartnerUseCase provideAssignOrderDeliveryPartnerUseCase() {
+    return AssignOrderDeliveryPartnerUseCase(provideOrdersRepository());
   }
 
   static OrdersRepository provideOrdersRepository() {

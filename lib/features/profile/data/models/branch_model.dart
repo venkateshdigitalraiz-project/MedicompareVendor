@@ -48,6 +48,7 @@ class Branch {
   final String vendorId;
   final String roleId;
   final String status;
+  final String deliveryPinCodes;
   final List<String> images;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -66,6 +67,7 @@ class Branch {
     required this.images,
     required this.createdAt,
     required this.updatedAt,
+    required this.deliveryPinCodes,
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {
@@ -85,6 +87,7 @@ class Branch {
           DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       updatedAt:
           DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      deliveryPinCodes: json['deliveryPinCodes'] ?? '',
     );
   }
 }

@@ -93,13 +93,10 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                 if (state is RentalBookingLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is RentalBookingLoaded) {
-                  return Column(
-                    children: [
-                      Expanded(
-                          child: _buildOrdersList(
-                              state.bookingsResponse.orderItems,
-                              state.isLoadingMore)),
-                    ],
+                  final loaded = state as RentalBookingLoaded;
+                  return _buildOrdersList(
+                    loaded.bookingsResponse.orderItems ?? [],
+                    loaded.isLoadingMore,
                   );
                 } else if (state is RentalBookingError) {
                   return Center(child: Text(state.message));

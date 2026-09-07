@@ -217,10 +217,13 @@ class ApiEndpoints {
   static const String ambulanceBookingList = '/vendor/ambulance-booking/list';
   static String ambulanceBookingSingle(String id) =>
       '/vendor/ambulance-booking/single/$id';
+  static String ambulanceBookingUpdateStatus(String id) =>
+      '/vendor/ambulance-booking/update-status/$id';
   static const String branchList = '/vendor/branch/list';
   static const String createBranch = '/vendor/branch/create';
   static String branchDetails(String id) => '/vendor/branch/details/$id';
   static String updateBranch(String id) => '/vendor/branch/update/$id';
+  static String deleteBranch(String id) => '/vendor/branch/delete/$id';
 
   // Service Charge (Service Fee)
   static const String serviceChargeList = '/vendor/service-charge/list';

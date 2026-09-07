@@ -114,4 +114,18 @@ class BranchService {
       throw ServerException(e.toString());
     }
   }
+
+  Future<void> deleteBranch(String id) async {
+    try {
+      final response = await _apiService.delete(ApiEndpoints.deleteBranch(id));
+      final body = jsonDecode(response.body);
+
+      if (body['success'] != true) {
+        throw ServerException(body['message'] ?? 'Failed to delete branch');
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
 }

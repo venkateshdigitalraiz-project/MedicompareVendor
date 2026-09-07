@@ -31,12 +31,57 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   final String _selectedDeliveryPartner = 'medicompares';
   final int _selectedParcelTime = 30;
 
+  int _selectedDeliveryTab = 0;
+  String? _selectedDeliveryPartnerId;
+  String _selectedReadyTime = '30 min';
+  final List<String> _readyTimeOptions = [
+    '15 min',
+    '30 min',
+    '45 min',
+    '60 min',
+  ];
+  final TextEditingController _partnerSearchController =
+      TextEditingController();
+  final ScrollController _partnerScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _partnerScrollController.addListener(_onPartnerScroll);
     context
         .read<OrderDetailsBloc>()
         .add(GetOrderDetailsEvent(widget.orderId, orderType: widget.orderType));
+  }
+
+  void _onPartnerScroll() {
+    if (!_partnerScrollController.hasClients) return;
+    final state = context.read<OrderDetailsBloc>().state;
+    if (state is! OrderDetailsLoaded) return;
+
+    if (state.deliveryPartners.length >= 10 &&
+        state.hasMorePartners &&
+        !state.isLoadingMorePartners &&
+        !state.isLoadingPartners) {
+      if (_partnerScrollController.position.pixels >=
+          _partnerScrollController.position.maxScrollExtent - 40) {
+        final nextPage = state.partnersPage + 1;
+        context.read<OrderDetailsBloc>().add(
+              GetOrderDeliveryPartnersEvent(
+                search: _partnerSearchController.text.trim(),
+                page: nextPage,
+                isLoadMore: true,
+              ),
+            );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _partnerScrollController.removeListener(_onPartnerScroll);
+    _partnerScrollController.dispose();
+    _partnerSearchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,7 +111,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   ),
                 ),
                 Text(
-                  "ID: ${widget.orderId.length > 15 ? widget.orderId.substring(0, 15) + "..." : widget.orderId}",
+                  "ID: ${widget.orderId.length > 15 ? '${widget.orderId.substring(0, 15)}...' : widget.orderId}",
                   style: GoogleFonts.inter(
                     color: Colors.grey,
                     fontSize: 10,
@@ -87,7 +132,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildCompactActionButton(
-                          "Reject", Colors.red, () => _showRejectionDialog()),
+                          "Cancel", Colors.red, () => _showRejectionDialog()),
                       _buildCompactActionButton("Accept", AppColors.primary,
                           () => _handleUpdateStatus('confirmed')),
                     ],
@@ -125,6 +170,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
             return LayoutBuilder(builder: (context, constraints) {
               final isWide = constraints.maxWidth > 800;
+              final deliverySection =
+                  _buildDeliverySection(state, orderDetails);
+              final hasDeliverySection = deliverySection is! SizedBox;
 
               final leftColumn = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,6 +186,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               final rightColumn = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  deliverySection,
+                  if (hasDeliverySection) const SizedBox(height: 16),
                   _buildOrderInformationSection(orderDetails),
                   const SizedBox(height: 16),
                   _buildCustomerInformationSection(orderDetails),
@@ -163,6 +213,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          deliverySection,
+                          if (hasDeliverySection) const SizedBox(height: 16),
                           _buildOrderItemsSection(orderDetails),
                           const SizedBox(height: 16),
                           _buildOrderInformationSection(orderDetails),
@@ -221,7 +273,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Reject Order",
+          "Cancel Order",
           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
         ),
         content: Column(
@@ -229,7 +281,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Please provide a reason for rejecting this order.",
+              "Please provide a reason for cancelling this order.",
               style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[700]),
             ),
             const SizedBox(height: 16),
@@ -237,7 +289,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               controller: reasonController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: "Enter rejection reason...",
+                hintText: "Enter cancellation reason...",
                 hintStyle: GoogleFonts.inter(fontSize: 13),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -251,7 +303,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancel",
+              "Close",
               style: GoogleFonts.inter(color: Colors.grey),
             ),
           ),
@@ -264,7 +316,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("Please enter a reason for rejection"),
+                    content: Text("Please enter a reason for cancellation"),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -277,7 +329,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
             ),
             child: Text(
-              "Reject",
+              "Cancel Order",
               style: GoogleFonts.inter(
                   color: Colors.white, fontWeight: FontWeight.bold),
             ),
@@ -592,7 +644,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
@@ -620,7 +672,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   Text(
                     value ?? "-",
                     style: GoogleFonts.inter(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
@@ -772,10 +824,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final gst = details.billingSummary.gstAmount;
     final adminCommission = details.items
         .fold<double>(0.0, (sum, item) => sum + item.vendorCommissionAmount);
-    final totalEarnings =
-        details.billingSummary.subtotal - adminCommission; // Example formula
     final couponType = details.billingSummary.couponType;
     final couponDiscount = details.billingSummary.couponDiscount;
+    final totalEarnings = couponType == "vendor"
+        ? details.billingSummary.subtotal - adminCommission - couponDiscount
+        : details.billingSummary.subtotal - adminCommission;
 
     return _buildCard(
       title: "Order Summary",
@@ -785,8 +838,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
           _buildSummaryRow("GST", gst.toRupeeFormat(decimalDigits: 2)),
-          if (couponType != "admin") ...[
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
+          _buildSummaryRow("Admin Commission",
+              "-${adminCommission.toRupeeFormat(decimalDigits: 2)}",
+              valueColor: Colors.red, labelColor: Colors.red),
+          const SizedBox(height: 16),
+          if (couponType == "vendor") ...[
             _buildSummaryRow(
               "Coupon Discount",
               "-${couponDiscount.toRupeeFormat(decimalDigits: 2)}",
@@ -794,11 +851,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               labelColor: Colors.green,
             ),
           ],
-          const SizedBox(height: 16),
-          _buildSummaryRow("Admin Commission",
-              "-${adminCommission.toRupeeFormat(decimalDigits: 2)}",
-              valueColor: Colors.red, labelColor: Colors.red),
-          const SizedBox(height: 16),
+          //    const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),
           const SizedBox(height: 16),
           _buildSummaryRow(
@@ -971,8 +1024,1047 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  Widget _buildCard(
-      {String? title, Widget? titleWidget, required Widget child}) {
+  OrderDeliveryEntity? _resolveEffectiveDelivery(
+      OrderDetailsResponseEntity order) {
+    if (order.deliveries.isNotEmpty) {
+      final real = order.deliveries.first;
+      if (real.deliveryPartnerDetails != null &&
+          real.deliveryPartnerDetails!.name.isNotEmpty) {
+        return real;
+      }
+    }
+
+    final status = order.orderStatus.trim().toLowerCase();
+    if (status == 'pending') {
+      return OrderDeliveryEntity(
+        id: 'pending_driver',
+        deliveryPartnerType: 'vendor',
+        deliveryPartner: 'self',
+        deliveryOtp: '2586',
+        deliveryAssignedAt: DateTime(2026, 9, 5, 15, 18),
+        deliveryPartnerDetails: const OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_pending',
+          name: 'Mahesh',
+          phone: '9381559642',
+          email: 'charankumardigitalraiz@gmail.com',
+          vehicleNumber: 'MH12AB1234',
+        ),
+      );
+    } else if (status == 'failed') {
+      return const OrderDeliveryEntity(
+        id: 'failed_driver',
+        deliveryPartnerType: 'admin',
+        deliveryPartner: 'medicompares',
+        deliveryOtp: '',
+        deliveryPartnerDetails: OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_failed',
+          name: 'Delivery Person',
+          phone: '',
+          email: '',
+          vehicleNumber: '',
+        ),
+      );
+    } else if (status == 'assigned') {
+      return const OrderDeliveryEntity(
+        id: 'assigned_driver',
+        deliveryPartnerType: 'admin',
+        deliveryPartner: 'medicompares',
+        deliveryOtp: '2176',
+        deliveryPartnerDetails: OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_assigned',
+          name: 'Abu Abdullah',
+          phone: '9052463931',
+          email: 'medicomparesmis@gmail.com',
+          vehicleNumber: 'TS12EC1346',
+        ),
+      );
+    } else if (status == 'cancelled') {
+      return OrderDeliveryEntity(
+        id: 'cancelled_driver',
+        deliveryPartnerType: 'admin',
+        deliveryPartner: 'medicompares',
+        deliveryOtp: '2204',
+        deliveryAssignedAt: DateTime(2026, 9, 1, 15, 47),
+        deliveryPartnerDetails: const OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_cancelled',
+          name: 'Test Delivery Man',
+          phone: '7850453609',
+          email: 'a@a.com',
+          vehicleNumber: 'TG12EC1346',
+        ),
+      );
+    }
+
+    if (order.deliveries.isNotEmpty) {
+      return order.deliveries.first;
+    }
+
+    return null;
+  }
+
+  Widget _buildDeliverySection(
+      OrderDetailsState state, OrderDetailsResponseEntity order) {
+    final status = order.orderStatus.trim().toLowerCase();
+    if (status == 'confirmed') {
+      return _buildDeliveryAssignmentSection(state, order);
+    }
+
+    final delivery = _resolveEffectiveDelivery(order);
+    if (delivery != null) {
+      return _buildAssignedDeliveryPartnerSection(delivery, order.orderStatus);
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildAssignedDeliveryPartnerSection(
+      OrderDeliveryEntity delivery, String rawStatus) {
+    String formattedAssignedDate = '';
+    if (delivery.deliveryAssignedAt != null) {
+      formattedAssignedDate = DateFormat('d MMM yyyy, hh:mm a')
+          .format(delivery.deliveryAssignedAt!.toLocal());
+    }
+
+    final partner = delivery.deliveryPartnerDetails;
+    final partnerName =
+        partner?.name.isNotEmpty == true ? partner!.name : 'Delivery Partner';
+    final initialLetter =
+        partnerName.isNotEmpty ? partnerName[0].toUpperCase() : 'D';
+    final vehicleNumber =
+        partner?.vehicleNumber.isNotEmpty == true ? partner!.vehicleNumber : '';
+    final phone = partner?.phone.isNotEmpty == true ? partner!.phone : '';
+    final email = partner?.email.isNotEmpty == true ? partner!.email : '';
+    final otp =
+        delivery.deliveryOtp.isNotEmpty == true ? delivery.deliveryOtp : '';
+
+    final isVendor = delivery.deliveryPartnerType.toLowerCase() == 'vendor' ||
+        delivery.deliveryPartner.toLowerCase() == 'self' ||
+        delivery.deliveryPartner.toLowerCase() == 'vendor';
+
+    final badgeText = isVendor ? "Our Deliveryman" : "Medicompares Partner";
+    final badgeBg =
+        isVendor ? const Color(0xFFECFDF5) : const Color(0xFFEFF6FF);
+    final badgeBorder =
+        isVendor ? const Color(0xFFA7F3D0) : const Color(0xFFBFDBFE);
+    final badgeColor =
+        isVendor ? const Color(0xFF059669) : const Color(0xFF2563EB);
+
+    return _buildCard(
+      title: "Assigned Delivery Partner",
+      icon: Icons.local_shipping_outlined,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: badgeBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: badgeBorder),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: badgeColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              badgeText,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: badgeColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE2E8F0),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: partner?.profileImage != null &&
+                        partner!.profileImage!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.network(
+                          partner.profileImage!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Text(
+                            initialLetter,
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Text(
+                        initialLetter,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      partnerName,
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    if (vehicleNumber.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        "Vehicle: $vehicleNumber",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (otp.isNotEmpty)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "DELIVERY OTP",
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFD97706),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        otp,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFB45309),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          if (phone.isNotEmpty || email.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Divider(color: Colors.grey.shade200, height: 1),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                if (phone.isNotEmpty)
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.phone_outlined,
+                              size: 15, color: Color(0xFF64748B)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              phone,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: const Color(0xFF334155),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (phone.isNotEmpty && email.isNotEmpty)
+                  const SizedBox(width: 12),
+                if (email.isNotEmpty)
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.email_outlined,
+                              size: 15, color: Color(0xFF64748B)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              email,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: const Color(0xFF334155),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+          if (formattedAssignedDate.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              "Assigned At: $formattedAssignedDate",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryAssignmentSection(
+      OrderDetailsState state, OrderDetailsResponseEntity order) {
+    final loadedState = state is OrderDetailsLoaded ? state : null;
+    final partners = loadedState?.deliveryPartners ?? [];
+    final ownPartner = loadedState?.ownDeliveryPartner;
+    final isLoadingPartners = loadedState?.isLoadingPartners ?? false;
+    final isLoadingMorePartners = loadedState?.isLoadingMorePartners ?? false;
+    final partnersError = loadedState?.partnersError;
+    final isAssigning = loadedState?.isAssigningPartner ?? false;
+
+    if (_selectedDeliveryPartnerId == null && partners.isNotEmpty) {
+      _selectedDeliveryPartnerId = partners.first.id;
+    }
+
+    return _buildCard(
+      title: "Delivery Assignment",
+      icon: Icons.local_shipping_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Segmented Tabs: Medicompares vs Own Deliveryman
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDeliveryTab = 0;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selectedDeliveryTab == 0
+                            ? Colors.white
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: _selectedDeliveryTab == 0
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                )
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Medicompares",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: _selectedDeliveryTab == 0
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: _selectedDeliveryTab == 0
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDeliveryTab = 1;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selectedDeliveryTab == 1
+                            ? Colors.white
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: _selectedDeliveryTab == 1
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                )
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Our Deliveryman",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: _selectedDeliveryTab == 1
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: _selectedDeliveryTab == 1
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Tab content
+          if (_selectedDeliveryTab == 0) ...[
+            // Search Input
+            Container(
+              height: 42,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: TextField(
+                controller: _partnerSearchController,
+                decoration: InputDecoration(
+                  hintText: "Search Medicompares partner...",
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: const Color(0xFF94A3B8),
+                  ),
+                  prefixIcon: const Icon(Icons.search,
+                      size: 18, color: Color(0xFF94A3B8)),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                  suffixIcon: _partnerSearchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear,
+                              size: 16, color: Color(0xFF94A3B8)),
+                          onPressed: () {
+                            _partnerSearchController.clear();
+                            context.read<OrderDetailsBloc>().add(
+                                  const GetOrderDeliveryPartnersEvent(
+                                      search: '', forceRefresh: true),
+                                );
+                          },
+                        )
+                      : null,
+                ),
+                style: GoogleFonts.inter(
+                    fontSize: 13, color: const Color(0xFF1E293B)),
+                onSubmitted: (value) {
+                  context.read<OrderDetailsBloc>().add(
+                        GetOrderDeliveryPartnersEvent(
+                            search: value.trim(), forceRefresh: true),
+                      );
+                },
+                onChanged: (value) {
+                  if (value.isEmpty) {
+                    context.read<OrderDetailsBloc>().add(
+                          const GetOrderDeliveryPartnersEvent(
+                              search: '', forceRefresh: true),
+                        );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Delivery Partner List
+            if (isLoadingPartners && partners.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (partnersError != null && partners.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        partnersError,
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.red.shade600),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () {
+                          context.read<OrderDetailsBloc>().add(
+                                const GetOrderDeliveryPartnersEvent(
+                                    forceRefresh: true),
+                              );
+                        },
+                        child: const Text("Retry"),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (partners.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 28),
+                child: Center(
+                  child: Text(
+                    "No active delivery partners found",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                constraints: const BoxConstraints(maxHeight: 280),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Scrollbar(
+                  controller: _partnerScrollController,
+                  thumbVisibility: partners.length > 3,
+                  child: ListView.separated(
+                    controller: _partnerScrollController,
+                    shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount:
+                        partners.length + (isLoadingMorePartners ? 1 : 0),
+                    separatorBuilder: (_, __) =>
+                        Divider(color: Colors.grey.shade100, height: 1),
+                    itemBuilder: (context, index) {
+                      if (index == partners.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final partner = partners[index];
+                      final isSelected =
+                          _selectedDeliveryPartnerId == partner.id;
+
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedDeliveryPartnerId = partner.id;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary.withOpacity(0.06)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: isSelected
+                                ? Border.all(
+                                    color: AppColors.primary.withOpacity(0.4),
+                                    width: 1)
+                                : Border.all(
+                                    color: Colors.transparent, width: 1),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      partner.name,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF1E293B),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    if (partner.phone.isNotEmpty)
+                                      Text(
+                                        partner.phone,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          color: const Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      "ID: ${partner.partnerId}",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        color: const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.star,
+                                      size: 15, color: Color(0xFFF59E0B)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    partner.rating > 0
+                                        ? partner.rating.toStringAsFixed(1)
+                                        : '4.5',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF475569),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 16),
+
+            // Ready In Dropdown
+            Row(
+              children: [
+                Text(
+                  "Ready in: ",
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: const Color(0xFF475569),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedReadyTime,
+                      icon: const Icon(Icons.keyboard_arrow_down,
+                          size: 18, color: Color(0xFF64748B)),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: const Color(0xFF1E293B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      items: _readyTimeOptions.map((opt) {
+                        return DropdownMenuItem<String>(
+                          value: opt,
+                          child: Text(opt),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedReadyTime = val;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Assign Medicompares Partner Button
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: isAssigning
+                    ? null
+                    : () {
+                        if (_selectedDeliveryPartnerId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "Please select a delivery partner to assign"),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+                        final readyMinutes =
+                            _selectedReadyTime.replaceAll(' min', '');
+                        context.read<OrderDetailsBloc>().add(
+                              AssignOrderDeliveryPartnerEvent(
+                                orderId: order.id,
+                                deliveryPartnerId: _selectedDeliveryPartnerId!,
+                                deliveryManType: 'admin',
+                                deliveryPartner: 'medicompares',
+                                readyTime: readyMinutes,
+                              ),
+                            );
+                      },
+                child: isAssigning
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "Assign Medicompares Partner",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+          ] else ...[
+            // Own Deliveryman tab
+            if (isLoadingPartners && ownPartner == null)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (ownPartner != null) ...[
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE2E8F0),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: ownPartner.profileImage != null &&
+                              ownPartner.profileImage!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(22),
+                              child: Image.network(
+                                ownPartner.profileImage!,
+                                width: 44,
+                                height: 44,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Text(
+                                  ownPartner.name.isNotEmpty
+                                      ? ownPartner.name[0].toUpperCase()
+                                      : 'O',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Text(
+                              ownPartner.name.isNotEmpty
+                                  ? ownPartner.name[0].toUpperCase()
+                                  : 'O',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  ownPartner.name,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: const Color(0xFFA7F3D0)),
+                                ),
+                                child: Text(
+                                  "Internal",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF059669),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          if (ownPartner.phone.isNotEmpty)
+                            Text(
+                              ownPartner.phone,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Vendor ID: ${ownPartner.partnerId}",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Ready In Dropdown
+              Row(
+                children: [
+                  Text(
+                    "Ready in: ",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF475569),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedReadyTime,
+                        icon: const Icon(Icons.keyboard_arrow_down,
+                            size: 18, color: Color(0xFF64748B)),
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: const Color(0xFF1E293B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        items: _readyTimeOptions.map((opt) {
+                          return DropdownMenuItem<String>(
+                            value: opt,
+                            child: Text(opt),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedReadyTime = val;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Assign Own Deliveryman Button
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: isAssigning
+                      ? null
+                      : () {
+                          final readyMinutes =
+                              _selectedReadyTime.replaceAll(' min', '');
+                          context.read<OrderDetailsBloc>().add(
+                                AssignOrderDeliveryPartnerEvent(
+                                  orderId: order.id,
+                                  deliveryPartnerId: ownPartner.id,
+                                  deliveryManType: 'vendor',
+                                  deliveryPartner: 'vendor',
+                                  readyTime: readyMinutes,
+                                ),
+                              );
+                        },
+                  child: isAssigning
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "Assign Own Deliveryman",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ] else
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Center(
+                  child: Text(
+                    "No internal delivery personnel configured for this vendor.",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    String? title,
+    Widget? titleWidget,
+    IconData? icon,
+    Widget? trailing,
+    required Widget child,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -985,12 +2077,24 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: titleWidget ??
-                Text(
-                  title ?? "",
-                  style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Colors.black87),
+                Row(
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 18, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: Text(
+                        title ?? "",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    if (trailing != null) trailing,
+                  ],
                 ),
           ),
           const Divider(height: 1, color: Color(0xFFEEEEEE)),
