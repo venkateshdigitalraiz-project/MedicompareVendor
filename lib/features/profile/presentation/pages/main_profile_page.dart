@@ -38,6 +38,7 @@ class _ProfilePageState extends State<MainprofileScreen> {
   List<String> activeModules = [];
   bool _isLabTestsExpanded = false;
   bool _isAmbulanceExpanded = false;
+  bool _isDeliverymanExpanded = false;
   bool _isCouponsExpanded = false;
   bool _isLegalExpanded = false;
 
@@ -327,9 +328,10 @@ class _ProfilePageState extends State<MainprofileScreen> {
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
+
                       child: const Icon(
                         Icons.edit_outlined,
                         color: AppColors.primary,
@@ -543,6 +545,43 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   ],
                 ),
               ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ExpansionTile(
+                leading: const Icon(Icons.local_shipping_outlined,
+                    color: AppColors.primaryDark),
+                title:
+                    Text("Deliverymen", style: GoogleFonts.inter(fontSize: 14)),
+                shape: const Border(),
+                childrenPadding: const EdgeInsets.only(left: 32),
+                trailing: Icon(
+                    _isDeliverymanExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.primaryDark),
+                onExpansionChanged: (expanded) {
+                  setState(() {
+                    _isDeliverymanExpanded = expanded;
+                  });
+                },
+                children: [
+                  _menuTile("All Deliverymen", Icons.group_outlined, () {
+                    context.push('/deliveryman');
+                  }, isSubTile: true),
+                  _menuTile("Add Deliveryman", Icons.person_add_alt_1_outlined, () {
+                    context.push('/add-deliveryman');
+                  }, isSubTile: true),
+                  _menuTile("Delivery Orders", Icons.shopping_bag_outlined, () {
+                    context.push('/delivery-orders');
+                  }, isSubTile: true),
+                  _menuTile("Delivery Analytics", Icons.analytics_outlined, () {
+                    context.push('/delivery-analytics');
+                  }, isSubTile: true),
+                ],
+              ),
+            ),
+
+
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),

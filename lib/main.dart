@@ -45,10 +45,14 @@ import 'package:MediCompare/features/ambulance/ambulance_injection.dart';
 import 'package:MediCompare/features/ambulance/presentation/bloc/ambulance_event.dart';
 import 'package:MediCompare/features/notifications/notifications_injection.dart';
 import 'package:MediCompare/features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'package:MediCompare/core/config/app_config.dart';
 import 'package:MediCompare/core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize App Configuration (Auto-detects Prod for release APK, Dev for debug run)
+  AppConfig.init();
 
   // Check for persisted token
   final token = await TokenStorage.getToken();
@@ -178,5 +182,5 @@ class _MyAppState extends State<MyApp> {
 }
 /*email":"tester@digitalraiz.com","password":"123456 
 this delete option in branch details page
-https://api.medicompares.com/api/v1/vendor/branch/delete/69eb62a6e232ad31d4abf67f
+https://api.medicompares.com/api/v1/vendor/branch/delete/6a91a219138c3115f9107de5
 */

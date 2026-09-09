@@ -77,6 +77,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:MediCompare/features/coupons/presentation/pages/add_coupon_screen.dart';
 import 'package:MediCompare/features/coupons/presentation/pages/coupon_list_screen.dart';
 import 'package:MediCompare/features/coupons/coupons_injection.dart';
+import 'package:MediCompare/features/deliveryman/presentation/pages/deliveryman_page.dart';
+import 'package:MediCompare/features/deliveryman/presentation/pages/delivery_orders_page.dart';
+import 'package:MediCompare/features/deliveryman/presentation/pages/add_deliveryman_page.dart';
+import 'package:MediCompare/features/deliveryman/presentation/pages/delivery_analytics_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -417,5 +421,27 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
             child: const ServiceFeePage(),
           ),
         ),
+        GoRoute(
+          path: '/deliveryman',
+          builder: (context, state) => const DeliverymanPage(),
+        ),
+        GoRoute(
+          path: '/deliverymen',
+          builder: (context, state) => const DeliverymanPage(),
+        ),
+        GoRoute(
+          path: '/delivery-orders',
+          builder: (context, state) => const DeliveryOrdersPage(),
+        ),
+        GoRoute(
+          path: '/add-deliveryman',
+          builder: (context, state) => const AddDeliverymanPage(),
+        ),
+        GoRoute(
+          path: '/delivery-analytics',
+          builder: (context, state) => const DeliveryAnalyticsPage(),
+        ),
       ],
     );
+
+

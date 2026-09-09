@@ -117,7 +117,7 @@ class BranchService {
 
   Future<void> deleteBranch(String id) async {
     try {
-      final response = await _apiService.delete(ApiEndpoints.deleteBranch(id));
+      final response = await _apiService.post(ApiEndpoints.deleteBranch(id));
       final body = jsonDecode(response.body);
 
       if (body['success'] != true) {

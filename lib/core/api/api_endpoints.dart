@@ -1,7 +1,33 @@
-class ApiEndpoints {
-  static const String _releaseBaseUrl = 'https://api.medicompares.com/api/v1';
+import '../config/app_config.dart';
 
-  static String get baseUrl => _releaseBaseUrl;
+class ApiEndpoints {
+  // Live / Release Base URL (Kept unchanged)
+  static const String releaseBaseUrl = 'https://api.medicompares.com/api/v1';
+  static const String releaseMediaBaseUrl = 'https://api.medicompares.com';
+
+  // Local / Debug Base URL  http://192.168.0.161:9002/api/v1/vendor/package/adminpackage/details
+  //static const String localBaseUrl = 'http://192.168.0.161:9002/api/v1';
+  //static const String localMediaBaseUrl = 'http://192.168.0.161:9002';
+  static const String localBaseUrl = 'https://api.medicompares.com/api/v1';
+  static const String localMediaBaseUrl = 'https://api.medicompares.com';
+
+  /// Returns active Base URL dynamically from [AppConfig]
+  static String get baseUrl => AppConfig.baseUrl;
+
+  /// Returns active Media/Image Base URL dynamically from [AppConfig]
+  static String get mediaBaseUrl => AppConfig.mediaBaseUrl;
+
+  /// Helper to get full image URL from a relative path
+  static String getImageUrl(String? relativePath) {
+    if (relativePath == null || relativePath.isEmpty) return '';
+    if (relativePath.startsWith('http://') ||
+        relativePath.startsWith('https://')) {
+      return relativePath;
+    }
+    final cleanPath =
+        relativePath.startsWith('/') ? relativePath : '/$relativePath';
+    return '$mediaBaseUrl$cleanPath';
+  }
 
   // Auth
   static const String register = '/vendor/auth/register';
@@ -53,6 +79,13 @@ class ApiEndpoints {
       '/vendor/order/orderstatusupdate/$id';
   static String uploadReport(String id) => '/vendor/order/reportupload/$id';
   static const String deliverymanAdminList = '/vendor/deliveryman/adminlist';
+  static const String deliverymanList = '/vendor/deliveryman/list';
+  static const String createDeliveryman = '/vendor/deliveryman/create';
+  static String updateDeliveryman(String id) => '/vendor/deliveryman/update/$id';
+  static String deleteDeliveryman(String id) => '/vendor/deliveryman/delete/$id';
+  static String deliverymanDetails(String id) => '/vendor/deliveryman/details/$id';
+  static const String deliverymanAllOrders = '/vendor/deliveryman/all-orders';
+  static const String deliverymanAnalytics = '/vendor/deliveryman/analytics';
 
   // Leads
   static const String leadsList = '/vendor/leads/list';
@@ -139,8 +172,7 @@ class ApiEndpoints {
   static const String homeCareList = '/vendor/product/homecare/list';
   static String homeCareDetails(String id) =>
       '/vendor/product/homecare/details/$id';
-  static const String createHomeCare =
-      '/vendor/product/homecare/create';
+  static const String createHomeCare = '/vendor/product/homecare/create';
   static String updateHomeCare(String id) =>
       '/vendor/product/homecare/update/$id';
   static String deleteHomeCare(String id) =>

@@ -443,8 +443,11 @@ class _MedicalEquipmentDetailsPageState
             _infoItem("RETURN CHARGE", (item.returnCharge ?? 0).toRupeeFormat(),
                 Icons.replay_outlined, Colors.blue),
             const SizedBox(width: 12),
-            _infoItem("SERVICE CHARGE", (item.serviceCharges ?? 0).toRupeeFormat(),
-                Icons.design_services_outlined, Colors.green),
+            _infoItem(
+                "SERVICE CHARGE",
+                (item.serviceCharges ?? 0).toRupeeFormat(),
+                Icons.design_services_outlined,
+                Colors.green),
           ],
         ),
         const SizedBox(height: 12),
@@ -455,6 +458,19 @@ class _MedicalEquipmentDetailsPageState
             const SizedBox(width: 12),
             _infoItem("STATUS", item.status.toUpperCase(),
                 Icons.check_circle_outline, Colors.teal),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _infoItem(
+              "CATEGORY",
+              item.details.subcategory?.name ?? "N/A",
+              Icons.category_outlined,
+              Colors.indigo,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ],
