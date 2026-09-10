@@ -47,9 +47,31 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
-      subtotal: (json['baseAmount'] ?? 0).toDouble(),
-      tax: (json['tax'] ?? 0).toDouble(),
-      total: (json['total'] ?? 0).toDouble(),
+      subtotal: double.tryParse((json['subtotal'] ??
+              json['subTotal'] ??
+              json['baseAmount'] ??
+              json['base_amount'] ??
+              json['billingSummary']?['subtotal'] ??
+              json['billingSummary']?['baseAmount'] ??
+              json['billingSummary']?['totalAmount'] ??
+              json['total'] ??
+              0)
+          .toString()) ??
+          0.0,
+      tax: double.tryParse((json['tax'] ??
+              json['gst'] ??
+              json['totalGst'] ??
+              json['billingSummary']?['totalGst'] ??
+              0)
+          .toString()) ??
+          0.0,
+      total: double.tryParse((json['total'] ??
+              json['totalAmount'] ??
+              json['finalAmount'] ??
+              json['billingSummary']?['finalAmount'] ??
+              0)
+          .toString()) ??
+          0.0,
       billingSummary: OrderBillingSummaryModel.fromJson(
           json['billingSummary'] ?? <String, dynamic>{}),
       items: json['items'] != null
@@ -103,14 +125,19 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
             json['installment_list'] ??
             json['installments'] ??
             json['orderDetails']?['installmentlist'] ??
-            json['orderDetails']?['installmentList'];
+            json['orderDetails']?['installmentList'] ??
+            json['orderDetails']?['installments'] ??
+            (json['items'] is List &&
+                    (json['items'] as List).isNotEmpty &&
+                    json['items'][0] is Map
+                ? (json['items'][0]['installmentlist'] ??
+                    json['items'][0]['installmentList'] ??
+                    json['items'][0]['installments'] ??
+                    json['items'][0]['rentalDetails']?['installmentlist'] ??
+                    json['items'][0]['rentalDetails']?['installmentList'] ??
+                    json['items'][0]['rentalDetails']?['installments'])
+                : null);
         if (list is List) {
-          return list
-              .whereType<Map<String, dynamic>>()
-              .map((e) => InstallmentItemModel.fromJson(e))
-              .toList();
-        }
-        if (list is List<dynamic>) {
           return list
               .whereType<Map>()
               .map((e) => InstallmentItemModel.fromJson(
@@ -123,7 +150,15 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
         final dList = json['deliveries'] ??
             json['delivery'] ??
             json['orderDetails']?['deliveries'] ??
-            json['orderDetails']?['delivery'];
+            json['orderDetails']?['delivery'] ??
+            (json['items'] is List &&
+                    (json['items'] as List).isNotEmpty &&
+                    json['items'][0] is Map
+                ? (json['items'][0]['delivery'] ??
+                    json['items'][0]['deliveries'] ??
+                    json['items'][0]['orderDetails']?['delivery'] ??
+                    json['items'][0]['orderDetails']?['deliveries'])
+                : null);
         if (dList is List && dList.isNotEmpty) {
           return dList
               .whereType<Map>()
@@ -137,11 +172,20 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
         }
         final directPartner = json['deliveryPartnerDetails'] ??
             json['deliveryPartner'] ??
+            json['assignedPartnerDetails'] ??
+            json['assignedPartner'] ??
             json['driverDetails'] ??
             json['assignedDriver'] ??
             json['deliveryman'] ??
+            json['deliveryMan'] ??
+            json['deliverymanDetails'] ??
+            json['partnerDetails'] ??
             json['orderDetails']?['deliveryPartnerDetails'] ??
-            json['orderDetails']?['deliveryPartner'];
+            json['orderDetails']?['deliveryPartner'] ??
+            json['orderDetails']?['assignedPartnerDetails'] ??
+            json['orderDetails']?['assignedPartner'] ??
+            json['orderDetails']?['deliveryman'] ??
+            json['orderDetails']?['deliveryMan'];
         if (directPartner is Map) {
           return [
             OrderDeliveryModel(
@@ -150,13 +194,15 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
               deliveryPartnerType: (json['deliveryPartnerType'] ??
                       json['deliveryManType'] ??
                       directPartner['deliveryManType'] ??
+                      directPartner['deliveryPartnerType'] ??
                       'admin')
                   .toString(),
               deliveryPartner: (json['deliveryPartner'] is String
                       ? json['deliveryPartner']
-                      : 'medicompares')
+                      : (directPartner['partnerType'] ?? 'medicompares'))
                   .toString(),
               deliveryPartnerId: (json['deliveryPartnerId'] ??
+                      json['assignedPartnerId'] ??
                       directPartner['_id'] ??
                       directPartner['id'] ??
                       '')
@@ -164,13 +210,17 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
               deliveryOtp: (json['deliveryOtp'] ??
                       json['otp'] ??
                       directPartner['otp'] ??
+                      directPartner['deliveryOtp'] ??
                       '')
                   .toString(),
               deliveryAssignedAt: json['deliveryAssignedAt'] != null
                   ? DateTime.tryParse(json['deliveryAssignedAt'].toString())
                   : (json['assignedAt'] != null
                       ? DateTime.tryParse(json['assignedAt'].toString())
-                      : null),
+                      : (directPartner['assignedAt'] != null
+                          ? DateTime.tryParse(
+                              directPartner['assignedAt'].toString())
+                          : null)),
               deliveryPartnerDetails: OrderDeliveryPartnerDetailsModel.fromJson(
                   Map<String, dynamic>.from(directPartner)),
             )
@@ -383,22 +433,30 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
 
   factory OrderBillingSummaryModel.fromJson(Map<String, dynamic> json) {
     return OrderBillingSummaryModel(
-      subtotal: double.tryParse(json['baseAmount']?.toString() ?? '0') ?? 0.0,
-      totalGst: double.tryParse(json['totalGst']?.toString() ?? '0') ?? 0.0,
+      subtotal: double.tryParse((json['subtotal'] ??
+              json['subTotal'] ??
+              json['baseAmount'] ??
+              json['base_amount'] ??
+              json['unitPrice'] ??
+              json['totalAmount'] ??
+              0)
+          .toString()) ??
+          0.0,
+      totalGst: double.tryParse((json['totalGst'] ?? json['total_gst'] ?? json['gst'] ?? json['tax'] ?? 0).toString()) ?? 0.0,
       finalAmount:
-          double.tryParse(json['finalAmount']?.toString() ?? '0') ?? 0.0,
-      unitPrice: double.tryParse(json['unitPrice']?.toString() ?? '0') ?? 0.0,
-      gstAmount: double.tryParse(json['gstAmount']?.toString() ?? '0') ?? 0.0,
-      paidAmount: double.tryParse(json['paidAmount']?.toString() ?? '0') ?? 0.0,
+          double.tryParse((json['finalAmount'] ?? json['final_amount'] ?? json['total'] ?? json['totalAmount'] ?? 0).toString()) ?? 0.0,
+      unitPrice: double.tryParse((json['unitPrice'] ?? json['unit_price'] ?? json['price'] ?? 0).toString()) ?? 0.0,
+      gstAmount: double.tryParse((json['gstAmount'] ?? json['gst_amount'] ?? json['tax'] ?? 0).toString()) ?? 0.0,
+      paidAmount: double.tryParse((json['paidAmount'] ?? json['paid_amount'] ?? 0).toString()) ?? 0.0,
       couponType: (json['couponType'] ?? json['coupontype'])?.toString(),
       couponDiscount: double.tryParse((json['couponDiscount'] ??
                       json['couponAmount'] ??
                       json['coupon_discount'] ??
                       json['discountAmount'] ??
                       json['discount'] ??
-                      json['couponValue'])
-                  ?.toString() ??
-              '0') ??
+                      json['couponValue'] ??
+                      0)
+                  .toString()) ??
           0.0,
     );
   }
@@ -418,12 +476,34 @@ class OrderDetailsItemModel extends OrderDetailsItemEntity {
   });
 
   factory OrderDetailsItemModel.fromJson(Map<String, dynamic> json) {
+    final rentalDetails = json['rentalDetails'] != null
+        ? RentalDetailsModel.fromJson(json['rentalDetails'])
+        : RentalDetailsModel.fromJson(json);
+
+    final double price = double.tryParse((json['price'] ??
+            json['basePricePerDay'] ??
+            json['perDayRent'] ??
+            json['unitPrice'] ??
+            rentalDetails.basePricePerDay ??
+            rentalDetails.productSnapshot?.perDayRent ??
+            0)
+        .toString()) ??
+        0.0;
+
+    final int qty = int.tryParse((json['quantity'] ??
+            json['qty'] ??
+            json['count'] ??
+            json['productQuantity'] ??
+            1)
+        .toString()) ??
+        1;
+
     return OrderDetailsItemModel(
-      orderItemId: json['orderItemId']?.toString() ?? '',
-      quantity: json['quantity'] ?? 0,
-      type: json['type']?.toString() ?? '',
-      bookingType: json['bookingType']?.toString() ?? '',
-      price: (json['price'] ?? 0).toDouble(),
+      orderItemId: (json['orderItemId'] ?? json['orderRef'] ?? json['_id'] ?? '').toString(),
+      quantity: qty,
+      type: (json['type'] ?? 'rental').toString(),
+      bookingType: (json['bookingType'] ?? json['booking_type'] ?? 'rental').toString(),
+      price: price,
       billingSummary: OrderBillingSummaryModel.fromJson(
           json['billingSummary'] ?? <String, dynamic>{}),
       productDetails: json['productDetails'] != null
@@ -431,13 +511,12 @@ class OrderDetailsItemModel extends OrderDetailsItemEntity {
           : json['productSnapshot'] != null
               ? ProductDetailsModel.fromJson(json['productSnapshot'])
               : ProductDetailsModel.fromJson(json),
-      vendorCommissionAmount: (json['vendorCommissionAmount'] ??
+      vendorCommissionAmount: double.tryParse((json['vendorCommissionAmount'] ??
               json['vendorcommissionamount'] ??
               0)
-          .toDouble(),
-      rentalDetails: json['rentalDetails'] != null
-          ? RentalDetailsModel.fromJson(json['rentalDetails'])
-          : RentalDetailsModel.fromJson(json),
+          .toString()) ??
+          0.0,
+      rentalDetails: rentalDetails,
     );
   }
 }

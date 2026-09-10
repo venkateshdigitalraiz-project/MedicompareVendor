@@ -162,10 +162,22 @@ class RecentLeadModel extends RecentLeadEntity {
     required super.serviceName,
     required super.createdAt,
     required super.leadStage,
+    super.imageUrl,
   });
 
   factory RecentLeadModel.fromJson(Map<String, dynamic> json) {
     final tabletDetails = json['tabletDetails'] ?? {};
+    final files = (tabletDetails['files'] as List?) ?? [];
+    final fallbackImageUrls = (tabletDetails['imageUrl'] as List?) ?? [];
+
+    String? imageUrl;
+    if (files.isNotEmpty && files.first != null && files.first.toString().isNotEmpty) {
+      imageUrl = files.first.toString();
+    } else if (fallbackImageUrls.isNotEmpty &&
+        fallbackImageUrls.first != null &&
+        fallbackImageUrls.first.toString().isNotEmpty) {
+      imageUrl = fallbackImageUrls.first.toString();
+    }
 
     return RecentLeadModel(
       id: json['_id'] ?? '',
@@ -175,6 +187,7 @@ class RecentLeadModel extends RecentLeadEntity {
       serviceName: tabletDetails['name'] ?? 'Unknown',
       createdAt: DateTime.parse(json['createdAt']),
       leadStage: json['leadStage'] ?? 'new',
+      imageUrl: imageUrl,
     );
   }
 }

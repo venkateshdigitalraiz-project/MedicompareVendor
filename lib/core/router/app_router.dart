@@ -435,7 +435,22 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         ),
         GoRoute(
           path: '/add-deliveryman',
-          builder: (context, state) => const AddDeliverymanPage(),
+          builder: (context, state) {
+            final deliverymanId = (state.extra is String
+                    ? state.extra as String
+                    : null) ??
+                state.uri.queryParameters['id'];
+            return AddDeliverymanPage(deliverymanId: deliverymanId);
+          },
+        ),
+        GoRoute(
+          path: '/edit-deliveryman/:id',
+          builder: (context, state) {
+            final deliverymanId = state.pathParameters['id'] ??
+                (state.extra is String ? state.extra as String : null) ??
+                state.uri.queryParameters['id'];
+            return AddDeliverymanPage(deliverymanId: deliverymanId);
+          },
         ),
         GoRoute(
           path: '/delivery-analytics',

@@ -25,3 +25,25 @@ class SubmitAddDeliverymanEvent extends AddDeliverymanEvent {
   @override
   List<Object?> get props => [data];
 }
+
+class LoadDeliverymanDetailsEvent extends AddDeliverymanEvent {
+  final String id;
+
+  const LoadDeliverymanDetailsEvent(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}
+
+class SubmitUpdateDeliverymanEvent extends AddDeliverymanEvent {
+  final String id;
+  final CreateDeliverymanEntity data;
+
+  const SubmitUpdateDeliverymanEvent({
+    required this.id,
+    required this.data,
+  });
+
+  @override
+  List<Object?> get props => [id, data];
+}

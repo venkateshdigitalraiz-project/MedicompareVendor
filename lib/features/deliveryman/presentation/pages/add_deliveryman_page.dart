@@ -13,19 +13,29 @@ import '../bloc/add_deliveryman_state.dart';
 import '../../deliveryman_injection.dart';
 
 class AddDeliverymanPage extends StatelessWidget {
-  const AddDeliverymanPage({super.key});
+  final String? deliverymanId;
+
+  const AddDeliverymanPage({super.key, this.deliverymanId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DeliverymanInjection.provideAddDeliverymanBloc(),
-      child: const AddDeliverymanView(),
+      create: (context) {
+        final bloc = DeliverymanInjection.provideAddDeliverymanBloc();
+        if (deliverymanId != null && deliverymanId!.isNotEmpty) {
+          bloc.add(LoadDeliverymanDetailsEvent(deliverymanId!));
+        }
+        return bloc;
+      },
+      child: AddDeliverymanView(deliverymanId: deliverymanId),
     );
   }
 }
 
 class AddDeliverymanView extends StatefulWidget {
-  const AddDeliverymanView({super.key});
+  final String? deliverymanId;
+
+  const AddDeliverymanView({super.key, this.deliverymanId});
 
   @override
   State<AddDeliverymanView> createState() => _AddDeliverymanViewState();
@@ -39,6 +49,7 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
   final _formKey5 = GlobalKey<FormState>();
 
   int _currentStep = 1;
+  bool _isInitialized = false;
 
   // Step 1: Personal Details
   final _nameController = TextEditingController();
@@ -73,6 +84,13 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
   File? _bikeRcFile;
   File? _licenseFile;
 
+  // Existing remote document URLs (for edit mode)
+  String? _existingAadhaarDoc;
+  String? _existingPanDoc;
+  String? _existingBikeRcDoc;
+  String? _existingLicenseDoc;
+  String? _existingProfileImage;
+
   // Step 5: Settings
   String _selectedStatus = 'active';
   bool _autoAssign = true;
@@ -82,6 +100,120 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
   final _notesController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
+
+  bool get isEditMode =>
+      widget.deliverymanId != null && widget.deliverymanId!.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<AddDeliverymanBloc>();
+    if (bloc.state is AddDeliverymanDetailsLoaded) {
+      _populateData((bloc.state as AddDeliverymanDetailsLoaded).deliveryman);
+      _isInitialized = true;
+    }
+  }
+
+  String _formatTime(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    if (raw.toUpperCase().contains('AM') || raw.toUpperCase().contains('PM')) {
+      return raw;
+    }
+    final parts = raw.split(':');
+    if (parts.length >= 2) {
+      int hour = int.tryParse(parts[0]) ?? 9;
+      final min = parts[1].padLeft(2, '0');
+      final period = hour >= 12 ? 'PM' : 'AM';
+      if (hour == 0) {
+        hour = 12;
+      } else if (hour > 12) {
+        hour -= 12;
+      }
+      return '${hour.toString().padLeft(2, '0')}:$min $period';
+    }
+    return raw;
+  }
+
+  void _populateData(CreateDeliverymanEntity data) {
+    _nameController.text = data.fullName;
+    _emailController.text = data.email;
+    _phoneController.text =
+        data.phone.replaceAll('+91', '').replaceAll(' ', '').trim();
+    if (data.dob.isNotEmpty) {
+      _dobController.text = data.dob.contains('T')
+          ? data.dob.split('T').first
+          : data.dob;
+    }
+
+    if (data.gender.isNotEmpty) {
+      final g = data.gender.toLowerCase().trim();
+      if (g == 'female' || g == 'f') {
+        _selectedGender = 'Female';
+      } else if (g == 'other' || g == 'o') {
+        _selectedGender = 'Other';
+      } else {
+        _selectedGender = 'Male';
+      }
+    }
+
+    _addressController.text = data.address;
+    _cityController.text = data.city;
+    _stateController.text = data.state;
+    _pincodeController.text = data.pincode.replaceAll(' ', '').trim();
+
+    if (data.vehicleType.isNotEmpty) {
+      final v = data.vehicleType.toLowerCase().trim();
+      if (v.contains('scooter')) {
+        _selectedVehicleType = 'Scooter';
+      } else if (v.contains('car')) {
+        _selectedVehicleType = 'Car';
+      } else if (v.contains('van')) {
+        _selectedVehicleType = 'Van';
+      } else if (v.contains('electric')) {
+        _selectedVehicleType = 'Electric Bike';
+      } else {
+        _selectedVehicleType = 'Bike';
+      }
+    }
+    _vehicleNumberController.text = data.vehicleNumber;
+    _licenseNumberController.text = data.drivingLicenseNumber;
+    if (data.shiftStartTime.isNotEmpty) {
+      _shiftStartController.text = _formatTime(data.shiftStartTime);
+    }
+    if (data.shiftEndTime.isNotEmpty) {
+      _shiftEndController.text = _formatTime(data.shiftEndTime);
+    }
+
+    _bankNameController.text = data.bankName;
+    _accountNumberController.text = data.accountNumber;
+    _accountHolderController.text = data.accountHolderName;
+    _ifscController.text = data.ifscCode;
+    _branchController.text = data.branchName;
+
+    _aadhaarNumberController.text =
+        data.aadhaarNumber.replaceAll(' ', '').trim();
+    _panNumberController.text = data.panNumber.replaceAll(' ', '').trim();
+
+    _existingAadhaarDoc = data.aadhaarDoc;
+    _existingPanDoc = data.panDoc;
+    _existingBikeRcDoc = data.bikeRcDoc;
+    _existingLicenseDoc = data.drivingLicenseDoc;
+    _existingProfileImage = data.profileImage;
+
+    if (data.status.isNotEmpty) {
+      final s = data.status.toLowerCase().trim();
+      if (s == 'inactive' || s == '0' || s == 'false' || s == 'disabled') {
+        _selectedStatus = 'inactive';
+      } else {
+        _selectedStatus = 'active';
+      }
+    }
+    _autoAssign = data.autoAssign;
+    _maxOrdersController.text = data.maxDailyOrders.toString();
+    _emergencyNameController.text = data.emergencyContactName ?? '';
+    _emergencyPhoneController.text = data.emergencyContactPhone ?? '';
+    _notesController.text = data.notes ?? '';
+  }
 
   @override
   void dispose() {
@@ -213,11 +345,12 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
 
   void _submitForm() {
     final entity = CreateDeliverymanEntity(
+      id: widget.deliverymanId,
       fullName: _nameController.text.trim(),
       email: _emailController.text.trim(),
       phone: _phoneController.text.trim(),
       dob: _dobController.text.trim(),
-      gender: _selectedGender ?? 'male',
+      gender: (_selectedGender ?? 'male').toLowerCase(),
       address: _addressController.text.trim(),
       city: _cityController.text.trim(),
       state: _stateController.text.trim(),
@@ -234,10 +367,11 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
       branchName: _branchController.text.trim(),
       aadhaarNumber: _aadhaarNumberController.text.trim(),
       panNumber: _panNumberController.text.trim(),
-      aadhaarDoc: _aadhaarFile?.path,
-      panDoc: _panFile?.path,
-      bikeRcDoc: _bikeRcFile?.path,
-      drivingLicenseDoc: _licenseFile?.path,
+      aadhaarDoc: _aadhaarFile?.path ?? _existingAadhaarDoc,
+      panDoc: _panFile?.path ?? _existingPanDoc,
+      bikeRcDoc: _bikeRcFile?.path ?? _existingBikeRcDoc,
+      drivingLicenseDoc: _licenseFile?.path ?? _existingLicenseDoc,
+      profileImage: _existingProfileImage,
       status: _selectedStatus,
       autoAssign: _autoAssign,
       maxDailyOrders: int.tryParse(_maxOrdersController.text.trim()) ?? 20,
@@ -246,7 +380,16 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
       notes: _notesController.text.trim(),
     );
 
-    context.read<AddDeliverymanBloc>().add(SubmitAddDeliverymanEvent(entity));
+    if (isEditMode) {
+      context.read<AddDeliverymanBloc>().add(
+            SubmitUpdateDeliverymanEvent(
+              id: widget.deliverymanId!,
+              data: entity,
+            ),
+          );
+    } else {
+      context.read<AddDeliverymanBloc>().add(SubmitAddDeliverymanEvent(entity));
+    }
   }
 
   @override
@@ -272,9 +415,11 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
                 color: const Color(0xFFEEF2FF),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.person_add_alt_1_outlined,
-                color: Color(0xFF6366F1),
+              child: Icon(
+                isEditMode
+                    ? Icons.edit_outlined
+                    : Icons.person_add_alt_1_outlined,
+                color: const Color(0xFF6366F1),
                 size: 20,
               ),
             ),
@@ -285,7 +430,7 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Add Deliveryman",
+                    isEditMode ? "Edit Deliveryman" : "Add Deliveryman",
                     style: GoogleFonts.inter(
                       color: const Color(0xFF1E1B4B),
                       fontWeight: FontWeight.bold,
@@ -294,7 +439,9 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    "Add a new delivery personnel to your team",
+                    isEditMode
+                        ? "Update delivery personnel details"
+                        : "Add a new delivery personnel to your team",
                     style: GoogleFonts.inter(
                       color: const Color(0xFF64748B),
                       fontSize: 11,
@@ -313,7 +460,20 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
       ),
       body: BlocConsumer<AddDeliverymanBloc, AddDeliverymanState>(
         listener: (context, state) {
-          if (state is AddDeliverymanSuccess) {
+          if (state is AddDeliverymanDetailsLoaded) {
+            setState(() {
+              _populateData(state.deliveryman);
+              _isInitialized = true;
+            });
+          } else if (state is AddDeliverymanDetailsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error),
+                backgroundColor: const Color(0xFFEF4444),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          } else if (state is AddDeliverymanSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -333,7 +493,85 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
           }
         },
         builder: (context, state) {
+          if (state is AddDeliverymanDetailsLoaded && !_isInitialized) {
+            _populateData(state.deliveryman);
+            _isInitialized = true;
+          }
+
           final isSubmitting = state is AddDeliverymanSubmitting;
+          final isLoadingDetails =
+              state is AddDeliverymanDetailsLoading && !_isInitialized;
+
+          if (isLoadingDetails) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF1E1B4B)),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "Loading deliveryman details...",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is AddDeliverymanDetailsError && !_isInitialized) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Color(0xFFEF4444)),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Failed to load details",
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E1B4B),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.error,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (widget.deliverymanId != null) {
+                          context.read<AddDeliverymanBloc>().add(
+                              LoadDeliverymanDetailsEvent(
+                                  widget.deliverymanId!));
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E1B4B),
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text("Retry"),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -854,11 +1092,13 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
             _buildUploadCard(
               title: "Aadhaar Card Document *",
               file: _aadhaarFile,
+              existingUrl: _existingAadhaarDoc,
               onTap: () => _pickDocument((f) => _aadhaarFile = f),
             ),
             _buildUploadCard(
               title: "PAN Card Document *",
               file: _panFile,
+              existingUrl: _existingPanDoc,
               onTap: () => _pickDocument((f) => _panFile = f),
             ),
           ]),
@@ -868,11 +1108,13 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
             _buildUploadCard(
               title: "Bike RC Document *",
               file: _bikeRcFile,
+              existingUrl: _existingBikeRcDoc,
               onTap: () => _pickDocument((f) => _bikeRcFile = f),
             ),
             _buildUploadCard(
               title: "Driving License Document *",
               file: _licenseFile,
+              existingUrl: _existingLicenseDoc,
               onTap: () => _pickDocument((f) => _licenseFile = f),
             ),
           ]),
@@ -1066,7 +1308,9 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          _currentStep == 5 ? "Submit" : "Next",
+                          _currentStep == 5
+                              ? (isEditMode ? "Update" : "Submit")
+                              : "Next",
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -1123,8 +1367,13 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
   Widget _buildUploadCard({
     required String title,
     required File? file,
+    String? existingUrl,
     required VoidCallback onTap,
   }) {
+    final hasExisting =
+        file == null && existingUrl != null && existingUrl.isNotEmpty;
+    final hasFile = file != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1140,13 +1389,13 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: file != null
+                color: (hasFile || hasExisting)
                     ? const Color(0xFF6366F1)
                     : const Color(0xFFCBD5E1),
                 style: BorderStyle.solid,
               ),
             ),
-            child: file != null
+            child: hasFile
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -1169,46 +1418,77 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
                       const Text(
                         "Change",
                         style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF6366F1),
-                            decoration: TextDecoration.underline),
+                          fontSize: 11,
+                          color: Color(0xFF6366F1),
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ],
                   )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEEF2FF),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.upload_outlined,
-                          color: Color(0xFF6366F1),
-                          size: 18,
-                        ),
+                : hasExisting
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.cloud_done_outlined,
+                              color: Color(0xFF6366F1), size: 20),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              existingUrl.split('/').last.split('\\').last,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1E1B4B),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            "Change",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF6366F1),
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEF2FF),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.upload_outlined,
+                              color: Color(0xFF6366F1),
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Click to upload or drag and drop",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF6366F1),
+                            ),
+                          ),
+                          Text(
+                            "JPG, PNG or PDF (Max 5MB)",
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Click to upload or drag and drop",
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF6366F1),
-                        ),
-                      ),
-                      Text(
-                        "JPG, PNG or PDF (Max 5MB)",
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          color: const Color(0xFF94A3B8),
-                        ),
-                      ),
-                    ],
-                  ),
           ),
         ),
       ],
@@ -1311,13 +1591,21 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
     required ValueChanged<String?> onChanged,
     String? Function(String?)? validator,
   }) {
+    final selectedValue = (value != null && items.contains(value))
+        ? value
+        : (value != null &&
+                items.any((e) => e.toLowerCase() == value.toLowerCase())
+            ? items.firstWhere((e) => e.toLowerCase() == value.toLowerCase())
+            : null);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(label),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          initialValue: value,
+          key: ValueKey('${label}_$selectedValue'),
+          initialValue: selectedValue,
           hint: Text(
             hint,
             style: GoogleFonts.inter(

@@ -90,16 +90,32 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
 
     final data = decoded['data'];
     final orderMap = Map<String, dynamic>.from(data['Order'] as Map);
-    if (data['installmentlist'] != null && orderMap['installmentlist'] == null) {
-      orderMap['installmentlist'] = data['installmentlist'];
+
+    final keysToMerge = [
+      'installmentlist',
+      'installmentList',
+      'installment_list',
+      'installments',
+      'deliveries',
+      'delivery',
+      'deliveryPartner',
+      'deliveryPartnerDetails',
+      'assignedPartner',
+      'assignedPartnerDetails',
+      'driverDetails',
+      'assignedDriver',
+      'deliveryman',
+      'deliveryMan',
+      'deliverymanDetails',
+      'partnerDetails',
+    ];
+
+    for (var key in keysToMerge) {
+      if (data[key] != null && orderMap[key] == null) {
+        orderMap[key] = data[key];
+      }
     }
-    if (data['installmentList'] != null && orderMap['installmentList'] == null) {
-      orderMap['installmentList'] = data['installmentList'];
-    }
-    if (data['installment_list'] != null && orderMap['installment_list'] == null) {
-      orderMap['installment_list'] = data['installment_list'];
-    }
-    
+
     return OrderDetailsResponseModel.fromJson(orderMap);
   }
 

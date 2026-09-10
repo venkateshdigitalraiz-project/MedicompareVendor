@@ -329,8 +329,11 @@ class DeliveryOrdersView extends StatelessWidget {
                                 return DeliveryOrderCard(
                                   item: item,
                                   onTap: () {
-                                    if (item.orderId.isNotEmpty) {
-                                      context.push('/order-details/${item.orderId}');
+                                    final targetId = item.orderId.isNotEmpty
+                                        ? item.orderId
+                                        : item.id;
+                                    if (targetId.isNotEmpty) {
+                                      context.push('/order-details/$targetId');
                                     }
                                   },
                                 );

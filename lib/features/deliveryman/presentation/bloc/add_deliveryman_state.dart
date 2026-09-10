@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/create_deliveryman_entity.dart';
 
 abstract class AddDeliverymanState extends Equatable {
   final int currentStep;
@@ -11,6 +12,36 @@ abstract class AddDeliverymanState extends Equatable {
 
 class AddDeliverymanInitial extends AddDeliverymanState {
   const AddDeliverymanInitial({super.currentStep = 1});
+}
+
+class AddDeliverymanDetailsLoading extends AddDeliverymanState {
+  const AddDeliverymanDetailsLoading({super.currentStep = 1});
+}
+
+class AddDeliverymanDetailsLoaded extends AddDeliverymanState {
+  final CreateDeliverymanEntity deliveryman;
+
+  CreateDeliverymanEntity get data => deliveryman;
+
+  const AddDeliverymanDetailsLoaded({
+    required this.deliveryman,
+    super.currentStep = 1,
+  });
+
+  @override
+  List<Object?> get props => [currentStep, deliveryman];
+}
+
+class AddDeliverymanDetailsError extends AddDeliverymanState {
+  final String error;
+
+  const AddDeliverymanDetailsError({
+    required this.error,
+    super.currentStep = 1,
+  });
+
+  @override
+  List<Object?> get props => [currentStep, error];
 }
 
 class AddDeliverymanSubmitting extends AddDeliverymanState {

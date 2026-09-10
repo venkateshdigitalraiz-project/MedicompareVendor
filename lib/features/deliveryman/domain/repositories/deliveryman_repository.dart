@@ -9,7 +9,11 @@ abstract class DeliverymanRepository {
     String status = '',
   });
 
+  Future<CreateDeliverymanEntity> getDeliverymanById(String id);
+
   Future<bool> createDeliveryman(CreateDeliverymanEntity entity);
+
+  Future<bool> updateDeliveryman(String id, CreateDeliverymanEntity entity);
 
   Future<bool> deleteDeliveryman(String id);
 }

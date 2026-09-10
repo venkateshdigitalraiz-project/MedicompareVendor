@@ -27,15 +27,14 @@ class RentalBookingRemoteDataSourceImpl implements RentalBookingRemoteDataSource
       final Map<String, dynamic> queryParameters = {
         'page': page,
         'limit': 10,
-        'orderType': 'rental', 
       };
 
-      if (status != null && status.isNotEmpty) {
-        queryParameters['status'] = status;
+      if (status != null && status.trim().isNotEmpty) {
+        queryParameters['status'] = status.trim();
       }
       
-      if (search != null && search.isNotEmpty) {
-        queryParameters['search'] = search;
+      if (search != null && search.trim().isNotEmpty) {
+        queryParameters['search'] = search.trim();
       }
 
       final response = await apiService.get(
@@ -45,10 +44,25 @@ class RentalBookingRemoteDataSourceImpl implements RentalBookingRemoteDataSource
 
       final decoded = json.decode(response.body);
       
-      if (decoded['success'] == true) {
-        return RentalBookingResponseModel.fromJson(decoded['data']);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (decoded == null) {
+          return const RentalBookingResponseModel(
+            orderItems: [],
+            pagination: RentalBookingPaginationModel(
+              total: 0,
+              page: 1,
+              limit: 10,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPrevPage: false,
+            ),
+          );
+        }
+        final data = decoded['data'] ?? decoded;
+        return RentalBookingResponseModel.fromJson(data);
       } else {
-        throw ServerException(decoded['message'] ?? 'Failed to fetch rental bookings');
+        throw ServerException(
+            decoded?['message'] ?? 'Failed to fetch rental bookings');
       }
     } catch (e) {
       if (e is ServerException) rethrow;

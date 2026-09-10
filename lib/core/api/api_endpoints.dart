@@ -6,8 +6,8 @@ class ApiEndpoints {
   static const String releaseMediaBaseUrl = 'https://api.medicompares.com';
 
   // Local / Debug Base URL  http://192.168.0.161:9002/api/v1/vendor/package/adminpackage/details
-  //static const String localBaseUrl = 'http://192.168.0.161:9002/api/v1';
-  //static const String localMediaBaseUrl = 'http://192.168.0.161:9002';
+  // static const String localBaseUrl = 'http://192.168.0.161:9002/api/v1';
+  // static const String localMediaBaseUrl = 'http://192.168.0.161:9002';
   static const String localBaseUrl = 'https://api.medicompares.com/api/v1';
   static const String localMediaBaseUrl = 'https://api.medicompares.com';
 
@@ -81,9 +81,14 @@ class ApiEndpoints {
   static const String deliverymanAdminList = '/vendor/deliveryman/adminlist';
   static const String deliverymanList = '/vendor/deliveryman/list';
   static const String createDeliveryman = '/vendor/deliveryman/create';
-  static String updateDeliveryman(String id) => '/vendor/deliveryman/update/$id';
-  static String deleteDeliveryman(String id) => '/vendor/deliveryman/delete/$id';
-  static String deliverymanDetails(String id) => '/vendor/deliveryman/details/$id';
+  static String updateDeliveryman(String id) =>
+      '/vendor/deliveryman/update/$id';
+  static String deleteDeliveryman(String id) =>
+      '/vendor/deliveryman/delete/$id';
+  static String deliverymanDetails(String id) =>
+      '/vendor/deliveryman/details/$id';
+  static String viewDeliveryman(String id) =>
+      '/vendor/deliveryman/view/$id';
   static const String deliverymanAllOrders = '/vendor/deliveryman/all-orders';
   static const String deliverymanAnalytics = '/vendor/deliveryman/analytics';
 

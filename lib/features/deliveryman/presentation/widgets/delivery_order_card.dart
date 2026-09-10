@@ -31,17 +31,20 @@ class DeliveryOrderCard extends StatelessWidget {
         ? DateFormat('dd MMM yyyy, hh:mm a').format(item.orderDate!)
         : 'N/A';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9)),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Color(0xFFF1F5F9)),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
           // ORDER ITEM ID
           Expanded(
             flex: 2,
@@ -195,7 +198,9 @@ class DeliveryOrderCard extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildMobileCard(BuildContext context) {
@@ -205,7 +210,6 @@ class DeliveryOrderCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -218,73 +222,83 @@ class DeliveryOrderCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item.orderItemId.startsWith('#')
-                    ? item.orderItemId
-                    : '#${item.orderItemId}',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1E1B4B),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      item.orderItemId.startsWith('#')
+                          ? item.orderItemId
+                          : '#${item.orderItemId}',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E1B4B),
+                      ),
+                    ),
+                    _buildStatusBadge(item.status),
+                  ],
                 ),
-              ),
-              _buildStatusBadge(item.status),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Customer: ${item.customerName} ${item.customerPhone.isNotEmpty ? '(${item.customerPhone})' : ''}",
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF1E1B4B),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 14, color: Color(0xFF94A3B8)),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  item.deliveryAddress,
+                const SizedBox(height: 8),
+                Text(
+                  "Customer: ${item.customerName} ${item.customerPhone.isNotEmpty ? '(${item.customerPhone})' : ''}",
                   style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: const Color(0xFF475569),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1E1B4B),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Personnel: ${item.assignedPersonnelName}",
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: const Color(0xFF64748B),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on_outlined,
+                        size: 14, color: Color(0xFF94A3B8)),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        item.deliveryAddress,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: const Color(0xFF475569),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                formattedDate,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: const Color(0xFF94A3B8),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Personnel: ${item.assignedPersonnelName}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                    Text(
+                      formattedDate,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

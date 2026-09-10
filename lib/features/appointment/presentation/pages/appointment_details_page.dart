@@ -863,23 +863,19 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                           fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          "Type: ${item.type}",
-                          style: GoogleFonts.inter(
-                              color: Colors.grey, fontSize: 12),
-                        ),
-                        if (item.serviceTypes.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            "Service: ${item.serviceTypes}",
-                            style: GoogleFonts.inter(
-                                color: Colors.grey, fontSize: 12),
-                          ),
-                        ],
-                      ],
+                    Text(
+                      "Type: ${item.type}",
+                      style:
+                          GoogleFonts.inter(color: Colors.grey, fontSize: 12),
                     ),
+                    if (item.serviceTypes.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        "Service: ${item.serviceTypes}",
+                        style:
+                            GoogleFonts.inter(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
                     if (patient != null &&
                         (patient.age.isNotEmpty ||
                             patient.gender.isNotEmpty)) ...[

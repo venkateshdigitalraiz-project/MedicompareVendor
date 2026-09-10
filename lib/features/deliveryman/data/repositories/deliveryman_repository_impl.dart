@@ -24,8 +24,19 @@ class DeliverymanRepositoryImpl implements DeliverymanRepository {
   }
 
   @override
+  Future<CreateDeliverymanEntity> getDeliverymanById(String id) async {
+    return await remoteDataSource.getDeliverymanById(id);
+  }
+
+  @override
   Future<bool> createDeliveryman(CreateDeliverymanEntity entity) async {
     return await remoteDataSource.createDeliveryman(entity.toJson());
+  }
+
+  @override
+  Future<bool> updateDeliveryman(
+      String id, CreateDeliverymanEntity entity) async {
+    return await remoteDataSource.updateDeliveryman(id, entity.toJson());
   }
 
   @override

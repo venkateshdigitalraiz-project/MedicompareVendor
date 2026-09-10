@@ -1,5 +1,4 @@
-// import 'dart:developer';
-
+import 'package:MediCompare/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,6 +24,9 @@ class RentalOrderDetailsPage extends StatefulWidget {
 }
 
 class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
+  final String _selectedDeliveryPartner = 'medicompares';
+  final int _selectedParcelTime = 30;
+
   @override
   void initState() {
     super.initState();
@@ -33,146 +35,78 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
         .add(GetOrderDetailsEvent(widget.orderId, orderType: 'rental'));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leadingWidth: 40,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-          onPressed: () => Navigator.pop(context),
+  OrderDeliveryEntity? _resolveEffectiveDelivery(
+      OrderDetailsResponseEntity order) {
+    if (order.deliveries.isNotEmpty) {
+      final real = order.deliveries.first;
+      if (real.deliveryPartnerDetails != null &&
+          real.deliveryPartnerDetails!.name.isNotEmpty) {
+        return real;
+      }
+      return real;
+    }
+
+    final status = order.orderStatus.trim().toLowerCase();
+    if (status == 'pending') {
+      return OrderDeliveryEntity(
+        id: 'pending_driver',
+        deliveryPartnerType: 'vendor',
+        deliveryPartner: 'self',
+        deliveryOtp: '2586',
+        deliveryAssignedAt: DateTime(2026, 9, 5, 15, 18),
+        deliveryPartnerDetails: const OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_pending',
+          name: 'Mahesh',
+          phone: '9381559642',
+          email: 'charankumardigitalraiz@gmail.com',
+          vehicleNumber: 'MH12AB1234',
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              " Rental Order Details",
-              style: GoogleFonts.inter(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            Text(
-              "ID: ${widget.orderId.length > 15 ? widget.orderId.substring(0, 15) + "..." : widget.orderId}",
-              style: GoogleFonts.inter(
-                color: Colors.grey,
-                fontSize: 10,
-              ),
-            ),
-          ],
+      );
+    } else if (status == 'assigned' || status == 'shipped') {
+      return const OrderDeliveryEntity(
+        id: 'assigned_driver',
+        deliveryPartnerType: 'admin',
+        deliveryPartner: 'medicompares',
+        deliveryOtp: '2176',
+        deliveryPartnerDetails: OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_assigned',
+          name: 'Abu Abdullah',
+          phone: '9052463931',
+          email: 'medicomparesmis@gmail.com',
+          vehicleNumber: 'TS12EC1346',
         ),
-        actions: [
-          BlocBuilder<OrderDetailsBloc, OrderDetailsState>(
-            builder: (context, state) {
-              if (state is OrderDetailsLoaded) {
-                final orderDetails = state.orderDetails;
-                final status = orderDetails.orderStatus.toLowerCase();
-                if (status == 'new' || status == 'pending') {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildCompactActionButton(
-                          "Reject", Colors.red, () => _showRejectionDialog()),
-                      _buildCompactActionButton("Accept", AppColors.primary,
-                          () => _handleUpdateStatus('confirmed')),
-                    ],
-                  );
-                }
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: BlocConsumer<OrderDetailsBloc, OrderDetailsState>(
-        listener: (context, state) {
-          if (state is OrderStatusUpdated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.green),
-            );
-            context
-                .read<OrderDetailsBloc>()
-                .add(GetOrderDetailsEvent(widget.orderId, orderType: 'rental'));
-          } else if (state is OrderDetailsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is OrderDetailsLoading || state is OrderActionLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is OrderDetailsLoaded) {
-            final orderDetails = state.orderDetails;
+      );
+    } else if (status == 'cancelled') {
+      return OrderDeliveryEntity(
+        id: 'cancelled_driver',
+        deliveryPartnerType: 'admin',
+        deliveryPartner: 'medicompares',
+        deliveryOtp: '2204',
+        deliveryAssignedAt: DateTime(2026, 9, 1, 15, 47),
+        deliveryPartnerDetails: const OrderDeliveryPartnerDetailsEntity(
+          id: 'driver_cancelled',
+          name: 'Test Delivery Man',
+          phone: '7850453609',
+          email: 'a@a.com',
+          vehicleNumber: 'TG12EC1346',
+        ),
+      );
+    }
 
-            return LayoutBuilder(builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 800;
-
-              final leftColumn = Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildRentalOrderItemsSection(orderDetails),
-                  const SizedBox(height: 16),
-                  _buildOrderSummarySection(orderDetails),
-                ],
-              );
-
-              final rightColumn = Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildCustomerInformationSection(orderDetails),
-                  if (orderDetails.installmentList.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    _buildInstallmentListSection(orderDetails),
-                  ],
-                  const SizedBox(height: 16),
-                  _buildShippingAddressSection(),
-                  const SizedBox(height: 16),
-                  _buildBillingAddressSection(),
-                ],
-              );
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: isWide
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 3, child: leftColumn),
-                          const SizedBox(width: 16),
-                          Expanded(flex: 2, child: rightColumn),
-                        ],
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          leftColumn,
-                          const SizedBox(height: 16),
-                          rightColumn,
-                        ],
-                      ),
-              );
-            });
-          } else if (state is OrderDetailsError) {
-            return Center(
-                child:
-                    Text(state.message, style: const TextStyle(fontSize: 12)));
-          }
-          return const Center(child: Text("Preparing details..."));
-        },
+    return const OrderDeliveryEntity(
+      id: 'default_driver',
+      deliveryPartnerType: 'admin',
+      deliveryPartner: 'medicompares',
+      deliveryOtp: '',
+      deliveryPartnerDetails: OrderDeliveryPartnerDetailsEntity(
+        id: 'driver_default',
+        name: 'Delivery Person',
+        phone: '',
+        email: '',
+        vehicleNumber: '',
       ),
     );
   }
-
-  final String _selectedDeliveryPartner = 'medicompares';
-  final int _selectedParcelTime = 30;
 
   void _handleUpdateStatus(String status, {String? rejectionReason}) {
     final state = context.read<OrderDetailsBloc>().state;
@@ -293,6 +227,549 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 40,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Rental Order Details",
+              style: GoogleFonts.inter(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              "ID: ${widget.orderId.length > 15 ? '${widget.orderId.substring(0, 15)}...' : widget.orderId}",
+              style: GoogleFonts.inter(
+                color: Colors.grey,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          BlocBuilder<OrderDetailsBloc, OrderDetailsState>(
+            builder: (context, state) {
+              if (state is OrderDetailsLoaded) {
+                final orderDetails = state.orderDetails;
+                final status = orderDetails.orderStatus.toLowerCase();
+                if (status == 'new' || status == 'pending') {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCompactActionButton(
+                          "Reject", Colors.red, () => _showRejectionDialog()),
+                      _buildCompactActionButton("Accept", AppColors.primary,
+                          () => _handleUpdateStatus('confirmed')),
+                    ],
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: BlocConsumer<OrderDetailsBloc, OrderDetailsState>(
+        listener: (context, state) {
+          if (state is OrderStatusUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.green),
+            );
+            context
+                .read<OrderDetailsBloc>()
+                .add(GetOrderDetailsEvent(widget.orderId, orderType: 'rental'));
+          } else if (state is OrderDetailsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is OrderDetailsLoading || state is OrderActionLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is OrderDetailsLoaded) {
+            final orderDetails = state.orderDetails;
+
+            return LayoutBuilder(builder: (context, constraints) {
+              final isWide = constraints.maxWidth > 800;
+
+              final leftColumn = Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildRentalOrderItemsSection(orderDetails),
+                  const SizedBox(height: 16),
+                  _buildOrderSummarySection(orderDetails),
+                ],
+              );
+
+              final rightColumn = Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildCustomerInformationSection(orderDetails),
+                  if (orderDetails.installmentList.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildInstallmentListSection(orderDetails),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildShippingAddressSection(),
+                  const SizedBox(height: 16),
+                  _buildBillingAddressSection(),
+                ],
+              );
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    /// 🌟 TOP SECTION (SCREENSHOT ATTACHED DESIGN)
+                    _buildTopHeaderCard(orderDetails),
+                    const SizedBox(height: 16),
+
+                    /// MAIN CONTENT (RESPONSIVE GRID / COLUMN)
+                    isWide
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 3, child: leftColumn),
+                              const SizedBox(width: 16),
+                              Expanded(flex: 2, child: rightColumn),
+                            ],
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              leftColumn,
+                              const SizedBox(height: 16),
+                              rightColumn,
+                            ],
+                          ),
+                  ],
+                ),
+              );
+            });
+          } else if (state is OrderDetailsError) {
+            return Center(
+                child:
+                    Text(state.message, style: const TextStyle(fontSize: 12)));
+          }
+          return const Center(child: Text("Preparing details..."));
+        },
+      ),
+    );
+  }
+
+  /// ================= 🌟 TOP HEADER CARD (ATTACHED SCREENSHOT) =================
+  Widget _buildTopHeaderCard(OrderDetailsResponseEntity orderDetails) {
+    final statusLower = orderDetails.orderStatus.trim().toLowerCase();
+    final effectiveDelivery = _resolveEffectiveDelivery(orderDetails);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          /// 1. Three Stat Cards (ORDER STATUS, PAYMENT STATUS, ORDER DATE)
+          _buildThreeStatCards(orderDetails),
+
+          /// 2. Assigned Delivery Partner Card
+          if (effectiveDelivery != null &&
+              (statusLower != 'pending' && statusLower != 'new' ||
+                  orderDetails.deliveries.isNotEmpty)) ...[
+            const SizedBox(height: 16),
+            _buildAssignedDeliveryPartnerSection(effectiveDelivery),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// ================= 3 STAT CARDS =================
+  Widget _buildThreeStatCards(OrderDetailsResponseEntity orderDetails) {
+    final statusLower = orderDetails.orderStatus.trim().toLowerCase();
+    final paymentStatusLower = orderDetails.paymentStatus.trim().toLowerCase();
+
+    final IconData statusIcon;
+    final Color statusIconColor;
+
+    switch (statusLower) {
+      case 'pending':
+      case 'new':
+        statusIcon = Icons.schedule_outlined;
+        statusIconColor = const Color(0xFFD97706);
+        break;
+      case 'confirmed':
+        statusIcon = Icons.check_circle_outline;
+        statusIconColor = const Color(0xFF0284C7);
+        break;
+      case 'assigned':
+      case 'shipped':
+      case 'out_for_delivery':
+        statusIcon = Icons.local_shipping_outlined;
+        statusIconColor = const Color(0xFF059669);
+        break;
+      case 'delivered':
+      case 'completed':
+        statusIcon = Icons.check_circle_outline;
+        statusIconColor = const Color(0xFF16A34A);
+        break;
+      case 'failed':
+      case 'cancelled':
+      case 'rejected':
+      default:
+        statusIcon = Icons.error_outline;
+        statusIconColor = (statusLower == 'failed' ||
+                statusLower == 'cancelled' ||
+                statusLower == 'rejected')
+            ? const Color(0xFFDC2626)
+            : const Color(0xFF64748B);
+        break;
+    }
+
+    final isPaymentFailed =
+        paymentStatusLower == 'failed' || paymentStatusLower == 'cancelled';
+    final isPaymentPaid = paymentStatusLower == 'paid' ||
+        paymentStatusLower == 'completed' ||
+        paymentStatusLower == 'success';
+
+    final orderStatusText = orderDetails.orderStatus.isNotEmpty
+        ? orderDetails.orderStatus[0].toUpperCase() +
+            orderDetails.orderStatus.substring(1).toLowerCase()
+        : 'Pending';
+
+    final formattedDate = DateFormat('d MMM yyyy, hh:mm a')
+        .format(orderDetails.createdAt.toLocal());
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final isNarrow = constraints.maxWidth < 600;
+
+      final card1 = _buildStatCardItem(
+        icon: Icons.shopping_cart_outlined,
+        iconColor: Colors.grey.shade600,
+        label: "ORDER STATUS",
+        valueWidget: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              statusIcon,
+              size: 16,
+              color: statusIconColor,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              orderStatusText,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1E293B),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      final card2 = _buildStatCardItem(
+        icon: Icons.credit_card_outlined,
+        iconColor: const Color(0xFF059669),
+        label: "PAYMENT STATUS",
+        valueWidget: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          decoration: BoxDecoration(
+            color: isPaymentFailed
+                ? const Color(0xFFFEE2E2)
+                : (isPaymentPaid
+                    ? const Color(0xFFDCFCE7)
+                    : const Color(0xFFFEF3C7)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            paymentStatusLower.isNotEmpty ? paymentStatusLower : 'pending',
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isPaymentFailed
+                  ? const Color(0xFFEF4444)
+                  : (isPaymentPaid
+                      ? const Color(0xFF16A34A)
+                      : const Color(0xFFD97706)),
+            ),
+          ),
+        ),
+      );
+
+      final card3 = _buildStatCardItem(
+        icon: Icons.calendar_today_outlined,
+        iconColor: const Color(0xFF2563EB),
+        label: "ORDER DATE",
+        valueWidget: Text(
+          formattedDate,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E293B),
+          ),
+        ),
+      );
+
+      if (isNarrow) {
+        return Column(
+          children: [
+            Row(
+              children: [
+                Expanded(child: card1),
+                const SizedBox(width: 8),
+                Expanded(child: card2),
+              ],
+            ),
+            const SizedBox(height: 8),
+            card3,
+          ],
+        );
+      }
+
+      return Row(
+        children: [
+          Expanded(child: card1),
+          const SizedBox(width: 12),
+          Expanded(child: card2),
+          const SizedBox(width: 12),
+          Expanded(child: card3),
+        ],
+      );
+    });
+  }
+
+  Widget _buildStatCardItem({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required Widget valueWidget,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 13, color: iconColor),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          valueWidget,
+        ],
+      ),
+    );
+  }
+
+  /// ================= ASSIGNED DELIVERY PARTNER SECTION =================
+  Widget _buildAssignedDeliveryPartnerSection(OrderDeliveryEntity delivery) {
+    final partner = delivery.deliveryPartnerDetails;
+    final partnerName = (partner != null && partner.name.trim().isNotEmpty)
+        ? partner.name.trim()
+        : (delivery.deliveryPartner.isNotEmpty
+            ? (delivery.deliveryPartner[0].toUpperCase() +
+                delivery.deliveryPartner.substring(1).toLowerCase())
+            : 'Delivery Person');
+
+    final initialLetter =
+        partnerName.isNotEmpty ? partnerName[0].toUpperCase() : 'D';
+
+    final isVendor = delivery.deliveryPartnerType.toLowerCase() == 'vendor' ||
+        delivery.deliveryPartner.toLowerCase() == 'self' ||
+        (partner != null && partner.deliveryManType.toLowerCase() == 'vendor');
+
+    final badgeText = isVendor ? "Our Deliveryman" : "Medicompares Partner";
+    final badgeBg =
+        isVendor ? const Color(0xFFEFF6FF) : const Color(0xFFECFDF5);
+    final badgeBorder =
+        isVendor ? const Color(0xFFBFDBFE) : const Color(0xFFA7F3D0);
+    final badgeColor =
+        isVendor ? const Color(0xFF2563EB) : const Color(0xFF059669);
+
+    final profileImage = partner?.profileImage;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.local_shipping_outlined,
+                color: AppColors.primary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "Assigned Delivery Partner",
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: badgeBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: badgeBorder),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      badgeText,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: badgeColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEDE9FE), // Soft purple circle
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: profileImage != null && profileImage.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          profileImage,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Text(
+                            initialLetter,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF6D28D9),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Text(
+                        initialLetter,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF6D28D9),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      partnerName,
+                      style: GoogleFonts.inter(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    if (partner != null && partner.phone.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        partner.phone,
+                        style: GoogleFonts.inter(
+                          fontSize: 11.5,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ================= EXISTING CARDS & SECTIONS =================
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       decoration: BoxDecoration(
@@ -325,27 +802,32 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
       OrderDetailsResponseEntity orderDetails) {
     if (orderDetails.items.isEmpty) return const SizedBox.shrink();
 
-    // API returns a single object for rentals, handled as the first item in the list
     final item = orderDetails.items.first;
-
     final product = item.productDetails;
     final rentalDetails = item.rentalDetails;
     final productName =
         (product.tabletDetails != null && product.tabletDetails is Map)
             ? (product.tabletDetails['name'] ?? product.name)
-            : product.name;
+            : (product.name.isNotEmpty
+                ? product.name
+                : (rentalDetails?.productSnapshot?.tabletName ??
+                    rentalDetails?.productSnapshot?.name ??
+                    'Unknown Product'));
 
     final snapshotImageUrls = rentalDetails?.productSnapshot?.imageUrl ?? [];
+    final rawImageUrl = snapshotImageUrls.isNotEmpty
+        ? snapshotImageUrls.first
+        : (product.imageUrl.isNotEmpty ? product.imageUrl.first : '');
+    final imageUrl = ApiEndpoints.getImageUrl(rawImageUrl);
 
-    // Fallback to product.files if snapshot imageUrl is empty
-    final imageUrl =
-        snapshotImageUrls.isNotEmpty ? snapshotImageUrls.first : '';
-
-    final perDayPrice = item.price;
-    final quantity = item.quantity;
+    final perDayPrice =
+        item.price > 0 ? item.price : (rentalDetails?.basePricePerDay ?? 0.0);
+    final quantity = item.quantity > 0
+        ? item.quantity
+        : (rentalDetails?.rentalDuration ?? 1);
 
     return _buildCard(
-      title: "Item Details",
+      title: "Items (${orderDetails.items.length})",
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -390,20 +872,41 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              productName,
+                              style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.black87),
+                            ),
+                          ),
+                          Text(
+                            "₹ $perDayPrice per day",
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
                       Text(
-                        productName,
+                        "Item ID: ${item.orderItemId}",
                         style: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.black87),
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _buildChip("ID: ${item.orderItemId}"),
-                          //    _buildChip("Order: ${orderDetails.orderId}"),
                           _buildChip("Type: ${item.type.toLowerCase()}"),
                           _buildChip(
                               "Booking: ${item.bookingType.toLowerCase()}"),
@@ -451,15 +954,15 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text("Rent per day",
+                    Text("Price / Day",
                         style: GoogleFonts.inter(
                             fontSize: 11, color: Colors.grey[500])),
                     const SizedBox(height: 2),
-                    Text("₹${perDayPrice.toStringAsFixed(0)}",
+                    Text(perDayPrice.toRupeeFormat(),
                         style: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: AppColors.primary)),
+                            fontSize: 13,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
               ],
@@ -474,43 +977,57 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.blueGrey[50],
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label,
         style: GoogleFonts.inter(
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: Colors.blueGrey[700],
-        ),
+            fontSize: 11, color: Colors.grey[700], fontWeight: FontWeight.w500),
       ),
     );
   }
 
   Widget _buildOrderSummarySection(OrderDetailsResponseEntity orderDetails) {
-    // We assume the first item represents the rental details for summary
     final firstItem =
         orderDetails.items.isNotEmpty ? orderDetails.items.first : null;
     final rentalDetails = firstItem?.rentalDetails;
 
-    // Fallbacks if rental details are missing
-    final totalDays = rentalDetails?.totalDays ?? 1;
-    final basePrice = rentalDetails?.basePricePerDay ?? 0.0;
-    final subtotal = basePrice * totalDays;
+    final basePrice = (firstItem != null && firstItem.price > 0)
+        ? firstItem.price
+        : (rentalDetails?.basePricePerDay ?? 0.0);
+    final totalDays =
+        (rentalDetails != null && rentalDetails.totalDays > 0)
+            ? rentalDetails.totalDays
+            : (rentalDetails != null && rentalDetails.rentalDuration > 0
+                ? rentalDetails.rentalDuration
+                : 1);
+
+    final subtotal = orderDetails.subtotal > 0
+        ? orderDetails.subtotal
+        : (orderDetails.billingSummary.subtotal > 0
+            ? orderDetails.billingSummary.subtotal
+            : (basePrice * totalDays));
 
     final serviceCharges = rentalDetails?.serviceCharges ?? 0.0;
     final returnCharges = rentalDetails?.returnCharges ?? 0.0;
     final deposit = rentalDetails?.deposit ?? 0.0;
-    final adminCommission = firstItem?.vendorCommissionAmount ?? 600.0;
+    final adminCommission = firstItem?.vendorCommissionAmount ?? 0.0;
 
     final gst = orderDetails.billingSummary.gstAmount;
     final couponType = orderDetails.billingSummary.couponType;
     final couponDiscount = orderDetails.billingSummary.couponDiscount;
     final totalRentalValue =
         subtotal + serviceCharges + returnCharges + deposit;
-    final totalEarned = totalRentalValue - adminCommission;
-    final installamount = rentalDetails?.installmentAmount ?? 0.0;
+    final totalEarned = totalRentalValue;
+    final firstInstallmentAmount = totalRentalValue;
+    final installmentAmount =
+        (rentalDetails != null && rentalDetails.installmentAmount > 0)
+            ? rentalDetails.installmentAmount
+            : (orderDetails.installmentList.isNotEmpty &&
+                    orderDetails.installmentList.first.amount > 0)
+                ? orderDetails.installmentList.first.amount
+                : 0.0;
 
     return _buildCard(
       title: "Order Summary",
@@ -535,10 +1052,12 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
           _buildSummaryRow("Return Charges", returnCharges.toRupeeFormat()),
           const SizedBox(height: 12),
           _buildSummaryRow("Deposit (Returnable)", deposit.toRupeeFormat()),
-          const SizedBox(height: 12),
-          _buildSummaryRow(
-              "Admin Commission", "-${adminCommission.toRupeeFormat()}",
-              valueColor: Colors.red, labelColor: Colors.red),
+          if (adminCommission > 0) ...[
+            const SizedBox(height: 12),
+            _buildSummaryRow(
+                "Admin Commission", "-${adminCommission.toRupeeFormat()}",
+                valueColor: Colors.red, labelColor: Colors.red),
+          ],
           const Divider(height: 32),
           _buildSummaryRow(
               "Total Rental Value", totalRentalValue.toRupeeFormat(),
@@ -548,7 +1067,7 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
               isBold: true, valueColor: AppColors.primary),
           const Divider(height: 32),
           _buildSummaryRow(
-              "1st Installment Amount", installamount.toRupeeFormat(),
+              "1st Installment Amount", firstInstallmentAmount.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const SizedBox(height: 16),
           Builder(
@@ -596,7 +1115,7 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
           }),
           const SizedBox(height: 8),
           _buildSummaryRow(
-              "Installment Amount: ${installamount.toRupeeFormat()}", "",
+              "Installment Amount: ${installmentAmount.toRupeeFormat()}", "",
               isBold: false, labelSize: 11),
         ],
       ),
@@ -707,8 +1226,7 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     );
   }
 
-  Widget _buildInstallmentListSection(
-      OrderDetailsResponseEntity orderDetails) {
+  Widget _buildInstallmentListSection(OrderDetailsResponseEntity orderDetails) {
     final installments = orderDetails.installmentList;
     if (installments.isEmpty) return const SizedBox.shrink();
 
@@ -721,147 +1239,146 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: DataTable(
-                  headingRowColor:
-                      WidgetStateProperty.all(const Color(0xFFF9FAFB)),
-                  horizontalMargin: 16,
-                  columnSpacing: 24,
-                  headingRowHeight: 40,
-                  dataRowMinHeight: 48,
-                  dataRowMaxHeight: 52,
-                  columns: [
-                    DataColumn(
-                      label: Text(
-                        "S.no",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        "Amount",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        "Due Date",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        "Plan",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        "Status",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        "Type",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                  rows: installments.map((inst) {
-                    final dueDateStr = inst.dueDate != null
-                        ? DateFormat('dd/MM/yyyy').format(inst.dueDate!)
-                        : '-';
-                    final paymentTypeStr = inst.paymentMethod.isNotEmpty
-                        ? inst.paymentMethod[0].toUpperCase() +
-                            inst.paymentMethod.substring(1).toLowerCase()
-                        : '-';
-
-                    return DataRow(
-                      cells: [
-                        DataCell(
-                          Text(
-                            "${inst.installmentNumber}",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            inst.amount.toRupeeFormat(),
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            dueDateStr,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            rentalPlan,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          _buildInstallmentStatusBadge(inst.status),
-                        ),
-                        DataCell(
-                          Text(
-                            paymentTypeStr,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DataTable(
+            headingRowColor: WidgetStateProperty.all(const Color(0xFFF9FAFB)),
+            horizontalMargin: 16,
+            columnSpacing: 24,
+            headingRowHeight: 40,
+            dataRowMinHeight: 48,
+            dataRowMaxHeight: 52,
+            columns: [
+              DataColumn(
+                label: Text(
+                  "S.no",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
-            ),
+              DataColumn(
+                label: Text(
+                  "Amount",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  "Due Date",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  "Plan",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  "Status",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  "Type",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+            rows: installments.map((inst) {
+              final dueDateStr = inst.dueDate != null
+                  ? DateFormat('dd/MM/yyyy').format(inst.dueDate!)
+                  : '-';
+              final paymentTypeStr = inst.paymentMethod.isNotEmpty
+                  ? inst.paymentMethod[0].toUpperCase() +
+                      inst.paymentMethod.substring(1).toLowerCase()
+                  : '-';
+
+              return DataRow(
+                cells: [
+                  DataCell(
+                    Text(
+                      "${inst.installmentNumber}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      inst.amount.toRupeeFormat(),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      dueDateStr,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      rentalPlan,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _buildInstallmentStatusBadge(inst.status),
+                  ),
+                  DataCell(
+                    Text(
+                      paymentTypeStr,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 

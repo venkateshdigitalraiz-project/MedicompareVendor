@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/price_formatter.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
@@ -22,20 +23,20 @@ class RentalBookingsPage extends StatefulWidget {
 class _RentalBookingsPageState extends State<RentalBookingsPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
-  // String _selectedDuration = 'No delivery Time';
   int _currentPage = 1;
   final ScrollController _scrollController = ScrollController();
 
-  // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
-    // {'label': 'New', 'value': 'new'},
-    // {'label': 'Pending', 'value': 'pending'},
+    {'label': 'New', 'value': 'new'},
+    {'label': 'Pending', 'value': 'pending'},
     {'label': 'Confirmed', 'value': 'confirmed'},
-    // {'label': 'Processing', 'value': 'processing'},
-    // {'label': 'Shipped', 'value': 'shipped'},
-    // {'label': 'Delivered', 'value': 'delivered'},
+    {'label': 'Processing', 'value': 'processing'},
+    {'label': 'Assigned', 'value': 'assigned'},
+    {'label': 'Shipped', 'value': 'shipped'},
+    {'label': 'Delivered', 'value': 'delivered'},
     {'label': 'Cancelled', 'value': 'cancelled'},
+    {'label': 'Failed', 'value': 'failed'},
   ];
 
   @override
@@ -93,13 +94,39 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                 if (state is RentalBookingLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is RentalBookingLoaded) {
-                  final loaded = state as RentalBookingLoaded;
+                  final loaded = state;
                   return _buildOrdersList(
-                    loaded.bookingsResponse.orderItems ?? [],
+                    loaded.bookingsResponse.orderItems,
                     loaded.isLoadingMore,
                   );
                 } else if (state is RentalBookingError) {
-                  return Center(child: Text(state.message));
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 48, color: Colors.red),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _onFilterChanged,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
                 return const Center(child: Text('No orders found.'));
               },
@@ -139,19 +166,6 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                   ),
                 ),
               ),
-              // const SizedBox(width: 8),
-              // Expanded(
-              //   flex: 2,
-              //   child: _buildDropdown(
-              //     value: _durations.contains(_selectedDuration)
-              //         ? _selectedDuration
-              //         : _durations.first,
-              //     items: _durations,
-              //     onChanged: (val) {
-              //       setState(() => _selectedDuration = val!);
-              //     },
-              //   ),
-              // ),
             ],
           ),
           const SizedBox(height: 12),
@@ -164,7 +178,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                   labels: _statuses.map((s) => s['label']!).toList(),
                   onChanged: (val) {
                     setState(() {
-                      _selectedStatus = val!;
+                      _selectedStatus = val ?? '';
                       _currentPage = 1;
                     });
                     _onFilterChanged();
@@ -192,7 +206,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: value,
+          value: items.contains(value) ? value : items.first,
           isExpanded: true,
           items: List.generate(items.length, (index) {
             return DropdownMenuItem(
@@ -220,25 +234,42 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
   Widget _buildOrdersList(
       List<RentalBookingEntity> orders, bool isLoadingMore) {
     if (orders.isEmpty) {
-      return const Center(child: Text("No orders matching filters."));
+      return RefreshIndicator(
+        onRefresh: () async {
+          _onFilterChanged();
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(height: 120),
+            Center(child: Text("No orders matching filters.")),
+          ],
+        ),
+      );
     }
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: isLoadingMore ? orders.length + 1 : orders.length,
-      itemBuilder: (context, index) {
-        if (index < orders.length) {
-          final order = orders[index];
-          return _buildOrderItemCard(order);
-        } else {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+    return RefreshIndicator(
+      onRefresh: () async {
+        _onFilterChanged();
       },
+      child: ListView.builder(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        itemCount: isLoadingMore ? orders.length + 1 : orders.length,
+        itemBuilder: (context, index) {
+          if (index < orders.length) {
+            final order = orders[index];
+            return _buildOrderItemCard(order);
+          } else {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -248,8 +279,22 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
     final productName =
         product?.tabletName ?? product?.name ?? "Unknown Product";
     final productImages = product?.imageUrl ?? [];
-    final imageUrl = productImages.isNotEmpty ? productImages.first : null;
-    final hasImage = imageUrl != null && imageUrl.trim().isNotEmpty;
+    final rawImageUrl = productImages.isNotEmpty ? productImages.first : null;
+    final formattedImageUrl = rawImageUrl != null && rawImageUrl.trim().isNotEmpty
+        ? ApiEndpoints.getImageUrl(rawImageUrl)
+        : null;
+    final hasImage = formattedImageUrl != null && formattedImageUrl.trim().isNotEmpty;
+
+    final customerName = user != null
+        ? "${user.firstName} ${user.lastName}".trim()
+        : "Customer";
+    final displayCustomerName =
+        customerName.isNotEmpty ? customerName : "Customer";
+
+    final effectiveStatus =
+        item.orderDetails?.orderStatus.isNotEmpty == true
+            ? item.orderDetails!.orderStatus
+            : item.orderStatus;
 
     return GestureDetector(
       onTap: () {
@@ -277,30 +322,36 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.orderItemId,
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.black87,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.orderItemId.isNotEmpty
+                              ? item.orderItemId
+                              : item.orderId,
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        productName,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                        const SizedBox(height: 4),
+                        Text(
+                          productName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  _buildStatusBadge(
-                      item.orderDetails?.orderStatus ?? item.orderStatus),
+                  const SizedBox(width: 8),
+                  _buildStatusBadge(effectiveStatus),
                 ],
               ),
               const Divider(height: 24),
@@ -308,7 +359,8 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColors.primary.withOpacity(0.1),
-                    backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+                    backgroundImage:
+                        hasImage ? NetworkImage(formattedImageUrl) : null,
                     child: !hasImage
                         ? const Icon(Icons.person_outline,
                             color: AppColors.primary)
@@ -320,21 +372,9 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user != null
-                              ? "${user.firstName} ${user.lastName}"
-                              : "Unknown Customer",
+                          displayCustomerName,
                           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                         ),
-                        // Text(
-                        //   user?.email ?? "No Email",
-                        //   style: GoogleFonts.inter(
-                        //       fontSize: 12, color: Colors.grey),
-                        // ),
-                        // Text(
-                        //   user?.phone ?? "No Phone",
-                        //   style: GoogleFonts.inter(
-                        //       fontSize: 12, color: Colors.grey),
-                        // ),
                         Row(
                           children: [
                             const Icon(Icons.calendar_today_outlined,
@@ -348,7 +388,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              DateFormat('hh:mm:ss a')
+                              DateFormat('hh:mm a')
                                   .format(item.createdAt.toLocal()),
                               style: GoogleFonts.inter(
                                   fontSize: 12, color: Colors.black87),
@@ -372,7 +412,12 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                             fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                       Text(
-                        item.totalPrice.toRupeeFormat(decimalDigits: 2),
+                        (item.totalPrice > 0
+                                ? item.totalPrice
+                                : ((item.rentalDetails?.totalAmount ?? 0) > 0
+                                    ? item.rentalDetails!.totalAmount
+                                    : item.price))
+                            .toRupeeFormat(decimalDigits: 2),
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -391,20 +436,7 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
   }
 
   Widget _buildStatusBadge(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'new':
-        color = Colors.orange;
-        break;
-      case 'delivered':
-        color = Colors.green;
-        break;
-      case 'cancelled':
-        color = Colors.red;
-        break;
-      default:
-        color = AppColors.primary;
-    }
+    Color color = getStatusColor(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -414,9 +446,9 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
         border: Border.all(color: color.withOpacity(0.5)),
       ),
       child: Text(
-        status.toUpperCase(),
+        status.isEmpty ? 'UNKNOWN' : status.toUpperCase(),
         style: GoogleFonts.inter(
-          color: getStatusColor(status),
+          color: color,
           fontSize: 10,
           fontWeight: FontWeight.bold,
         ),
@@ -426,8 +458,8 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
 }
 
 Color getStatusColor(String? status) {
-  if (status == null) return Colors.grey;
-  switch (status.toLowerCase()) {
+  if (status == null || status.trim().isEmpty) return Colors.grey;
+  switch (status.trim().toLowerCase()) {
     case 'new':
       return Colors.blue;
     case 'accepted':

@@ -4,6 +4,8 @@ import 'data/repositories/deliveryman_repository_impl.dart';
 import 'domain/usecases/get_deliverymen_usecase.dart';
 import 'domain/usecases/delete_deliveryman_usecase.dart';
 import 'domain/usecases/create_deliveryman_usecase.dart';
+import 'domain/usecases/get_deliveryman_details_usecase.dart';
+import 'domain/usecases/update_deliveryman_usecase.dart';
 import 'presentation/bloc/deliveryman_bloc.dart';
 import 'presentation/bloc/add_deliveryman_bloc.dart';
 import 'data/datasources/delivery_orders_remote_data_source.dart';
@@ -39,9 +41,14 @@ class DeliverymanInjection {
     final repository =
         DeliverymanRepositoryImpl(remoteDataSource: remoteDataSource);
     final createDeliverymanUseCase = CreateDeliverymanUseCase(repository);
+    final getDeliverymanDetailsUseCase =
+        GetDeliverymanDetailsUseCase(repository);
+    final updateDeliverymanUseCase = UpdateDeliverymanUseCase(repository);
 
     return AddDeliverymanBloc(
       createDeliverymanUseCase: createDeliverymanUseCase,
+      getDeliverymanDetailsUseCase: getDeliverymanDetailsUseCase,
+      updateDeliverymanUseCase: updateDeliverymanUseCase,
     );
   }
 

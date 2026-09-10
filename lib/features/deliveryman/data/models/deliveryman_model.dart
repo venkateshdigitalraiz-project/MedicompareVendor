@@ -16,8 +16,6 @@ class DeliverymanModel extends DeliverymanEntity {
   });
 
   factory DeliverymanModel.fromJson(Map<String, dynamic> json) {
-    final rawId = json['_id']?.toString() ?? json['id']?.toString() ?? '';
-
     Map<String, dynamic>? userMap;
     if (json['user'] is Map) {
       userMap = Map<String, dynamic>.from(json['user'] as Map);
@@ -28,6 +26,15 @@ class DeliverymanModel extends DeliverymanEntity {
     } else if (json['deliveryman'] is Map) {
       userMap = Map<String, dynamic>.from(json['deliveryman'] as Map);
     }
+
+    final rawId = json['_id']?.toString() ??
+        json['id']?.toString() ??
+        json['deliverymanId']?.toString() ??
+        json['deliveryManId']?.toString() ??
+        json['driverId']?.toString() ??
+        userMap?['_id']?.toString() ??
+        userMap?['id']?.toString() ??
+        '';
 
     // Name
     String fullName = json['fullName']?.toString() ??

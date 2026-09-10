@@ -472,16 +472,14 @@ class DeliverymanView extends StatelessWidget {
     );
   }
 
-  void _showEditPlaceholder(BuildContext context, DeliverymanEntity item) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Edit ${item.fullName} clicked",
-          style: GoogleFonts.inter(),
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  Future<void> _showEditPlaceholder(
+      BuildContext context, DeliverymanEntity item) async {
+    final res = await context.push('/edit-deliveryman/${item.id}');
+    if (res == true && context.mounted) {
+      context.read<DeliverymanBloc>().add(
+            const LoadDeliverymenEvent(page: 1, limit: 10, isRefresh: true),
+          );
+    }
   }
 }
 

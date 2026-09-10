@@ -234,18 +234,18 @@ class DashboardPage extends StatelessWidget {
                   ...dashboard.topProducts
                       .take(5)
                       .map((product) => _buildTopProductItem(product)),
-                  if (dashboard.user.serviceType?.toLowerCase() ==
-                      'surgeries') ...[
-                    const SizedBox(height: 32),
-                    _buildSectionHeader(
-                        "Recent Leads" // () => context.push('/leads')
-                        ),
-                    const SizedBox(height: 12),
-                    ...dashboard.recentLeads
-                        .take(5)
-                        .map((lead) => _buildRecentLeadItem(lead)),
-                  ],
+                  // if (dashboard.user.serviceType?.toLowerCase() ==
+                  //     'surgeries') ...[
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(
+                      "Recent Leads" // () => context.push('/leads')
+                      ),
+                  const SizedBox(height: 12),
+                  ...dashboard.recentLeads
+                      .take(5)
+                      .map((lead) => _buildRecentLeadItem(lead)),
                 ],
+                //   ],
               );
             },
           ),
@@ -427,23 +427,6 @@ class DashboardPage extends StatelessWidget {
             ),
           ],
         ),
-        // TextButton(
-        //   onPressed: onViewAll,
-        //   child: Row(
-        //     children: [
-        //       Text(
-        //         "View All",
-        //         style: GoogleFonts.inter(
-        //           fontSize: 13,
-        //           color: AppColors.primary,
-        //           fontWeight: FontWeight.w600,
-        //         ),
-        //       ),
-        //       const Icon(Icons.chevron_right,
-        //           size: 16, color: AppColors.primary),
-        //     ],
-        //   ),
-        // ),
       ],
     );
   }
@@ -491,7 +474,8 @@ class DashboardPage extends StatelessWidget {
                       fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 Text(
-                  "${product.categoryName}",
+                  // ignore: dead_null_aware_expression
+                  product.categoryName ?? "",
                   style:
                       GoogleFonts.inter(color: Colors.grey[500], fontSize: 12),
                 ),
@@ -534,8 +518,24 @@ class DashboardPage extends StatelessWidget {
               color: Colors.purple.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.group_outlined,
-                color: Colors.purple, size: 24),
+            child: lead.imageUrl != null && lead.imageUrl!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      lead.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.group_outlined,
+                        color: Colors.purple,
+                        size: 24,
+                      ),
+                    ),
+                  )
+                : const Icon(
+                    Icons.group_outlined,
+                    color: Colors.purple,
+                    size: 24,
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(

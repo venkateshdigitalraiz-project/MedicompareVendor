@@ -1027,78 +1027,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   OrderDeliveryEntity? _resolveEffectiveDelivery(
       OrderDetailsResponseEntity order) {
     if (order.deliveries.isNotEmpty) {
-      final real = order.deliveries.first;
-      if (real.deliveryPartnerDetails != null &&
-          real.deliveryPartnerDetails!.name.isNotEmpty) {
-        return real;
-      }
-    }
-
-    final status = order.orderStatus.trim().toLowerCase();
-    if (status == 'pending') {
-      return OrderDeliveryEntity(
-        id: 'pending_driver',
-        deliveryPartnerType: 'vendor',
-        deliveryPartner: 'self',
-        deliveryOtp: '2586',
-        deliveryAssignedAt: DateTime(2026, 9, 5, 15, 18),
-        deliveryPartnerDetails: const OrderDeliveryPartnerDetailsEntity(
-          id: 'driver_pending',
-          name: 'Mahesh',
-          phone: '9381559642',
-          email: 'charankumardigitalraiz@gmail.com',
-          vehicleNumber: 'MH12AB1234',
-        ),
-      );
-    } else if (status == 'failed') {
-      return const OrderDeliveryEntity(
-        id: 'failed_driver',
-        deliveryPartnerType: 'admin',
-        deliveryPartner: 'medicompares',
-        deliveryOtp: '',
-        deliveryPartnerDetails: OrderDeliveryPartnerDetailsEntity(
-          id: 'driver_failed',
-          name: 'Delivery Person',
-          phone: '',
-          email: '',
-          vehicleNumber: '',
-        ),
-      );
-    } else if (status == 'assigned') {
-      return const OrderDeliveryEntity(
-        id: 'assigned_driver',
-        deliveryPartnerType: 'admin',
-        deliveryPartner: 'medicompares',
-        deliveryOtp: '2176',
-        deliveryPartnerDetails: OrderDeliveryPartnerDetailsEntity(
-          id: 'driver_assigned',
-          name: 'Abu Abdullah',
-          phone: '9052463931',
-          email: 'medicomparesmis@gmail.com',
-          vehicleNumber: 'TS12EC1346',
-        ),
-      );
-    } else if (status == 'cancelled') {
-      return OrderDeliveryEntity(
-        id: 'cancelled_driver',
-        deliveryPartnerType: 'admin',
-        deliveryPartner: 'medicompares',
-        deliveryOtp: '2204',
-        deliveryAssignedAt: DateTime(2026, 9, 1, 15, 47),
-        deliveryPartnerDetails: const OrderDeliveryPartnerDetailsEntity(
-          id: 'driver_cancelled',
-          name: 'Test Delivery Man',
-          phone: '7850453609',
-          email: 'a@a.com',
-          vehicleNumber: 'TG12EC1346',
-        ),
-      );
-    }
-
-    if (order.deliveries.isNotEmpty) {
       return order.deliveries.first;
     }
-
     return null;
   }
 

@@ -108,6 +108,7 @@ class RecentLeadEntity {
   final String serviceName;
   final DateTime createdAt;
   final String leadStage;
+  final String? imageUrl;
 
   RecentLeadEntity({
     required this.id,
@@ -117,6 +118,7 @@ class RecentLeadEntity {
     required this.serviceName,
     required this.createdAt,
     required this.leadStage,
+    this.imageUrl,
   });
 }
 
