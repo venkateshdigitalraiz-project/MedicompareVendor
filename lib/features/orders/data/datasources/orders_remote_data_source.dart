@@ -127,10 +127,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       body: payload,
     );
     final decoded = json.decode(response.body);
-    if (decoded['success'] == true || decoded['status'] == true) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (decoded is Map &&
+          (decoded['status'] == false || decoded['success'] == false)) {
+        throw Exception(decoded['message'] ?? 'Failed to update order status');
+      }
       return true;
     } else {
-      throw Exception(decoded['message'] ?? 'Failed to update order status');
+      final message = decoded != null && decoded is Map && decoded['message'] != null
+          ? decoded['message'].toString()
+          : 'Failed to update order status';
+      throw Exception(message);
     }
   }
 
@@ -147,10 +154,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       'page': page,
       'limit': limit,
       'status': status,
+      'search': search.trim(),
     };
-    if (search.trim().isNotEmpty) {
-      queryParams['search'] = search.trim();
-    }
 
     final response = await apiService.get(
       ApiEndpoints.deliverymanAdminList,

@@ -35,7 +35,20 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       orderRef: json['orderRef']?.toString() ?? '',
       vendorId: json['vendorId']?.toString() ?? '',
       paymentStatus: json['paymentStatus']?.toString() ?? '',
-      orderStatus: json['orderStatus']?.toString() ?? '',
+      orderStatus: (json['orderStatus'] ??
+              json['status'] ??
+              json['orderDetails']?['orderStatus'] ??
+              json['orderDetails']?['status'] ??
+              (json['items'] is List &&
+                      (json['items'] as List).isNotEmpty &&
+                      json['items'][0] is Map
+                  ? (json['items'][0]['orderStatus'] ??
+                      json['items'][0]['status'] ??
+                      json['items'][0]['orderDetails']?['orderStatus'] ??
+                      json['items'][0]['orderDetails']?['status'])
+                  : null))
+          ?.toString() ??
+          '',
       bookingType: json['bookingType']?.toString() ?? '',
       orderType: json['orderType']?.toString() ?? '',
       paymentMethod: (json['orderDetails']?['paymentmethod'] ??

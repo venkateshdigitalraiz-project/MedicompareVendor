@@ -37,8 +37,13 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
       DeliveryPartnersResultEntity? partnersResult;
       bool hasLoaded = false;
       String? partnersError;
-      final statusLower = result.orderStatus.toLowerCase();
-      if (statusLower == 'confirmed') {
+      final statusLower =
+          result.orderStatus.trim().toLowerCase().replaceAll(' ', '_');
+      if (statusLower == 'confirmed' ||
+          statusLower == 'order_confirmed' ||
+          statusLower == 'accepted' ||
+          statusLower == 'order_accepted' ||
+          statusLower == 'processing') {
         try {
           partnersResult = await getOrderDeliveryPartnersUseCase.call(
             search: '',
@@ -77,7 +82,7 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
       await updateOrderStatusUseCase.call(event.orderItemId, event.payload);
       emit(const OrderStatusUpdated());
     } catch (e) {
-      emit(OrderDetailsError(e.toString()));
+      emit(OrderDetailsError(e.toString().replaceAll('Exception: ', '')));
       if (currentState is OrderDetailsLoaded) {
         emit(currentState);
       }
