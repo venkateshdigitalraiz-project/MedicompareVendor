@@ -578,7 +578,7 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                 ),
                 alignment: Alignment.center,
                 child: driver?.profileImage != null &&
-                        driver!.profileImage!.isNotEmpty
+                        driver!.profileImage!.startsWith('http')
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(24),
                         child: Image.network(
@@ -627,38 +627,38 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                   ],
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFDE68A)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "DELIVERY OTP",
-                      style: GoogleFonts.inter(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFD97706),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      otp,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFFB45309),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   padding:
+              //       const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFFFFFBEB),
+              //     borderRadius: BorderRadius.circular(8),
+              //     border: Border.all(color: const Color(0xFFFDE68A)),
+              //   ),
+              //   child: Column(
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Text(
+              //         "DELIVERY OTP",
+              //         style: GoogleFonts.inter(
+              //           fontSize: 9,
+              //           fontWeight: FontWeight.w700,
+              //           color: const Color(0xFFD97706),
+              //           letterSpacing: 0.5,
+              //         ),
+              //       ),
+              //       const SizedBox(height: 2),
+              //       Text(
+              //         otp,
+              //         style: GoogleFonts.inter(
+              //           fontSize: 15,
+              //           fontWeight: FontWeight.bold,
+              //           color: const Color(0xFFB45309),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
           const SizedBox(height: 14),
@@ -752,8 +752,7 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
     final partners = loadedState?.deliveryPartners ?? [];
     final ownPartner = loadedState?.ownDeliveryPartner;
     final isLoadingPartners = loadedState?.isLoadingPartners ?? false;
-    final isLoadingMorePartners =
-        loadedState?.isLoadingMorePartners ?? false;
+    final isLoadingMorePartners = loadedState?.isLoadingMorePartners ?? false;
     final partnersError = loadedState?.partnersError;
     final isAssigning = loadedState?.isAssigningPartner ?? false;
 
@@ -1223,7 +1222,7 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                       ),
                       alignment: Alignment.center,
                       child: ownPartner.profileImage != null &&
-                              ownPartner.profileImage!.isNotEmpty
+                              ownPartner.profileImage!.startsWith('http')
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(22),
                               child: Image.network(
@@ -1545,16 +1544,17 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.grey.shade200),
             ),
-            child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      product.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _ambulancePlaceholder(),
-                    ),
-                  )
-                : _ambulancePlaceholder(),
+            child:
+                product.imageUrl != null && product.imageUrl!.startsWith('http')
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          product.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _ambulancePlaceholder(),
+                        ),
+                      )
+                    : _ambulancePlaceholder(),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1658,7 +1658,7 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                 ),
                 alignment: Alignment.center,
                 child: customer.profileImage != null &&
-                        customer.profileImage!.isNotEmpty
+                        customer.profileImage!.startsWith('http')
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(23),
                         child: Image.network(
@@ -1809,6 +1809,57 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                 : 'Address not available',
           ),
           const SizedBox(height: 16),
+          if (order.bookingDateTime != null) ...[
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_month_outlined,
+                          size: 18, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Booking Date & Time: ',
+                        style: GoogleFonts.inter(
+                            fontSize: 13, color: Colors.grey.shade600),
+                      ),
+                      // Expanded(
+                      //   child: Text(
+                      //     DateFormat('MMM dd, yyyy, hh:mm a')
+                      //         .format(order.bookingDateTime!),
+                      //     style: GoogleFonts.inter(
+                      //       fontSize: 13,
+                      //       fontWeight: FontWeight.bold,
+                      //       color: AppColors.primary,
+                      //     ),
+                      //     maxLines: 1,
+                      //     overflow: TextOverflow.ellipsis,
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                  Text(
+                    DateFormat('MMM dd, yyyy, hh:mm a')
+                        .format(order.bookingDateTime!),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -1855,8 +1906,8 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
     // when "coupontype": "vendor" -> basic fare - admin commision - Coupon Discount
     // when coupontype any type -> basic fare - admin commision
     final double calculatedTotal =
-        order.fare - order.adminCommission - effectiveCoupon;
-    final double total = calculatedTotal < 0.0 ? 0.0 : calculatedTotal;
+        order.subtotal - order.adminCommission - effectiveCoupon;
+    final double total = calculatedTotal;
 
     return _buildCard(
       title: "Billing Summary",
@@ -1871,7 +1922,7 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
           const Divider(height: 20),
           _buildSummaryRow(
             "Base Fare(Inclusive of all taxes)",
-            order.fare.toRupeeFormat(decimalDigits: 2),
+            order.subtotal.toRupeeFormat(decimalDigits: 2),
           ),
           if (isVendorCoupon &&
               (order.couponAmount > 0 || order.couponType.isNotEmpty))
@@ -1903,11 +1954,13 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                     fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Text(
-                total.toRupeeFormat(decimalDigits: 2),
+                total < 0
+                    ? "-${total.abs().toRupeeFormat(decimalDigits: 2)}"
+                    : total.toRupeeFormat(decimalDigits: 2),
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: AppColors.primary,
+                  color: total < 0 ? Colors.red : AppColors.primary,
                 ),
               ),
             ],

@@ -246,6 +246,9 @@ class _ProfilePageState extends State<MainprofileScreen> {
                         child: CircleAvatar(
                           radius: 39,
                           backgroundImage: _buildProfileImage(),
+                          onBackgroundImageError: (exception, stackTrace) {
+                            debugPrint('Error loading profile image: $exception');
+                          },
                           child: _isLoading || _isUploading
                               ? Container(
                                   decoration: const BoxDecoration(

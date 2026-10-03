@@ -31,6 +31,8 @@ abstract class AppointmentRemoteDataSource {
     required String orderId,
     required String orderStatus,
     String? rejectionReason,
+    String? otp,
+    String? deliveryOtp,
   });
 
   Future<DeliveryPartnersResultModel> getDeliveryPartners({
@@ -129,6 +131,8 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
     required String orderId,
     required String orderStatus,
     String? rejectionReason,
+    String? otp,
+    String? deliveryOtp,
   }) async {
     final body = <String, dynamic>{
       'orderStatus': orderStatus,
@@ -136,6 +140,12 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
     };
     if (rejectionReason != null && rejectionReason.isNotEmpty) {
       body['rejectionReason'] = rejectionReason;
+    }
+    if (otp != null && otp.isNotEmpty) {
+      body['otp'] = otp;
+    }
+    if (deliveryOtp != null && deliveryOtp.isNotEmpty) {
+      body['deliveryOtp'] = deliveryOtp;
     }
 
     final response = await apiService.post(

@@ -43,6 +43,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   final TextEditingController _partnerSearchController =
       TextEditingController();
   final ScrollController _partnerScrollController = ScrollController();
+  final TextEditingController _otpController = TextEditingController();
 
   @override
   void initState() {
@@ -81,6 +82,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     _partnerScrollController.removeListener(_onPartnerScroll);
     _partnerScrollController.dispose();
     _partnerSearchController.dispose();
+    _otpController.dispose();
     super.dispose();
   }
 
@@ -110,12 +112,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     fontSize: 16,
                   ),
                 ),
-                Text(
-                  "ID: ${widget.orderId.length > 15 ? '${widget.orderId.substring(0, 15)}...' : widget.orderId}",
-                  style: GoogleFonts.inter(
-                    color: Colors.grey,
-                    fontSize: 10,
-                  ),
+                BlocBuilder<OrderDetailsBloc, OrderDetailsState>(
+                  builder: (context, state) {
+                    String displayId = widget.orderId;
+                    if (state is OrderDetailsLoaded) {
+                      displayId = state.orderDetails.orderRef;
+                    }
+                    return Text(
+                      "ID: ${displayId.length > 15 && !displayId.startsWith('ORD') ? '${displayId.substring(0, 15)}...' : displayId}",
+                      style: GoogleFonts.inter(
+                        color: Colors.grey,
+                        fontSize: 10,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -134,7 +144,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                       _buildCompactActionButton(
                           "Cancel", Colors.red, () => _showRejectionDialog()),
                       _buildCompactActionButton("Accept", AppColors.primary,
-                          () => _handleUpdateStatus('confirmed')),
+                          () => _showAcceptOrderDialog(orderDetails)),
                     ],
                   );
                 }
@@ -177,6 +187,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               final leftColumn = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (orderDetails.otpEnable == 'yes' && orderDetails.otpStatus == 'pending') ...[
+                    _buildOtpVerificationSection(orderDetails),
+                    const SizedBox(height: 16),
+                  ],
                   _buildOrderItemsSection(orderDetails),
                   const SizedBox(height: 16),
                   _buildOrderSummarySection(orderDetails),
@@ -213,6 +227,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          if (orderDetails.otpEnable == 'yes' && orderDetails.otpStatus == 'pending') ...[
+                            _buildOtpVerificationSection(orderDetails),
+                            const SizedBox(height: 16),
+                          ],
                           deliverySection,
                           if (hasDeliverySection) const SizedBox(height: 16),
                           _buildOrderItemsSection(orderDetails),
@@ -265,6 +283,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             payload: payload,
           ));
     }
+  }
+
+  void _showAcceptOrderDialog(OrderDetailsResponseEntity orderDetails) {
+    showDialog(
+      context: context,
+      builder: (ctx) => _AcceptOrderDialog(
+        orderDetails: orderDetails,
+        onAccept: (status, {rejectionReason}) {
+          _handleUpdateStatus(status, rejectionReason: rejectionReason);
+        },
+      ),
+    );
   }
 
   void _showRejectionDialog() {
@@ -827,15 +857,22 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final couponType = details.billingSummary.couponType;
     final couponDiscount = details.billingSummary.couponDiscount;
     final totalEarnings = couponType == "vendor"
-        ? details.billingSummary.subtotal - adminCommission - couponDiscount
-        : details.billingSummary.subtotal - adminCommission;
+        ? details.billingSummary.baseAmount -
+            adminCommission -
+            couponDiscount +
+            details.billingSummary.deliveryCharges
+        : details.billingSummary.baseAmount -
+            adminCommission +
+            details.billingSummary.deliveryCharges;
 
     return _buildCard(
       title: "Order Summary",
       child: Column(
         children: [
-          _buildSummaryRow("Subtotal (Inclusive of all taxes)",
-              details.billingSummary.subtotal.toRupeeFormat(decimalDigits: 2)),
+          _buildSummaryRow(
+              "Subtotal (Inclusive of all taxes)",
+              details.billingSummary.baseAmount
+                  .toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
           _buildSummaryRow("GST", gst.toRupeeFormat(decimalDigits: 2)),
           const SizedBox(height: 16),
@@ -849,6 +886,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               "-${couponDiscount.toRupeeFormat(decimalDigits: 2)}",
               valueColor: Colors.green,
               labelColor: Colors.green,
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (details.billingSummary.deliveryCharges > 0) ...[
+            _buildSummaryRow(
+              "Delivery Charge",
+              details.billingSummary.deliveryCharges
+                  .toRupeeFormat(decimalDigits: 2),
+              valueColor: Colors.black87,
             ),
           ],
           //    const SizedBox(height: 16),
@@ -1064,8 +1110,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         partner?.vehicleNumber.isNotEmpty == true ? partner!.vehicleNumber : '';
     final phone = partner?.phone.isNotEmpty == true ? partner!.phone : '';
     final email = partner?.email.isNotEmpty == true ? partner!.email : '';
-    final otp =
-        delivery.deliveryOtp.isNotEmpty == true ? delivery.deliveryOtp : '';
+    // final otp =
+    //     delivery.deliveryOtp.isNotEmpty == true ? delivery.deliveryOtp : '';
 
     final isVendor = delivery.deliveryPartnerType.toLowerCase() == 'vendor' ||
         delivery.deliveryPartner.toLowerCase() == 'self' ||
@@ -1178,39 +1224,39 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   ],
                 ),
               ),
-              if (otp.isNotEmpty)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFBEB),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFFDE68A)),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "DELIVERY OTP",
-                        style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFFD97706),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        otp,
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFB45309),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              // if (otp.isNotEmpty)
+              //   Container(
+              //     padding:
+              //         const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              //     decoration: BoxDecoration(
+              //       color: const Color(0xFFFFFBEB),
+              //       borderRadius: BorderRadius.circular(8),
+              //       border: Border.all(color: const Color(0xFFFDE68A)),
+              //     ),
+              //     child: Column(
+              //       mainAxisSize: MainAxisSize.min,
+              //       children: [
+              //         Text(
+              //           "DELIVERY OTP",
+              //           style: GoogleFonts.inter(
+              //             fontSize: 9,
+              //             fontWeight: FontWeight.w700,
+              //             color: const Color(0xFFD97706),
+              //             letterSpacing: 0.5,
+              //           ),
+              //         ),
+              //         const SizedBox(height: 2),
+              //         Text(
+              //           otp,
+              //           style: GoogleFonts.inter(
+              //             fontSize: 15,
+              //             fontWeight: FontWeight.bold,
+              //             color: const Color(0xFFB45309),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
             ],
           ),
           if (phone.isNotEmpty || email.isNotEmpty) ...[
@@ -2033,6 +2079,652 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             child: child,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOtpVerificationSection(OrderDetailsResponseEntity details) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red, width: 2), // Red outline
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.vpn_key_outlined,
+                    color: Color(0xFFD97706),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "OTP Verification Required",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Please enter the OTP provided by the customer to verify or complete this order.",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _otpController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.key_outlined,
+                          size: 20, color: Colors.grey),
+                      hintText: "Enter OTP (e.g. 1234)",
+                      hintStyle:
+                          GoogleFonts.inter(fontSize: 13, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_otpController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please enter OTP"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+                    // Handle OTP verify logic here if needed via BLoC
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    "Verify",
+                    style: GoogleFonts.inter(
+                        fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AcceptOrderDialog extends StatefulWidget {
+  final OrderDetailsResponseEntity orderDetails;
+  final Function(String status, {String? rejectionReason}) onAccept;
+
+  const _AcceptOrderDialog({
+    Key? key,
+    required this.orderDetails,
+    required this.onAccept,
+  }) : super(key: key);
+
+  @override
+  State<_AcceptOrderDialog> createState() => _AcceptOrderDialogState();
+}
+
+class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
+  final TextEditingController _remarksController = TextEditingController();
+  final Map<String, TextEditingController> _qtyControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    for (var item in widget.orderDetails.items) {
+      _qtyControllers[item.orderItemId] = TextEditingController(text: item.quantity.toString());
+    }
+  }
+
+  @override
+  void dispose() {
+    _remarksController.dispose();
+    for (var c in _qtyControllers.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = widget.orderDetails.userDetails;
+    
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      backgroundColor: Colors.white,
+      child: Container(
+        width: 500, // max width for tablet/desktop, on mobile it shrinks
+        constraints: const BoxConstraints(maxHeight: 800),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFBEB),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFFDE68A)),
+                    ),
+                    child: const Icon(Icons.inventory_2_rounded, color: Color(0xFFD97706), size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Stock Verification & Acceptance",
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF0F172A),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Order #${widget.orderDetails.orderId.isNotEmpty ? widget.orderDetails.orderId : widget.orderDetails.id}",
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Color(0xFF94A3B8)),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Scrollable Content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Warning Container
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFBEB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFDE68A)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.inventory_2_outlined, color: Color(0xFFB45309), size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "Stock Availability Warning & Requirement",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFFB45309),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Do you have complete stock available for all booked items in this order?",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF78350F),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Accepting confirms that you have verified inventory and can fulfill all requested items. If you are unsure or need clarification, you can call the customer directly before confirming.",
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: const Color(0xFF92400E),
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    // Customer Contact
+                    if (user != null)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFAFAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFF3E8FF)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.person_outline, color: Color(0xFF7C3AED), size: 18),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            "CUSTOMER CONTACT DETAILS",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF7C3AED),
+                                              letterSpacing: 0.5,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Text(
+                                      "${user.firstName} ${user.lastName}",
+                                      textAlign: TextAlign.right,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF475569),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFF1F5F9)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFD1FAE5),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.phone_in_talk, color: Color(0xFF059669), size: 20),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          user.phone,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF1E293B),
+                                          ),
+                                        ),
+                                        Text(
+                                          "Registered Mobile",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            color: const Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      // Action to call customer
+                                    },
+                                    icon: const Icon(Icons.call, size: 14),
+                                    label: const Text("Call"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF059669),
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    
+                    if (user != null) const SizedBox(height: 24),
+                    
+                    // Booked Items Header
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Booked Items & Negotiated Deliverable Stock:",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Adjust qty if negotiated with user",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Items List
+                    ...widget.orderDetails.items.map((item) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFF1F5F9)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "${widget.orderDetails.items.indexOf(item) + 1}. ${item.productDetails.name}",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF1E293B),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE2E8F0),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "Booked Qty: ${item.quantity}",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF475569),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "Deliverable Stock Quantity:",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF6B21A8),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 70,
+                                        child: TextField(
+                                          controller: _qtyControllers[item.orderItemId],
+                                          keyboardType: TextInputType.number,
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF0F172A),
+                                          ),
+                                          decoration: InputDecoration(
+                                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                              borderSide: const BorderSide(color: Color(0xFFD8B4FE)),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                              borderSide: const BorderSide(color: Color(0xFF7C3AED)),
+                                            ),
+                                            filled: true,
+                                            fillColor: const Color(0xFFFAFAFC),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "units",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          color: const Color(0xFF64748B),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Remarks
+                    Text(
+                      "Negotiation Notes / Remarks (Optional):",
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _remarksController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: "e.g. Spoke with customer over phone and agreed to deliver partial stock of 2 units...",
+                        hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Footer
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Cancel",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF475569),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        widget.onAccept('confirmed', rejectionReason: _remarksController.text.trim());
+                      },
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      label: Text(
+                        "Confirm & Accept",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF059669),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -25,6 +25,8 @@ class OrderDetailsResponseEntity extends Equatable {
   final dynamic subBranchDetails;
   final List<InstallmentItemEntity> installmentList;
   final List<OrderDeliveryEntity> deliveries;
+  final String? otpEnable;
+  final String? otpStatus;
 
   const OrderDetailsResponseEntity({
     required this.id,
@@ -49,6 +51,8 @@ class OrderDetailsResponseEntity extends Equatable {
     this.subBranchDetails,
     this.installmentList = const [],
     this.deliveries = const [],
+    this.otpEnable = "no",
+    this.otpStatus = "pending",
   });
 
   @override
@@ -75,6 +79,8 @@ class OrderDetailsResponseEntity extends Equatable {
         subBranchDetails,
         installmentList,
         deliveries,
+        otpEnable,
+        otpStatus,
       ];
 }
 
@@ -138,20 +144,26 @@ class OrderBillingSummaryEntity extends Equatable {
   final double totalGst;
   final double finalAmount;
   final double unitPrice;
+  final double baseAmount;
   final double gstAmount;
   final double paidAmount;
   final String? couponType;
   final double couponDiscount;
+  final double deliveryCharges;
+  final double totalPayAmount;
 
   const OrderBillingSummaryEntity({
     required this.subtotal,
     required this.totalGst,
     required this.finalAmount,
     required this.unitPrice,
+    this.baseAmount = 0.0,
     required this.gstAmount,
     this.paidAmount = 0.0,
     this.couponType,
     this.couponDiscount = 0.0,
+    this.deliveryCharges = 0.0,
+    this.totalPayAmount = 0.0,
   });
 
   @override
@@ -160,10 +172,13 @@ class OrderBillingSummaryEntity extends Equatable {
         totalGst,
         finalAmount,
         unitPrice,
+        baseAmount,
         gstAmount,
         paidAmount,
         couponType,
         couponDiscount,
+        deliveryCharges,
+        totalPayAmount,
       ];
 }
 

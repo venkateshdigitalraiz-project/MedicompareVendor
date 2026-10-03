@@ -70,6 +70,7 @@ class OrderItemEntity extends Equatable {
 class OrderDetailsEntity extends Equatable {
   final String id;
   final String orderId;
+  final String orderRef;
   final String userId;
   final String paymentMethod;
   final String paymentStatus;
@@ -98,6 +99,7 @@ class OrderDetailsEntity extends Equatable {
   const OrderDetailsEntity({
     required this.id,
     required this.orderId,
+    this.orderRef = '',
     required this.userId,
     required this.paymentMethod,
     required this.paymentStatus,
@@ -126,6 +128,7 @@ class OrderDetailsEntity extends Equatable {
   List<Object?> get props => [
         id,
         orderId,
+        orderRef,
         userId,
         paymentMethod,
         paymentStatus,

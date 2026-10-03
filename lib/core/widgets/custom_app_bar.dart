@@ -107,6 +107,9 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               backgroundColor: Colors.white.withOpacity(0.2),
               backgroundImage:
                   userImageUrl != null ? NetworkImage(userImageUrl!) : null,
+              onBackgroundImageError: (exception, stackTrace) {
+                debugPrint('Error loading app bar image: $exception');
+              },
               child: userImageUrl == null
                   ? Text(
                       userName?.isNotEmpty == true

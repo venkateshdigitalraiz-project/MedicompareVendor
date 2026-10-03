@@ -26,6 +26,8 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     super.subBranchDetails,
     super.installmentList = const [],
     super.deliveries = const [],
+    super.otpEnable,
+    super.otpStatus,
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -86,7 +88,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
           .toString()) ??
           0.0,
       billingSummary: OrderBillingSummaryModel.fromJson(
-          json['billingSummary'] ?? <String, dynamic>{}),
+          json['billingSummary'] ?? json['billing_summary'] ?? <String, dynamic>{}),
       items: json['items'] != null
           ? (json['items'] as List<dynamic>)
               .map((e) =>
@@ -241,6 +243,8 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
         }
         return <OrderDeliveryModel>[];
       }(),
+      otpEnable: json['otpEnable']?.toString() ?? json['otp_enable']?.toString() ?? json['orderDetails']?['otpEnable']?.toString() ?? json['orderDetails']?['otp_enable']?.toString() ?? 'no',
+      otpStatus: json['otpStatus']?.toString() ?? json['otp_status']?.toString() ?? json['orderDetails']?['otpStatus']?.toString() ?? json['orderDetails']?['otp_status']?.toString() ?? 'pending',
     );
   }
 }
@@ -438,10 +442,13 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
     required super.totalGst,
     required super.finalAmount,
     required super.unitPrice,
+    super.baseAmount,
     required super.gstAmount,
     super.paidAmount,
     super.couponType,
     super.couponDiscount,
+    super.deliveryCharges,
+    super.totalPayAmount,
   });
 
   factory OrderBillingSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -459,6 +466,7 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
       finalAmount:
           double.tryParse((json['finalAmount'] ?? json['final_amount'] ?? json['total'] ?? json['totalAmount'] ?? 0).toString()) ?? 0.0,
       unitPrice: double.tryParse((json['unitPrice'] ?? json['unit_price'] ?? json['price'] ?? 0).toString()) ?? 0.0,
+      baseAmount: double.tryParse((json['baseAmount'] ?? json['base_amount'] ?? 0).toString()) ?? 0.0,
       gstAmount: double.tryParse((json['gstAmount'] ?? json['gst_amount'] ?? json['tax'] ?? 0).toString()) ?? 0.0,
       paidAmount: double.tryParse((json['paidAmount'] ?? json['paid_amount'] ?? 0).toString()) ?? 0.0,
       couponType: (json['couponType'] ?? json['coupontype'])?.toString(),
@@ -471,6 +479,8 @@ class OrderBillingSummaryModel extends OrderBillingSummaryEntity {
                       0)
                   .toString()) ??
           0.0,
+      deliveryCharges: double.tryParse((json['deliveryCharges'] ?? json['deliveryCharge'] ?? json['delivery_charges'] ?? json['delivery_charge'] ?? json['shippingCharges'] ?? json['shippingFee'] ?? 0).toString()) ?? 0.0,
+      totalPayAmount: double.tryParse((json['totalPayAmount'] ?? json['total_pay_amount'] ?? 0).toString()) ?? 0.0,
     );
   }
 }
@@ -518,7 +528,7 @@ class OrderDetailsItemModel extends OrderDetailsItemEntity {
       bookingType: (json['bookingType'] ?? json['booking_type'] ?? 'rental').toString(),
       price: price,
       billingSummary: OrderBillingSummaryModel.fromJson(
-          json['billingSummary'] ?? <String, dynamic>{}),
+          json['billingSummary'] ?? json['billing_summary'] ?? <String, dynamic>{}),
       productDetails: json['productDetails'] != null
           ? ProductDetailsModel.fromJson(json['productDetails'])
           : json['productSnapshot'] != null

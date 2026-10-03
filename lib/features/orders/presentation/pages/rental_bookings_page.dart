@@ -361,6 +361,9 @@ class _RentalBookingsPageState extends State<RentalBookingsPage> {
                     backgroundColor: AppColors.primary.withOpacity(0.1),
                     backgroundImage:
                         hasImage ? NetworkImage(formattedImageUrl) : null,
+                    onBackgroundImageError: (exception, stackTrace) {
+                      debugPrint('Error loading image: $exception');
+                    },
                     child: !hasImage
                         ? const Icon(Icons.person_outline,
                             color: AppColors.primary)

@@ -109,6 +109,8 @@ class AppointmentDetailsBloc
         orderId: event.orderId,
         orderStatus: event.orderStatus,
         rejectionReason: event.rejectionReason,
+        otp: event.otp,
+        deliveryOtp: event.deliveryOtp,
       );
       final statusLower = event.orderStatus.trim().toLowerCase();
       final successMsg = statusLower == 'confirmed'

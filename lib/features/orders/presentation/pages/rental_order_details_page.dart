@@ -1986,7 +1986,7 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
               isBold: true, valueColor: AppColors.primary),
           const Divider(height: 32),
           _buildSummaryRow(
-              "1st Installment Amount", firstInstallmentAmount.toRupeeFormat(),
+              "1st Installment Amount", orderDetails.billingSummary.totalPayAmount.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const SizedBox(height: 16),
           Builder(

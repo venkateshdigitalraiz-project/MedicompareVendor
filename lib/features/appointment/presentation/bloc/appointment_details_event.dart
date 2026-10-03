@@ -52,15 +52,19 @@ class UpdateAppointmentOrderStatusEvent extends AppointmentDetailsEvent {
   final String orderId;
   final String orderStatus;
   final String? rejectionReason;
+  final String? otp;
+  final String? deliveryOtp;
 
   const UpdateAppointmentOrderStatusEvent({
     required this.orderId,
     required this.orderStatus,
     this.rejectionReason,
+    this.otp,
+    this.deliveryOtp,
   });
 
   @override
-  List<Object?> get props => [orderId, orderStatus, rejectionReason];
+  List<Object?> get props => [orderId, orderStatus, rejectionReason, otp, deliveryOtp];
 }
 
 class GetDeliveryPartnersEvent extends AppointmentDetailsEvent {

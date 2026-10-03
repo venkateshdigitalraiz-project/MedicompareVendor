@@ -78,12 +78,16 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     required String orderId,
     required String orderStatus,
     String? rejectionReason,
+    String? otp,
+    String? deliveryOtp,
   }) async {
     try {
       await remoteDataSource.updateOrderStatus(
         orderId: orderId,
         orderStatus: orderStatus,
         rejectionReason: rejectionReason,
+        otp: otp,
+        deliveryOtp: deliveryOtp,
       );
     } on ServerException catch (e) {
       throw ServerException(e.message);

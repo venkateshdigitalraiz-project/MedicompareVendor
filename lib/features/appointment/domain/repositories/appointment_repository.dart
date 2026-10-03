@@ -28,6 +28,8 @@ abstract class AppointmentRepository {
     required String orderId,
     required String orderStatus,
     String? rejectionReason,
+    String? otp,
+    String? deliveryOtp,
   });
 
   Future<DeliveryPartnersResultEntity> getDeliveryPartners({

@@ -77,6 +77,7 @@ class OrderDetailsModel extends OrderDetailsEntity {
   const OrderDetailsModel({
     required super.id,
     required super.orderId,
+    super.orderRef = '',
     required super.userId,
     required super.paymentMethod,
     required super.paymentStatus,
@@ -105,6 +106,7 @@ class OrderDetailsModel extends OrderDetailsEntity {
     return OrderDetailsModel(
       id: json['_id']?.toString() ?? '',
       orderId: json['orderId']?.toString() ?? '',
+      orderRef: json['orderRef']?.toString() ?? '',
       userId: json['userId']?.toString() ?? '',
       paymentMethod: json['paymentmethod']?.toString() ??
           json['paymentMethod']?.toString() ??

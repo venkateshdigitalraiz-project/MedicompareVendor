@@ -9,11 +9,15 @@ class UpdateAppointmentOrderStatusUseCase {
     required String orderId,
     required String orderStatus,
     String? rejectionReason,
+    String? otp,
+    String? deliveryOtp,
   }) async {
     return await repository.updateOrderStatus(
       orderId: orderId,
       orderStatus: orderStatus,
       rejectionReason: rejectionReason,
+      otp: otp,
+      deliveryOtp: deliveryOtp,
     );
   }
 }

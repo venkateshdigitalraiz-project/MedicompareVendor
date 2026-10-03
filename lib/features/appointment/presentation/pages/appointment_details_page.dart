@@ -62,6 +62,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   @override
   void dispose() {
     _partnerSearchController.dispose();
+    _otpController.dispose();
     super.dispose();
   }
 
@@ -224,6 +225,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   }
 
   String? _selectedStatus;
+  final TextEditingController _otpController = TextEditingController();
 
   String _normalizeStatus(String status) {
     final s = status.trim().toLowerCase().replaceAll(' ', '_');
@@ -311,12 +313,15 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           );
         }
 
-        // Do not show any buttons while loading or if details are not yet loaded
-        if (state is! AppointmentDetailsLoaded) {
+        // Do not show any buttons if details are not yet loaded
+        final details = state is AppointmentDetailsLoaded
+            ? state.appointmentDetails
+            : _cachedDetails;
+
+        if (details == null) {
           return const SizedBox.shrink();
         }
 
-        final details = state.appointmentDetails;
         final orderStatus = details.orderStatus.trim().toLowerCase();
         final isPending = orderStatus == 'pending';
 
@@ -718,17 +723,29 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (activeStatus != 'pending') ...[
+                        _buildStatusDropdownSection(details, activeStatus),
+                        const SizedBox(height: 24),
+                      ],
                       if (_isPendingStatus(activeStatus)) ...[
                         // Pending status: no delivery cards displayed
                       ] else if (_isConfirmedStatus(activeStatus)) ...[
                         _buildDeliveryAssignmentSection(state, details),
                         const SizedBox(height: 24),
                       ] else if (_isAssignedStatus(activeStatus)) ...[
-                        _buildAssignedDeliveryPartnerSection(
-                          details.deliveries.isNotEmpty
-                              ? details.deliveries.first
-                              : null,
-                        ),
+                        if (details.otpEnable.trim().toLowerCase() == 'no') ...[
+                          _buildAssignedDeliveryPartnerSection(
+                            details.deliveries.isNotEmpty
+                                ? details.deliveries.first
+                                : null,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ],
+                      if (details.otpEnable.trim().toLowerCase() == 'yes' &&
+                          details.otpStatus.trim().toLowerCase() ==
+                              'pending') ...[
+                        _buildOtpVerificationSection(details),
                         const SizedBox(height: 24),
                       ],
                       _buildAppointmentInformationSection(details, isWide),
@@ -1316,6 +1333,238 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     );
   }
 
+  Widget _buildOtpVerificationSection(AppointmentDetailsEntity details) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red, width: 2), // Red outline
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.vpn_key_outlined,
+                    color: Color(0xFFD97706),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "OTP Verification Required",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Please enter the OTP provided by the customer to verify or complete this appointment.",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _otpController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.key_outlined,
+                          size: 20, color: Colors.grey),
+                      hintText: "Enter OTP (e.g. 1234)",
+                      hintStyle:
+                          GoogleFonts.inter(fontSize: 13, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    style: GoogleFonts.inter(fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  height: 48, // matching textfield height roughly
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final otp = _otpController.text.trim();
+                      if (otp.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please enter OTP')),
+                        );
+                        return;
+                      }
+                      final orderId = details.id.isNotEmpty
+                          ? details.id
+                          : (details.orderId.isNotEmpty
+                              ? details.orderId
+                              : widget.appointmentId);
+
+                      context.read<AppointmentDetailsBloc>().add(
+                            UpdateAppointmentOrderStatusEvent(
+                              orderId: orderId,
+                              orderStatus: details.orderStatus,
+                              otp: otp,
+                              deliveryOtp: otp,
+                            ),
+                          );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(
+                          0xFFEAB308), // Yellowish/Amber color like the image
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    ),
+                    icon: const Icon(Icons.check_circle_outline, size: 18),
+                    label: Text(
+                      "Submit / Verify OTP",
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusDropdownSection(
+      AppointmentDetailsEntity details, String currentStatus) {
+    final orderId = details.id.isNotEmpty
+        ? details.id
+        : (details.orderId.isNotEmpty ? details.orderId : widget.appointmentId);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Status",
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value:
+                ['confirmed', 'assigned', 'completed'].contains(currentStatus)
+                    ? currentStatus
+                    : 'confirmed',
+            decoration: InputDecoration(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            hint: Text(
+              "Select Status",
+              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+            ),
+            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+            items: const [
+              DropdownMenuItem(
+                value: 'confirmed',
+                child: Text('Confirmed'),
+              ),
+              DropdownMenuItem(
+                value: 'assigned',
+                child: Text('Assigned'),
+              ),
+              DropdownMenuItem(
+                value: 'completed',
+                child: Text('Completed'),
+              ),
+            ],
+            onChanged: (newStatus) {
+              if (newStatus != null && newStatus != currentStatus) {
+                setState(() {
+                  _selectedStatus = newStatus;
+                });
+
+                // context.read<AppointmentDetailsBloc>().add(
+                //       UpdateAppointmentOrderStatusEvent(
+                //         orderId: orderId,
+                //         orderStatus: newStatus,
+                //       ),
+                //     );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCustomerAddressSection(AppointmentDetailsEntity details) {
     final address = details.shippingAddress ?? details.billingAddress;
 
@@ -1515,38 +1764,38 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   ],
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFDE68A)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "DELIVERY OTP",
-                      style: GoogleFonts.inter(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFD97706),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      otp,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFFB45309),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   padding:
+              //       const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFFFFFBEB),
+              //     borderRadius: BorderRadius.circular(8),
+              //     border: Border.all(color: const Color(0xFFFDE68A)),
+              //   ),
+              //   child: Column(
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Text(
+              //         "DELIVERY OTP",
+              //         style: GoogleFonts.inter(
+              //           fontSize: 9,
+              //           fontWeight: FontWeight.w700,
+              //           color: const Color(0xFFD97706),
+              //           letterSpacing: 0.5,
+              //         ),
+              //       ),
+              //       const SizedBox(height: 2),
+              //       Text(
+              //         otp,
+              //         style: GoogleFonts.inter(
+              //           fontSize: 15,
+              //           fontWeight: FontWeight.bold,
+              //           color: const Color(0xFFB45309),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
           const SizedBox(height: 14),
@@ -2528,4 +2777,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 }
 /*
  "selectType": "self", and  "type": "self" both matched  then consider patientDetails  {name} compare both  but UI display URl but real ti display upload file with icon. please cross check it  
+ */
+/*
+http://192.168.0.161:9002/api/v1/vendor/order/orderstatusupdate/6ac0da9e540daf03972deaa7
  */

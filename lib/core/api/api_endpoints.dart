@@ -6,10 +6,10 @@ class ApiEndpoints {
   static const String releaseMediaBaseUrl = 'https://api.medicompares.com';
 
   // Local / Debug Base URL  http://192.168.0.161:9002/api/v1/vendor/package/adminpackage/details
-  // static const String localBaseUrl = 'http://192.168.0.161:9002/api/v1';
-  // static const String localMediaBaseUrl = 'http://192.168.0.161:9002';
-  static const String localBaseUrl = 'https://api.medicompares.com/api/v1';
-  static const String localMediaBaseUrl = 'https://api.medicompares.com';
+  static const String localBaseUrl = 'http://192.168.0.161:9002/api/v1';
+  static const String localMediaBaseUrl = 'http://192.168.0.161:9002';
+  // static const String localBaseUrl = 'https://api.medicompares.com/api/v1';
+  // static const String localMediaBaseUrl = 'https://api.medicompares.com';
 
   /// Returns active Base URL dynamically from [AppConfig]
   static String get baseUrl => AppConfig.baseUrl;
@@ -87,8 +87,7 @@ class ApiEndpoints {
       '/vendor/deliveryman/delete/$id';
   static String deliverymanDetails(String id) =>
       '/vendor/deliveryman/details/$id';
-  static String viewDeliveryman(String id) =>
-      '/vendor/deliveryman/view/$id';
+  static String viewDeliveryman(String id) => '/vendor/deliveryman/view/$id';
   static const String deliverymanAllOrders = '/vendor/deliveryman/all-orders';
   static const String deliverymanAnalytics = '/vendor/deliveryman/analytics';
 

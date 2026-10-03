@@ -316,45 +316,45 @@ class AmbulanceOrdersRemoteDataSource {
         : (e['billing'] is Map ? (e['billing'] as Map<String, dynamic>) : null);
 
     final double fare = (() {
+      if (e['fare'] != null) {
+        final val = (e['fare'] as num?)?.toDouble() ??
+            double.tryParse(e['fare'].toString());
+        if (val != null) return val;
+      }
       if (billing != null) {
         if (billing['subtotal'] != null) {
           final val = (billing['subtotal'] as num?)?.toDouble() ??
               double.tryParse(billing['subtotal'].toString());
-          if (val != null && val > 0) return val;
+          if (val != null) return val;
         }
         if (billing['fare'] != null) {
           final val = (billing['fare'] as num?)?.toDouble() ??
               double.tryParse(billing['fare'].toString());
-          if (val != null && val > 0) return val;
+          if (val != null) return val;
         }
         if (billing['price'] != null) {
           final val = (billing['price'] as num?)?.toDouble() ??
               double.tryParse(billing['price'].toString());
-          if (val != null && val > 0) return val;
+          if (val != null) return val;
         }
-      }
-      if (e['fare'] != null) {
-        final val = (e['fare'] as num?)?.toDouble() ??
-            double.tryParse(e['fare'].toString());
-        if (val != null && val > 0) return val;
       }
       if (e['price'] != null) {
         final val = (e['price'] as num?)?.toDouble() ??
             double.tryParse(e['price'].toString());
-        if (val != null && val > 0) return val;
+        if (val != null) return val;
       }
       if (e['subtotal'] != null) {
         final val = (e['subtotal'] as num?)?.toDouble() ??
             double.tryParse(e['subtotal'].toString());
-        if (val != null && val > 0) return val;
+        if (val != null) return val;
       }
-      if (productList.isNotEmpty && productList.first.price > 0) {
+      if (productList.isNotEmpty && productList.first.price >= 0) {
         return productList.first.price;
       }
       if (billing != null && billing['total'] != null) {
         final val = (billing['total'] as num?)?.toDouble() ??
             double.tryParse(billing['total'].toString());
-        if (val != null && val > 0) return val;
+        if (val != null) return val;
       }
       return 0.0;
     })();
@@ -477,6 +477,11 @@ class AmbulanceOrdersRemoteDataSource {
         address: dropoff['address']?.toString() ?? '',
       ),
       distance: (e['distance'] as num?)?.toDouble() ?? 0,
+      subtotal: (billing != null && billing['subtotal'] != null)
+          ? ((billing['subtotal'] as num?)?.toDouble() ??
+              double.tryParse(billing['subtotal'].toString()) ??
+              fare)
+          : fare,
       fare: fare,
       totalFare: totalFare,
       gst: gst,
@@ -489,6 +494,9 @@ class AmbulanceOrdersRemoteDataSource {
       paymentMethod: e['paymentMethod']?.toString() ?? e['paymentmethod']?.toString() ?? 'cod',
       paymentStatus: e['paymentStatus']?.toString() ?? e['paymentstatus']?.toString() ?? 'unpaid',
       emergencyType: e['emergencyType']?.toString() ?? '',
+      bookingDateTime: e['bookingDateTime'] != null
+          ? DateTime.tryParse(e['bookingDateTime'].toString())
+          : null,
       createdAt: e['createdAt'] != null
           ? DateTime.tryParse(e['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),

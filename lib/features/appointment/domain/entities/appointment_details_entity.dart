@@ -21,6 +21,8 @@ class AppointmentDetailsEntity extends Equatable {
   final List<AppointmentGroupDetailsEntity> groupDetails;
   final List<AppointmentServiceItemEntity> normalItems;
   final List<AppointmentDeliveryEntity> deliveries;
+  final String otpEnable;
+  final String otpStatus;
 
   final AppointmentAddressEntity? shippingAddress;
   final AppointmentAddressEntity? billingAddress;
@@ -50,6 +52,8 @@ class AppointmentDetailsEntity extends Equatable {
     this.billingAddress,
     this.couponDetails,
     this.deliveries = const [],
+    this.otpEnable = '',
+    this.otpStatus = '',
   });
 
   @override
@@ -77,6 +81,8 @@ class AppointmentDetailsEntity extends Equatable {
         billingAddress,
         couponDetails,
         deliveries,
+        otpEnable,
+        otpStatus,
       ];
 }
 

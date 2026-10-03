@@ -300,7 +300,7 @@ class _OrdersPageState extends State<OrdersPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.orderItemId,
+                          item.orderDetails.orderRef.isNotEmpty ? item.orderDetails.orderRef : item.orderItemId,
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -344,6 +344,9 @@ class _OrdersPageState extends State<OrdersPage> {
                     backgroundImage: item.productDetails.imageUrl.isNotEmpty
                         ? NetworkImage(item.productDetails.imageUrl.first)
                         : null,
+                    onBackgroundImageError: (exception, stackTrace) {
+                      debugPrint('Error loading image: $exception');
+                    },
                     child: item.productDetails.imageUrl.isEmpty
                         ? const Icon(Icons.person_outline,
                             color: AppColors.primary)

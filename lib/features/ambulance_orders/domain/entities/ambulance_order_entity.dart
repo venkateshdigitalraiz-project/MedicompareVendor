@@ -230,6 +230,7 @@ class AmbulanceOrderEntity extends Equatable {
   final AmbulanceOrderLocation pickupLocation;
   final AmbulanceOrderLocation dropoffLocation;
   final double distance;
+  final double subtotal;
   final double fare;
   final double totalFare;
   final double gst;
@@ -242,6 +243,7 @@ class AmbulanceOrderEntity extends Equatable {
   final String paymentMethod;
   final String paymentStatus;
   final String emergencyType;
+  final DateTime? bookingDateTime;
   final DateTime? _createdAt;
   final List<AmbulanceOrderUser> users;
   final List<AmbulanceOrderProductDetail> productDetails;
@@ -253,6 +255,7 @@ class AmbulanceOrderEntity extends Equatable {
     this.pickupLocation = const AmbulanceOrderLocation(),
     this.dropoffLocation = const AmbulanceOrderLocation(),
     this.distance = 0.0,
+    this.subtotal = 0.0,
     this.fare = 0.0,
     this.totalFare = 0.0,
     this.gst = 0.0,
@@ -265,6 +268,7 @@ class AmbulanceOrderEntity extends Equatable {
     this.paymentMethod = 'cod',
     this.paymentStatus = 'unpaid',
     this.emergencyType = '',
+    this.bookingDateTime,
     DateTime? createdAt,
     this.users = const [],
     this.productDetails = const [],
@@ -297,6 +301,7 @@ class AmbulanceOrderEntity extends Equatable {
     AmbulanceOrderLocation? pickupLocation,
     AmbulanceOrderLocation? dropoffLocation,
     double? distance,
+    double? subtotal,
     double? fare,
     double? totalFare,
     double? gst,
@@ -309,6 +314,7 @@ class AmbulanceOrderEntity extends Equatable {
     String? paymentMethod,
     String? paymentStatus,
     String? emergencyType,
+    DateTime? bookingDateTime,
     DateTime? createdAt,
     List<AmbulanceOrderUser>? users,
     List<AmbulanceOrderProductDetail>? productDetails,
@@ -320,6 +326,7 @@ class AmbulanceOrderEntity extends Equatable {
       pickupLocation: pickupLocation ?? this.pickupLocation,
       dropoffLocation: dropoffLocation ?? this.dropoffLocation,
       distance: distance ?? this.distance,
+      subtotal: subtotal ?? this.subtotal,
       fare: fare ?? this.fare,
       totalFare: totalFare ?? this.totalFare,
       gst: gst ?? this.gst,
@@ -332,6 +339,7 @@ class AmbulanceOrderEntity extends Equatable {
       paymentMethod: paymentMethod ?? this.paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       emergencyType: emergencyType ?? this.emergencyType,
+      bookingDateTime: bookingDateTime ?? this.bookingDateTime,
       createdAt: createdAt ?? _createdAt,
       users: users ?? this.users,
       productDetails: productDetails ?? this.productDetails,
@@ -346,6 +354,7 @@ class AmbulanceOrderEntity extends Equatable {
         pickupLocation,
         dropoffLocation,
         distance,
+        subtotal,
         fare,
         totalFare,
         gst,
@@ -358,6 +367,7 @@ class AmbulanceOrderEntity extends Equatable {
         paymentMethod,
         paymentStatus,
         emergencyType,
+        bookingDateTime,
         _createdAt,
         users,
         productDetails,

@@ -25,6 +25,8 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
     super.billingAddress,
     super.couponDetails,
     super.deliveries,
+    super.otpEnable,
+    super.otpStatus,
   });
 
   factory AppointmentDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -169,6 +171,8 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
         }
         return <AppointmentDeliveryModel>[];
       })(),
+      otpEnable: json['otpEnable']?.toString() ?? '',
+      otpStatus: json['otpStatus']?.toString() ?? '',
     );
   }
 }
