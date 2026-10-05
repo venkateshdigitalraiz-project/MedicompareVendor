@@ -12,5 +12,7 @@ abstract class AuthRepository {
   Future<VendorEntity> login({
     required String email,
     required String password,
+    String? otp,
+    String? fcmToken,
   });
 }

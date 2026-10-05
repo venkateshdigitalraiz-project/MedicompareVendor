@@ -11,7 +11,7 @@ import '../bloc/nursing_care_state.dart';
 import '../../data/models/nursing_care_model.dart';
 import '../widgets/nursing_care_card.dart';
 import '../widgets/add_nursing_care_sheet.dart';
-import 'package:MediCompare/core/utils/permission_handler.dart';
+// import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class NursingCareListPage extends StatefulWidget {
   const NursingCareListPage({super.key});

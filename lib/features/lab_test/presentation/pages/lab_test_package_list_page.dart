@@ -28,6 +28,7 @@ class _LabTestPackageListPageState extends State<LabTestPackageListPage> {
   final LabTestService _labTestService =
       LabTestInjection.provideLabTestService();
 
+  // ignore: unused_field
   List<LabTestDetails> _allLabTests = [];
   Timer? _debounce;
 

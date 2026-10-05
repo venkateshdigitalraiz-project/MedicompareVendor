@@ -285,7 +285,7 @@ class _DiagnosticDetailsPageState extends State<DiagnosticDetailsPage> {
       children: [
         Row(
           children: [
-            _infoTile("Diagnostic Name", item.details.name ?? 'N/A',
+            _infoTile("Diagnostic Name", item.details.name,
                 Icons.location_on_outlined, Colors.blue),
             const SizedBox(width: 12),
             _infoTile("BODY PART", item.details.bodyPart ?? 'N/A',

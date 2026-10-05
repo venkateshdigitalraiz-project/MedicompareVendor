@@ -36,16 +36,22 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<VendorEntity> login({
     required String email,
     required String password,
+    String? otp,
+    String? fcmToken,
   }) async {
     final responseModel = await remoteDataSource.login(
       email: email,
       password: password,
+      otp: otp,
+      fcmToken: fcmToken,
     );
 
-    if (responseModel.success &&
-        responseModel.data != null &&
-        responseModel.data!.user != null) {
-      return responseModel.data!.user!.toEntity(responseModel.data!.token);
+    if (responseModel.success) {
+      if (responseModel.data != null && responseModel.data!.user != null) {
+        return responseModel.data!.user!.toEntity(responseModel.data!.token);
+      } else {
+        throw Exception("OTP_SENT");
+      }
     } else {
       throw Exception(responseModel.message);
     }

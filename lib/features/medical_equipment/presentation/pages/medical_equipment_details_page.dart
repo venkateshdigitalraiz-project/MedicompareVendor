@@ -26,7 +26,7 @@ class _MedicalEquipmentDetailsPageState
   bool _showAllDescription = false;
   bool _showAllPrecaution = false;
   bool _showAllSideEffects = false;
-  bool _showAllPreparation = false;
+  // bool _showAllPreparation = false;
 
   @override
   Widget build(BuildContext context) {

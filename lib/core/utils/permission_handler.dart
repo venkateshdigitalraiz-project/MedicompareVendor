@@ -1,5 +1,5 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'dart:convert';
+// import 'package:shared_preferences/shared_preferences.dart';
 import '../models/permission_model.dart';
 
 class PermissionHandler {
@@ -9,7 +9,7 @@ class PermissionHandler {
 
   List<PermissionModel> _permissions = [];
 
-  static const String _permissionsKey = 'vendor_permissions';
+  //static const String _permissionsKey = 'vendor_permissions';
 
   Future<void> setPermissions(List<PermissionModel> permissions) async {
     _permissions = permissions;

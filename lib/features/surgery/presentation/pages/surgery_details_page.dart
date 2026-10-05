@@ -582,31 +582,31 @@ class _SurgeryDetailsPageState extends State<SurgeryDetailsPage> {
     );
   }
 
-  Widget _badge(IconData icon, String label, Color bg, Color text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: text),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              style: GoogleFonts.poppins(
-                  fontSize: 11, fontWeight: FontWeight.w500, color: text),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _badge(IconData icon, String label, Color bg, Color text) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  //     decoration: BoxDecoration(
+  //       color: bg,
+  //       borderRadius: BorderRadius.circular(8),
+  //     ),
+  //     child: Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         Icon(icon, size: 14, color: text),
+  //         const SizedBox(width: 6),
+  //         Flexible(
+  //           child: Text(
+  //             label,
+  //             style: GoogleFonts.poppins(
+  //                 fontSize: 11, fontWeight: FontWeight.w500, color: text),
+  //             maxLines: 1,
+  //             overflow: TextOverflow.ellipsis,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _infoCard(String label, String value, Color bg, IconData icon) {
     return Expanded(

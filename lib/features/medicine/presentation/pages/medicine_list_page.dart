@@ -420,107 +420,107 @@ class _MedicineListPageState extends State<MedicineListPage> {
     );
   }
 
-  void _showCategoryPicker(MedicineLoaded state) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        String sheetSearch = '';
-        return StatefulBuilder(builder: (context, setSheetState) {
-          final filtered = state.categories
-              .where((c) =>
-                  (c.name).toLowerCase().contains(sheetSearch.toLowerCase()))
-              .toList();
+  // void _showCategoryPicker(MedicineLoaded state) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.white,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //     ),
+  //     builder: (ctx) {
+  //       String sheetSearch = '';
+  //       return StatefulBuilder(builder: (context, setSheetState) {
+  //         final filtered = state.categories
+  //             .where((c) =>
+  //                 (c.name).toLowerCase().contains(sheetSearch.toLowerCase()))
+  //             .toList();
 
-          return Container(
-            padding: const EdgeInsets.only(top: 8),
-            height: MediaQuery.of(context).size.height * 0.8,
-            child: Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Select Category",
-                          style: GoogleFonts.inter(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TextField(
-                    onChanged: (val) => setSheetState(() => sheetSearch = val),
-                    decoration: InputDecoration(
-                      hintText: "Search categories...",
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Expanded(
-                //   child: ListView.builder(
-                //     itemCount: filtered.length + 1,
-                //     itemBuilder: (ctx, index) {
-                //       if (index == 0) {
-                //         return ListTile(
-                //           title: const Text("All Categories",
-                //               style: TextStyle(fontWeight: FontWeight.bold)),
-                //           onTap: () {
-                //             context
-                //                 .read<MedicineBloc>()
-                //                 .add(const SelectCategoryEvent(''));
-                //             Navigator.pop(context);
-                //           },
-                //         );
-                //       }
-                //       final cat = filtered[index - 1];
-                //       return ListTile(
-                //         title: Text((cat.name).replaceAll('|', ', ')),
-                //         trailing: state.selectedCategoryId == cat.id
-                //             ? const Icon(Icons.check, color: AppColors.primary)
-                //             : null,
-                //         onTap: () {
-                //           context
-                //               .read<MedicineBloc>()
-                //               .add(SelectCategoryEvent(cat.id));
-                //           Navigator.pop(context);
-                //         },
-                //       );
-                //     },
-                //   ),
-                // ),
-              ],
-            ),
-          );
-        });
-      },
-    );
-  }
+  //         return Container(
+  //           padding: const EdgeInsets.only(top: 8),
+  //           height: MediaQuery.of(context).size.height * 0.8,
+  //           child: Column(
+  //             children: [
+  //               Container(
+  //                 width: 40,
+  //                 height: 4,
+  //                 margin: const EdgeInsets.symmetric(vertical: 8),
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.grey[300],
+  //                   borderRadius: BorderRadius.circular(2),
+  //                 ),
+  //               ),
+  //               Padding(
+  //                 padding: const EdgeInsets.all(16.0),
+  //                 child: Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                   children: [
+  //                     Text("Select Category",
+  //                         style: GoogleFonts.inter(
+  //                             fontSize: 18, fontWeight: FontWeight.bold)),
+  //                     IconButton(
+  //                       icon: const Icon(Icons.close),
+  //                       onPressed: () => Navigator.pop(context),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               Padding(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //                 child: TextField(
+  //                   onChanged: (val) => setSheetState(() => sheetSearch = val),
+  //                   decoration: InputDecoration(
+  //                     hintText: "Search categories...",
+  //                     prefixIcon: const Icon(Icons.search),
+  //                     filled: true,
+  //                     fillColor: Colors.grey[100],
+  //                     border: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       borderSide: BorderSide.none,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 8),
+  //               // Expanded(
+  //               //   child: ListView.builder(
+  //               //     itemCount: filtered.length + 1,
+  //               //     itemBuilder: (ctx, index) {
+  //               //       if (index == 0) {
+  //               //         return ListTile(
+  //               //           title: const Text("All Categories",
+  //               //               style: TextStyle(fontWeight: FontWeight.bold)),
+  //               //           onTap: () {
+  //               //             context
+  //               //                 .read<MedicineBloc>()
+  //               //                 .add(const SelectCategoryEvent(''));
+  //               //             Navigator.pop(context);
+  //               //           },
+  //               //         );
+  //               //       }
+  //               //       final cat = filtered[index - 1];
+  //               //       return ListTile(
+  //               //         title: Text((cat.name).replaceAll('|', ', ')),
+  //               //         trailing: state.selectedCategoryId == cat.id
+  //               //             ? const Icon(Icons.check, color: AppColors.primary)
+  //               //             : null,
+  //               //         onTap: () {
+  //               //           context
+  //               //               .read<MedicineBloc>()
+  //               //               .add(SelectCategoryEvent(cat.id));
+  //               //           Navigator.pop(context);
+  //               //         },
+  //               //       );
+  //               //     },
+  //               //   ),
+  //               // ),
+  //             ],
+  //           ),
+  //         );
+  //       });
+  //     },
+  //   );
+  // }
 
   Widget _buildEmptyState() {
     return Center(

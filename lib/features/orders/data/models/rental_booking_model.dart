@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_cast, unnecessary_null_comparison
+
 import '../../domain/entities/rental_booking_entity.dart';
 
 class RentalBookingResponseModel extends RentalBookingResponseEntity {
@@ -94,12 +96,15 @@ class RentalBookingResponseModel extends RentalBookingResponseEntity {
     );
   }
 
-  static List<RentalBookingEntity> _parseOrderOrItems(Map<String, dynamic> raw) {
+  static List<RentalBookingEntity> _parseOrderOrItems(
+      Map<String, dynamic> raw) {
     final List<RentalBookingEntity> result = [];
 
     final parentDbId = (raw['_id'] ?? raw['id'])?.toString() ?? '';
-    final parentReadableOrderRef = RentalBookingModel.extractReadableOrderId(raw);
-    final parentStatus = raw['orderStatus']?.toString() ?? raw['status']?.toString() ?? '';
+    final parentReadableOrderRef =
+        RentalBookingModel.extractReadableOrderId(raw);
+    final parentStatus =
+        raw['orderStatus']?.toString() ?? raw['status']?.toString() ?? '';
     final parentPaymentStatus = raw['paymentStatus']?.toString() ?? '';
     final parentBookingType = raw['bookingType']?.toString() ?? 'rental';
     final parentCreatedAt = raw['createdAt'] != null
@@ -110,7 +115,10 @@ class RentalBookingResponseModel extends RentalBookingResponseEntity {
       '_id': parentDbId,
       'paymentmethod': raw['paymentMethod'] ?? raw['paymentmethod'] ?? '',
       'orderStatus': parentStatus,
-      'userDetails': raw['userDetails'] ?? raw['user'] ?? raw['customer'] ?? raw['customerDetails'],
+      'userDetails': raw['userDetails'] ??
+          raw['user'] ??
+          raw['customer'] ??
+          raw['customerDetails'],
     };
 
     final rawItems = raw['items'];
@@ -127,19 +135,36 @@ class RentalBookingResponseModel extends RentalBookingResponseEntity {
 
           double extractedTotal = 0.0;
           if (itemBilling is Map && itemBilling['totalAmount'] != null) {
-            extractedTotal = double.tryParse(itemBilling['totalAmount'].toString()) ?? 0.0;
-          } else if (parentBilling is Map && parentBilling['totalAmount'] != null) {
-            extractedTotal = double.tryParse(parentBilling['totalAmount'].toString()) ?? 0.0;
-          } else if (itemRentalDetails is Map && itemRentalDetails['totalAmount'] != null) {
-            extractedTotal = double.tryParse(itemRentalDetails['totalAmount'].toString()) ?? 0.0;
-          } else if (parentRentalDetails is Map && parentRentalDetails['totalAmount'] != null) {
-            extractedTotal = double.tryParse(parentRentalDetails['totalAmount'].toString()) ?? 0.0;
+            extractedTotal =
+                double.tryParse(itemBilling['totalAmount'].toString()) ?? 0.0;
+          } else if (parentBilling is Map &&
+              parentBilling['totalAmount'] != null) {
+            extractedTotal =
+                double.tryParse(parentBilling['totalAmount'].toString()) ?? 0.0;
+          } else if (itemRentalDetails is Map &&
+              itemRentalDetails['totalAmount'] != null) {
+            extractedTotal =
+                double.tryParse(itemRentalDetails['totalAmount'].toString()) ??
+                    0.0;
+          } else if (parentRentalDetails is Map &&
+              parentRentalDetails['totalAmount'] != null) {
+            extractedTotal = double.tryParse(
+                    parentRentalDetails['totalAmount'].toString()) ??
+                0.0;
           } else if (itemBilling is Map && itemBilling['total'] != null) {
-            extractedTotal = double.tryParse(itemBilling['total'].toString()) ?? 0.0;
+            extractedTotal =
+                double.tryParse(itemBilling['total'].toString()) ?? 0.0;
           } else if (parentBilling is Map && parentBilling['total'] != null) {
-            extractedTotal = double.tryParse(parentBilling['total'].toString()) ?? 0.0;
+            extractedTotal =
+                double.tryParse(parentBilling['total'].toString()) ?? 0.0;
           } else {
-            extractedTotal = double.tryParse((itemMap['totalPrice'] ?? itemMap['total'] ?? raw['total'] ?? itemMap['price'] ?? '0').toString()) ?? 0.0;
+            extractedTotal = double.tryParse((itemMap['totalPrice'] ??
+                        itemMap['total'] ??
+                        raw['total'] ??
+                        itemMap['price'] ??
+                        '0')
+                    .toString()) ??
+                0.0;
           }
 
           final merged = <String, dynamic>{
@@ -148,19 +173,30 @@ class RentalBookingResponseModel extends RentalBookingResponseEntity {
             'orderId': parentReadableOrderRef,
             'orderRef': parentReadableOrderRef,
             'orderItemId': parentReadableOrderRef,
-            'productId': itemMap['productId'] ?? itemMap['productSnapshot']?['productId'] ?? '',
+            'productId': itemMap['productId'] ??
+                itemMap['productSnapshot']?['productId'] ??
+                '',
             'quantity': itemMap['quantity'] ?? 1,
             'type': itemMap['type'] ?? 'rental',
             'bookingType': itemMap['bookingType'] ?? parentBookingType,
             'orderStatus': itemMap['orderStatus'] ?? parentStatus,
             'paymentStatus': itemMap['paymentStatus'] ?? parentPaymentStatus,
-            'price': itemMap['price'] ?? itemMap['productSnapshot']?['price'] ?? raw['baseAmount'] ?? raw['subtotal'] ?? 0,
+            'price': itemMap['price'] ??
+                itemMap['productSnapshot']?['price'] ??
+                raw['baseAmount'] ??
+                raw['subtotal'] ??
+                0,
             'totalPrice': extractedTotal,
             'billingSummary': itemBilling ?? parentBilling,
-            'vendorCommissionAmount': itemMap['vendorCommissionAmount'] ?? raw['vendorCommissionAmount'] ?? 0,
-            'rentalDetails': itemMap['rentalDetails'] ?? raw['rentalDetails'] ?? itemMap,
+            'vendorCommissionAmount': itemMap['vendorCommissionAmount'] ??
+                raw['vendorCommissionAmount'] ??
+                0,
+            'rentalDetails':
+                itemMap['rentalDetails'] ?? raw['rentalDetails'] ?? itemMap,
             'orderDetails': itemMap['orderDetails'] ?? parentOrderDetailsMap,
-            'createdAt': raw['createdAt'] ?? itemMap['createdAt'] ?? parentCreatedAt.toIso8601String(),
+            'createdAt': raw['createdAt'] ??
+                itemMap['createdAt'] ??
+                parentCreatedAt.toIso8601String(),
           };
           result.add(RentalBookingModel.fromJson(merged));
         }
@@ -199,8 +235,9 @@ class RentalBookingPaginationModel extends RentalBookingPaginationEntity {
     final total = int.tryParse(json['total']?.toString() ?? '0') ?? 0;
     final page = int.tryParse(json['page']?.toString() ?? '1') ?? 1;
     final limit = int.tryParse(json['limit']?.toString() ?? '10') ?? 10;
-    final totalPages =
-        int.tryParse((json['totalPages'] ?? json['total_pages'] ?? '1').toString()) ?? 1;
+    final totalPages = int.tryParse(
+            (json['totalPages'] ?? json['total_pages'] ?? '1').toString()) ??
+        1;
 
     return RentalBookingPaginationModel(
       total: total,
@@ -237,8 +274,12 @@ class RentalBookingModel extends RentalBookingEntity {
     String orderDetailsId = '';
     final dynamic rawOrderDetails = json['orderDetails'];
     if (rawOrderDetails is Map) {
-      orderDetailsRef = (rawOrderDetails['orderRef'] ?? rawOrderDetails['order_ref'] ?? '').toString();
-      orderDetailsId = (rawOrderDetails['orderId'] ?? rawOrderDetails['order_id'] ?? '').toString();
+      orderDetailsRef =
+          (rawOrderDetails['orderRef'] ?? rawOrderDetails['order_ref'] ?? '')
+              .toString();
+      orderDetailsId =
+          (rawOrderDetails['orderId'] ?? rawOrderDetails['order_id'] ?? '')
+              .toString();
     } else if (rawOrderDetails is RentalOrderDetailsEntity) {
       orderDetailsId = rawOrderDetails.id;
     }
@@ -278,10 +319,12 @@ class RentalBookingModel extends RentalBookingEntity {
       }
     }
 
-    if (json['orderRef'] != null && json['orderRef'].toString().trim().isNotEmpty) {
+    if (json['orderRef'] != null &&
+        json['orderRef'].toString().trim().isNotEmpty) {
       return json['orderRef'].toString().trim();
     }
-    if (json['orderId'] != null && json['orderId'].toString().trim().isNotEmpty) {
+    if (json['orderId'] != null &&
+        json['orderId'].toString().trim().isNotEmpty) {
       return json['orderId'].toString().trim();
     }
 
@@ -292,8 +335,10 @@ class RentalBookingModel extends RentalBookingEntity {
     final dbId = (json['_id'] ?? json['id'])?.toString() ?? '';
     final readableOrderRef = extractReadableOrderId(json);
 
-    String resolvedStatus = (json['orderStatus'] ?? json['status'] ?? '').toString();
-    String resolvedPaymentStatus = (json['paymentStatus'] ?? json['payment_status'] ?? '').toString();
+    String resolvedStatus =
+        (json['orderStatus'] ?? json['status'] ?? '').toString();
+    String resolvedPaymentStatus =
+        (json['paymentStatus'] ?? json['payment_status'] ?? '').toString();
 
     RentalOrderDetailsEntity? resolvedOrderDetails;
     final dynamic rawOrderDetails = json['orderDetails'];
@@ -301,6 +346,8 @@ class RentalBookingModel extends RentalBookingEntity {
       resolvedOrderDetails = rawOrderDetails;
     } else if (rawOrderDetails is Map) {
       resolvedOrderDetails = RentalOrderDetailsModel.fromJson(
+          // ignore: duplicate_ignore
+          // ignore: unnecessary_cast
           Map<String, dynamic>.from(rawOrderDetails as Map));
     } else {
       resolvedOrderDetails = RentalOrderDetailsModel.fromJson(json);
@@ -317,7 +364,9 @@ class RentalBookingModel extends RentalBookingEntity {
     } else if (rawRentalDetails is Map) {
       resolvedRentalDetails = RentalDetailsModel.fromJson(
           Map<String, dynamic>.from(rawRentalDetails as Map));
-    } else if (json['productSnapshot'] != null || json['rentalPlan'] != null || json['productDetails'] != null) {
+    } else if (json['productSnapshot'] != null ||
+        json['rentalPlan'] != null ||
+        json['productDetails'] != null) {
       resolvedRentalDetails = RentalDetailsModel.fromJson(json);
     }
 
@@ -327,38 +376,55 @@ class RentalBookingModel extends RentalBookingEntity {
 
     double extractedTotal = 0.0;
     if (billing is Map && billing['totalAmount'] != null) {
-      extractedTotal = double.tryParse(billing['totalAmount'].toString()) ?? 0.0;
+      extractedTotal =
+          double.tryParse(billing['totalAmount'].toString()) ?? 0.0;
     } else if (rentalDet is Map && rentalDet['totalAmount'] != null) {
-      extractedTotal = double.tryParse(rentalDet['totalAmount'].toString()) ?? 0.0;
+      extractedTotal =
+          double.tryParse(rentalDet['totalAmount'].toString()) ?? 0.0;
     } else if (json['totalAmount'] != null) {
       extractedTotal = double.tryParse(json['totalAmount'].toString()) ?? 0.0;
-    } else if (resolvedRentalDetails != null && resolvedRentalDetails.totalAmount > 0) {
+    } else if (resolvedRentalDetails != null &&
+        resolvedRentalDetails.totalAmount > 0) {
       extractedTotal = resolvedRentalDetails.totalAmount;
     } else if (billing is Map && billing['total'] != null) {
       extractedTotal = double.tryParse(billing['total'].toString()) ?? 0.0;
     } else {
-      extractedTotal = double.tryParse((json['totalPrice'] ?? json['total'] ?? json['price'] ?? '0').toString()) ?? 0.0;
+      extractedTotal = double.tryParse(
+              (json['totalPrice'] ?? json['total'] ?? json['price'] ?? '0')
+                  .toString()) ??
+          0.0;
     }
 
     return RentalBookingModel(
       id: dbId.isNotEmpty ? dbId : readableOrderRef,
       orderItemId: readableOrderRef,
       orderId: readableOrderRef,
-      productId: (json['productId'] ?? json['productSnapshot']?['productId'] ?? '').toString(),
+      productId:
+          (json['productId'] ?? json['productSnapshot']?['productId'] ?? '')
+              .toString(),
       quantity: int.tryParse((json['quantity'] ?? '1').toString()) ?? 1,
       type: (json['type'] ?? 'rental').toString(),
-      bookingType: (json['bookingType'] ?? json['booking_type'] ?? 'rental').toString(),
+      bookingType:
+          (json['bookingType'] ?? json['booking_type'] ?? 'rental').toString(),
       orderStatus: resolvedStatus,
       paymentStatus: resolvedPaymentStatus,
-      price: double.tryParse((json['price'] ?? json['baseAmount'] ?? json['subtotal'] ?? '0').toString()) ?? 0.0,
+      price: double.tryParse(
+              (json['price'] ?? json['baseAmount'] ?? json['subtotal'] ?? '0')
+                  .toString()) ??
+          0.0,
       totalPrice: extractedTotal,
-      vendorCommissionAmount: double.tryParse((json['vendorCommissionAmount'] ?? json['vendor_commission_amount'] ?? '0').toString()) ?? 0.0,
+      vendorCommissionAmount: double.tryParse((json['vendorCommissionAmount'] ??
+                  json['vendor_commission_amount'] ??
+                  '0')
+              .toString()) ??
+          0.0,
       rentalDetails: resolvedRentalDetails,
       orderDetails: resolvedOrderDetails,
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] is DateTime
               ? json['createdAt'] as DateTime
-              : DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now())
+              : DateTime.tryParse(json['createdAt'].toString()) ??
+                  DateTime.now())
           : DateTime.now(),
     );
   }
@@ -418,46 +484,84 @@ class RentalDetailsModel extends RentalDetailsEntity {
 
     return RentalDetailsModel(
       rentalPlan: (rMap['rentalPlan'] ?? rMap['rentalplan'] ?? '').toString(),
-      rentalDuration: int.tryParse((rMap['rentalDuration'] ?? rMap['rentalduration'] ?? '0').toString()) ?? 0,
+      rentalDuration: int.tryParse(
+              (rMap['rentalDuration'] ?? rMap['rentalduration'] ?? '0')
+                  .toString()) ??
+          0,
       startDate: rMap['startDate'] != null
           ? DateTime.tryParse(rMap['startDate'].toString())
-          : (rMap['start_date'] != null ? DateTime.tryParse(rMap['start_date'].toString()) : null),
+          : (rMap['start_date'] != null
+              ? DateTime.tryParse(rMap['start_date'].toString())
+              : null),
       endDate: rMap['endDate'] != null
           ? DateTime.tryParse(rMap['endDate'].toString())
-          : (rMap['end_date'] != null ? DateTime.tryParse(rMap['end_date'].toString()) : null),
-      paymentType: (rMap['paymentType'] ?? rMap['paymenttype'] ?? '').toString(),
-      paymentMethod: (rMap['paymentMethod'] ?? rMap['paymentmethod'] ?? '').toString(),
-      numberOfInstallments: int.tryParse((rMap['numberOfInstallments'] ?? rMap['numberofinstallments'] ?? '0').toString()) ?? 0,
-      basePricePerDay: double.tryParse((rMap['basePricePerDay'] ?? rMap['price'] ?? rMap['perDayRent'] ?? '0').toString()) ?? 0.0,
-      totalDays: int.tryParse((rMap['totalDays'] ?? rMap['totaldays'] ?? '0').toString()) ?? 0,
+          : (rMap['end_date'] != null
+              ? DateTime.tryParse(rMap['end_date'].toString())
+              : null),
+      paymentType:
+          (rMap['paymentType'] ?? rMap['paymenttype'] ?? '').toString(),
+      paymentMethod:
+          (rMap['paymentMethod'] ?? rMap['paymentmethod'] ?? '').toString(),
+      numberOfInstallments: int.tryParse((rMap['numberOfInstallments'] ??
+                  rMap['numberofinstallments'] ??
+                  '0')
+              .toString()) ??
+          0,
+      basePricePerDay: double.tryParse((rMap['basePricePerDay'] ??
+                  rMap['price'] ??
+                  rMap['perDayRent'] ??
+                  '0')
+              .toString()) ??
+          0.0,
+      totalDays: int.tryParse(
+              (rMap['totalDays'] ?? rMap['totaldays'] ?? '0').toString()) ??
+          0,
       totalAmount: totalAmt,
       installmentAmount: double.tryParse((rMap['installmentAmount'] ??
-              rMap['installmentamount'] ??
-              rMap['installment_amount'] ??
-              rMap['firstInstallmentAmount'] ??
-              rMap['firstinstallmentamount'] ??
-              rMap['first_installment_amount'] ??
-              rMap['installamount'] ??
-              rMap['installment'] ??
-              json['installmentAmount'] ??
-              json['installmentamount'] ??
-              json['installment_amount'] ??
-              json['firstInstallmentAmount'] ??
-              json['firstinstallmentamount'] ??
-              json['first_installment_amount'] ??
-              json['installamount'] ??
-              '0')
-          .toString()) ??
+                  rMap['installmentamount'] ??
+                  rMap['installment_amount'] ??
+                  rMap['firstInstallmentAmount'] ??
+                  rMap['firstinstallmentamount'] ??
+                  rMap['first_installment_amount'] ??
+                  rMap['installamount'] ??
+                  rMap['installment'] ??
+                  json['installmentAmount'] ??
+                  json['installmentamount'] ??
+                  json['installment_amount'] ??
+                  json['firstInstallmentAmount'] ??
+                  json['firstinstallmentamount'] ??
+                  json['first_installment_amount'] ??
+                  json['installamount'] ??
+                  '0')
+              .toString()) ??
           0.0,
-      serviceCharges: double.tryParse((rMap['serviceCharges'] ?? rMap['servicecharges'] ?? rMap['serviceCharge'] ?? rMap['servicecharge'] ?? '0').toString()) ?? 0.0,
-      returnCharges: double.tryParse((rMap['returnCharges'] ?? rMap['returncharges'] ?? rMap['returnCharge'] ?? rMap['returncharge'] ?? '0').toString()) ?? 0.0,
-      deposit: double.tryParse((rMap['fixedDeposit'] ?? rMap['deposit'] ?? '0').toString()) ?? 0.0,
-      productSnapshot: rMap['productSnapshot'] != null && rMap['productSnapshot'] is Map
-          ? RentalProductSnapshotModel.fromJson(Map<String, dynamic>.from(rMap['productSnapshot'] as Map))
+      serviceCharges: double.tryParse((rMap['serviceCharges'] ??
+                  rMap['servicecharges'] ??
+                  rMap['serviceCharge'] ??
+                  rMap['servicecharge'] ??
+                  '0')
+              .toString()) ??
+          0.0,
+      returnCharges: double.tryParse((rMap['returnCharges'] ??
+                  rMap['returncharges'] ??
+                  rMap['returnCharge'] ??
+                  rMap['returncharge'] ??
+                  '0')
+              .toString()) ??
+          0.0,
+      deposit: double.tryParse(
+              (rMap['fixedDeposit'] ?? rMap['deposit'] ?? '0').toString()) ??
+          0.0,
+      productSnapshot: rMap['productSnapshot'] != null &&
+              rMap['productSnapshot'] is Map
+          ? RentalProductSnapshotModel.fromJson(
+              Map<String, dynamic>.from(rMap['productSnapshot'] as Map))
           : (json['productSnapshot'] != null && json['productSnapshot'] is Map
-              ? RentalProductSnapshotModel.fromJson(Map<String, dynamic>.from(json['productSnapshot'] as Map))
+              ? RentalProductSnapshotModel.fromJson(
+                  Map<String, dynamic>.from(json['productSnapshot'] as Map))
               : (json['productDetails'] != null && json['productDetails'] is Map
-                  ? RentalProductSnapshotModel.fromJson(Map<String, dynamic>.from(json['productDetails'] as Map))
+                  ? RentalProductSnapshotModel.fromJson(
+                      Map<String, dynamic>.from(json['productDetails'] as Map))
                   : RentalProductSnapshotModel.fromJson(json))),
     );
   }
@@ -482,17 +586,32 @@ class RentalProductSnapshotModel extends RentalProductSnapshotEntity {
     final map = Map<String, dynamic>.from(json);
 
     return RentalProductSnapshotModel(
-      name: (map['name'] ?? map['productName'] ?? map['title'] ?? '').toString(),
-      perDayRent: double.tryParse((map['perDayRent'] ?? map['price'] ?? map['basePricePerDay'] ?? '0').toString()) ?? 0.0,
-      tabletName: (map['tabletName'] ?? map['name'] ?? map['productName'])?.toString(),
+      name:
+          (map['name'] ?? map['productName'] ?? map['title'] ?? '').toString(),
+      perDayRent: double.tryParse((map['perDayRent'] ??
+                  map['price'] ??
+                  map['basePricePerDay'] ??
+                  '0')
+              .toString()) ??
+          0.0,
+      tabletName:
+          (map['tabletName'] ?? map['name'] ?? map['productName'])?.toString(),
       imageUrl: () {
-        final img = map['imageUrl'] ?? map['imageurl'] ?? map['images'] ?? map['image'] ?? map['files'];
+        final img = map['imageUrl'] ??
+            map['imageurl'] ??
+            map['images'] ??
+            map['image'] ??
+            map['files'];
         if (img is String) return [img];
         if (img is List) {
-          return img.map((e) {
-            if (e is Map) return (e['url'] ?? e['file'] ?? e['path'] ?? '').toString();
-            return e.toString();
-          }).where((s) => s.isNotEmpty).toList();
+          return img
+              .map((e) {
+                if (e is Map)
+                  return (e['url'] ?? e['file'] ?? e['path'] ?? '').toString();
+                return e.toString();
+              })
+              .where((s) => s.isNotEmpty)
+              .toList();
         }
         return <String>[];
       }(),
@@ -520,10 +639,14 @@ class RentalOrderDetailsModel extends RentalOrderDetailsEntity {
 
     return RentalOrderDetailsModel(
       id: (map['_id'] ?? map['id'] ?? map['orderId'])?.toString() ?? '',
-      paymentmethod: (map['paymentmethod'] ?? map['paymentMethod'] ?? '').toString(),
+      paymentmethod:
+          (map['paymentmethod'] ?? map['paymentMethod'] ?? '').toString(),
       orderStatus: (map['orderStatus'] ?? map['status'] ?? '').toString(),
       userDetails: () {
-        final u = map['userDetails'] ?? map['user'] ?? map['customer'] ?? map['customerDetails'];
+        final u = map['userDetails'] ??
+            map['user'] ??
+            map['customer'] ??
+            map['customerDetails'];
         if (u != null && u is Map) {
           return RentalUserDetailsModel.fromJson(Map<String, dynamic>.from(u));
         }
@@ -555,7 +678,9 @@ class RentalUserDetailsModel extends RentalUserDetailsEntity {
 
     String firstName = (map['first_name'] ?? map['firstName'] ?? '').toString();
     String lastName = (map['last_name'] ?? map['lastName'] ?? '').toString();
-    if (firstName.isEmpty && lastName.isEmpty && (map['name'] != null || map['fullName'] != null)) {
+    if (firstName.isEmpty &&
+        lastName.isEmpty &&
+        (map['name'] != null || map['fullName'] != null)) {
       final fullName = (map['name'] ?? map['fullName']).toString().trim();
       final parts = fullName.split(' ');
       if (parts.isNotEmpty) {
@@ -567,7 +692,8 @@ class RentalUserDetailsModel extends RentalUserDetailsEntity {
     }
     return RentalUserDetailsModel(
       id: (map['_id'] ?? map['id'])?.toString() ?? '',
-      custId: (map['custId'] ?? map['customerId'] ?? map['cust_id'] ?? '').toString(),
+      custId: (map['custId'] ?? map['customerId'] ?? map['cust_id'] ?? '')
+          .toString(),
       firstName: firstName,
       lastName: lastName,
       email: (map['email'] ?? '').toString(),

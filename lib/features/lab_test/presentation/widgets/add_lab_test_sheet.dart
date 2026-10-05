@@ -364,14 +364,13 @@ class _AddLabTestSheetState extends State<AddLabTestSheet> {
 
                                   return ListTile(
                                     title: Text(
-                                      test.name ?? '',
+                                      test.name,
                                       style: GoogleFonts.poppins(fontSize: 14),
                                     ),
                                     onTap: () {
                                       setState(() {
                                         _selectedTest = test;
-                                        _searchController.text =
-                                            test.name ?? '';
+                                        _searchController.text = test.name;
                                         _searchResults.clear();
                                       });
                                     },

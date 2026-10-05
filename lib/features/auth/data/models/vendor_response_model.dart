@@ -12,11 +12,31 @@ class VendorResponseModel {
   });
 
   factory VendorResponseModel.fromJson(Map<String, dynamic> json) {
+    VendorDataModel? dataModel;
+    if (json['data'] != null) {
+      dataModel = VendorDataModel.fromJson(json['data']);
+      if (dataModel.token.isEmpty && json['token'] != null) {
+        dataModel = VendorDataModel(
+          token: json['token'],
+          user: dataModel.user,
+          business: dataModel.business,
+        );
+      }
+    } else if (json['user'] != null || json['vendor'] != null) {
+      dataModel = VendorDataModel.fromJson(json);
+      if (dataModel.token.isEmpty && json['token'] != null) {
+        dataModel = VendorDataModel(
+          token: json['token'],
+          user: dataModel.user,
+          business: dataModel.business,
+        );
+      }
+    }
+
     return VendorResponseModel(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data:
-          json['data'] != null ? VendorDataModel.fromJson(json['data']) : null,
+      data: dataModel,
     );
   }
 }

@@ -373,30 +373,30 @@ class NursingCareDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(label,
-              style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[500])),
-        ),
-        Expanded(
-          flex: 3,
-          child: Text(value,
-              textAlign: TextAlign.right,
-              style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1E1B4B))),
-        ),
-      ],
-    );
-  }
+  // Widget _buildDetailRow(String label, String value) {
+  //   return Row(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Expanded(
+  //         flex: 2,
+  //         child: Text(label,
+  //             style: GoogleFonts.inter(
+  //                 fontSize: 13,
+  //                 fontWeight: FontWeight.w500,
+  //                 color: Colors.grey[500])),
+  //       ),
+  //       Expanded(
+  //         flex: 3,
+  //         child: Text(value,
+  //             textAlign: TextAlign.right,
+  //             style: GoogleFonts.inter(
+  //                 fontSize: 13,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: const Color(0xFF1E1B4B))),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   String capitalizeFirstLetter(String text) {
     if (text.isEmpty) return text;

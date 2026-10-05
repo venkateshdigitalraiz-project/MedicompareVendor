@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,24 +68,24 @@ class _AddLabTestPackageSheetState extends State<AddLabTestPackageSheet> {
     }
   }
 
-  Future<void> _fetchLabTests() async {
-    setState(() => _isFetchingTests = true);
-    try {
-      final tests = await _labTestService.getAllLabTestTablets();
-      if (mounted) {
-        setState(() {
-          _allLabTests = tests;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
-      }
-    } finally {
-      if (mounted) setState(() => _isFetchingTests = false);
-    }
-  }
+  // Future<void> _fetchLabTests() async {
+  //   setState(() => _isFetchingTests = true);
+  //   try {
+  //     final tests = await _labTestService.getAllLabTestTablets();
+  //     if (mounted) {
+  //       setState(() {
+  //         _allLabTests = tests;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context)
+  //           .showSnackBar(SnackBar(content: Text(e.toString())));
+  //     }
+  //   } finally {
+  //     if (mounted) setState(() => _isFetchingTests = false);
+  //   }
+  // }
 
   Future<void> _fetchAdminTemplates() async {
     if (_adminTemplates.isNotEmpty) return;

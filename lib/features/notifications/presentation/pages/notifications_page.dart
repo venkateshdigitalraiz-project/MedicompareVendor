@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
-import 'package:MediCompare/core/utils/core_injection.dart';
+// import 'package:MediCompare/core/utils/core_injection.dart';
 import '../bloc/notifications_bloc.dart';
 import '../../domain/entities/notification_entity.dart';
 
@@ -28,76 +28,82 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFB),
-        appBar: AppBar(
-          backgroundColor: AppColors.primary,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.pop(),
-          ),
-          title: Text(
-            "Notifications",
-            style: GoogleFonts.inter(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.read<NotificationsBloc>().add(MarkAllNotificationsReadEvent());
-              },
-              child: Text(
-                "Mark all as read",
-                style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600),
-              ),
+      backgroundColor: const Color(0xFFF8FAFB),
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          "Notifications",
+          style: GoogleFonts.inter(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context
+                  .read<NotificationsBloc>()
+                  .add(MarkAllNotificationsReadEvent());
+            },
+            child: Text(
+              "Mark all as read",
+              style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w600),
             ),
-          ],
-        ),
-        body: BlocBuilder<NotificationsBloc, NotificationsState>(
-          builder: (context, state) {
-            if (state is NotificationsLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is NotificationsError) {
-              return Center(child: Text(state.message));
-            } else if (state is NotificationsLoaded) {
-              if (state.notifications.isEmpty) {
-                return _buildEmptyState();
-              }
-              return RefreshIndicator(
-                onRefresh: () async =>
-                    context.read<NotificationsBloc>().add(LoadNotificationsEvent(refresh: true)),
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount:
-                      state.notifications.length + (state.hasMore ? 1 : 0),
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    if (index == state.notifications.length) {
-                      context.read<NotificationsBloc>().add(LoadNotificationsEvent());
-                      return const Center(
-                          child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: CircularProgressIndicator()));
-                    }
-                    final notification = state.notifications[index];
-                    return _buildNotificationCard(notification);
-                  },
-                ),
-              );
+          ),
+        ],
+      ),
+      body: BlocBuilder<NotificationsBloc, NotificationsState>(
+        builder: (context, state) {
+          if (state is NotificationsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is NotificationsError) {
+            return Center(child: Text(state.message));
+          } else if (state is NotificationsLoaded) {
+            if (state.notifications.isEmpty) {
+              return _buildEmptyState();
             }
-            return const SizedBox();
-          },
-        ),
-      );
+            return RefreshIndicator(
+              onRefresh: () async => context
+                  .read<NotificationsBloc>()
+                  .add(LoadNotificationsEvent(refresh: true)),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.notifications.length + (state.hasMore ? 1 : 0),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  if (index == state.notifications.length) {
+                    context
+                        .read<NotificationsBloc>()
+                        .add(LoadNotificationsEvent());
+                    return const Center(
+                        child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator()));
+                  }
+                  final notification = state.notifications[index];
+                  return _buildNotificationCard(notification);
+                },
+              ),
+            );
+          }
+          return const SizedBox();
+        },
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<NotificationsBloc>().add(LoadNotificationsEvent(refresh: true));
+        context
+            .read<NotificationsBloc>()
+            .add(LoadNotificationsEvent(refresh: true));
         await Future.delayed(const Duration(milliseconds: 500));
       },
       child: LayoutBuilder(

@@ -56,7 +56,7 @@ void main() async {
 
   // Check for persisted token
   final token = await TokenStorage.getToken();
-  final String initialLocation = token != null ? '/bottom-nav' : '/login';
+  final String initialLocation = (token != null && token.isNotEmpty) ? '/bottom-nav' : '/login';
 
   runApp(MyApp(initialLocation: initialLocation));
 }

@@ -1,4 +1,10 @@
+// ignore_for_file: unused_catch_stack
+
 import 'dart:developer';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:MediCompare/features/orders/domain/entities/order_details_response_entity.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +13,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/utils/price_formatter.dart';
+import 'package:go_router/go_router.dart';
 import '../bloc/order_details_bloc.dart';
 import '../bloc/order_details_event.dart';
 import '../bloc/order_details_state.dart';
@@ -44,6 +52,69 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       TextEditingController();
   final ScrollController _partnerScrollController = ScrollController();
   final TextEditingController _otpController = TextEditingController();
+
+  Future<void> _downloadPdf(String url, String fileName) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Downloading file...')),
+      );
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        Directory? directory;
+        if (Platform.isAndroid) {
+          directory = await getExternalStorageDirectory();
+          directory ??= await getApplicationDocumentsDirectory();
+        } else {
+          directory = await getApplicationDocumentsDirectory();
+        }
+
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+
+        final filePath = '\${directory.path}/\$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Downloaded successfully to documents:\n\$filePath')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    'Failed to download file (HTTP \${response.statusCode})')),
+          );
+        }
+      }
+    } catch (e, stackTrace) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Download Failed'),
+            content: SingleChildScrollView(
+              child: Text(
+                'An error occurred while downloading the file. Please share this exact error message:\n\nError:\n\$e\n\nStackTrace:\n\$stackTrace',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -187,12 +258,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               final leftColumn = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (orderDetails.otpEnable == 'yes' && orderDetails.otpStatus == 'pending') ...[
+                  if (orderDetails.otpEnable == 'yes' &&
+                      orderDetails.otpStatus == 'pending') ...[
                     _buildOtpVerificationSection(orderDetails),
                     const SizedBox(height: 16),
                   ],
                   _buildOrderItemsSection(orderDetails),
                   const SizedBox(height: 16),
+                  if (orderDetails.adminprescription != null &&
+                      orderDetails.adminprescription!.isNotEmpty) ...[
+                    _buildPrescriptionDocumentsSection(orderDetails),
+                    const SizedBox(height: 16),
+                  ],
                   _buildOrderSummarySection(orderDetails),
                 ],
               );
@@ -227,7 +304,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (orderDetails.otpEnable == 'yes' && orderDetails.otpStatus == 'pending') ...[
+                          if (orderDetails.otpEnable == 'yes' &&
+                              orderDetails.otpStatus == 'pending') ...[
                             _buildOtpVerificationSection(orderDetails),
                             const SizedBox(height: 16),
                           ],
@@ -239,6 +317,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           const SizedBox(height: 16),
                           _buildCustomerInformationSection(orderDetails),
                           const SizedBox(height: 16),
+                          if (orderDetails.adminprescription != null &&
+                              orderDetails.adminprescription!.isNotEmpty) ...[
+                            _buildPrescriptionDocumentsSection(orderDetails),
+                            const SizedBox(height: 16),
+                          ],
                           _buildOrderSummarySection(orderDetails),
                           const SizedBox(height: 16),
                           _buildShippingAddressSection(orderDetails),
@@ -846,6 +929,139 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPrescriptionDocumentsSection(
+      OrderDetailsResponseEntity details) {
+    if (details.adminprescription == null ||
+        details.adminprescription!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final String rawData = details.adminprescription!;
+    List<String> urls = [];
+
+    // Rigorously clean brackets, quotes, and split by comma
+    final cleanData = rawData.replaceAll('[', '').replaceAll(']', '');
+    urls = cleanData
+        .split(',')
+        .map((e) => e.trim().replaceAll(RegExp(r'^"|"$'), ''))
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    if (urls.isEmpty) return const SizedBox.shrink();
+
+    // We display the file name of the first item
+    final firstUrl = ApiEndpoints.getImageUrl(urls.first);
+    final fileName = firstUrl.split('/').last;
+
+    return _buildCard(
+      title: "Prescription Documents",
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(
+                    Icons.picture_as_pdf,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        fileName,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "PDF Document",
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () {
+                    final rawUrl = ApiEndpoints.getImageUrl(urls.first);
+                    final isPdf = rawUrl.toLowerCase().endsWith('.pdf');
+
+                    if (isPdf) {
+                      context.push('/pdf-viewer', extra: {
+                        'url': rawUrl,
+                        'title': 'Prescription Document',
+                      });
+                    } else {
+                      context.push('/webview', extra: {
+                        'url': rawUrl,
+                        'title': 'Prescription Document',
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.visibility_outlined, size: 16),
+                  label: Text("View",
+                      style: GoogleFonts.inter(
+                          fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: () async {
+                    for (final u in urls) {
+                      final url = ApiEndpoints.getImageUrl(u);
+                      final fName = url.split('/').last;
+                      await _downloadPdf(url, fName);
+                    }
+                  },
+                  icon: const Icon(Icons.download_outlined, size: 16),
+                  label: Text("Download",
+                      style: GoogleFonts.inter(
+                          fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -2088,7 +2304,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.red, width: 2), // Red outline
       ),
       child: Column(
@@ -2120,7 +2336,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         "OTP Verification Required",
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 14,
                           color: Colors.black87,
                         ),
                       ),
@@ -2138,68 +2354,76 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFF3F4F6)),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding:
+                const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _otpController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.key_outlined,
-                          size: 20, color: Colors.grey),
-                      hintText: "Enter OTP (e.g. 1234)",
-                      hintStyle:
-                          GoogleFonts.inter(fontSize: 13, color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: AppColors.primary),
+                  child: SizedBox(
+                    height: 48,
+                    child: TextField(
+                      controller: _otpController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.key_outlined,
+                            size: 20, color: Colors.grey),
+                        hintText: "Enter OTP (e.g. 1234)",
+                        hintStyle:
+                            GoogleFonts.inter(fontSize: 13, color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: AppColors.primary),
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_otpController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please enter OTP"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
-                    }
-                    // Handle OTP verify logic here if needed via BLoC
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (_otpController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Please enter OTP"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      // Handle OTP verify logic here if needed via BLoC
+                    },
+                    icon: const Icon(Icons.check_circle_outline, size: 18),
+                    label: Text(
+                      "Submit / Verify OTP",
+                      style: GoogleFonts.inter(
+                          fontSize: 13, fontWeight: FontWeight.bold),
                     ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    "Verify",
-                    style: GoogleFonts.inter(
-                        fontSize: 14, fontWeight: FontWeight.bold),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE2B78B),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
                   ),
                 ),
               ],
@@ -2233,7 +2457,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
   void initState() {
     super.initState();
     for (var item in widget.orderDetails.items) {
-      _qtyControllers[item.orderItemId] = TextEditingController(text: item.quantity.toString());
+      _qtyControllers[item.orderItemId] =
+          TextEditingController(text: item.quantity.toString());
     }
   }
 
@@ -2249,7 +2474,7 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
   @override
   Widget build(BuildContext context) {
     final user = widget.orderDetails.userDetails;
-    
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -2274,7 +2499,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                       shape: BoxShape.circle,
                       border: Border.all(color: const Color(0xFFFDE68A)),
                     ),
-                    child: const Icon(Icons.inventory_2_rounded, color: Color(0xFFD97706), size: 24),
+                    child: const Icon(Icons.inventory_2_rounded,
+                        color: Color(0xFFD97706), size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -2311,7 +2537,7 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                 ],
               ),
             ),
-            
+
             // Scrollable Content
             Flexible(
               child: SingleChildScrollView(
@@ -2332,7 +2558,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.inventory_2_outlined, color: Color(0xFFB45309), size: 18),
+                              const Icon(Icons.inventory_2_outlined,
+                                  color: Color(0xFFB45309), size: 18),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -2368,7 +2595,7 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Customer Contact
                     if (user != null)
                       Container(
@@ -2381,15 +2608,18 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 16, 16, 12),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     flex: 2,
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.person_outline, color: Color(0xFF7C3AED), size: 18),
+                                        const Icon(Icons.person_outline,
+                                            color: Color(0xFF7C3AED), size: 18),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
@@ -2429,7 +2659,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFF1F5F9)),
+                                border:
+                                    Border.all(color: const Color(0xFFF1F5F9)),
                               ),
                               child: Row(
                                 children: [
@@ -2439,12 +2670,14 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                                       color: Color(0xFFD1FAE5),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.phone_in_talk, color: Color(0xFF059669), size: 20),
+                                    child: const Icon(Icons.phone_in_talk,
+                                        color: Color(0xFF059669), size: 20),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           user.phone,
@@ -2479,8 +2712,11 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                                       backgroundColor: const Color(0xFF059669),
                                       foregroundColor: Colors.white,
                                       elevation: 0,
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6)),
                                     ),
                                   ),
                                 ],
@@ -2489,9 +2725,9 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                           ],
                         ),
                       ),
-                    
+
                     if (user != null) const SizedBox(height: 24),
-                    
+
                     // Booked Items Header
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2516,7 +2752,7 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Items List
                     ...widget.orderDetails.items.map((item) {
                       return Container(
@@ -2538,11 +2774,14 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                             Container(
                               decoration: const BoxDecoration(
                                 color: Color(0xFFF8FAFC),
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(16)),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
@@ -2555,7 +2794,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFE2E8F0),
                                       borderRadius: BorderRadius.circular(20),
@@ -2576,7 +2816,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                             Padding(
                               padding: const EdgeInsets.all(16),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
@@ -2595,7 +2836,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                                       SizedBox(
                                         width: 70,
                                         child: TextField(
-                                          controller: _qtyControllers[item.orderItemId],
+                                          controller:
+                                              _qtyControllers[item.orderItemId],
                                           keyboardType: TextInputType.number,
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.inter(
@@ -2604,14 +2846,20 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                                             color: const Color(0xFF0F172A),
                                           ),
                                           decoration: InputDecoration(
-                                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 10),
                                             enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                              borderSide: const BorderSide(color: Color(0xFFD8B4FE)),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              borderSide: const BorderSide(
+                                                  color: Color(0xFFD8B4FE)),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                              borderSide: const BorderSide(color: Color(0xFF7C3AED)),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              borderSide: const BorderSide(
+                                                  color: Color(0xFF7C3AED)),
                                             ),
                                             filled: true,
                                             fillColor: const Color(0xFFFAFAFC),
@@ -2636,9 +2884,9 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                         ),
                       );
                     }).toList(),
-                    
+
                     const SizedBox(height: 8),
-                    
+
                     // Remarks
                     Text(
                       "Negotiation Notes / Remarks (Optional):",
@@ -2653,15 +2901,19 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                       controller: _remarksController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: "e.g. Spoke with customer over phone and agreed to deliver partial stock of 2 units...",
-                        hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+                        hintText:
+                            "e.g. Spoke with customer over phone and agreed to deliver partial stock of 2 units...",
+                        hintStyle: GoogleFonts.inter(
+                            color: const Color(0xFF94A3B8), fontSize: 13),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                       ),
                     ),
@@ -2670,7 +2922,7 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                 ),
               ),
             ),
-            
+
             // Footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -2700,7 +2952,8 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        widget.onAccept('confirmed', rejectionReason: _remarksController.text.trim());
+                        widget.onAccept('confirmed',
+                            rejectionReason: _remarksController.text.trim());
                       },
                       icon: const Icon(Icons.check_circle_outline, size: 18),
                       label: Text(
@@ -2715,8 +2968,10 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
                         backgroundColor: const Color(0xFF059669),
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                     ),
                   ),

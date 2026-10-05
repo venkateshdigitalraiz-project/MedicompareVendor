@@ -11,7 +11,7 @@ import '../bloc/dental_service_state.dart';
 import '../../data/models/dental_service_model.dart';
 import '../widgets/dental_service_card.dart';
 import '../widgets/add_dental_service_sheet.dart';
-import 'package:MediCompare/core/utils/permission_handler.dart';
+// import 'package:MediCompare/core/utils/permission_handler.dart';
 
 class DentalServiceListPage extends StatefulWidget {
   const DentalServiceListPage({super.key});

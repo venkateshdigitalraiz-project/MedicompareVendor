@@ -28,6 +28,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     super.deliveries = const [],
     super.otpEnable,
     super.otpStatus,
+    super.adminprescription,
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -245,6 +246,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       }(),
       otpEnable: json['otpEnable']?.toString() ?? json['otp_enable']?.toString() ?? json['orderDetails']?['otpEnable']?.toString() ?? json['orderDetails']?['otp_enable']?.toString() ?? 'no',
       otpStatus: json['otpStatus']?.toString() ?? json['otp_status']?.toString() ?? json['orderDetails']?['otpStatus']?.toString() ?? json['orderDetails']?['otp_status']?.toString() ?? 'pending',
+      adminprescription: json['adminprescription']?.toString() ?? json['admin_prescription']?.toString() ?? json['orderDetails']?['adminprescription']?.toString() ?? json['orderDetails']?['admin_prescription']?.toString(),
     );
   }
 }

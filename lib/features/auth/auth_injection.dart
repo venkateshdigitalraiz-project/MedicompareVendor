@@ -4,6 +4,7 @@ import 'data/repositories/auth_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/register_usecase.dart';
 import 'domain/usecases/login_usecase.dart';
+import 'presentation/bloc/login_bloc.dart';
 
 class AuthInjection {
   static RegisterUseCase provideRegisterUseCase() {
@@ -22,5 +23,9 @@ class AuthInjection {
     final AuthRepository repository =
         AuthRepositoryImpl(remoteDataSource: remoteDataSource);
     return LoginUseCase(repository);
+  }
+
+  static LoginBloc provideLoginBloc() {
+    return LoginBloc(loginUseCase: provideLoginUseCase());
   }
 }

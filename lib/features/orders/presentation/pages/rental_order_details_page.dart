@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:MediCompare/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1096,9 +1098,8 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                         }
                         final readyMinutes =
                             _selectedReadyTime.replaceAll(' min', '');
-                        final effectiveId = order.id.isNotEmpty
-                            ? order.id
-                            : widget.orderId;
+                        final effectiveId =
+                            order.id.isNotEmpty ? order.id : widget.orderId;
                         context.read<OrderDetailsBloc>().add(
                               AssignOrderDeliveryPartnerEvent(
                                 orderId: effectiveId,
@@ -1146,9 +1147,8 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                     : () {
                         final readyMinutes =
                             _selectedReadyTime.replaceAll(' min', '');
-                        final effectiveId = order.id.isNotEmpty
-                            ? order.id
-                            : widget.orderId;
+                        final effectiveId =
+                            order.id.isNotEmpty ? order.id : widget.orderId;
                         context.read<OrderDetailsBloc>().add(
                               AssignOrderDeliveryPartnerEvent(
                                 orderId: effectiveId,
@@ -1388,9 +1388,8 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
                     : () {
                         final readyMinutes =
                             _selectedReadyTime.replaceAll(' min', '');
-                        final effectiveId = order.id.isNotEmpty
-                            ? order.id
-                            : widget.orderId;
+                        final effectiveId =
+                            order.id.isNotEmpty ? order.id : widget.orderId;
                         context.read<OrderDetailsBloc>().add(
                               AssignOrderDeliveryPartnerEvent(
                                 orderId: effectiveId,
@@ -1915,12 +1914,11 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     final basePrice = (firstItem != null && firstItem.price > 0)
         ? firstItem.price
         : (rentalDetails?.basePricePerDay ?? 0.0);
-    final totalDays =
-        (rentalDetails != null && rentalDetails.totalDays > 0)
-            ? rentalDetails.totalDays
-            : (rentalDetails != null && rentalDetails.rentalDuration > 0
-                ? rentalDetails.rentalDuration
-                : 1);
+    final totalDays = (rentalDetails != null && rentalDetails.totalDays > 0)
+        ? rentalDetails.totalDays
+        : (rentalDetails != null && rentalDetails.rentalDuration > 0
+            ? rentalDetails.rentalDuration
+            : 1);
 
     final subtotal = orderDetails.subtotal > 0
         ? orderDetails.subtotal
@@ -1939,7 +1937,7 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
     final totalRentalValue =
         subtotal + serviceCharges + returnCharges + deposit;
     final totalEarned = totalRentalValue;
-    final firstInstallmentAmount = totalRentalValue;
+    // final firstInstallmentAmount = totalRentalValue;
     final installmentAmount =
         (rentalDetails != null && rentalDetails.installmentAmount > 0)
             ? rentalDetails.installmentAmount
@@ -1985,8 +1983,8 @@ class _RentalOrderDetailsPageState extends State<RentalOrderDetailsPage> {
           _buildSummaryRow("Total Earned", totalEarned.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const Divider(height: 32),
-          _buildSummaryRow(
-              "1st Installment Amount", orderDetails.billingSummary.totalPayAmount.toRupeeFormat(),
+          _buildSummaryRow("1st Installment Amount",
+              orderDetails.billingSummary.totalPayAmount.toRupeeFormat(),
               isBold: true, valueColor: AppColors.primary),
           const SizedBox(height: 16),
           Builder(

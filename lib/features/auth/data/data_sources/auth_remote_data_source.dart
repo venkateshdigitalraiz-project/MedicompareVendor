@@ -1,6 +1,7 @@
 import 'dart:convert';
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
+import '../../../../core/utils/token_storage.dart';
 import '../models/vendor_response_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -15,6 +16,8 @@ abstract class AuthRemoteDataSource {
   Future<VendorResponseModel> login({
     required String email,
     required String password,
+    String? otp,
+    String? fcmToken,
   });
 }
 
@@ -49,15 +52,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<VendorResponseModel> login({
     required String email,
     required String password,
+    String? otp,
+    String? fcmToken,
   }) async {
+    final body = {
+      'email': email,
+      'password': password,
+      'fcmToken': fcmToken,
+    };
+    if (otp != null) body['otp'] = otp;
+
     final response = await apiService.post(
       ApiEndpoints.login,
-      body: {
-        'email': email,
-        'password': password,
-      },
+      body: body,
     );
 
+    await TokenStorage.saveUserData(response.body);
     return VendorResponseModel.fromJson(jsonDecode(response.body));
   }
 }

@@ -9,10 +9,14 @@ class LoginUseCase {
   Future<VendorEntity> call({
     required String email,
     required String password,
+    String? otp,
+    String? fcmToken,
   }) {
     return repository.login(
       email: email,
       password: password,
+      otp: otp,
+      fcmToken: fcmToken,
     );
   }
 }

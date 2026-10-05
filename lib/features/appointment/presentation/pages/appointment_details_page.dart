@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:file_picker/file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
 import 'package:printing/printing.dart';
 import 'package:http/http.dart' as http;
 
@@ -28,7 +28,7 @@ class AppointmentDetailsPage extends StatefulWidget {
 }
 
 class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
-  final Map<String, PlatformFile> _pickedFiles = {};
+  // final Map<String, PlatformFile> _pickedFiles = {};
   AppointmentDetailsEntity? _cachedDetails;
 
   int _selectedDeliveryTab = 0; // 0: Medicompares, 1: Own Deliveryman
@@ -66,155 +66,155 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     super.dispose();
   }
 
-  Future<void> _pickPdf({
-    required AppointmentServiceItemEntity item,
-    required AppointmentPatientDetailsEntity? patient,
-    String? patientId,
-    String? selectType,
-    required String orderId,
-    required bool isGroup,
-  }) async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-        withData: true,
-      );
-      if (result != null && result.files.isNotEmpty) {
-        final platformFile = result.files.single;
-        if (platformFile.path != null) {
-          final extension = platformFile.path!.split('.').last.toLowerCase();
-          if (extension != 'pdf') {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please select a valid PDF file'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-            return;
-          }
+  // Future<void> _pickPdf({
+  //   required AppointmentServiceItemEntity item,
+  //   required AppointmentPatientDetailsEntity? patient,
+  //   String? patientId,
+  //   String? selectType,
+  //   required String orderId,
+  //   required bool isGroup,
+  // }) async {
+  //   try {
+  //     FilePickerResult? result = await FilePicker.platform.pickFiles(
+  //       type: FileType.custom,
+  //       allowedExtensions: ['pdf'],
+  //       withData: true,
+  //     );
+  //     if (result != null && result.files.isNotEmpty) {
+  //       final platformFile = result.files.single;
+  //       if (platformFile.path != null) {
+  //         final extension = platformFile.path!.split('.').last.toLowerCase();
+  //         if (extension != 'pdf') {
+  //           if (mounted) {
+  //             ScaffoldMessenger.of(context).showSnackBar(
+  //               const SnackBar(
+  //                 content: Text('Please select a valid PDF file'),
+  //                 backgroundColor: Colors.red,
+  //               ),
+  //             );
+  //           }
+  //           return;
+  //         }
 
-          final file = File(platformFile.path!);
+  //         final file = File(platformFile.path!);
 
-          final String resolvedOrderId = orderId.isNotEmpty
-              ? orderId
-              : (item.id.isNotEmpty
-                  ? item.id
-                  : (item.orderItemId.isNotEmpty
-                      ? item.orderItemId
-                      : widget.appointmentId));
+  //         final String resolvedOrderId = orderId.isNotEmpty
+  //             ? orderId
+  //             : (item.id.isNotEmpty
+  //                 ? item.id
+  //                 : (item.orderItemId.isNotEmpty
+  //                     ? item.orderItemId
+  //                     : widget.appointmentId));
 
-          final String resolvedPatientId =
-              (patientId != null && patientId.isNotEmpty)
-                  ? patientId
-                  : (patient?.patientId.isNotEmpty == true
-                      ? patient!.patientId
-                      : (item.patientId.isNotEmpty ? item.patientId : ''));
+  //         final String resolvedPatientId =
+  //             (patientId != null && patientId.isNotEmpty)
+  //                 ? patientId
+  //                 : (patient?.patientId.isNotEmpty == true
+  //                     ? patient!.patientId
+  //                     : (item.patientId.isNotEmpty ? item.patientId : ''));
 
-          final String reportType = item.reports.isNotEmpty &&
-                  item.reports.first.reportType.isNotEmpty
-              ? item.reports.first.reportType
-              : (item.type.toLowerCase().contains('lab') ||
-                      item.serviceTypes.toLowerCase().contains('lab')
-                  ? 'labtests'
-                  : (item.type.isNotEmpty
-                      ? item.type.toLowerCase()
-                      : 'labtests'));
+  //         final String reportType = item.reports.isNotEmpty &&
+  //                 item.reports.first.reportType.isNotEmpty
+  //             ? item.reports.first.reportType
+  //             : (item.type.toLowerCase().contains('lab') ||
+  //                     item.serviceTypes.toLowerCase().contains('lab')
+  //                 ? 'labtests'
+  //                 : (item.type.isNotEmpty
+  //                     ? item.type.toLowerCase()
+  //                     : 'labtests'));
 
-          final String resolvedSelectType =
-              (selectType != null && selectType.isNotEmpty)
-                  ? selectType
-                  : (isGroup ? 'family' : 'family');
+  //         final String resolvedSelectType =
+  //             (selectType != null && selectType.isNotEmpty)
+  //                 ? selectType
+  //                 : (isGroup ? 'family' : 'family');
 
-          final String description =
-              item.reports.isNotEmpty ? item.reports.first.description : '';
+  //         final String description =
+  //             item.reports.isNotEmpty ? item.reports.first.description : '';
 
-          if (resolvedOrderId.isEmpty) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'Unable to upload report: missing item or order reference'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-            return;
-          }
+  //         if (resolvedOrderId.isEmpty) {
+  //           if (mounted) {
+  //             ScaffoldMessenger.of(context).showSnackBar(
+  //               const SnackBar(
+  //                 content: Text(
+  //                     'Unable to upload report: missing item or order reference'),
+  //                 backgroundColor: Colors.red,
+  //               ),
+  //             );
+  //           }
+  //           return;
+  //         }
 
-          setState(() {
-            _pickedFiles[item.orderItemId] = platformFile;
-          });
+  //         setState(() {
+  //           _pickedFiles[item.orderItemId] = platformFile;
+  //         });
 
-          if (mounted) {
-            context.read<AppointmentDetailsBloc>().add(
-                  UploadReportEvent(
-                    orderId: resolvedOrderId,
-                    orderItemId: item.orderItemId,
-                    reportType: reportType,
-                    patientId: resolvedPatientId,
-                    selectType: resolvedSelectType,
-                    description: description,
-                    file: file,
-                  ),
-                );
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Error picking PDF: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to pick PDF')),
-        );
-      }
-    }
-  }
+  //         if (mounted) {
+  //           context.read<AppointmentDetailsBloc>().add(
+  //                 UploadReportEvent(
+  //                   orderId: resolvedOrderId,
+  //                   orderItemId: item.orderItemId,
+  //                   reportType: reportType,
+  //                   patientId: resolvedPatientId,
+  //                   selectType: resolvedSelectType,
+  //                   description: description,
+  //                   file: file,
+  //                 ),
+  //               );
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error picking PDF: $e');
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Failed to pick PDF')),
+  //       );
+  //     }
+  //   }
+  // }
 
-  Future<void> _viewPdf(String itemId) async {
-    final file = _pickedFiles[itemId];
-    if (file != null && (file.path != null || file.bytes != null)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PdfViewerPage(
-            path: file.path,
-            bytes: file.bytes,
-            title: file.name,
-          ),
-        ),
-      );
-    }
-  }
+  // Future<void> _viewPdf(String itemId) async {
+  //   final file = _pickedFiles[itemId];
+  //   if (file != null && (file.path != null || file.bytes != null)) {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => PdfViewerPage(
+  //           path: file.path,
+  //           bytes: file.bytes,
+  //           title: file.name,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
 
-  String _resolveFileUrl(String fileUrl) {
-    if (fileUrl.trim().isEmpty) return '';
-    final trimmed = fileUrl.trim();
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      return trimmed;
-    }
-    if (trimmed.startsWith('/')) {
-      return 'https://api.medicompares.com$trimmed';
-    }
-    return 'https://api.medicompares.com/$trimmed';
-  }
+  // String _resolveFileUrl(String fileUrl) {
+  //   if (fileUrl.trim().isEmpty) return '';
+  //   final trimmed = fileUrl.trim();
+  //   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+  //     return trimmed;
+  //   }
+  //   if (trimmed.startsWith('/')) {
+  //     return 'https://api.medicompares.com$trimmed';
+  //   }
+  //   return 'https://api.medicompares.com/$trimmed';
+  // }
 
-  Future<void> _viewReportFile(String fileUrl, String title) async {
-    final resolvedUrl = _resolveFileUrl(fileUrl);
-    if (resolvedUrl.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PdfViewerPage(
-            url: resolvedUrl,
-            title: title,
-          ),
-        ),
-      );
-    }
-  }
+  // Future<void> _viewReportFile(String fileUrl, String title) async {
+  //   final resolvedUrl = _resolveFileUrl(fileUrl);
+  //   if (resolvedUrl.isNotEmpty) {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => PdfViewerPage(
+  //           url: resolvedUrl,
+  //           title: title,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
 
   @override
   void initState() {
@@ -938,6 +938,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             valueColor: Colors.black,
           ),
           _buildSummaryRow("Status", item.status),
+          /* 
           const SizedBox(height: 8),
           Divider(height: 1, color: Colors.grey.shade200),
           const SizedBox(height: 8),
@@ -1077,6 +1078,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               }
             },
           ),
+          */
         ],
       ),
     );
@@ -1480,9 +1482,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
 
   Widget _buildStatusDropdownSection(
       AppointmentDetailsEntity details, String currentStatus) {
-    final orderId = details.id.isNotEmpty
-        ? details.id
-        : (details.orderId.isNotEmpty ? details.orderId : widget.appointmentId);
+    // final orderId = details.id.isNotEmpty
+    //     ? details.id
+    //     : (details.orderId.isNotEmpty ? details.orderId : widget.appointmentId);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1663,9 +1665,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
         : 'N/A';
     final phone = partner?.phone.isNotEmpty == true ? partner!.phone : 'N/A';
     final email = partner?.email.isNotEmpty == true ? partner!.email : 'N/A';
-    final otp = delivery?.deliveryOtp.isNotEmpty == true
-        ? delivery!.deliveryOtp
-        : 'N/A';
+    // final otp = delivery?.deliveryOtp.isNotEmpty == true
+    //     ? delivery!.deliveryOtp
+    //     : 'N/A';
 
     return _buildCard(
       title: "Assigned Delivery Partner",

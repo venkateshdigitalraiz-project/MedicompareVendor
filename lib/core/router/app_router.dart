@@ -9,13 +9,16 @@ import 'package:MediCompare/features/auth/presentation/pages/login_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/registration_page.dart';
 import 'package:MediCompare/features/auth/presentation/pages/app_webview_screen.dart';
 import 'package:MediCompare/features/auth/presentation/pages/vendor_onboarding_screen.dart';
+import 'package:MediCompare/features/orders/presentation/pages/pdf_viewer_page.dart';
+import 'package:MediCompare/features/auth/auth_injection.dart';
 import 'package:MediCompare/features/profile/presentation/pages/change_password_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:MediCompare/features/profile/presentation/pages/main_profile_page.dart';
 import 'package:MediCompare/features/appointment/presentation/pages/appointment_bookings_page.dart';
 import 'package:MediCompare/features/appointment/presentation/bloc/appointment_booking_event.dart';
 import 'package:MediCompare/features/appointment/appointment_injection.dart';
-import 'package:MediCompare/features/appointment/presentation/pages/appointment_details_page.dart';
+import 'package:MediCompare/features/appointment/presentation/pages/appointment_details_page.dart'
+    hide PdfViewerPage;
 import 'package:MediCompare/features/profile/presentation/pages/branches_list_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branch_details_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/add_branch_page.dart';
@@ -90,7 +93,10 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
       routes: [
         GoRoute(
           path: '/login',
-          builder: (_, __) => const LoginPage(),
+          builder: (_, __) => BlocProvider(
+            create: (_) => AuthInjection.provideLoginBloc(),
+            child: const LoginPage(),
+          ),
         ),
         GoRoute(
           path: '/register',
@@ -117,6 +123,16 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
             final url = extras['url'] as String;
             final title = extras['title'] as String;
             return AppWebViewScreen(url: url, title: title);
+          },
+        ),
+        GoRoute(
+          path: '/pdf-viewer',
+          builder: (context, state) {
+            final Map<String, dynamic> extras =
+                state.extra as Map<String, dynamic>;
+            final url = extras['url'] as String;
+            final title = extras['title'] as String;
+            return PdfViewerPage(url: url, title: title);
           },
         ),
         GoRoute(
@@ -436,10 +452,9 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/add-deliveryman',
           builder: (context, state) {
-            final deliverymanId = (state.extra is String
-                    ? state.extra as String
-                    : null) ??
-                state.uri.queryParameters['id'];
+            final deliverymanId =
+                (state.extra is String ? state.extra as String : null) ??
+                    state.uri.queryParameters['id'];
             return AddDeliverymanPage(deliverymanId: deliverymanId);
           },
         ),
@@ -458,5 +473,3 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         ),
       ],
     );
-
-
