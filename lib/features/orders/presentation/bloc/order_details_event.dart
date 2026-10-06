@@ -72,3 +72,6 @@ class AssignOrderDeliveryPartnerEvent extends OrderDetailsEvent {
       ];
 }
 
+class CheckAcceptEligibilityEvent extends OrderDetailsEvent {
+  const CheckAcceptEligibilityEvent();
+}

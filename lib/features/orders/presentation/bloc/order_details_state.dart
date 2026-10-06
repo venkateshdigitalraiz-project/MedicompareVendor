@@ -105,3 +105,21 @@ class OrderDetailsError extends OrderDetailsState {
   List<Object?> get props => [message];
 }
 
+class OrderAcceptEligibilityChecked extends OrderDetailsState {
+  final OrderDetailsResponseEntity orderDetails;
+  
+  const OrderAcceptEligibilityChecked(this.orderDetails);
+  
+  @override
+  List<Object?> get props => [orderDetails];
+}
+
+class OrderAcceptOtpPending extends OrderDetailsState {
+  final String message;
+  
+  const OrderAcceptOtpPending(this.message);
+  
+  @override
+  List<Object?> get props => [message];
+}
+

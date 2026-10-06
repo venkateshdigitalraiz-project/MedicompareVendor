@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
 import '../models/order_model.dart';
@@ -79,7 +80,16 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     final endpoint = orderType == 'rental'
         ? ApiEndpoints.rentalOrderDetails
         : ApiEndpoints.orderDetails;
-    final response = await apiService.get('$endpoint/$orderId');
+    final response = await apiService.get(
+      '$endpoint/$orderId',
+      queryParameters: {
+        'page': 1,
+        'limit': 10,
+        'status': '',
+        'search': '',
+        'branch': '',
+      },
+    );
 
     final decoded = json.decode(response.body);
     if (decoded == null ||
@@ -122,10 +132,21 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   @override
   Future<bool> updateOrderStatus(
       String orderItemId, Map<String, dynamic> payload) async {
+    print('================ API REQUEST: updateOrderStatus ================');
+    print('URL: ${ApiEndpoints.updateOrderStatus(orderItemId)}');
+    print('BODY: ${json.encode(payload)}');
+    print('================================================================');
+
     final response = await apiService.post(
       ApiEndpoints.updateOrderStatus(orderItemId),
       body: payload,
     );
+    
+    print('================ API RESPONSE: updateOrderStatus ===============');
+    print('STATUS CODE: ${response.statusCode}');
+    print('RESPONSE BODY: ${response.body}');
+    print('================================================================');
+
     final decoded = json.decode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (decoded is Map &&
@@ -252,18 +273,26 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     String deliveryPartner = 'medicompares',
     String? readyTime,
   }) async {
+    final generatedOtp = (1000 + Random().nextInt(9000)).toString();
     final body = <String, dynamic>{
       'orderStatus': 'assigned',
       'deliveryManType': deliveryManType,
       'deliveryPartner': deliveryPartner,
       'deliveryPartnerId': deliveryPartnerId,
       'orderId': orderId,
-      'readyTime': (readyTime != null && readyTime.isNotEmpty) ? readyTime : '30',
+      'readyTime': deliveryManType == 'vendor'
+          ? null
+          : ((readyTime != null && readyTime.isNotEmpty) ? readyTime : '30'),
       'status': 'assigned',
       'packageIds': [],
       'productIds': [],
       'rejectionReason': null,
     };
+
+    if (deliveryManType != 'vendor') {
+      body['deliveryOtp'] = generatedOtp;
+      body['otp'] = generatedOtp;
+    }
 
     final response = await apiService.post(
       ApiEndpoints.updateOrderStatus(orderId),

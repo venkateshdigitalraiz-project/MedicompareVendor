@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
 
 import 'package:MediCompare/features/orders/domain/entities/order_details_response_entity.dart';
 import 'package:flutter/material.dart';
@@ -62,8 +63,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       if (response.statusCode == 200) {
         Directory? directory;
         if (Platform.isAndroid) {
-          directory = await getExternalStorageDirectory();
-          directory ??= await getApplicationDocumentsDirectory();
+          directory = Directory('/storage/emulated/0/Download');
+          if (!await directory.exists()) {
+            directory = await getExternalStorageDirectory();
+            directory ??= await getApplicationDocumentsDirectory();
+          }
         } else {
           directory = await getApplicationDocumentsDirectory();
         }
@@ -72,23 +76,36 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           await directory.create(recursive: true);
         }
 
-        final filePath = '\${directory.path}/\$fileName';
+        // Clean up the file name to avoid OS errors with invalid characters
+        String safeFileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+        if (safeFileName.isEmpty) safeFileName = 'downloaded_file.pdf';
+
+        final filePath = '${directory.path}/$safeFileName';
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
         if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content:
-                    Text('Downloaded successfully to documents:\n\$filePath')),
+              content: Text('Downloaded successfully to:\n$filePath'),
+              action: SnackBarAction(
+                label: 'OPEN',
+                textColor: Colors.white,
+                onPressed: () {
+                  OpenFilex.open(filePath);
+                },
+              ),
+            ),
           );
         }
       } else {
         if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(
-                    'Failed to download file (HTTP \${response.statusCode})')),
+                    'Failed to download file (HTTP ${response.statusCode})')),
           );
         }
       }
@@ -100,7 +117,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             title: const Text('Download Failed'),
             content: SingleChildScrollView(
               child: Text(
-                'An error occurred while downloading the file. Please share this exact error message:\n\nError:\n\$e\n\nStackTrace:\n\$stackTrace',
+                'An error occurred while downloading the file. Please share this exact error message:\n\nError:\n$e\n\nStackTrace:\n$stackTrace',
                 style: const TextStyle(fontSize: 12),
               ),
             ),
@@ -215,7 +232,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                       _buildCompactActionButton(
                           "Cancel", Colors.red, () => _showRejectionDialog()),
                       _buildCompactActionButton("Accept", AppColors.primary,
-                          () => _showAcceptOrderDialog(orderDetails)),
+                          () {
+                        context
+                            .read<OrderDetailsBloc>()
+                            .add(const CheckAcceptEligibilityEvent());
+                      }),
                     ],
                   );
                 }
@@ -233,13 +254,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               SnackBar(
                   content: Text(state.message), backgroundColor: Colors.green),
             );
-            context
-                .read<OrderDetailsBloc>()
-                .add(GetOrderDetailsEvent(widget.orderId));
           } else if (state is OrderDetailsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(state.message), backgroundColor: Colors.red),
+            );
+          } else if (state is OrderAcceptEligibilityChecked) {
+            _showAcceptOrderDialog(state.orderDetails);
+          } else if (state is OrderAcceptOtpPending) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -258,8 +285,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               final leftColumn = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (orderDetails.otpEnable == 'yes' &&
-                      orderDetails.otpStatus == 'pending') ...[
+                  if (orderDetails.otpEnable?.toLowerCase() == 'yes' &&
+                      orderDetails.otpStatus?.toLowerCase() == 'pending') ...[
                     _buildOtpVerificationSection(orderDetails),
                     const SizedBox(height: 16),
                   ],
@@ -955,7 +982,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
     // We display the file name of the first item
     final firstUrl = ApiEndpoints.getImageUrl(urls.first);
-    final fileName = firstUrl.split('/').last;
+    final fileName = firstUrl.split('/').last.split('?').first;
 
     return _buildCard(
       title: "Prescription Documents",
@@ -1045,7 +1072,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   onPressed: () async {
                     for (final u in urls) {
                       final url = ApiEndpoints.getImageUrl(u);
-                      final fName = url.split('/').last;
+                      final fName = url.split('/').last.split('?').first;
                       await _downloadPdf(url, fName);
                     }
                   },
@@ -1329,9 +1356,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     // final otp =
     //     delivery.deliveryOtp.isNotEmpty == true ? delivery.deliveryOtp : '';
 
-    final isVendor = delivery.deliveryPartnerType.toLowerCase() == 'vendor' ||
-        delivery.deliveryPartner.toLowerCase() == 'self' ||
-        delivery.deliveryPartner.toLowerCase() == 'vendor';
+    final isVendor = delivery.deliveryPartnerType.toLowerCase() == 'self' ||
+        delivery.deliveryPartner.toLowerCase() == 'self';
 
     final badgeText = isVendor ? "Our Deliveryman" : "Medicompares Partner";
     final badgeBg =
@@ -1571,10 +1597,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final partnersError = loadedState?.partnersError;
     final isAssigning = loadedState?.isAssigningPartner ?? false;
 
-    if (_selectedDeliveryPartnerId == null && partners.isNotEmpty) {
-      _selectedDeliveryPartnerId = partners.first.id;
-    }
-
     return _buildCard(
       title: "Delivery Assignment",
       icon: Icons.local_shipping_outlined,
@@ -1810,8 +1832,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         );
                       }
                       final partner = partners[index];
-                      final isSelected =
-                          _selectedDeliveryPartnerId == partner.id;
+                      final isSelected = _selectedDeliveryPartnerId ==
+                              partner.id ||
+                          (_selectedDeliveryPartnerId == null && index == 0);
 
                       return InkWell(
                         onTap: () {
@@ -1964,7 +1987,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 onPressed: isAssigning
                     ? null
                     : () {
-                        if (_selectedDeliveryPartnerId == null) {
+                        final selectedId = _selectedDeliveryPartnerId ??
+                            (partners.isNotEmpty ? partners[0].id : null);
+
+                        if (selectedId == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
@@ -1979,7 +2005,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         context.read<OrderDetailsBloc>().add(
                               AssignOrderDeliveryPartnerEvent(
                                 orderId: order.id,
-                                deliveryPartnerId: _selectedDeliveryPartnerId!,
+                                deliveryPartnerId: selectedId,
                                 deliveryManType: 'admin',
                                 deliveryPartner: 'medicompares',
                                 readyTime: readyMinutes,
@@ -2202,7 +2228,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   orderId: order.id,
                                   deliveryPartnerId: ownPartner.id,
                                   deliveryManType: 'vendor',
-                                  deliveryPartner: 'vendor',
+                                  deliveryPartner: 'self',
                                   readyTime: readyMinutes,
                                 ),
                               );
@@ -2406,7 +2432,17 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         );
                         return;
                       }
-                      // Handle OTP verify logic here if needed via BLoC
+
+                      context.read<OrderDetailsBloc>().add(
+                            UpdateOrderStatusEvent(
+                              orderItemId: details.orderId,
+                              payload: {
+                                'orderId': details.orderId,
+                                'deliveryOtp': _otpController.text.trim(),
+                                'otp': _otpController.text.trim(),
+                              },
+                            ),
+                          );
                     },
                     icon: const Icon(Icons.check_circle_outline, size: 18),
                     label: Text(
@@ -2984,3 +3020,20 @@ class _AcceptOrderDialogState extends State<_AcceptOrderDialog> {
     );
   }
 }
+//adminprescription
+/*
+
+mobile API call
+{"orderStatus":"assigned",
+"deliveryManType":"vendor",
+"deliveryPartner":"vendor",
+"deliveryPartnerId":"69a69064759b099286a9c39b",
+"orderId":"6ac5057c148a3a561bf478ad",
+"readyTime":"30",
+"status":"assigned",
+"packageIds":[],
+"productIds":[],
+"rejectionReason":null,
+"deliveryOtp":"2531",
+"otp":"2531"}
+ */

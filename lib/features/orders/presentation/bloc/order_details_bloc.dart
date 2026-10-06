@@ -23,6 +23,7 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     on<UpdateOrderStatusEvent>(_onUpdateOrderStatus);
     on<GetOrderDeliveryPartnersEvent>(_onGetDeliveryPartners);
     on<AssignOrderDeliveryPartnerEvent>(_onAssignDeliveryPartner);
+    on<CheckAcceptEligibilityEvent>(_onCheckAcceptEligibility);
   }
 
   Future<void> _onGetOrderDetails(
@@ -79,8 +80,57 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     final currentState = state;
     emit(OrderActionLoading());
     try {
-      await updateOrderStatusUseCase.call(event.orderItemId, event.payload);
+      final targetStatusLower = event.payload['orderStatus']?.toString().toLowerCase() ?? 
+                                event.payload['status']?.toString().toLowerCase() ?? '';
+      
+      final isAccepting = targetStatusLower == 'confirmed' ||
+                          targetStatusLower == 'order_confirmed' ||
+                          targetStatusLower == 'accepted' ||
+                          targetStatusLower == 'order_accepted' ||
+                          targetStatusLower == 'processing';
+
+      DeliveryPartnersResultEntity? partnersResult;
+      bool hasLoaded = false;
+      String? partnersError;
+
+      // Start the update process
+      Future<void> updateFuture = updateOrderStatusUseCase.call(event.orderItemId, event.payload);
+      
+      // Concurrently start the partners fetch if we are accepting the order
+      Future<DeliveryPartnersResultEntity?> partnersFuture = Future.value(null);
+      if (isAccepting) {
+        partnersFuture = getOrderDeliveryPartnersUseCase.call(
+          search: '',
+          page: 1,
+          limit: 10,
+        ).catchError((e) {
+          partnersError = e.toString().replaceAll('Exception: ', '');
+          return null;
+        });
+      }
+
+      // Wait for both to complete in parallel
+      await updateFuture;
+      partnersResult = await partnersFuture;
+      if (partnersResult != null) hasLoaded = true;
+
+      // Fetch fresh details seamlessly after update
+      final updatedDetails = await getOrderDetailsUseCase.call(event.orderItemId);
+      
       emit(const OrderStatusUpdated());
+      
+      if (currentState is OrderDetailsLoaded) {
+        final initialPartners = partnersResult?.deliveryMans ?? currentState.deliveryPartners;
+        final ownPartner = partnersResult?.ownDeliveryUser ?? currentState.ownDeliveryPartner;
+        
+        emit(currentState.copyWith(
+          orderDetails: updatedDetails,
+          deliveryPartners: initialPartners,
+          ownDeliveryPartner: ownPartner,
+          hasLoadedPartners: hasLoaded || currentState.hasLoadedPartners,
+          partnersError: partnersError,
+        ));
+      }
     } catch (e) {
       emit(OrderDetailsError(e.toString().replaceAll('Exception: ', '')));
       if (currentState is OrderDetailsLoaded) {
@@ -198,8 +248,19 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
         deliveryPartner: event.deliveryPartner,
         readyTime: event.readyTime,
       );
+      
+      // Immediately refresh the order details after assignment
+      final updatedDetails = await getOrderDetailsUseCase.call(event.orderId);
+      
       emit(const OrderStatusUpdated(
           message: 'Delivery partner assigned successfully'));
+          
+      if (currentState is OrderDetailsLoaded) {
+        emit(currentState.copyWith(
+          isAssigningPartner: false,
+          orderDetails: updatedDetails,
+        ));
+      }
     } catch (e) {
       emit(OrderDetailsError(
           e.toString().replaceAll('Exception: ', '')));
@@ -207,6 +268,27 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
         emit(currentState.copyWith(isAssigningPartner: false));
       }
     }
+  }
+
+  Future<void> _onCheckAcceptEligibility(
+    CheckAcceptEligibilityEvent event,
+    Emitter<OrderDetailsState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! OrderDetailsLoaded) return;
+    
+    final orderDetails = currentState.orderDetails;
+    final otpEnable = orderDetails.otpEnable?.toLowerCase() ?? 'no';
+    final otpStatus = orderDetails.otpStatus?.toLowerCase() ?? '';
+
+    if (otpEnable == 'no' || (otpEnable == 'yes' && otpStatus == 'verified')) {
+      emit(OrderAcceptEligibilityChecked(orderDetails));
+    } else {
+      emit(const OrderAcceptOtpPending('Please submit OTP'));
+    }
+    
+    // Restore UI state immediately
+    emit(currentState);
   }
 }
 
