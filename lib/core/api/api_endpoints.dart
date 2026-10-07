@@ -54,7 +54,7 @@ class ApiEndpoints {
 
   // Coupons
   static const String couponList = '/vendor/coupon/list';
-  static const String couponCreate = '/vendor/coupon/create';
+  static const String couponCreate = '/admin/coupon/create';
   static String updateCoupon(String id) => '/vendor/coupon/update/$id';
   static String deleteCoupon(String id) => '/vendor/coupon/delete/$id';
   static const String customersList = '/vendor/notifications/customers-list';

@@ -16,6 +16,7 @@ class AmbulanceOrderDetailsLoading extends AmbulanceOrderDetailsState {}
 class AmbulanceOrderDetailsLoaded extends AmbulanceOrderDetailsState {
   final AmbulanceOrderEntity order;
   final List<DeliveryPartnerEntity> deliveryPartners;
+  final List<DeliveryPartnerEntity> ownDeliveryPartners;
   final DeliveryPartnerEntity? ownDeliveryPartner;
   final bool isLoadingPartners;
   final bool hasLoadedPartners;
@@ -29,6 +30,7 @@ class AmbulanceOrderDetailsLoaded extends AmbulanceOrderDetailsState {
   const AmbulanceOrderDetailsLoaded(
     this.order, {
     this.deliveryPartners = const [],
+    this.ownDeliveryPartners = const [],
     this.ownDeliveryPartner,
     this.isLoadingPartners = false,
     this.hasLoadedPartners = false,
@@ -43,6 +45,7 @@ class AmbulanceOrderDetailsLoaded extends AmbulanceOrderDetailsState {
   AmbulanceOrderDetailsLoaded copyWith({
     AmbulanceOrderEntity? order,
     List<DeliveryPartnerEntity>? deliveryPartners,
+    List<DeliveryPartnerEntity>? ownDeliveryPartners,
     DeliveryPartnerEntity? ownDeliveryPartner,
     bool? isLoadingPartners,
     bool? hasLoadedPartners,
@@ -56,6 +59,7 @@ class AmbulanceOrderDetailsLoaded extends AmbulanceOrderDetailsState {
     return AmbulanceOrderDetailsLoaded(
       order ?? this.order,
       deliveryPartners: deliveryPartners ?? this.deliveryPartners,
+      ownDeliveryPartners: ownDeliveryPartners ?? this.ownDeliveryPartners,
       ownDeliveryPartner: ownDeliveryPartner ?? this.ownDeliveryPartner,
       isLoadingPartners: isLoadingPartners ?? this.isLoadingPartners,
       hasLoadedPartners: hasLoadedPartners ?? this.hasLoadedPartners,
@@ -73,6 +77,7 @@ class AmbulanceOrderDetailsLoaded extends AmbulanceOrderDetailsState {
   List<Object?> get props => [
         order,
         deliveryPartners,
+        ownDeliveryPartners,
         ownDeliveryPartner,
         isLoadingPartners,
         hasLoadedPartners,

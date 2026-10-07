@@ -108,7 +108,7 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
     final response = await apiService.post(
       ApiEndpoints.uploadReport(orderId),
       fields: fields,
-      files: {'reportFiles': file},
+      files: {'file': file},
     );
 
     final decoded = json.decode(response.body);
@@ -316,7 +316,10 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
       'deliveryPartnerId': deliveryPartnerId,
       'orderId': orderId,
       'orderStatus': 'assigned',
+      'packageIds': [],
+      'productIds': [],
       'readyTime': readyTime,
+      'rejectionReason': null,
       'status': 'assigned',
     };
 

@@ -63,3 +63,5 @@ class DeleteCouponEvent extends CouponEvent {
   @override
   List<Object> get props => [id];
 }
+
+class FetchVendorCategoriesEvent extends CouponEvent {}

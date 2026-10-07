@@ -5,6 +5,7 @@ import '../../domain/usecases/get_coupons_usecase.dart';
 import '../../domain/usecases/get_customers_usecase.dart';
 import '../../domain/usecases/update_coupon_usecase.dart';
 import '../../domain/usecases/delete_coupon_usecase.dart';
+import '../../domain/usecases/get_vendor_categories_usecase.dart';
 import 'coupon_event.dart';
 import 'coupon_state.dart';
 
@@ -14,6 +15,7 @@ class CouponBloc extends Bloc<CouponEvent, CouponState> {
   final UpdateCouponUseCase updateCouponUseCase;
   final GetCustomersUseCase getCustomersUseCase;
   final DeleteCouponUseCase deleteCouponUseCase;
+  final GetVendorCategoriesUseCase getVendorCategoriesUseCase;
 
   CouponBloc({
     required this.addCouponUseCase,
@@ -21,12 +23,14 @@ class CouponBloc extends Bloc<CouponEvent, CouponState> {
     required this.updateCouponUseCase,
     required this.getCustomersUseCase,
     required this.deleteCouponUseCase,
+    required this.getVendorCategoriesUseCase,
   }) : super(CouponInitial()) {
     on<SubmitAddCouponEvent>(_onSubmitAddCouponEvent);
     on<GetCouponsEvent>(_onGetCouponsEvent);
     on<SubmitUpdateCouponEvent>(_onSubmitUpdateCouponEvent);
     on<FetchCustomersEvent>(_onFetchCustomersEvent);
     on<DeleteCouponEvent>(_onDeleteCouponEvent);
+    on<FetchVendorCategoriesEvent>(_onFetchVendorCategoriesEvent);
   }
 
   Future<void> _onSubmitAddCouponEvent(
@@ -165,6 +169,19 @@ class CouponBloc extends Bloc<CouponEvent, CouponState> {
       if (currentState is CouponListLoaded) {
         emit(currentState);
       }
+    }
+  }
+
+  Future<void> _onFetchVendorCategoriesEvent(
+    FetchVendorCategoriesEvent event,
+    Emitter<CouponState> emit,
+  ) async {
+    emit(VendorCategoriesLoading());
+    try {
+      final categories = await getVendorCategoriesUseCase.call();
+      emit(VendorCategoriesLoaded(categories: categories));
+    } catch (e) {
+      emit(VendorCategoriesError(message: e.toString()));
     }
   }
 }

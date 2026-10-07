@@ -23,7 +23,11 @@ class DeliveryPartnerModel extends DeliveryPartnerEntity {
         json['partnerId']?.toString() ??
         json['customId']?.toString() ??
         json['displayId']?.toString() ??
-        (rawId.isNotEmpty ? (rawId.length > 8 ? rawId.substring(rawId.length - 8).toUpperCase() : rawId) : 'N/A');
+        (rawId.isNotEmpty
+            ? (rawId.length > 8
+                ? rawId.substring(rawId.length - 8).toUpperCase()
+                : rawId)
+            : 'N/A');
 
     Map<String, dynamic>? userMap;
     if (json['user'] is Map) {
@@ -42,14 +46,21 @@ class DeliveryPartnerModel extends DeliveryPartnerEntity {
         userMap?['fullName']?.toString() ??
         userMap?['name']?.toString() ??
         '';
-    if (name.isEmpty && (json['firstName'] != null || json['lastName'] != null)) {
+    if (name.isEmpty &&
+        (json['firstName'] != null || json['lastName'] != null)) {
       name = '${json['firstName'] ?? ''} ${json['lastName'] ?? ''}'.trim();
     }
-    if (name.isEmpty && userMap != null && (userMap['firstName'] != null || userMap['lastName'] != null)) {
-      name = '${userMap['firstName'] ?? ''} ${userMap['lastName'] ?? ''}'.trim();
+    if (name.isEmpty &&
+        userMap != null &&
+        (userMap['firstName'] != null || userMap['lastName'] != null)) {
+      name =
+          '${userMap['firstName'] ?? ''} ${userMap['lastName'] ?? ''}'.trim();
     }
     if (name.isEmpty) {
-      name = json['userName']?.toString() ?? json['username']?.toString() ?? userMap?['username']?.toString() ?? 'Delivery Partner';
+      name = json['userName']?.toString() ??
+          json['username']?.toString() ??
+          userMap?['username']?.toString() ??
+          'Delivery Partner';
     }
 
     // Phone / Mobile
@@ -62,7 +73,8 @@ class DeliveryPartnerModel extends DeliveryPartnerEntity {
         '';
 
     // Email
-    final email = json['email']?.toString() ?? userMap?['email']?.toString() ?? '';
+    final email =
+        json['email']?.toString() ?? userMap?['email']?.toString() ?? '';
 
     // Vehicle number
     String vehicleNumber = json['vehicleNumber']?.toString() ??
@@ -92,7 +104,9 @@ class DeliveryPartnerModel extends DeliveryPartnerEntity {
       rating = double.tryParse(json['ratings'].toString()) ?? 0.0;
     }
 
-    final status = json['status']?.toString() ?? userMap?['status']?.toString() ?? 'active';
+    final status = json['status']?.toString() ??
+        userMap?['status']?.toString() ??
+        'active';
     final profileImage = json['profileImage']?.toString() ??
         json['image']?.toString() ??
         userMap?['profileImage']?.toString() ??

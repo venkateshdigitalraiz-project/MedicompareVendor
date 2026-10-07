@@ -119,3 +119,23 @@ class CouponDeleteFailure extends CouponState {
   @override
   List<Object> get props => [id, message];
 }
+
+class VendorCategoriesLoading extends CouponState {}
+
+class VendorCategoriesLoaded extends CouponState {
+  final List<String> categories;
+
+  const VendorCategoriesLoaded({required this.categories});
+
+  @override
+  List<Object> get props => [categories];
+}
+
+class VendorCategoriesError extends CouponState {
+  final String message;
+
+  const VendorCategoriesError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

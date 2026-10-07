@@ -25,6 +25,7 @@ class OrderDetailsLoaded extends OrderDetailsState {
   final bool isLoadingMorePartners;
   final bool isAssigningPartner;
   final String? lastPartnersSearch;
+  final String currentDeliveryManType;
 
   const OrderDetailsLoaded(
     this.orderDetails, {
@@ -38,6 +39,7 @@ class OrderDetailsLoaded extends OrderDetailsState {
     this.isLoadingMorePartners = false,
     this.isAssigningPartner = false,
     this.lastPartnersSearch,
+    this.currentDeliveryManType = 'admin',
   });
 
   OrderDetailsLoaded copyWith({
@@ -52,6 +54,7 @@ class OrderDetailsLoaded extends OrderDetailsState {
     bool? isLoadingMorePartners,
     bool? isAssigningPartner,
     String? lastPartnersSearch,
+    String? currentDeliveryManType,
   }) {
     return OrderDetailsLoaded(
       orderDetails ?? this.orderDetails,
@@ -66,6 +69,7 @@ class OrderDetailsLoaded extends OrderDetailsState {
           isLoadingMorePartners ?? this.isLoadingMorePartners,
       isAssigningPartner: isAssigningPartner ?? this.isAssigningPartner,
       lastPartnersSearch: lastPartnersSearch ?? this.lastPartnersSearch,
+      currentDeliveryManType: currentDeliveryManType ?? this.currentDeliveryManType,
     );
   }
 
@@ -82,6 +86,7 @@ class OrderDetailsLoaded extends OrderDetailsState {
         isLoadingMorePartners,
         isAssigningPartner,
         lastPartnersSearch,
+        currentDeliveryManType,
       ];
 }
 

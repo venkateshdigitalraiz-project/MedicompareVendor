@@ -28,6 +28,7 @@ class OrderDetailsResponseEntity extends Equatable {
   final String? otpEnable;
   final String? otpStatus;
   final String? adminprescription;
+  final List<String> prescriptionImages;
 
   const OrderDetailsResponseEntity({
     required this.id,
@@ -55,6 +56,7 @@ class OrderDetailsResponseEntity extends Equatable {
     this.otpEnable = "no",
     this.otpStatus = "pending",
     this.adminprescription,
+    this.prescriptionImages = const [],
   });
 
   @override
@@ -84,6 +86,7 @@ class OrderDetailsResponseEntity extends Equatable {
         otpEnable,
         otpStatus,
         adminprescription,
+        prescriptionImages,
       ];
 }
 

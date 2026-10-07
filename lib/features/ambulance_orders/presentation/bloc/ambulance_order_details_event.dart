@@ -36,16 +36,18 @@ class GetAmbulanceDeliveryPartnersEvent extends AmbulanceOrderDetailsEvent {
   final bool forceRefresh;
   final int page;
   final bool isLoadMore;
+  final String deliveryManType;
 
   const GetAmbulanceDeliveryPartnersEvent({
     this.search = '',
     this.forceRefresh = false,
     this.page = 1,
     this.isLoadMore = false,
+    this.deliveryManType = 'admin',
   });
 
   @override
-  List<Object?> get props => [search, forceRefresh, page, isLoadMore];
+  List<Object?> get props => [search, forceRefresh, page, isLoadMore, deliveryManType];
 }
 
 class AssignAmbulanceDeliveryPartnerEvent extends AmbulanceOrderDetailsEvent {

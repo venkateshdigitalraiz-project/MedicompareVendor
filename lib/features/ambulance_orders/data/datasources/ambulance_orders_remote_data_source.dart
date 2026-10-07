@@ -140,6 +140,7 @@ class AmbulanceOrdersRemoteDataSource {
             'deliveryPartners',
             'items',
             'docs',
+            'users',
           ]) {
             if (dataMap[key] is List) {
               items = dataMap[key] as List;
@@ -163,6 +164,7 @@ class AmbulanceOrdersRemoteDataSource {
             'deliveryPartners',
             'items',
             'docs',
+            'users',
           ]) {
             if (decoded[key] is List) {
               items = decoded[key] as List;
@@ -465,15 +467,13 @@ class AmbulanceOrdersRemoteDataSource {
       id: e['_id']?.toString() ?? '',
       bookingId: e['bookingId']?.toString() ?? '',
       pickupLocation: AmbulanceOrderLocation(
-        lat: pickupCoords.length > 1 ? (pickupCoords[1] as num).toDouble() : 0,
-        lng: pickupCoords.isNotEmpty ? (pickupCoords[0] as num).toDouble() : 0,
+        lat: pickupCoords.length > 1 ? (num.tryParse(pickupCoords[1]?.toString() ?? '0')?.toDouble() ?? 0) : 0,
+        lng: pickupCoords.isNotEmpty ? (num.tryParse(pickupCoords[0]?.toString() ?? '0')?.toDouble() ?? 0) : 0,
         address: pickup['address']?.toString() ?? '',
       ),
       dropoffLocation: AmbulanceOrderLocation(
-        lat:
-            dropoffCoords.length > 1 ? (dropoffCoords[1] as num).toDouble() : 0,
-        lng:
-            dropoffCoords.isNotEmpty ? (dropoffCoords[0] as num).toDouble() : 0,
+        lat: dropoffCoords.length > 1 ? (num.tryParse(dropoffCoords[1]?.toString() ?? '0')?.toDouble() ?? 0) : 0,
+        lng: dropoffCoords.isNotEmpty ? (num.tryParse(dropoffCoords[0]?.toString() ?? '0')?.toDouble() ?? 0) : 0,
         address: dropoff['address']?.toString() ?? '',
       ),
       distance: (e['distance'] as num?)?.toDouble() ?? 0,

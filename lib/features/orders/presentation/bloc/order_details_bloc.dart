@@ -146,6 +146,8 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     final currentState = state;
     if (currentState is! OrderDetailsLoaded) return;
 
+    final isTabSwitch = currentState.currentDeliveryManType != event.deliveryManType;
+
     if (event.isLoadMore) {
       if (currentState.isLoadingMorePartners ||
           currentState.isLoadingPartners ||
@@ -155,6 +157,7 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
       emit(currentState.copyWith(isLoadingMorePartners: true));
       try {
         final partnersResult = await getOrderDeliveryPartnersUseCase.call(
+          deliveryManType: event.deliveryManType,
           search: event.search,
           page: event.page,
           limit: 10,
@@ -187,6 +190,7 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     }
 
     if (!event.forceRefresh &&
+        !isTabSwitch &&
         currentState.hasLoadedPartners &&
         currentState.lastPartnersSearch == event.search) {
       return;
@@ -195,10 +199,14 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     emit(currentState.copyWith(
       isLoadingPartners: true,
       lastPartnersSearch: event.search,
+      currentDeliveryManType: event.deliveryManType,
+      deliveryPartners: isTabSwitch ? [] : currentState.deliveryPartners,
+      hasLoadedPartners: isTabSwitch ? false : currentState.hasLoadedPartners,
     ));
 
     try {
       final partnersResult = await getOrderDeliveryPartnersUseCase.call(
+        deliveryManType: event.deliveryManType,
         search: event.search,
         page: event.page,
         limit: 10,
@@ -241,13 +249,20 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     }
 
     try {
-      await assignOrderDeliveryPartnerUseCase.call(
-        orderId: event.orderId,
-        deliveryPartnerId: event.deliveryPartnerId,
-        deliveryManType: event.deliveryManType,
-        deliveryPartner: event.deliveryPartner,
-        readyTime: event.readyTime,
-      );
+      final payload = <String, dynamic>{
+        "orderStatus": "assigned",
+        "deliveryManType": event.deliveryManType,
+        "deliveryPartner": event.deliveryPartner,
+        "deliveryPartnerId": event.deliveryPartnerId,
+        "orderId": event.orderId,
+        "readyTime": event.deliveryManType == 'vendor' ? null : event.readyTime,
+        "status": "assigned",
+        "packageIds": [],
+        "productIds": [],
+        "rejectionReason": null,
+      };
+
+      await updateOrderStatusUseCase.call(event.orderId, payload);
       
       // Immediately refresh the order details after assignment
       final updatedDetails = await getOrderDetailsUseCase.call(event.orderId);

@@ -7,7 +7,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../bloc/ambulance_orders_bloc.dart';
 import '../bloc/ambulance_orders_event.dart';
 import '../bloc/ambulance_orders_state.dart';
-import '../../../../core/utils/price_formatter.dart';
 import '../../domain/entities/ambulance_order_entity.dart';
 
 class AmbulanceOrdersPage extends StatefulWidget {
@@ -300,15 +299,19 @@ class _AmbulanceOrdersPageState extends State<AmbulanceOrdersPage> {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: const Color(0xFFF5F3FF),
-                    backgroundImage: (customer?.profileImage != null && customer!.profileImage!.startsWith('http'))
+                    backgroundImage: (customer?.profileImage != null &&
+                            customer!.profileImage!.startsWith('http'))
                         ? NetworkImage(customer.profileImage!) as ImageProvider
                         : null,
-                    onBackgroundImageError: (customer?.profileImage != null && customer!.profileImage!.startsWith('http'))
+                    onBackgroundImageError: (customer?.profileImage != null &&
+                            customer!.profileImage!.startsWith('http'))
                         ? (exception, stackTrace) {
-                            debugPrint('Error loading ambulance order image: $exception');
+                            debugPrint(
+                                'Error loading ambulance order image: $exception');
                           }
                         : null,
-                    child: (customer?.profileImage == null || !customer!.profileImage!.startsWith('http'))
+                    child: (customer?.profileImage == null ||
+                            !customer!.profileImage!.startsWith('http'))
                         ? const Icon(Icons.person,
                             size: 18, color: AppColors.primaryDark)
                         : null,

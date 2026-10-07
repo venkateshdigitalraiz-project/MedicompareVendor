@@ -699,16 +699,19 @@ class _EditCouponScreenState extends State<EditCouponScreen> {
                         onChanged: (val) => setState(() => _status = val!),
                       ),
                       const SizedBox(height: 16),
-                      CheckboxListTile(
-                        value: _hiddenCoupon,
-                        onChanged: (val) => setState(() => _hiddenCoupon = val!),
-                        title: Text(
-                          'Hidden Coupon (Hide from general list)',
-                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                      Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          value: _hiddenCoupon,
+                          onChanged: (val) => setState(() => _hiddenCoupon = val!),
+                          title: Text(
+                            'Hidden Coupon (Hide from general list)',
+                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                          ),
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: _primaryColor,
                         ),
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        activeColor: _primaryColor,
                       ),
                     ],
                   ),

@@ -16,6 +16,7 @@ abstract class CouponRemoteDataSource {
     String status = '',
   });
   Future<List<CustomerModel>> getCustomers({String search = ''});
+  Future<List<String>> getVendorCategories();
 }
 
 class CouponRemoteDataSourceImpl implements CouponRemoteDataSource {
@@ -145,6 +146,19 @@ class CouponRemoteDataSourceImpl implements CouponRemoteDataSource {
       if (decoded != null && decoded['success'] == true && decoded['data'] != null) {
         final List<dynamic> list = decoded['data']['customers'] ?? [];
         return list.map((item) => CustomerModel.fromJson(item)).toList();
+      }
+    }
+    return [];
+  }
+
+  @override
+  Future<List<String>> getVendorCategories() async {
+    final response = await apiService.get(ApiEndpoints.vendorProfile);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = json.decode(response.body);
+      if (decoded != null && decoded['data'] != null && decoded['data']['business'] != null && decoded['data']['business']['categories'] != null) {
+        final List<dynamic> categories = decoded['data']['business']['categories'];
+        return categories.map((c) => c['name'].toString()).toList();
       }
     }
     return [];

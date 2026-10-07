@@ -125,9 +125,12 @@ class CouponModel extends Coupon {
     }
 
     String mapDiscountType(String val) {
-      if (val.contains('Percentage') || val.contains('Percent'))
+      if (val.contains('Percentage') || val.contains('Percent')) {
         return 'percentage';
-      if (val.contains('Fixed') || val.contains('Flat')) return 'fixed';
+      }
+      if (val.contains('Fixed') || val.contains('Flat')) {
+        return 'amount';
+      }
       return val.toLowerCase();
     }
 
@@ -138,7 +141,7 @@ class CouponModel extends Coupon {
     return {
       'code': couponCode,
       'name': couponName,
-      'description': description,
+      'description': description ?? '',
       'discountType': mapDiscountType(discountType),
       'discount': discountValue,
       'minimumPurchase': minimumPurchaseAmount ?? 0.0,
@@ -146,14 +149,12 @@ class CouponModel extends Coupon {
         'maximumDiscount': maximumDiscountAmount,
       'startDate': validFrom.toIso8601String(),
       'endDate': validTo.toIso8601String(),
+      'applicableType': applicableType ?? '',
       'selectionType': mapSelectionType(selectionType),
       if (userLimit != null) 'usageLimit': userLimit,
-      if (userLimit != null) 'userLimit': userLimit,
-      'renewalCycle': mapRenewalCycle(renewalCycle),
-      'userRenewal': mapRenewalCycle(renewalCycle),
       if (userId != null) 'userId': userId,
-      'applicableType': applicableType ?? mapSelectionType(selectionType),
-      'category': category ?? 'all',
+      'categoryId': '',
+      'categoryType': category ?? 'all',
       'status': mapStatus(status),
       'isHidden': hiddenCoupon,
     };

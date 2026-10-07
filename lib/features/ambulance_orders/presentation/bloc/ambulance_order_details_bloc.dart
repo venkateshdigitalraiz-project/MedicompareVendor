@@ -108,18 +108,24 @@ class AmbulanceOrderDetailsBloc
           search: event.search,
           page: event.page,
           limit: 10,
+          deliveryManType: event.deliveryManType,
         );
         final newPartners = partnersResult.deliveryMans;
         final hasMore = newPartners.length >= 10;
-        final updatedList =
-            List<DeliveryPartnerEntity>.from(currentState.deliveryPartners);
+        final isVendor = event.deliveryManType == 'vendor';
+        
+        final updatedList = List<DeliveryPartnerEntity>.from(
+            isVendor ? currentState.ownDeliveryPartners : currentState.deliveryPartners);
+            
         for (final p in newPartners) {
           if (!updatedList.any((existing) => existing.id == p.id)) {
             updatedList.add(p);
           }
         }
+        
         emit(currentState.copyWith(
-          deliveryPartners: updatedList,
+          deliveryPartners: isVendor ? currentState.deliveryPartners : updatedList,
+          ownDeliveryPartners: isVendor ? updatedList : currentState.ownDeliveryPartners,
           isLoadingMorePartners: false,
           hasMorePartners: hasMore,
           partnersPage: event.page,
@@ -132,15 +138,8 @@ class AmbulanceOrderDetailsBloc
       return;
     }
 
-    if (!event.forceRefresh && currentState.isLoadingPartners) {
-      return;
-    }
-
-    if (!event.forceRefresh &&
-        currentState.hasLoadedPartners &&
-        currentState.lastPartnersSearch == event.search) {
-      return;
-    }
+    // Note: To allow fetching 'vendor' when 'admin' is already loaded, we skip the hasLoadedPartners check
+    // if we are searching or changing tabs (we let the UI pass forceRefresh=true when switching tabs).
 
     emit(currentState.copyWith(
       isLoadingPartners: true,
@@ -152,11 +151,15 @@ class AmbulanceOrderDetailsBloc
         search: event.search,
         page: event.page,
         limit: 10,
+        deliveryManType: event.deliveryManType,
       );
       if (state is AmbulanceOrderDetailsLoaded) {
         final newPartners = partnersResult.deliveryMans;
+        final isVendor = event.deliveryManType == 'vendor';
+        
         emit((state as AmbulanceOrderDetailsLoaded).copyWith(
-          deliveryPartners: newPartners,
+          deliveryPartners: isVendor ? currentState.deliveryPartners : newPartners,
+          ownDeliveryPartners: isVendor ? newPartners : currentState.ownDeliveryPartners,
           ownDeliveryPartner: partnersResult.ownDeliveryUser ??
               (state as AmbulanceOrderDetailsLoaded).ownDeliveryPartner,
           isLoadingPartners: false,

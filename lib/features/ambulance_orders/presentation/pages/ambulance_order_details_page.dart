@@ -750,14 +750,16 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
   ) {
     final loadedState = state is AmbulanceOrderDetailsLoaded ? state : null;
     final partners = loadedState?.deliveryPartners ?? [];
-    final ownPartner = loadedState?.ownDeliveryPartner;
+    final ownPartners = loadedState?.ownDeliveryPartners ?? [];
     final isLoadingPartners = loadedState?.isLoadingPartners ?? false;
     final isLoadingMorePartners = loadedState?.isLoadingMorePartners ?? false;
     final partnersError = loadedState?.partnersError;
     final isAssigning = loadedState?.isAssigningPartner ?? false;
+    
+    final activePartners = _selectedDeliveryTab == 0 ? partners : ownPartners;
 
-    if (_selectedDeliveryPartnerId == null && partners.isNotEmpty) {
-      _selectedDeliveryPartnerId = partners.first.id;
+    if (_selectedDeliveryPartnerId == null && activePartners.isNotEmpty) {
+      _selectedDeliveryPartnerId = activePartners.first.id;
     }
 
     return _buildCard(
@@ -780,6 +782,11 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                     onTap: () {
                       setState(() {
                         _selectedDeliveryTab = 0;
+                        _partnerSearchController.clear();
+                        context.read<AmbulanceOrderDetailsBloc>().add(
+                              const GetAmbulanceDeliveryPartnersEvent(
+                                  search: '', forceRefresh: true, deliveryManType: 'admin'),
+                            );
                       });
                     },
                     child: Container(
@@ -820,6 +827,11 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
                     onTap: () {
                       setState(() {
                         _selectedDeliveryTab = 1;
+                        _partnerSearchController.clear();
+                        context.read<AmbulanceOrderDetailsBloc>().add(
+                              const GetAmbulanceDeliveryPartnersEvent(
+                                  search: '', forceRefresh: true, deliveryManType: 'vendor'),
+                            );
                       });
                     },
                     child: Container(
@@ -861,589 +873,348 @@ class _AmbulanceOrderDetailsPageState extends State<AmbulanceOrderDetailsPage> {
           const SizedBox(height: 16),
 
           // Tab content
-          if (_selectedDeliveryTab == 0) ...[
-            // Search Input
-            Container(
-              height: 42,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: TextField(
-                controller: _partnerSearchController,
-                decoration: InputDecoration(
-                  hintText: "Search Medicompares partner...",
-                  hintStyle: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xFF94A3B8),
-                  ),
-                  prefixIcon: const Icon(Icons.search,
-                      size: 18, color: Color(0xFF94A3B8)),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 11),
-                  suffixIcon: _partnerSearchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear,
-                              size: 16, color: Color(0xFF94A3B8)),
-                          onPressed: () {
-                            _partnerSearchController.clear();
-                            context.read<AmbulanceOrderDetailsBloc>().add(
-                                  const GetAmbulanceDeliveryPartnersEvent(
-                                      search: '', forceRefresh: true),
-                                );
-                          },
-                        )
-                      : null,
-                ),
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: const Color(0xFF1E293B)),
-                onSubmitted: (value) {
-                  context.read<AmbulanceOrderDetailsBloc>().add(
-                        GetAmbulanceDeliveryPartnersEvent(
-                            search: value.trim(), forceRefresh: true),
-                      );
-                },
-                onChanged: (value) {
-                  if (value.isEmpty) {
-                    context.read<AmbulanceOrderDetailsBloc>().add(
-                          const GetAmbulanceDeliveryPartnersEvent(
-                              search: '', forceRefresh: true),
-                        );
-                  }
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Delivery Partner List
-            if (isLoadingPartners && partners.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (partnersError != null && partners.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        partnersError,
-                        style: GoogleFonts.inter(
-                            fontSize: 12, color: Colors.red.shade600),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () {
-                          context.read<AmbulanceOrderDetailsBloc>().add(
-                                const GetAmbulanceDeliveryPartnersEvent(
-                                    forceRefresh: true),
-                              );
-                        },
-                        child: const Text("Retry"),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else if (partners.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 28),
-                child: Center(
-                  child: Text(
-                    "No active delivery partners found",
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: const Color(0xFF94A3B8),
-                    ),
-                  ),
-                ),
-              )
-            else
-              Container(
-                constraints: const BoxConstraints(maxHeight: 280),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Scrollbar(
-                  controller: _partnerScrollController,
-                  thumbVisibility: partners.length > 3,
-                  child: ListView.separated(
-                    controller: _partnerScrollController,
-                    shrinkWrap: true,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount:
-                        partners.length + (isLoadingMorePartners ? 1 : 0),
-                    separatorBuilder: (_, __) =>
-                        Divider(color: Colors.grey.shade100, height: 1),
-                    itemBuilder: (context, index) {
-                      if (index == partners.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      final partner = partners[index];
-                      final isSelected =
-                          _selectedDeliveryPartnerId == partner.id;
-
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            _selectedDeliveryPartnerId = partner.id;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.primary.withOpacity(0.06)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: isSelected
-                                ? Border.all(
-                                    color: AppColors.primary.withOpacity(0.4),
-                                    width: 1)
-                                : Border.all(
-                                    color: Colors.transparent, width: 1),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      partner.name,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF1E293B),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    if (partner.phone.isNotEmpty)
-                                      Text(
-                                        partner.phone,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 12,
-                                          color: const Color(0xFF64748B),
-                                        ),
-                                      ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      "ID: ${partner.partnerId}",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11,
-                                        color: const Color(0xFF94A3B8),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.star,
-                                      size: 15, color: Color(0xFFF59E0B)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    partner.rating > 0
-                                        ? partner.rating.toStringAsFixed(1)
-                                        : '4.5',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF475569),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-
-            const SizedBox(height: 16),
-
-            // Ready In Dropdown
-            Row(
+          Builder(builder: (context) {
+            final isVendor = _selectedDeliveryTab == 1;
+            final typeText = isVendor ? 'vendor' : 'admin';
+            final titleText = isVendor ? 'Own Deliveryman' : 'Medicompares partner';
+            final deliveryPartnerType = isVendor ? 'vendor' : 'medicompares';
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Ready in: ",
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xFF475569),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 8),
+                // Search Input
                 Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  height: 42,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedReadyTime,
-                      icon: const Icon(Icons.keyboard_arrow_down,
-                          size: 18, color: Color(0xFF64748B)),
-                      style: GoogleFonts.inter(
+                  child: TextField(
+                    controller: _partnerSearchController,
+                    decoration: InputDecoration(
+                      hintText: "Search $titleText...",
+                      hintStyle: GoogleFonts.inter(
                         fontSize: 13,
-                        color: const Color(0xFF1E293B),
-                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF94A3B8),
                       ),
-                      items: _readyTimeOptions.map((opt) {
-                        return DropdownMenuItem<String>(
-                          value: opt,
-                          child: Text(opt),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            _selectedReadyTime = val;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Assign Medicompares Partner Button
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: isAssigning
-                    ? null
-                    : () {
-                        if (_selectedDeliveryPartnerId == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  "Please select a delivery partner to assign"),
-                              backgroundColor: Colors.orange,
-                            ),
-                          );
-                          return;
-                        }
-                        final readyMinutes =
-                            _selectedReadyTime.replaceAll(' min', '').trim();
-                        context.read<AmbulanceOrderDetailsBloc>().add(
-                              AssignAmbulanceDeliveryPartnerEvent(
-                                orderId: resolvedOrderId,
-                                deliveryPartnerId: _selectedDeliveryPartnerId!,
-                                deliveryManType: 'admin',
-                                deliveryPartner: 'medicompares',
-                                readyTime: readyMinutes.isNotEmpty
-                                    ? readyMinutes
-                                    : '30',
-                              ),
-                            );
-                      },
-                child: isAssigning
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(
-                        "Assign Medicompares Partner",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            ),
-          ] else ...[
-            // Own Deliveryman tab
-            if (isLoadingPartners && ownPartner == null)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (ownPartner != null) ...[
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.04),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE2E8F0),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: ownPartner.profileImage != null &&
-                              ownPartner.profileImage!.startsWith('http')
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(22),
-                              child: Image.network(
-                                ownPartner.profileImage!,
-                                width: 44,
-                                height: 44,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Text(
-                                  ownPartner.name.isNotEmpty
-                                      ? ownPartner.name[0].toUpperCase()
-                                      : 'O',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1E293B),
-                                  ),
-                                ),
-                              ),
+                      prefixIcon: const Icon(Icons.search,
+                          size: 18, color: Color(0xFF94A3B8)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                      suffixIcon: _partnerSearchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear,
+                                  size: 16, color: Color(0xFF94A3B8)),
+                              onPressed: () {
+                                _partnerSearchController.clear();
+                                context.read<AmbulanceOrderDetailsBloc>().add(
+                                      GetAmbulanceDeliveryPartnersEvent(
+                                          search: '', forceRefresh: true, deliveryManType: typeText),
+                                    );
+                              },
                             )
-                          : Text(
-                              ownPartner.name.isNotEmpty
-                                  ? ownPartner.name[0].toUpperCase()
-                                  : 'O',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E293B),
-                              ),
-                            ),
+                          : null,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: const Color(0xFF1E293B)),
+                    onSubmitted: (value) {
+                      context.read<AmbulanceOrderDetailsBloc>().add(
+                            GetAmbulanceDeliveryPartnersEvent(
+                                search: value.trim(), forceRefresh: true, deliveryManType: typeText),
+                          );
+                    },
+                    onChanged: (value) {
+                      if (value.isEmpty) {
+                        context.read<AmbulanceOrderDetailsBloc>().add(
+                              GetAmbulanceDeliveryPartnersEvent(
+                                  search: '', forceRefresh: true, deliveryManType: typeText),
+                            );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Delivery Partner List
+                if (isLoadingPartners && activePartners.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (partnersError != null && activePartners.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  ownPartner.name,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1E293B),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFECFDF5),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                      color: const Color(0xFFA7F3D0)),
-                                ),
-                                child: Text(
-                                  "Internal",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF059669),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          if (ownPartner.phone.isNotEmpty)
-                            Text(
-                              ownPartner.phone,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          const SizedBox(height: 2),
                           Text(
-                            "Vendor ID: ${ownPartner.partnerId}",
+                            partnersError,
                             style: GoogleFonts.inter(
-                              fontSize: 11,
-                              color: const Color(0xFF94A3B8),
-                            ),
+                                fontSize: 12, color: Colors.red.shade600),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () {
+                              context.read<AmbulanceOrderDetailsBloc>().add(
+                                    GetAmbulanceDeliveryPartnersEvent(
+                                        forceRefresh: true, deliveryManType: typeText),
+                                  );
+                            },
+                            child: const Text("Retry"),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Ready In Dropdown
-              Row(
-                children: [
-                  Text(
-                    "Ready in: ",
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: const Color(0xFF475569),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    height: 36,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedReadyTime,
-                        icon: const Icon(Icons.keyboard_arrow_down,
-                            size: 18, color: Color(0xFF64748B)),
+                  )
+                else if (activePartners.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 28),
+                    child: Center(
+                      child: Text(
+                        "No active $titleText found",
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          color: const Color(0xFF1E293B),
-                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF94A3B8),
                         ),
-                        items: _readyTimeOptions.map((opt) {
-                          return DropdownMenuItem<String>(
-                            value: opt,
-                            child: Text(opt),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _selectedReadyTime = val;
-                            });
-                          }
-                        },
                       ),
                     ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Assign Own Deliveryman Button
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
+                  )
+                else
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 280),
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                  ),
-                  onPressed: isAssigning
-                      ? null
-                      : () {
-                          final readyMinutes =
-                              _selectedReadyTime.replaceAll(' min', '');
-                          context.read<AmbulanceOrderDetailsBloc>().add(
-                                AssignAmbulanceDeliveryPartnerEvent(
-                                  orderId: resolvedOrderId,
-                                  deliveryPartnerId: ownPartner.id,
-                                  deliveryManType: 'vendor',
-                                  deliveryPartner: 'vendor',
-                                  readyTime: readyMinutes,
+                    child: Scrollbar(
+                      controller: _partnerScrollController,
+                      thumbVisibility: activePartners.length > 3,
+                      child: ListView.separated(
+                        controller: _partnerScrollController,
+                        shrinkWrap: true,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount:
+                            activePartners.length + (isLoadingMorePartners ? 1 : 0),
+                        separatorBuilder: (_, __) =>
+                            Divider(color: Colors.grey.shade100, height: 1),
+                        itemBuilder: (context, index) {
+                          if (index == activePartners.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
-                              );
+                              ),
+                            );
+                          }
+                          final partner = activePartners[index];
+                          final isSelected =
+                              _selectedDeliveryPartnerId == partner.id;
+
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                _selectedDeliveryPartnerId = partner.id;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 10),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary.withOpacity(0.06)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: isSelected
+                                    ? Border.all(
+                                        color: AppColors.primary.withOpacity(0.4),
+                                        width: 1)
+                                    : Border.all(
+                                        color: Colors.transparent, width: 1),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          partner.name,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF1E293B),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        if (partner.phone.isNotEmpty)
+                                          Text(
+                                            partner.phone,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              color: const Color(0xFF64748B),
+                                            ),
+                                          ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "ID: ${partner.partnerId}",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            color: const Color(0xFF94A3B8),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.star,
+                                          size: 15, color: Color(0xFFF59E0B)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        partner.rating > 0
+                                            ? partner.rating.toStringAsFixed(1)
+                                            : '4.5',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF475569),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
                         },
-                  child: isAssigning
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          "Assign Own Deliveryman",
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
-              ),
-            ] else ...[
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
-                alignment: Alignment.center,
-                child: Column(
-                  children: [
-                    Icon(Icons.person_pin_circle_outlined,
-                        size: 40, color: Colors.grey.shade400),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Own Deliveryman",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1E293B),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                  ),
+
+                const SizedBox(height: 16),
+
+                // Ready In Dropdown
+                Row(
+                  children: [
                     Text(
-                      "No internal delivery personnel registered.",
+                      "Ready in: ",
                       style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF64748B),
+                        fontSize: 13,
+                        color: const Color(0xFF475569),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedReadyTime,
+                          icon: const Icon(Icons.keyboard_arrow_down,
+                              size: 18, color: Color(0xFF64748B)),
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: const Color(0xFF1E293B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          items: _readyTimeOptions.map((opt) {
+                            return DropdownMenuItem<String>(
+                              value: opt,
+                              child: Text(opt),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedReadyTime = val;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ],
+
+                const SizedBox(height: 16),
+
+                // Assign Partner Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: isAssigning
+                        ? null
+                        : () {
+                            if (_selectedDeliveryPartnerId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      "Please select a delivery partner to assign"),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              return;
+                            }
+                            final readyMinutes =
+                                _selectedReadyTime.replaceAll(' min', '').trim();
+                            context.read<AmbulanceOrderDetailsBloc>().add(
+                                  AssignAmbulanceDeliveryPartnerEvent(
+                                    orderId: resolvedOrderId,
+                                    deliveryPartnerId: _selectedDeliveryPartnerId!,
+                                    deliveryManType: typeText,
+                                    deliveryPartner: deliveryPartnerType,
+                                    readyTime: readyMinutes.isNotEmpty
+                                        ? readyMinutes
+                                        : '30',
+                                  ),
+                                );
+                          },
+                    child: isAssigning
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            "Assign $titleText",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );

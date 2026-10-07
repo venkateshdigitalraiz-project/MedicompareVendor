@@ -38,6 +38,9 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   List<Customer> _customers = [];
   List<Customer> _selectedCustomers = [];
 
+  List<String> _categories = [];
+  String _selectedCategory = 'all';
+
   final DateFormat _dateFormat = DateFormat('MM/dd/yyyy');
 
   final Color _primaryColor = const Color(0xFF2D1B69);
@@ -46,6 +49,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
   void initState() {
     super.initState();
     context.read<CouponBloc>().add(const FetchCustomersEvent());
+    context.read<CouponBloc>().add(FetchVendorCategoriesEvent());
   }
 
   @override
@@ -98,15 +102,33 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      if (_couponCodeController.text.trim().isEmpty) {
+        _showErrorSnackbar('Please enter a valid Coupon Code');
+        return;
+      }
+      if (_couponNameController.text.trim().isEmpty) {
+        _showErrorSnackbar('Please enter a valid Coupon Name');
+        return;
+      }
+      if (_selectionType.isEmpty) {
+        _showErrorSnackbar('Please select a Selection Type');
+        return;
+      }
+      if (_discountType.isEmpty) {
+        _showErrorSnackbar('Please select a Discount Type');
+        return;
+      }
+      final discountValueText = _discountValueController.text.trim();
+      if (discountValueText.isEmpty || double.tryParse(discountValueText) == null) {
+        _showErrorSnackbar('Please enter a valid Discount Value');
+        return;
+      }
       if (_validFrom == null || _validTo == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Please select Valid From and Valid To dates',
-                style: GoogleFonts.inter()),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        _showErrorSnackbar('Please select Valid From and Valid To dates');
+        return;
+      }
+      if (_status.isEmpty) {
+        _showErrorSnackbar('Please select a Status');
         return;
       }
 
@@ -133,10 +155,21 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
         userId: _selectedCustomers.isNotEmpty
             ? _selectedCustomers.map((c) => c.id).join(',')
             : null,
+        category: _selectedCategory,
       );
 
       context.read<CouponBloc>().add(SubmitAddCouponEvent(coupon: coupon));
     }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter()),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   InputDecoration _buildInputDecoration(String hint, {Widget? suffixIcon}) {
@@ -239,6 +272,13 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                 ..sort((a, b) => a.fullName
                     .toLowerCase()
                     .compareTo(b.fullName.toLowerCase()));
+            });
+          } else if (state is VendorCategoriesLoaded) {
+            setState(() {
+              _categories = state.categories;
+              if (_categories.isNotEmpty && _selectedCategory == 'all' && !_categories.contains('all')) {
+                _categories.insert(0, 'all');
+              }
             });
           } else if (state is CouponSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -347,6 +387,31 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                   _buildSectionCard(
                     title: 'Additional Settings',
                     children: [
+                      _buildLabel('Category'),
+                      DropdownButtonFormField<String>(
+                        value: _selectedCategory,
+                        decoration: _buildInputDecoration(''),
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                        items: _categories.isNotEmpty 
+                            ? _categories.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value == 'all' ? 'All Categories' : value,
+                                    style: GoogleFonts.inter(),
+                                  ),
+                                );
+                              }).toList()
+                            : [
+                                DropdownMenuItem<String>(
+                                  value: 'all',
+                                  child: Text('All Categories', style: GoogleFonts.inter()),
+                                )
+                              ],
+                        onChanged: (newValue) =>
+                            setState(() => _selectedCategory = newValue!),
+                      ),
+                      const SizedBox(height: 16),
                       _buildLabel('Selection Type'),
                       Container(
                         height: 44,
@@ -544,16 +609,20 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                     child: _selectedCustomers.isNotEmpty
                                         ? (_selectedCustomers.length > 1
                                             ? const Icon(Icons.people_alt,
-                                                color: Color(0xFF6B48FF), size: 20)
+                                                color: Color(0xFF6B48FF),
+                                                size: 20)
                                             : Text(
-                                                _selectedCustomers.first.fullName.isNotEmpty
-                                                    ? _selectedCustomers.first.fullName[0]
+                                                _selectedCustomers.first
+                                                        .fullName.isNotEmpty
+                                                    ? _selectedCustomers
+                                                        .first.fullName[0]
                                                         .toUpperCase()
                                                     : '?',
                                                 style: GoogleFonts.inter(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
-                                                  color: const Color(0xFF6B48FF),
+                                                  color:
+                                                      const Color(0xFF6B48FF),
                                                 ),
                                               ))
                                         : const Icon(
@@ -585,9 +654,12 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                                             const SizedBox(height: 2),
                                             Text(
                                               _selectedCustomers.length == 1
-                                                  ? (_selectedCustomers.first.phone.isNotEmpty
-                                                      ? _selectedCustomers.first.phone
-                                                      : (_selectedCustomers.first.email ??
+                                                  ? (_selectedCustomers.first
+                                                          .phone.isNotEmpty
+                                                      ? _selectedCustomers
+                                                          .first.phone
+                                                      : (_selectedCustomers
+                                                              .first.email ??
                                                           'ID: ${_selectedCustomers.first.custId}'))
                                                   : '${_selectedCustomers.length} customers selected',
                                               style: GoogleFonts.inter(
@@ -712,24 +784,27 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
                       const SizedBox(height: 16),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.grey.shade200),
                         ),
-                        child: CheckboxListTile(
-                          title: Text('Hidden Coupon',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600, fontSize: 14)),
-                          subtitle: Text('Hide from general list',
-                              style: GoogleFonts.inter(
-                                  fontSize: 12, color: Colors.grey.shade600)),
-                          value: _hiddenCoupon,
-                          activeColor: _primaryColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          onChanged: (bool? value) =>
-                              setState(() => _hiddenCoupon = value ?? false),
-                          controlAffinity: ListTileControlAffinity.trailing,
+                        child: Material(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          child: CheckboxListTile(
+                            title: Text('Hidden Coupon',
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600, fontSize: 14)),
+                            subtitle: Text('Hide from general list',
+                                style: GoogleFonts.inter(
+                                    fontSize: 12, color: Colors.grey.shade600)),
+                            value: _hiddenCoupon,
+                            activeColor: _primaryColor,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            onChanged: (bool? value) =>
+                                setState(() => _hiddenCoupon = value ?? false),
+                            controlAffinity: ListTileControlAffinity.trailing,
+                          ),
                         ),
                       ),
                     ],
@@ -1390,3 +1465,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> {
     );
   }
 }
+/*
+Coupon Code,Selection Type,Coupon Name,Discount Type,Discount Value,Valid From,Valid To,Status
+
+ */

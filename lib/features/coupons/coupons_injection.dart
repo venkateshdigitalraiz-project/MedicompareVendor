@@ -6,6 +6,7 @@ import 'domain/usecases/get_coupons_usecase.dart';
 import 'domain/usecases/update_coupon_usecase.dart';
 import 'domain/usecases/get_customers_usecase.dart';
 import 'domain/usecases/delete_coupon_usecase.dart';
+import 'domain/usecases/get_vendor_categories_usecase.dart';
 import 'presentation/bloc/coupon_bloc.dart';
 
 class CouponsInjection {
@@ -18,12 +19,14 @@ class CouponsInjection {
     final updateUseCase = UpdateCouponUseCase(repository);
     final getCustomersUseCase = GetCustomersUseCase(repository);
     final deleteUseCase = DeleteCouponUseCase(repository);
+    final getVendorCategoriesUseCase = GetVendorCategoriesUseCase(repository);
     return CouponBloc(
       addCouponUseCase: addUseCase,
       getCouponsUseCase: getUseCase,
       updateCouponUseCase: updateUseCase,
       getCustomersUseCase: getCustomersUseCase,
       deleteCouponUseCase: deleteUseCase,
+      getVendorCategoriesUseCase: getVendorCategoriesUseCase,
     );
   }
 }

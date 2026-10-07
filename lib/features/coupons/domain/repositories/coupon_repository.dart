@@ -13,4 +13,5 @@ abstract class CouponRepository {
     String status = '',
   });
   Future<List<Customer>> getCustomers({String search = ''});
+  Future<List<String>> getVendorCategories();
 }

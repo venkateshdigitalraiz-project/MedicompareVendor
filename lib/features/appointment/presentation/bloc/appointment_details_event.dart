@@ -19,7 +19,9 @@ class GetAppointmentDetailsEvent extends AppointmentDetailsEvent {
 
 class UploadReportEvent extends AppointmentDetailsEvent {
   final String orderId;
+  final String parentOrderId;
   final String orderItemId;
+  final String itemKey;
   final String reportType;
   final String patientId;
   final String selectType;
@@ -28,7 +30,9 @@ class UploadReportEvent extends AppointmentDetailsEvent {
 
   const UploadReportEvent({
     required this.orderId,
+    required this.parentOrderId,
     required this.orderItemId,
+    required this.itemKey,
     required this.reportType,
     required this.patientId,
     required this.selectType,
@@ -39,7 +43,9 @@ class UploadReportEvent extends AppointmentDetailsEvent {
   @override
   List<Object?> get props => [
         orderId,
+        parentOrderId,
         orderItemId,
+        itemKey,
         reportType,
         patientId,
         selectType,
@@ -70,14 +76,16 @@ class UpdateAppointmentOrderStatusEvent extends AppointmentDetailsEvent {
 class GetDeliveryPartnersEvent extends AppointmentDetailsEvent {
   final String search;
   final bool forceRefresh;
+  final String deliveryManType;
 
   const GetDeliveryPartnersEvent({
     this.search = '',
     this.forceRefresh = false,
+    this.deliveryManType = 'admin',
   });
 
   @override
-  List<Object?> get props => [search, forceRefresh];
+  List<Object?> get props => [search, forceRefresh, deliveryManType];
 }
 
 class AssignDeliveryPartnerEvent extends AppointmentDetailsEvent {

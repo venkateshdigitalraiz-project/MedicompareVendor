@@ -39,13 +39,19 @@ class AppointmentDetailsBloc
       final result =
           await getAppointmentDetailsUseCase.call(event.appointmentId);
 
-      DeliveryPartnersResultEntity? partnersResult;
+      DeliveryPartnersResultEntity? adminResult;
+      DeliveryPartnersResultEntity? vendorResult;
       bool hasLoaded = false;
       String? partnersError;
 
       if (result.orderStatus.trim().toLowerCase() == 'confirmed') {
         try {
-          partnersResult = await getDeliveryPartnersUseCase.call();
+          final results = await Future.wait([
+            getDeliveryPartnersUseCase.call(deliveryManType: 'admin'),
+            getDeliveryPartnersUseCase.call(deliveryManType: 'vendor'),
+          ]);
+          adminResult = results[0];
+          vendorResult = results[1];
           hasLoaded = true;
         } catch (e) {
           hasLoaded = true;
@@ -55,8 +61,11 @@ class AppointmentDetailsBloc
 
       emit(AppointmentDetailsLoaded(
         result,
-        deliveryPartners: partnersResult?.deliveryMans ?? [],
-        ownDeliveryPartner: partnersResult?.ownDeliveryUser,
+        deliveryPartners: adminResult?.deliveryMans ?? [],
+        ownDeliveryPartner: vendorResult?.ownDeliveryUser ??
+            (vendorResult?.deliveryMans.isNotEmpty == true
+                ? vendorResult!.deliveryMans.first
+                : null),
         hasLoadedPartners: hasLoaded,
         partnersError: partnersError,
       ));
@@ -69,7 +78,12 @@ class AppointmentDetailsBloc
     UploadReportEvent event,
     Emitter<AppointmentDetailsState> emit,
   ) async {
-    emit(ReportUploadingState(event.orderItemId));
+    // Capture the current loaded state to preserve delivery partners
+    final currentLoaded = state is AppointmentDetailsLoaded
+        ? (state as AppointmentDetailsLoaded)
+        : null;
+
+    emit(ReportUploadingState(event.orderItemId, event.itemKey, patientId: event.patientId, selectType: event.selectType));
     try {
       await uploadReportUseCase.call(
         orderId: event.orderId,
@@ -80,13 +94,15 @@ class AppointmentDetailsBloc
         file: event.file,
       );
       emit(ReportUploadSuccessState(
-          'Report uploaded successfully', event.orderItemId));
+          'Report uploaded successfully', event.orderItemId, event.itemKey));
+          
+      // Wait for the backend to process the upload and settle the database transaction
+      await Future.delayed(const Duration(milliseconds: 1500));
+
       // Re-fetch appointment details to get updated state from backend
       final result =
-          await getAppointmentDetailsUseCase.call(event.orderId);
-      final currentLoaded = state is AppointmentDetailsLoaded
-          ? (state as AppointmentDetailsLoaded)
-          : null;
+          await getAppointmentDetailsUseCase.call(event.parentOrderId);
+
       emit(AppointmentDetailsLoaded(
         result,
         deliveryPartners: currentLoaded?.deliveryPartners ?? [],
@@ -95,7 +111,7 @@ class AppointmentDetailsBloc
       ));
     } catch (e) {
       emit(ReportUploadErrorState(
-          e.toString().replaceAll('Exception: ', ''), event.orderItemId));
+          e.toString().replaceAll('Exception: ', ''), event.orderItemId, event.itemKey));
     }
   }
 
@@ -151,6 +167,7 @@ class AppointmentDetailsBloc
     try {
       final partnersResult = await getDeliveryPartnersUseCase.call(
         search: event.search,
+        deliveryManType: event.deliveryManType,
       );
       if (state is AppointmentDetailsLoaded) {
         emit((state as AppointmentDetailsLoaded).copyWith(

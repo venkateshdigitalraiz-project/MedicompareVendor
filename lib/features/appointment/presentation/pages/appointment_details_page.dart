@@ -3,13 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
-import 'dart:typed_data';
-// import 'package:file_picker/file_picker.dart';
-import 'package:printing/printing.dart';
-import 'package:http/http.dart' as http;
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/api/api_endpoints.dart';
+import '../../../../features/orders/presentation/pages/pdf_viewer_page.dart';
 import '../../../../core/utils/price_formatter.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../domain/entities/appointment_details_entity.dart';
 import '../bloc/appointment_details_bloc.dart';
 import '../bloc/appointment_details_event.dart';
@@ -27,8 +26,14 @@ class AppointmentDetailsPage extends StatefulWidget {
   State<AppointmentDetailsPage> createState() => _AppointmentDetailsPageState();
 }
 
+class _LocalFile {
+  final String path;
+  final String name;
+  _LocalFile(this.path, this.name);
+}
+
 class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
-  // final Map<String, PlatformFile> _pickedFiles = {};
+  final Map<String, _LocalFile> _pickedFiles = {};
   AppointmentDetailsEntity? _cachedDetails;
 
   int _selectedDeliveryTab = 0; // 0: Medicompares, 1: Own Deliveryman
@@ -66,155 +71,172 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     super.dispose();
   }
 
-  // Future<void> _pickPdf({
-  //   required AppointmentServiceItemEntity item,
-  //   required AppointmentPatientDetailsEntity? patient,
-  //   String? patientId,
-  //   String? selectType,
-  //   required String orderId,
-  //   required bool isGroup,
-  // }) async {
-  //   try {
-  //     FilePickerResult? result = await FilePicker.platform.pickFiles(
-  //       type: FileType.custom,
-  //       allowedExtensions: ['pdf'],
-  //       withData: true,
-  //     );
-  //     if (result != null && result.files.isNotEmpty) {
-  //       final platformFile = result.files.single;
-  //       if (platformFile.path != null) {
-  //         final extension = platformFile.path!.split('.').last.toLowerCase();
-  //         if (extension != 'pdf') {
-  //           if (mounted) {
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               const SnackBar(
-  //                 content: Text('Please select a valid PDF file'),
-  //                 backgroundColor: Colors.red,
-  //               ),
-  //             );
-  //           }
-  //           return;
-  //         }
+  Future<void> _pickFile({
+    required AppointmentServiceItemEntity item,
+    required AppointmentPatientDetailsEntity? patient,
+    String? patientId,
+    String? selectType,
+    required String orderId,
+    required bool isGroup,
+  }) async {
+    try {
+      String? filePath;
+      String? fileName;
 
-  //         final file = File(platformFile.path!);
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+        withData: false,
+      );
+      if (result != null && result.files.isNotEmpty) {
+        filePath = result.files.single.path;
+        fileName = result.files.single.name;
+      }
 
-  //         final String resolvedOrderId = orderId.isNotEmpty
-  //             ? orderId
-  //             : (item.id.isNotEmpty
-  //                 ? item.id
-  //                 : (item.orderItemId.isNotEmpty
-  //                     ? item.orderItemId
-  //                     : widget.appointmentId));
+      if (filePath != null && fileName != null) {
+        final file = File(filePath);
 
-  //         final String resolvedPatientId =
-  //             (patientId != null && patientId.isNotEmpty)
-  //                 ? patientId
-  //                 : (patient?.patientId.isNotEmpty == true
-  //                     ? patient!.patientId
-  //                     : (item.patientId.isNotEmpty ? item.patientId : ''));
+        final String resolvedOrderId = item.id.isNotEmpty
+            ? item.id
+            : (item.orderItemId.isNotEmpty
+                ? item.orderItemId
+                : orderId.isNotEmpty
+                    ? orderId
+                    : widget.appointmentId);
 
-  //         final String reportType = item.reports.isNotEmpty &&
-  //                 item.reports.first.reportType.isNotEmpty
-  //             ? item.reports.first.reportType
-  //             : (item.type.toLowerCase().contains('lab') ||
-  //                     item.serviceTypes.toLowerCase().contains('lab')
-  //                 ? 'labtests'
-  //                 : (item.type.isNotEmpty
-  //                     ? item.type.toLowerCase()
-  //                     : 'labtests'));
+        final String resolvedPatientId =
+            (patientId != null && patientId.isNotEmpty)
+                ? patientId
+                : (patient?.patientId.isNotEmpty == true
+                    ? patient!.patientId
+                    : (item.patientId.isNotEmpty ? item.patientId : ''));
 
-  //         final String resolvedSelectType =
-  //             (selectType != null && selectType.isNotEmpty)
-  //                 ? selectType
-  //                 : (isGroup ? 'family' : 'family');
+        final String reportType =
+            item.reports.isNotEmpty && item.reports.first.reportType.isNotEmpty
+                ? item.reports.first.reportType
+                : (item.type.toLowerCase().contains('lab') ||
+                        item.serviceTypes.toLowerCase().contains('lab')
+                    ? 'labtests'
+                    : (item.type.isNotEmpty
+                        ? item.type.toLowerCase()
+                        : 'labtests'));
 
-  //         final String description =
-  //             item.reports.isNotEmpty ? item.reports.first.description : '';
+        final String resolvedSelectType =
+            (selectType != null && selectType.isNotEmpty)
+                ? selectType
+                : (isGroup ? 'family' : 'family');
 
-  //         if (resolvedOrderId.isEmpty) {
-  //           if (mounted) {
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               const SnackBar(
-  //                 content: Text(
-  //                     'Unable to upload report: missing item or order reference'),
-  //                 backgroundColor: Colors.red,
-  //               ),
-  //             );
-  //           }
-  //           return;
-  //         }
+        final String description =
+            item.reports.isNotEmpty ? item.reports.first.description : '';
 
-  //         setState(() {
-  //           _pickedFiles[item.orderItemId] = platformFile;
-  //         });
+        if (resolvedOrderId.isEmpty) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    'Unable to upload report: missing item or order reference'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
 
-  //         if (mounted) {
-  //           context.read<AppointmentDetailsBloc>().add(
-  //                 UploadReportEvent(
-  //                   orderId: resolvedOrderId,
-  //                   orderItemId: item.orderItemId,
-  //                   reportType: reportType,
-  //                   patientId: resolvedPatientId,
-  //                   selectType: resolvedSelectType,
-  //                   description: description,
-  //                   file: file,
-  //                 ),
-  //               );
-  //         }
-  //       }
-  //     }
-  //   } catch (e) {
-  //     debugPrint('Error picking PDF: $e');
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Failed to pick PDF')),
-  //       );
-  //     }
-  //   }
-  // }
+        final String baseKey = item.id.isNotEmpty ? item.id : item.orderItemId;
+        final String itemKey = '${baseKey}_$resolvedPatientId';
+        setState(() {
+          _pickedFiles[itemKey] = _LocalFile(filePath!, fileName!);
+        });
 
-  // Future<void> _viewPdf(String itemId) async {
-  //   final file = _pickedFiles[itemId];
-  //   if (file != null && (file.path != null || file.bytes != null)) {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => PdfViewerPage(
-  //           path: file.path,
-  //           bytes: file.bytes,
-  //           title: file.name,
-  //         ),
-  //       ),
-  //     );
-  //   }
-  // }
+        if (mounted) {
+          context.read<AppointmentDetailsBloc>().add(
+                UploadReportEvent(
+                  orderId: resolvedOrderId,
+                  parentOrderId: widget.appointmentId,
+                  orderItemId: item.orderItemId,
+                  itemKey: itemKey,
+                  reportType: reportType,
+                  patientId: resolvedPatientId,
+                  selectType: resolvedSelectType,
+                  description: description,
+                  file: file,
+                ),
+              );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking file: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to pick file')),
+        );
+      }
+    }
+  }
 
-  // String _resolveFileUrl(String fileUrl) {
-  //   if (fileUrl.trim().isEmpty) return '';
-  //   final trimmed = fileUrl.trim();
-  //   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-  //     return trimmed;
-  //   }
-  //   if (trimmed.startsWith('/')) {
-  //     return 'https://api.medicompares.com$trimmed';
-  //   }
-  //   return 'https://api.medicompares.com/$trimmed';
-  // }
+  String _resolveFileUrl(String fileUrl) {
+    if (fileUrl.trim().isEmpty) return '';
+    return ApiEndpoints.getImageUrl(fileUrl.trim());
+  }
 
-  // Future<void> _viewReportFile(String fileUrl, String title) async {
-  //   final resolvedUrl = _resolveFileUrl(fileUrl);
-  //   if (resolvedUrl.isNotEmpty) {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => PdfViewerPage(
-  //           url: resolvedUrl,
-  //           title: title,
-  //         ),
-  //       ),
-  //     );
-  //   }
-  // }
+  Future<void> _viewReportFile(String fileUrl, String title) async {
+    final resolvedUrl = _resolveFileUrl(fileUrl);
+    if (resolvedUrl.isNotEmpty) {
+      final isImage = resolvedUrl.toLowerCase().endsWith('.jpg') ||
+          resolvedUrl.toLowerCase().endsWith('.jpeg') ||
+          resolvedUrl.toLowerCase().endsWith('.png') ||
+          resolvedUrl.toLowerCase().endsWith('.webp');
+
+      if (isImage) {
+        showDialog(
+          context: context,
+          builder: (context) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.all(16),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                InteractiveViewer(
+                  child: Image.network(
+                    resolvedUrl,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(Icons.error, color: Colors.white, size: 50),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: IconButton(
+                    icon:
+                        const Icon(Icons.close, color: Colors.white, size: 30),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PdfViewerPage(
+              url: resolvedUrl,
+              title: title,
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -268,32 +290,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     }
   }
 
-  // Dropdown background helper - commented out with status dropdown
-  /*
-  Color _getStatusBgColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return const Color(0xFFE8F5E9);
-      case 'sample_collected':
-        return const Color(0xFFE3F2FD);
-      case 'sample_not_collected':
-        return const Color(0xFFFFEBEE);
-      case 'confirmed':
-        return const Color(0xFFE0F2FE);
-      case 'assigned':
-      case 'assigned_technician':
-        return const Color(0xFFECFDF5);
-      case 'cancelled':
-      case 'rejected':
-      case 'failed':
-        return const Color(0xFFFEE2E2);
-      case 'pending':
-      default:
-        return const Color(0xFFFFF3E0);
-    }
-  }
-  */
-
   Widget _buildAppBarActions() {
     return BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
       builder: (context, state) {
@@ -340,13 +336,13 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildCompactAppBarButton(
-              label: "Cancel Order",
+              label: "Cancel",
               color: const Color(0xFFDC2626),
               onTap: () => _showCancelOrderDialog(orderId),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             _buildCompactAppBarButton(
-              label: "Accept Order",
+              label: "Accept",
               color: AppColors.primary,
               onTap: () {
                 context.read<AppointmentDetailsBloc>().add(
@@ -635,13 +631,24 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               ),
               overflow: TextOverflow.ellipsis,
             ),
-            Text(
-              "ID: ${widget.appointmentId.length > 12 ? '${widget.appointmentId.substring(0, 12)}...' : widget.appointmentId}",
-              style: GoogleFonts.inter(
-                color: Colors.grey,
-                fontSize: 10,
-              ),
-              overflow: TextOverflow.ellipsis,
+            BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
+              builder: (context, state) {
+                final details = state is AppointmentDetailsLoaded
+                    ? state.appointmentDetails
+                    : _cachedDetails;
+                final displayId = details != null && details.orderId.isNotEmpty
+                    ? details.orderId
+                    : widget.appointmentId;
+
+                return Text(
+                  "ID: ${displayId.length > 20 ? '${displayId.substring(0, 20)}...' : displayId}",
+                  style: GoogleFonts.inter(
+                    color: Colors.grey,
+                    fontSize: 10,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
             ),
           ],
         ),
@@ -686,6 +693,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               ),
             );
           } else if (state is ReportUploadErrorState) {
+            setState(() {
+              _pickedFiles.remove(state.itemKey);
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -937,11 +947,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             labelColor: Colors.black,
             valueColor: Colors.black,
           ),
-          _buildSummaryRow("Status", item.status),
-          /* 
-          const SizedBox(height: 8),
-          Divider(height: 1, color: Colors.grey.shade200),
-          const SizedBox(height: 8),
           Builder(
             builder: (context) {
               final String pType = patient?.type.trim().toLowerCase() ?? '';
@@ -949,23 +954,54 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   ? pType
                   : (selectType?.trim().toLowerCase() ?? '');
               final matchingReports = item.reports.where((report) {
-                return report.selectType.trim().toLowerCase() ==
-                    effectivePatientType;
+                final rSelectType = report.selectType.trim().toLowerCase();
+                if (rSelectType != effectivePatientType) return false;
+
+                if (effectivePatientType == 'self') {
+                  return report.patientId == null ||
+                      report.patientId!.trim().isEmpty ||
+                      report.patientId == "null" ||
+                      report.patientId?.trim() == patientId?.trim();
+                } else {
+                  return report.patientId?.trim() == patientId?.trim();
+                }
               }).toList();
 
               final validReports = matchingReports.where((report) {
-                return report.file.trim().isNotEmpty;
+                return report.file.trim().isNotEmpty &&
+                    report.reportStatus.toLowerCase() == 'uploaded';
               }).toList();
 
+              final String resolvedPatientId =
+                  (patientId != null && patientId.isNotEmpty)
+                      ? patientId
+                      : (patient?.patientId.isNotEmpty == true
+                          ? patient!.patientId
+                          : (item.patientId.isNotEmpty ? item.patientId : ''));
+              final String baseKey =
+                  item.id.isNotEmpty ? item.id : item.orderItemId;
+              final String itemKey = '${baseKey}_$resolvedPatientId';
+
+              final bool isCompleted = validReports.isNotEmpty ||
+                  (item.status.toLowerCase() == 'completed');
+
+              Widget content;
               if (validReports.isNotEmpty) {
-                return Column(
+                content = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: validReports.asMap().entries.map((entry) {
                     final int index = entry.key;
                     final report = entry.value;
-                    final String fileName = report.file.isNotEmpty
-                        ? (report.file.split('/').last.split('\\').last)
-                        : "Report ${index + 1}";
+                    String fileName = "Report ${index + 1}";
+                    if (report.file.isNotEmpty) {
+                      String rawName =
+                          report.file.split('/').last.split('\\').last;
+                      fileName =
+                          rawName.split('?').first; // Strip query parameters
+                    }
+                    final isImage = fileName.toLowerCase().endsWith('.jpg') ||
+                        fileName.toLowerCase().endsWith('.jpeg') ||
+                        fileName.toLowerCase().endsWith('.png');
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: InkWell(
@@ -973,8 +1009,11 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.picture_as_pdf,
-                                color: Colors.red.shade400, size: 20),
+                            Icon(isImage ? Icons.image : Icons.picture_as_pdf,
+                                color: isImage
+                                    ? Colors.blue.shade400
+                                    : Colors.red.shade400,
+                                size: 20),
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
@@ -994,91 +1033,114 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                     );
                   }).toList(),
                 );
-              } else if (_pickedFiles.containsKey(item.orderItemId)) {
-                return Row(
+              } else if (_pickedFiles.containsKey(itemKey)) {
+                final pickedFile = _pickedFiles[itemKey]!;
+                final isImage =
+                    pickedFile.name.toLowerCase().endsWith('.jpg') ||
+                        pickedFile.name.toLowerCase().endsWith('.jpeg') ||
+                        pickedFile.name.toLowerCase().endsWith('.png');
+                content = Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
-                      child: InkWell(
-                        onTap: () => _viewPdf(item.orderItemId),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.picture_as_pdf,
-                                color: Colors.red.shade400, size: 20),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                _pickedFiles[item.orderItemId]!.name,
-                                style: GoogleFonts.inter(
-                                  color: Colors.blue.shade700,
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(isImage ? Icons.image : Icons.picture_as_pdf,
+                              color: isImage
+                                  ? Colors.blue.shade400
+                                  : Colors.red.shade400,
+                              size: 20),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              pickedFile.name,
+                              style: GoogleFonts.inter(
+                                color: Colors.blue.shade700,
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 );
               } else {
-                return BlocBuilder<AppointmentDetailsBloc,
-                    AppointmentDetailsState>(
-                  builder: (context, state) {
-                    final isUploading = state is ReportUploadingState &&
-                        state.orderItemId == item.orderItemId;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          isUploading ? "Uploading..." : "Upload Report",
-                          style: GoogleFonts.inter(
-                              color: Colors.grey.shade700, fontSize: 14),
-                        ),
-                        if (isUploading)
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        else
-                          InkWell(
-                            onTap: () => _pickPdf(
-                              item: item,
-                              patient: patient,
-                              patientId: patientId,
-                              selectType: selectType,
-                              orderId: item.id.isNotEmpty
-                                  ? item.id
-                                  : (item.orderItemId.isNotEmpty
-                                      ? item.orderItemId
-                                      : (details.id.isNotEmpty
-                                          ? details.id
-                                          : widget.appointmentId)),
-                              isGroup: details.isGroup,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(Icons.attach_file,
-                                  size: 20, color: Colors.blue.shade700),
-                            ),
+                final serviceType = details.serviceFixedTypes.trim().toLowerCase();
+                final canUploadReport = serviceType == 'labtests' || serviceType == 'diagnostics';
+
+                if (canUploadReport) {
+                  content = BlocBuilder<AppointmentDetailsBloc,
+                      AppointmentDetailsState>(
+                    builder: (context, state) {
+                      final isUploading = state is ReportUploadingState &&
+                          state.itemKey == itemKey;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            isUploading ? "Uploading..." : "Upload Report",
+                            style: GoogleFonts.inter(
+                                color: Colors.grey.shade700, fontSize: 14),
                           ),
-                      ],
-                    );
-                  },
-                );
+                          if (isUploading)
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else
+                            InkWell(
+                              onTap: () => _pickFile(
+                                item: item,
+                                patient: patient,
+                                patientId: patientId,
+                                selectType: selectType,
+                                orderId: item.id.isNotEmpty
+                                    ? item.id
+                                    : (item.orderItemId.isNotEmpty
+                                        ? item.orderItemId
+                                        : widget.appointmentId),
+                                isGroup: details.isGroup,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(Icons.attach_file,
+                                    size: 20, color: Colors.blue.shade700),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  content = const SizedBox.shrink();
+                }
               }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSummaryRow(
+                      "Status", isCompleted ? "Completed" : item.status),
+                  if (content is! SizedBox) ...[
+                    const SizedBox(height: 8),
+                    Divider(height: 1, color: Colors.grey.shade200),
+                    const SizedBox(height: 8),
+                    content,
+                  ],
+                ],
+              );
             },
           ),
-          */
         ],
       ),
     );
@@ -1910,9 +1972,16 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _selectedDeliveryTab = 0;
-                      });
+                      if (_selectedDeliveryTab != 0) {
+                        setState(() {
+                          _selectedDeliveryTab = 0;
+                          _partnerSearchController.clear();
+                        });
+                        context.read<AppointmentDetailsBloc>().add(
+                              const GetDeliveryPartnersEvent(
+                                  deliveryManType: 'admin', forceRefresh: true),
+                            );
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1950,9 +2019,17 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _selectedDeliveryTab = 1;
-                      });
+                      if (_selectedDeliveryTab != 1) {
+                        setState(() {
+                          _selectedDeliveryTab = 1;
+                          _partnerSearchController.clear();
+                        });
+                        context.read<AppointmentDetailsBloc>().add(
+                              const GetDeliveryPartnersEvent(
+                                  deliveryManType: 'vendor',
+                                  forceRefresh: true),
+                            );
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1993,7 +2070,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           const SizedBox(height: 16),
 
           // Tab content
-          if (_selectedDeliveryTab == 0) ...[
+          if (_selectedDeliveryTab == 0 || _selectedDeliveryTab == 1) ...[
             // Search Input
             Container(
               height: 42,
@@ -2005,7 +2082,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
               child: TextField(
                 controller: _partnerSearchController,
                 decoration: InputDecoration(
-                  hintText: "Search Medicompares partner...",
+                  hintText: _selectedDeliveryTab == 0
+                      ? "Search Medicompares partner..."
+                      : "Search own deliveryman...",
                   hintStyle: GoogleFonts.inter(
                     fontSize: 13,
                     color: const Color(0xFF94A3B8),
@@ -2021,8 +2100,12 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                           onPressed: () {
                             _partnerSearchController.clear();
                             context.read<AppointmentDetailsBloc>().add(
-                                  const GetDeliveryPartnersEvent(
-                                      search: '', forceRefresh: true),
+                                  GetDeliveryPartnersEvent(
+                                      deliveryManType: _selectedDeliveryTab == 0
+                                          ? 'admin'
+                                          : 'vendor',
+                                      search: '',
+                                      forceRefresh: true),
                                 );
                           },
                         )
@@ -2033,14 +2116,21 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 onSubmitted: (value) {
                   context.read<AppointmentDetailsBloc>().add(
                         GetDeliveryPartnersEvent(
-                            search: value.trim(), forceRefresh: true),
+                            deliveryManType:
+                                _selectedDeliveryTab == 0 ? 'admin' : 'vendor',
+                            search: value.trim(),
+                            forceRefresh: true),
                       );
                 },
                 onChanged: (value) {
                   if (value.isEmpty) {
                     context.read<AppointmentDetailsBloc>().add(
-                          const GetDeliveryPartnersEvent(
-                              search: '', forceRefresh: true),
+                          GetDeliveryPartnersEvent(
+                              deliveryManType: _selectedDeliveryTab == 0
+                                  ? 'admin'
+                                  : 'vendor',
+                              search: '',
+                              forceRefresh: true),
                         );
                   }
                 },
@@ -2070,7 +2160,10 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                       TextButton(
                         onPressed: () {
                           context.read<AppointmentDetailsBloc>().add(
-                                const GetDeliveryPartnersEvent(
+                                GetDeliveryPartnersEvent(
+                                    deliveryManType: _selectedDeliveryTab == 0
+                                        ? 'admin'
+                                        : 'vendor',
                                     forceRefresh: true),
                               );
                         },
@@ -2085,7 +2178,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 padding: const EdgeInsets.symmetric(vertical: 28),
                 child: Center(
                   child: Text(
-                    "No active delivery partners found",
+                    _selectedDeliveryTab == 0
+                        ? "No active delivery partners found"
+                        : "No internal delivery personnel registered.",
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       color: const Color(0xFF94A3B8),
@@ -2237,7 +2332,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
 
             const SizedBox(height: 16),
 
-            // Assign Medicompares Partner Button
+            // Assign Partner Button
             SizedBox(
               width: double.infinity,
               height: 44,
@@ -2267,13 +2362,22 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                             : (details.orderId.isNotEmpty
                                 ? details.orderId
                                 : widget.appointmentId);
+
+                        final readyMinutes = _selectedDeliveryTab == 1
+                            ? _selectedReadyTime.replaceAll(' min', '')
+                            : null;
+
                         context.read<AppointmentDetailsBloc>().add(
                               AssignDeliveryPartnerEvent(
                                 orderId: orderId,
                                 deliveryPartnerId: _selectedDeliveryPartnerId!,
-                                deliveryManType: 'vendor',
-                                deliveryPartner: 'self',
-                                readyTime: null,
+                                deliveryManType: _selectedDeliveryTab == 0
+                                    ? 'admin'
+                                    : 'vendor',
+                                deliveryPartner: _selectedDeliveryTab == 0
+                                    ? 'medicompares'
+                                    : 'self',
+                                readyTime: readyMinutes,
                               ),
                             );
                       },
@@ -2287,7 +2391,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                         ),
                       )
                     : Text(
-                        "Assign Medicompares Partner",
+                        _selectedDeliveryTab == 0
+                            ? "Assign Medicompares Partner"
+                            : "Assign Own Deliveryman",
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -2296,262 +2402,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                       ),
               ),
             ),
-          ] else ...[
-            // Own Deliveryman tab
-            if (isLoadingPartners && ownPartner == null)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (ownPartner != null) ...[
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.04),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE2E8F0),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: ownPartner.profileImage != null &&
-                              ownPartner.profileImage!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(22),
-                              child: Image.network(
-                                ownPartner.profileImage!,
-                                width: 44,
-                                height: 44,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Text(
-                                  ownPartner.name.isNotEmpty
-                                      ? ownPartner.name[0].toUpperCase()
-                                      : 'O',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1E293B),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Text(
-                              ownPartner.name.isNotEmpty
-                                  ? ownPartner.name[0].toUpperCase()
-                                  : 'O',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E293B),
-                              ),
-                            ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  ownPartner.name,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1E293B),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFECFDF5),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                      color: const Color(0xFFA7F3D0)),
-                                ),
-                                child: Text(
-                                  "Internal",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF059669),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          if (ownPartner.phone.isNotEmpty)
-                            Text(
-                              ownPartner.phone,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "Vendor ID: ${ownPartner.partnerId}",
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              color: const Color(0xFF94A3B8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Ready In Dropdown
-              Row(
-                children: [
-                  Text(
-                    "Ready in: ",
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: const Color(0xFF475569),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    height: 36,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedReadyTime,
-                        icon: const Icon(Icons.keyboard_arrow_down,
-                            size: 18, color: Color(0xFF64748B)),
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: const Color(0xFF1E293B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                        items: _readyTimeOptions.map((opt) {
-                          return DropdownMenuItem<String>(
-                            value: opt,
-                            child: Text(opt),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _selectedReadyTime = val;
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Assign Own Deliveryman Button
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: isAssigning
-                      ? null
-                      : () {
-                          final orderId = details.id.isNotEmpty
-                              ? details.id
-                              : (details.orderId.isNotEmpty
-                                  ? details.orderId
-                                  : widget.appointmentId);
-                          final readyMinutes =
-                              _selectedReadyTime.replaceAll(' min', '');
-                          context.read<AppointmentDetailsBloc>().add(
-                                AssignDeliveryPartnerEvent(
-                                  orderId: orderId,
-                                  deliveryPartnerId: ownPartner.id,
-                                  deliveryManType: 'vendor',
-                                  deliveryPartner: 'vendor',
-                                  readyTime: readyMinutes,
-                                ),
-                              );
-                        },
-                  child: isAssigning
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          "Assign Own Deliveryman",
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
-              ),
-            ] else ...[
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
-                alignment: Alignment.center,
-                child: Column(
-                  children: [
-                    Icon(Icons.person_pin_circle_outlined,
-                        size: 40, color: Colors.grey.shade400),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Own Deliveryman",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1E293B),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "No internal delivery personnel registered.",
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF64748B),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         ],
       ),
@@ -2672,111 +2522,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   }
 }
 
-class PdfViewerPage extends StatefulWidget {
-  final String? path;
-  final Uint8List? bytes;
-  final String? url;
-  final String title;
-
-  const PdfViewerPage({
-    super.key,
-    this.path,
-    this.bytes,
-    this.url,
-    required this.title,
-  });
-
-  @override
-  State<PdfViewerPage> createState() => _PdfViewerPageState();
-}
-
-class _PdfViewerPageState extends State<PdfViewerPage> {
-  Uint8List? _pdfBytes;
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPdfData();
-  }
-
-  Future<void> _loadPdfData() async {
-    try {
-      if (widget.bytes != null && widget.bytes!.isNotEmpty) {
-        _pdfBytes = widget.bytes;
-      } else if (widget.path != null && widget.path!.isNotEmpty) {
-        final file = File(widget.path!);
-        if (await file.exists()) {
-          _pdfBytes = await file.readAsBytes();
-        } else {
-          _error = "File does not exist: ${widget.path}";
-        }
-      } else if (widget.url != null && widget.url!.isNotEmpty) {
-        final response = await http.get(Uri.parse(widget.url!));
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          _pdfBytes = response.bodyBytes;
-        } else {
-          _error =
-              "Failed to load PDF from server (HTTP ${response.statusCode})";
-        }
-      } else {
-        _error = "No PDF data provided";
-      }
-    } catch (e) {
-      _error = e.toString();
-    }
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
-        titleTextStyle: const TextStyle(
-            color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "Failed to load PDF:\n$_error",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
-                )
-              : PdfPreview(
-                  build: (format) => _pdfBytes!,
-                  allowPrinting: false,
-                  allowSharing: false,
-                  canChangeOrientation: false,
-                  canChangePageFormat: false,
-                  canDebug: false,
-                  useActions: false,
-                  padding: EdgeInsets.zero,
-                  previewPageMargin: EdgeInsets.zero,
-                  scrollViewDecoration: const BoxDecoration(
-                    color: Colors.white,
-                  ),
-                  pdfPreviewPageDecoration: const BoxDecoration(
-                    color: Colors.white,
-                  ),
-                ),
-    );
-  }
-}
 /*
  "selectType": "self", and  "type": "self" both matched  then consider patientDetails  {name} compare both  but UI display URl but real ti display upload file with icon. please cross check it  
  */

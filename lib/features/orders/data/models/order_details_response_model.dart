@@ -29,6 +29,7 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
     super.otpEnable,
     super.otpStatus,
     super.adminprescription,
+    super.prescriptionImages,
   });
 
   factory OrderDetailsResponseModel.fromJson(Map<String, dynamic> json) {
@@ -247,7 +248,37 @@ class OrderDetailsResponseModel extends OrderDetailsResponseEntity {
       otpEnable: json['otpEnable']?.toString() ?? json['otp_enable']?.toString() ?? json['orderDetails']?['otpEnable']?.toString() ?? json['orderDetails']?['otp_enable']?.toString() ?? 'no',
       otpStatus: json['otpStatus']?.toString() ?? json['otp_status']?.toString() ?? json['orderDetails']?['otpStatus']?.toString() ?? json['orderDetails']?['otp_status']?.toString() ?? 'pending',
       adminprescription: json['adminprescription']?.toString() ?? json['admin_prescription']?.toString() ?? json['orderDetails']?['adminprescription']?.toString() ?? json['orderDetails']?['admin_prescription']?.toString(),
+      prescriptionImages: _parsePrescriptionImages(json),
     );
+  }
+
+  static List<String> _parsePrescriptionImages(Map<String, dynamic> json) {
+    // Try root-level first, then nested orderDetails
+    final raw = json['prescriptionImages'] ??
+        json['prescription_images'] ??
+        json['orderDetails']?['prescriptionImages'] ??
+        json['orderDetails']?['prescription_images'];
+
+    if (raw == null) return const [];
+
+    if (raw is List) {
+      return raw
+          .where((e) => e != null && e.toString().trim().isNotEmpty)
+          .map((e) => e.toString().trim())
+          .toList();
+    }
+
+    // Handle case where it's a stringified JSON array
+    if (raw is String) {
+      final cleaned = raw.replaceAll('[', '').replaceAll(']', '');
+      return cleaned
+          .split(',')
+          .map((e) => e.trim().replaceAll(RegExp(r'^"|"$'), ''))
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    return const [];
   }
 }
 

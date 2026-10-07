@@ -65,4 +65,13 @@ class CouponRepositoryImpl implements CouponRepository {
       throw Exception('Failed to fetch customers: $e');
     }
   }
+
+  @override
+  Future<List<String>> getVendorCategories() async {
+    try {
+      return await remoteDataSource.getVendorCategories();
+    } catch (e) {
+      throw Exception('Failed to fetch vendor categories: $e');
+    }
+  }
 }

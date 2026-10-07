@@ -259,15 +259,15 @@ class AppointmentGroupDetailsModel extends AppointmentGroupDetailsEntity {
         json['patient_details'] ??
         json['patient'];
 
-    final patientId = json['patientId']?.toString() ??
-        json['_id']?.toString() ??
-        json['id']?.toString() ??
-        (rawPatient is Map
+    final patientId = (rawPatient is Map
             ? (rawPatient['_id']?.toString() ??
                 rawPatient['patientId']?.toString() ??
-                rawPatient['id']?.toString() ??
-                '')
-            : '');
+                rawPatient['id']?.toString())
+            : null) ??
+        json['patientId']?.toString() ??
+        json['_id']?.toString() ??
+        json['id']?.toString() ??
+        '';
 
     final selectType = json['selectType']?.toString() ??
         json['selecttype']?.toString() ??
@@ -348,6 +348,8 @@ class AppointmentReportModel extends AppointmentReportEntity {
     super.description,
     super.file,
     super.selectType,
+    super.patientId,
+    super.reportStatus,
     super.createdAt,
   });
 
@@ -369,6 +371,11 @@ class AppointmentReportModel extends AppointmentReportEntity {
           '',
       selectType: json['selectType']?.toString() ??
           json['selecttype']?.toString() ??
+          '',
+      patientId: json['patientId']?.toString(),
+      reportStatus: json['reportStatus']?.toString() ??
+          json['reportstatus']?.toString() ??
+          json['status']?.toString() ??
           '',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())?.toLocal()

@@ -215,6 +215,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
             'deliveryPartners',
             'items',
             'docs',
+            'users',
           ]) {
             if (dataMap[key] is List) {
               items = dataMap[key] as List;
@@ -238,6 +239,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
             'deliveryPartners',
             'items',
             'docs',
+            'users',
           ]) {
             if (decoded[key] is List) {
               items = decoded[key] as List;
