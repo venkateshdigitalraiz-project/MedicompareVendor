@@ -13,7 +13,6 @@ import '../widgets/medical_equipment_fee_card.dart';
 import '../widgets/lab_test_visit_fee_card.dart';
 import '../widgets/medicine_delivery_fee_bottom_sheet.dart';
 
-
 class ServiceFeePage extends StatefulWidget {
   const ServiceFeePage({super.key});
 
@@ -57,7 +56,8 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                          color: AppColors.white, strokeWidth: 2),
                     ),
                   ),
                 );
@@ -65,8 +65,10 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if ((state is ServiceFeeSuccess && state.serviceFee.medicine != null) || 
-                      (state is ServiceFeeRefreshing && state.serviceFee.medicine != null))
+                  if ((state is ServiceFeeSuccess &&
+                          state.serviceFee.medicine != null) ||
+                      (state is ServiceFeeRefreshing &&
+                          state.serviceFee.medicine != null))
                     IconButton(
                       icon: const Icon(Icons.edit, color: AppColors.white),
                       onPressed: () {
@@ -74,59 +76,54 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                           context: context,
                           isScrollControlled: true,
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
                           ),
                           builder: (sheetContext) {
-                            final currentFee = state is ServiceFeeSuccess 
-                                ? state.serviceFee 
+                            final currentFee = state is ServiceFeeSuccess
+                                ? state.serviceFee
                                 : (state as ServiceFeeRefreshing).serviceFee;
-                                
-                            return MedicineDeliveryFeeBottomSheet(
-                              fee: currentFee.medicine!,
-                              onSave: (updatedMedicineFee) {
-                                final updatedServiceFee = ServiceFee(
-                                  id: currentFee.id,
-                                  vendorId: currentFee.vendorId,
-                                  createdAt: currentFee.createdAt,
-                                  updatedAt: currentFee.updatedAt,
-                                  user: currentFee.user,
-                                  labTests: currentFee.labTests,
-                                  medicalEquipment: currentFee.medicalEquipment,
-                                  branchOverrides: currentFee.branchOverrides,
-                                  medicine: updatedMedicineFee,
-                                );
-                                context.read<ServiceFeeBloc>().add(SaveServiceFee(updatedServiceFee));
-                                Navigator.pop(sheetContext); // Close the bottom sheet
-                              },
+
+                            return BlocProvider.value(
+                              value: context.read<ServiceFeeBloc>(),
+                              child: MedicineDeliveryFeeBottomSheet(
+                                serviceFee: currentFee,
+                                onSave: (updatedServiceFee) {
+                                  // The bottom sheet now internally dispatches the save event and pops itself.
+                                },
+                              ),
                             );
                           },
                         );
                       },
                     ),
-                  TextButton(
-                    onPressed: () {
-                      if (state is ServiceFeeSuccess) {
-                        context.read<ServiceFeeBloc>().add(SaveServiceFee(state.serviceFee));
-                      }
-                    },
-                    child: Text(
-                      "Save",
-                      style: GoogleFonts.inter(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => _showResetDialog(),
-                    child: Text(
-                      "Reset",
-                      style: GoogleFonts.inter(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  // TextButton(
+                  //   onPressed: () {
+                  //     if (state is ServiceFeeSuccess) {
+                  //       context.read<ServiceFeeBloc>().add(SaveServiceFee(state.serviceFee));
+                  //     }
+                  //   },
+                  //   child: Text(
+                  //     "Save",
+                  //     style: GoogleFonts.inter(
+                  //       color: AppColors.white,
+                  //       fontWeight: FontWeight.w600,
+                  //     ),
+                  //   ),
+                  // ),
+                  // TextButton(
+                  //   onPressed: () => _showResetDialog(),
+                  //   child: Text(
+                  //     "Reset",
+                  //     style: GoogleFonts.inter(
+                  //       color: AppColors.white,
+                  //       fontWeight: FontWeight.w600,
+                  //     ),
+                  //   ),
+                  // ),
+                  SizedBox(
+                    width: 20,
+                  )
                 ],
               );
             },
@@ -166,7 +163,8 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: AppColors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: AppColors.red),
                     const SizedBox(height: 16),
                     Text(
                       "Unable to load service fee",
@@ -242,9 +240,12 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   if (hasUser) _buildVendorHeader(serviceFee.user!),
-                  if (hasMedicine) MedicineDeliveryFeeCard(fee: serviceFee.medicine!),
-                  if (hasEquipment) MedicalEquipmentFeeCard(fee: serviceFee.medicalEquipment!),
-                  if (hasLabTests) LabTestVisitFeeCard(fee: serviceFee.labTests!),
+                  if (hasMedicine)
+                    MedicineDeliveryFeeCard(fee: serviceFee.medicine!),
+                  if (hasEquipment)
+                    MedicalEquipmentFeeCard(fee: serviceFee.medicalEquipment!),
+                  if (hasLabTests)
+                    LabTestVisitFeeCard(fee: serviceFee.labTests!),
                 ],
               ),
             );
@@ -298,7 +299,8 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                     color: AppColors.black,
                   ),
                 ),
-                if (user.businessName != null || user.businessLegalName != null) ...[
+                if (user.businessName != null ||
+                    user.businessLegalName != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     user.fullName,
@@ -312,21 +314,25 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.mail_outline, size: 14, color: AppColors.greyText),
+                    const Icon(Icons.mail_outline,
+                        size: 14, color: AppColors.greyText),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         user.email,
-                        style: GoogleFonts.inter(fontSize: 12, color: AppColors.greyText),
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: AppColors.greyText),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Icon(Icons.phone_outlined, size: 14, color: AppColors.greyText),
+                    const Icon(Icons.phone_outlined,
+                        size: 14, color: AppColors.greyText),
                     const SizedBox(width: 4),
                     Text(
                       user.mobile,
-                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.greyText),
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: AppColors.greyText),
                     ),
                   ],
                 ),
@@ -366,7 +372,8 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
               },
               child: Text(
                 "OK",
-                style: GoogleFonts.inter(color: AppColors.primaryDark, fontWeight: FontWeight.bold),
+                style: GoogleFonts.inter(
+                    color: AppColors.primaryDark, fontWeight: FontWeight.bold),
               ),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'appointment_entity.dart';
 
 class AppointmentDetailsEntity extends Equatable {
   final String id;
@@ -27,6 +28,7 @@ class AppointmentDetailsEntity extends Equatable {
   final AppointmentAddressEntity? shippingAddress;
   final AppointmentAddressEntity? billingAddress;
   final AppointmentCouponDetailsEntity? couponDetails;
+  final AppointmentUserDetailsEntity? userDetails;
 
   const AppointmentDetailsEntity({
     this.id = '',
@@ -54,6 +56,7 @@ class AppointmentDetailsEntity extends Equatable {
     this.deliveries = const [],
     this.otpEnable = '',
     this.otpStatus = '',
+    this.userDetails,
   });
 
   @override
@@ -83,6 +86,7 @@ class AppointmentDetailsEntity extends Equatable {
         deliveries,
         otpEnable,
         otpStatus,
+        userDetails,
       ];
 }
 

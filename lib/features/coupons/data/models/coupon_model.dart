@@ -129,7 +129,7 @@ class CouponModel extends Coupon {
         return 'percentage';
       }
       if (val.contains('Fixed') || val.contains('Flat')) {
-        return 'amount';
+        return 'fixed';
       }
       return val.toLowerCase();
     }
@@ -145,14 +145,13 @@ class CouponModel extends Coupon {
       'discountType': mapDiscountType(discountType),
       'discount': discountValue,
       'minimumPurchase': minimumPurchaseAmount ?? 0.0,
-      if (maximumDiscountAmount != null)
-        'maximumDiscount': maximumDiscountAmount,
+      'maximumDiscount': maximumDiscountAmount ?? '',
       'startDate': validFrom.toIso8601String(),
       'endDate': validTo.toIso8601String(),
       'applicableType': applicableType ?? '',
       'selectionType': mapSelectionType(selectionType),
-      if (userLimit != null) 'usageLimit': userLimit,
-      if (userId != null) 'userId': userId,
+      'usageLimit': userLimit ?? '',
+      'userId': userId ?? '',
       'categoryId': '',
       'categoryType': category ?? 'all',
       'status': mapStatus(status),

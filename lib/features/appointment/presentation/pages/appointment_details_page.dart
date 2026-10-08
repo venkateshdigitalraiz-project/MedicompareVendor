@@ -293,22 +293,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   Widget _buildAppBarActions() {
     return BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
       builder: (context, state) {
-        if (state is AppointmentStatusUpdatingState) {
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-            child: const Center(
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          );
-        }
-
         // Do not show any buttons if details are not yet loaded
         final details = state is AppointmentDetailsLoaded
             ? state.appointmentDetails
@@ -332,18 +316,30 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 ? details.orderId
                 : widget.appointmentId);
 
+        bool isAccepting = false;
+        bool isCanceling = false;
+        if (state is AppointmentStatusUpdatingState && !state.isOtpVerification) {
+          if (state.updatingStatus == 'confirmed') {
+            isAccepting = true;
+          } else if (state.updatingStatus == 'cancelled') {
+            isCanceling = true;
+          }
+        }
+
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildCompactAppBarButton(
               label: "Cancel",
               color: const Color(0xFFDC2626),
+              isLoading: isCanceling,
               onTap: () => _showCancelOrderDialog(orderId),
             ),
             const SizedBox(width: 8),
             _buildCompactAppBarButton(
               label: "Accept",
               color: AppColors.primary,
+              isLoading: isAccepting,
               onTap: () {
                 context.read<AppointmentDetailsBloc>().add(
                       UpdateAppointmentOrderStatusEvent(
@@ -363,11 +359,12 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
     required String label,
     required Color color,
     required VoidCallback onTap,
+    bool isLoading = false,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       child: ElevatedButton(
-        onPressed: onTap,
+        onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: Colors.white,
@@ -376,14 +373,23 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           minimumSize: const Size(0, 30),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }
@@ -569,7 +575,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
   //       decoration: BoxDecoration(
   //         color: activeBgColor,
   //         borderRadius: BorderRadius.circular(16),
-  //         border: Border.all(color: activeColor.withOpacity(0.4), width: 1),
+  //         border: Border.all(color: activeColor.withValues(alpha: 0.4), width: 1),
   //       ),
   //       child: Row(
   //         mainAxisSize: MainAxisSize.min,
@@ -849,7 +855,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1356,7 +1362,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: AppColors.primary, size: 20),
@@ -1385,7 +1391,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -1490,48 +1496,66 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 const SizedBox(width: 12),
                 SizedBox(
                   height: 48, // matching textfield height roughly
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      final otp = _otpController.text.trim();
-                      if (otp.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please enter OTP')),
-                        );
-                        return;
+                  child: BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
+                    builder: (context, state) {
+                      bool isOtpLoading = false;
+                      if (state is AppointmentStatusUpdatingState && state.isOtpVerification) {
+                        isOtpLoading = true;
                       }
-                      final orderId = details.id.isNotEmpty
-                          ? details.id
-                          : (details.orderId.isNotEmpty
-                              ? details.orderId
-                              : widget.appointmentId);
 
-                      context.read<AppointmentDetailsBloc>().add(
-                            UpdateAppointmentOrderStatusEvent(
-                              orderId: orderId,
-                              orderStatus: details.orderStatus,
-                              otp: otp,
-                              deliveryOtp: otp,
-                            ),
-                          );
+                      return ElevatedButton.icon(
+                        onPressed: isOtpLoading ? null : () {
+                          final otp = _otpController.text.trim();
+                          if (otp.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please enter OTP')),
+                            );
+                            return;
+                          }
+                          final orderId = details.id.isNotEmpty
+                              ? details.id
+                              : (details.orderId.isNotEmpty
+                                  ? details.orderId
+                                  : widget.appointmentId);
+
+                          context.read<AppointmentDetailsBloc>().add(
+                                UpdateAppointmentOrderStatusEvent(
+                                  orderId: orderId,
+                                  orderStatus: details.orderStatus,
+                                  otp: otp,
+                                  deliveryOtp: otp,
+                                ),
+                              );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(
+                              0xFFEAB308), // Yellowish/Amber color like the image
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                        icon: isOtpLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.check_circle_outline, size: 18),
+                        label: Text(
+                          "Submit / Verify OTP",
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(
-                          0xFFEAB308), // Yellowish/Amber color like the image
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                    ),
-                    icon: const Icon(Icons.check_circle_outline, size: 18),
-                    label: Text(
-                      "Submit / Verify OTP",
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
                   ),
                 ),
               ],
@@ -1568,7 +1592,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value:
+            initialValue:
                 ['confirmed', 'assigned', 'completed'].contains(currentStatus)
                     ? currentStatus
                     : 'confirmed',
@@ -1945,7 +1969,6 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
       AppointmentDetailsState state, AppointmentDetailsEntity details) {
     final loadedState = state is AppointmentDetailsLoaded ? state : null;
     final partners = loadedState?.deliveryPartners ?? [];
-    final ownPartner = loadedState?.ownDeliveryPartner;
     final isLoadingPartners = loadedState?.isLoadingPartners ?? false;
     final partnersError = loadedState?.partnersError;
     final isAssigning = loadedState?.isAssigningPartner ?? false;
@@ -1993,7 +2016,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                         boxShadow: _selectedDeliveryTab == 0
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
+                                  color: Colors.black.withValues(alpha: 0.04),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 )
@@ -2041,7 +2064,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                         boxShadow: _selectedDeliveryTab == 1
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
+                                  color: Colors.black.withValues(alpha: 0.04),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 )
@@ -2211,12 +2234,12 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                           vertical: 10, horizontal: 10),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary.withOpacity(0.06)
+                            ? AppColors.primary.withValues(alpha: 0.06)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: isSelected
                             ? Border.all(
-                                color: AppColors.primary.withOpacity(0.4),
+                                color: AppColors.primary.withValues(alpha: 0.4),
                                 width: 1)
                             : Border.all(color: Colors.transparent, width: 1),
                       ),
@@ -2435,7 +2458,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           _buildTimelineStep(
             icon: Icons.check_circle_outline,
             iconColor: Colors.green,
-            bgColor: Colors.green.withOpacity(0.1),
+            bgColor: Colors.green.withValues(alpha: 0.1),
             title: "Order Created",
             subtitle: formattedDate,
             showLine: true,
@@ -2443,7 +2466,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           _buildTimelineStep(
             icon: Icons.credit_card,
             iconColor: Colors.blue,
-            bgColor: Colors.blue.withOpacity(0.1),
+            bgColor: Colors.blue.withValues(alpha: 0.1),
             title: "Payment $payStatus",
             subtitle: payStatus,
             showLine: true,
@@ -2451,7 +2474,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
           _buildTimelineStep(
             icon: Icons.schedule,
             iconColor: Colors.orange,
-            bgColor: Colors.orange.withOpacity(0.1),
+            bgColor: Colors.orange.withValues(alpha: 0.1),
             title: "Current Status",
             subtitle: ordStatus,
             showLine: false,

@@ -1,4 +1,5 @@
 import '../../domain/entities/appointment_details_entity.dart';
+import 'appointment_model.dart';
 
 class AppointmentDetailsModel extends AppointmentDetailsEntity {
   const AppointmentDetailsModel({
@@ -27,6 +28,7 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
     super.deliveries,
     super.otpEnable,
     super.otpStatus,
+    super.userDetails,
   });
 
   factory AppointmentDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -173,6 +175,11 @@ class AppointmentDetailsModel extends AppointmentDetailsEntity {
       })(),
       otpEnable: json['otpEnable']?.toString() ?? '',
       otpStatus: json['otpStatus']?.toString() ?? '',
+      userDetails: json['userDetails'] != null && json['userDetails'] is Map
+          ? AppointmentUserDetailsModel.fromJson(
+              json['userDetails'] as Map<String, dynamic>)
+          : null,
+
     );
   }
 }

@@ -119,7 +119,10 @@ class AppointmentDetailsBloc
     UpdateAppointmentOrderStatusEvent event,
     Emitter<AppointmentDetailsState> emit,
   ) async {
-    emit(AppointmentStatusUpdatingState());
+    emit(AppointmentStatusUpdatingState(
+        isOtpVerification: event.otp != null && event.otp!.isNotEmpty,
+        updatingStatus: event.orderStatus,
+    ));
     try {
       await updateAppointmentOrderStatusUseCase.call(
         orderId: event.orderId,

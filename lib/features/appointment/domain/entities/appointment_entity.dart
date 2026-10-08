@@ -91,14 +91,18 @@ class AppointmentUserDetailsEntity extends Equatable {
   final String lastName;
   final String email;
   final String phone;
+  final String gender;
+  final String age;
 
   const AppointmentUserDetailsEntity({
     required this.firstName,
     required this.lastName,
     required this.email,
     required this.phone,
+    this.gender = '',
+    this.age = '',
   });
 
   @override
-  List<Object?> get props => [firstName, lastName, email, phone];
+  List<Object?> get props => [firstName, lastName, email, phone, gender, age];
 }

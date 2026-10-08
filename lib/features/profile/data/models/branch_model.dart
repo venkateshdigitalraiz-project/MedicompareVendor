@@ -52,6 +52,8 @@ class Branch {
   final List<String> images;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String managerName;
+  final String roleName;
 
   Branch({
     required this.id,
@@ -68,9 +70,42 @@ class Branch {
     required this.createdAt,
     required this.updatedAt,
     required this.deliveryPinCodes,
+    this.managerName = '',
+    this.roleName = 'Standard Access',
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {
+    String extractedManagerName = '';
+    
+    String extractName(dynamic userObj) {
+      if (userObj is Map) {
+        final firstName = userObj['firstName'] ?? '';
+        final lastName = userObj['lastName'] ?? '';
+        return '$firstName $lastName'.trim();
+      }
+      return '';
+    }
+
+    if (json['user'] != null) {
+      if (json['user'] is List && (json['user'] as List).isNotEmpty) {
+        extractedManagerName = extractName(json['user'][0]);
+      } else if (json['user'] is Map) {
+        extractedManagerName = extractName(json['user']);
+      }
+    }
+
+    if (extractedManagerName.isEmpty && json['users'] != null) {
+      if (json['users'] is List && (json['users'] as List).isNotEmpty) {
+        extractedManagerName = extractName(json['users'][0]);
+      } else if (json['users'] is Map) {
+        extractedManagerName = extractName(json['users']);
+      }
+    }
+    
+    if (extractedManagerName.isEmpty) {
+      extractedManagerName = json['name'] ?? '';
+    }
+
     return Branch(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -88,6 +123,8 @@ class Branch {
       updatedAt:
           DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
       deliveryPinCodes: json['deliveryPinCodes'] ?? '',
+      managerName: extractedManagerName,
+      roleName: json['roleName'] ?? 'Standard Access',
     );
   }
 }
@@ -127,10 +164,16 @@ class BranchDetailsResponse {
   });
 
   factory BranchDetailsResponse.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> branchJson = Map<String, dynamic>.from(json['data']?['list'] ?? {});
+    // Inject the root-level 'users' object into the branch JSON so Branch.fromJson can parse it
+    if (json['users'] != null) {
+      branchJson['users'] = json['users'];
+    }
+
     return BranchDetailsResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      branch: Branch.fromJson(json['data']?['list'] ?? {}),
+      branch: Branch.fromJson(branchJson),
     );
   }
 }

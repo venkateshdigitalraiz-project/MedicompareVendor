@@ -12,6 +12,12 @@ import '../bloc/branch_event.dart';
 import '../bloc/branch_state.dart';
 import '../widgets/edit_branch_sheet.dart';
 import 'branches_list_page.dart';
+import 'package:MediCompare/features/service_fee/service_fee_injection.dart';
+import 'package:MediCompare/features/service_fee/presentation/bloc/service_fee_bloc.dart';
+import 'package:MediCompare/features/service_fee/presentation/bloc/service_fee_event.dart';
+import 'package:MediCompare/features/service_fee/presentation/bloc/service_fee_state.dart';
+import 'package:MediCompare/features/service_fee/domain/entities/service_fee.dart';
+import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class BranchDetailsPage extends StatefulWidget {
   final String branchId;
@@ -27,131 +33,141 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
       BranchService(CoreInjection.provideApiService());
   late Future<BranchDetailsResponse> _branchFuture;
   late final BranchBloc _branchBloc;
+  late final ServiceFeeBloc _serviceFeeBloc;
 
   @override
   void initState() {
     super.initState();
     _branchBloc = ProfileBranchInjection.provideBranchBloc();
+    _serviceFeeBloc = ServiceFeeInjection.provideServiceFeeBloc();
+    _serviceFeeBloc.add(LoadServiceFee());
     _branchFuture = _branchService.getBranchDetails(widget.branchId);
   }
 
   @override
   void dispose() {
     _branchBloc.close();
+    _serviceFeeBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<BranchBloc, BranchState>(
-      bloc: _branchBloc,
-      listener: (context, state) {
-        if (state is BranchDeleteSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.green),
-          );
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const BranchesListPage()),
-            (route) => route.isFirst,
-          );
-        } else if (state is BranchDeleteFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF1F4FB),
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryDark,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "Branch Details",
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+        bloc: _branchBloc,
+        listener: (context, state) {
+          if (state is BranchDeleteSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.green),
+            );
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const BranchesListPage()),
+              (route) => route.isFirst,
+            );
+          } else if (state is BranchDeleteFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF1F4FB),
+          appBar: AppBar(
+            backgroundColor: AppColors.primaryDark,
+            elevation: 0,
+            centerTitle: true,
+            title: Text(
+              "Branch Details",
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            leading: const BackButton(color: Colors.white),
+            actions: [
+              FutureBuilder<BranchDetailsResponse>(
+                future: _branchFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return IconButton(
+                      icon:
+                          const Icon(Icons.edit_outlined, color: Colors.white),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (ctx) => EditBranchSheet(
+                            branch: snapshot.data!.branch,
+                            onSuccess: () {
+                              setState(() {
+                                _branchFuture = _branchService
+                                    .getBranchDetails(widget.branchId);
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Branch updated successfully'),
+                                    backgroundColor: Colors.green),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              //  const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Delete Branch'),
+                      content: const Text(
+                          'Are you sure you want to delete this branch? This action cannot be undone.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            _branchBloc.add(DeleteBranchEvent(widget.branchId));
+                          },
+                          child: const Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ),
-        leading: const BackButton(color: Colors.white),
-        actions: [
-          FutureBuilder<BranchDetailsResponse>(
+          body: FutureBuilder<BranchDetailsResponse>(
             future: _branchFuture,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (ctx) => EditBranchSheet(
-                        branch: snapshot.data!.branch,
-                        onSuccess: () {
-                          setState(() {
-                            _branchFuture = _branchService
-                                .getBranchDetails(widget.branchId);
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Branch updated successfully'),
-                                backgroundColor: Colors.green),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return _buildErrorState(snapshot.error.toString());
+              } else if (!snapshot.hasData) {
+                return const Center(child: Text("No data found"));
               }
-              return const SizedBox.shrink();
-            },
-          ),
-          //  const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Delete Branch'),
-                  content: const Text('Are you sure you want to delete this branch? This action cannot be undone.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        _branchBloc.add(DeleteBranchEvent(widget.branchId));
-                      },
-                      child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<BranchDetailsResponse>(
-        future: _branchFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error.toString());
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text("No data found"));
-          }
 
-          final branch = snapshot.data!.branch;
-          return _buildContent(branch);
-        },
-      ),
-    ));
+              final branch = snapshot.data!.branch;
+              return _buildContent(branch);
+            },
+          ),
+        ));
   }
 
   Widget _buildContent(Branch branch) {
@@ -273,6 +289,11 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
               ],
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          // Management & Roles
+          _buildManagementRolesCard(branch),
 
           const SizedBox(height: 16),
 
@@ -507,4 +528,243 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
       ),
     );
   }
+
+  Widget _buildManagementRolesCard(Branch branch) {
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEDE9FE),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.shield_outlined,
+                    size: 20, color: Color(0xFF6D28D9)),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                "Management & Roles",
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1E1B4B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Manager & Access Role sub-cards
+          Column(
+            children: [
+              // Manager Card
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFEDF2FF)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.person_outline,
+                          size: 20, color: Color(0xFF2563EB)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Manager",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF2563EB),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            branch.managerName.isNotEmpty
+                                ? branch.managerName
+                                : branch.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E1B4B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Access Role Card
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAF5FF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFF3E8FF)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.shield_outlined,
+                          size: 20, color: Color(0xFF9333EA)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Access Role",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF9333EA),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            branch.roleName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E1B4B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceFeeCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required List<_ServiceFeeRow> rows,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDark.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 20, color: AppColors.primaryDark),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E1B4B),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.0),
+            child: Divider(height: 1),
+          ),
+          ...rows.map((row) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      row.label,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      row.value,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E1B4B),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServiceFeeRow {
+  final String label;
+  final String value;
+
+  const _ServiceFeeRow(this.label, this.value);
 }

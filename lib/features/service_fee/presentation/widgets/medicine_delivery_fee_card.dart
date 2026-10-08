@@ -26,7 +26,8 @@ class MedicineDeliveryFeeCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.medication_outlined, color: AppColors.primaryDark),
+                const Icon(Icons.medication_outlined,
+                    color: AppColors.primaryDark),
                 const SizedBox(width: 8),
                 Text(
                   "Medicine",
@@ -48,10 +49,12 @@ class MedicineDeliveryFeeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _buildRow("Minimum Delivery Fee", fee.minDeliveryFee.toRupeeFormat()),
+            _buildRow(
+                "Minimum Delivery Fee", fee.minDeliveryFee.toRupeeFormat()),
             _buildRow("Base Radius", "${fee.baseRadius.toStringAsFixed(0)} km"),
             _buildRow("Per Km Charge", fee.perKmCharge.toRupeeFormat()),
-            _buildRow("Free Delivery Above", fee.minOrderForFreeDelivery.toRupeeFormat()),
+            _buildRow("Free Delivery Above",
+                fee.minOrderForFreeDelivery.toRupeeFormat()),
           ],
         ),
       ),

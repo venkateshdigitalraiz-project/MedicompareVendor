@@ -350,6 +350,8 @@ class AppointmentUserDetailsModel extends AppointmentUserDetailsEntity {
     required super.lastName,
     required super.email,
     required super.phone,
+    super.gender,
+    super.age,
   });
 
   factory AppointmentUserDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -362,6 +364,8 @@ class AppointmentUserDetailsModel extends AppointmentUserDetailsEntity {
       lastName: json['last_name']?.toString() ?? json['lastName']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? json['phoneNumber']?.toString() ?? json['mobile']?.toString() ?? '',
+      gender: json['gender']?.toString() ?? json['sex']?.toString() ?? '',
+      age: json['age']?.toString() ?? '',
     );
   }
 }

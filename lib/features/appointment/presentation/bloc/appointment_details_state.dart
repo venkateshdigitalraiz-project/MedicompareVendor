@@ -112,7 +112,18 @@ class ReportUploadErrorState extends AppointmentDetailsState {
   List<Object?> get props => [message, orderItemId, itemKey];
 }
 
-class AppointmentStatusUpdatingState extends AppointmentDetailsState {}
+class AppointmentStatusUpdatingState extends AppointmentDetailsState {
+  final bool isOtpVerification;
+  final String? updatingStatus;
+
+  const AppointmentStatusUpdatingState({
+    this.isOtpVerification = false,
+    this.updatingStatus,
+  });
+
+  @override
+  List<Object?> get props => [isOtpVerification, updatingStatus];
+}
 
 class AppointmentStatusUpdatedState extends AppointmentDetailsState {
   final String message;
