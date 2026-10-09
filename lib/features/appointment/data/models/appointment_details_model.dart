@@ -197,6 +197,8 @@ class AppointmentDetailsBillingSummaryModel
     required super.sampleCollection,
     required super.tax,
     required super.adminCommission,
+    super.collectionType = '',
+    super.homeVisitFee = 0.0,
   });
 
   factory AppointmentDetailsBillingSummaryModel.fromJson(
@@ -233,6 +235,15 @@ class AppointmentDetailsBillingSummaryModel
               json['vendorcommission']?.toString() ??
               json['adminCommission']?.toString() ??
               json['admincommission']?.toString() ??
+              '0') ??
+          0.0,
+      collectionType: json['collectionType']?.toString() ??
+          json['collectiontype']?.toString() ??
+          json['collection_type']?.toString() ??
+          '',
+      homeVisitFee: double.tryParse(json['homeVisitFee']?.toString() ??
+              json['homevisitfee']?.toString() ??
+              json['home_visit_fee']?.toString() ??
               '0') ??
           0.0,
     );

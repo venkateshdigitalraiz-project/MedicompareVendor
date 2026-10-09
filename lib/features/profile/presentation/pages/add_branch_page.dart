@@ -8,6 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:MediCompare/core/api/api_endpoints.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:MediCompare/core/utils/core_injection.dart';
+import 'dart:async';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart' as geocoding;
+
 import '../bloc/branch_bloc.dart';
 import '../bloc/branch_event.dart';
 import '../bloc/branch_state.dart';
@@ -41,9 +46,10 @@ class _AddBranchViewState extends State<_AddBranchView> {
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _editableAddressController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _stateController = TextEditingController(text: "telangana");
+  final TextEditingController _editableAddressController =
+      TextEditingController();
+  final TextEditingController _stateController =
+      TextEditingController(text: "telangana");
   final TextEditingController _pincodeController = TextEditingController();
 
   String _selectedStatus = 'active';
@@ -51,6 +57,11 @@ class _AddBranchViewState extends State<_AddBranchView> {
   String _selectedDeliveryPincode = '';
   File? _selectedImage;
   bool _obscurePassword = true;
+
+  GoogleMapController? _mapController;
+  LatLng _currentPosition =
+      const LatLng(20.5937, 78.9629); // Default India center
+  Set<Marker> _markers = {};
 
   List<dynamic> _predictions = [];
   bool _isSearchingAddress = false;
@@ -63,6 +74,166 @@ class _AddBranchViewState extends State<_AddBranchView> {
   void initState() {
     super.initState();
     _fetchDeliveryPincodes();
+    _getCurrentLocation();
+    _pincodeController.addListener(_onPincodeChanged);
+  }
+
+  void _onPincodeChanged() {
+    String pincode = _pincodeController.text.trim();
+    if (pincode.length == 6) {
+      _getLatLngFromPincode(pincode);
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location services are disabled.')),
+        );
+      }
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')),
+          );
+        }
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Location permissions are permanently denied.')),
+        );
+      }
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+      LatLng newPos = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _currentPosition = newPos;
+        _updateMarkerAndCamera(_currentPosition);
+      });
+      await _getAddressFromLatLng(newPos);
+    } catch (e) {
+      debugPrint("Error getting location: $e");
+    }
+  }
+
+  void _updateMarkerAndCamera(LatLng position) {
+    _markers = {
+      Marker(
+        markerId: const MarkerId('branch_location'),
+        position: position,
+      )
+    };
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: position, zoom: 15),
+      ),
+    );
+    setState(() {});
+  }
+
+  Future<void> _getAddressFromLatLng(LatLng position,
+      {bool updatePincode = true}) async {
+    try {
+      List<geocoding.Placemark> placemarks = await geocoding.Geocoding()
+          .placemarkFromCoordinates(position.latitude, position.longitude);
+      if (placemarks.isNotEmpty) {
+        geocoding.Placemark place = placemarks.first;
+
+        List<String> mainParts = [];
+        
+        if (place.locality != null && place.locality!.isNotEmpty) {
+          mainParts.add(place.locality!);
+        } else if (place.subAdministrativeArea != null && place.subAdministrativeArea!.isNotEmpty) {
+          mainParts.add(place.subAdministrativeArea!);
+        }
+
+        String stateZip = "";
+        if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty) {
+          stateZip += place.administrativeArea!;
+        }
+        if (place.postalCode != null && place.postalCode!.isNotEmpty) {
+          if (stateZip.isNotEmpty) stateZip += " ";
+          stateZip += place.postalCode!;
+        }
+        
+        if (stateZip.isNotEmpty) {
+          mainParts.add(stateZip);
+        }
+
+        if (place.country != null && place.country!.isNotEmpty) {
+          mainParts.add(place.country!);
+        }
+
+        String completeAddress = mainParts.join(", ");
+
+        if (mounted) {
+          setState(() {
+            _addressController.text = completeAddress;
+            _editableAddressController.text = completeAddress;
+
+            if (updatePincode &&
+                place.postalCode != null &&
+                place.postalCode!.isNotEmpty) {
+              _pincodeController.removeListener(_onPincodeChanged);
+              _pincodeController.text = place.postalCode!;
+              _pincodeController.addListener(_onPincodeChanged);
+            }
+            if (place.administrativeArea != null &&
+                place.administrativeArea!.isNotEmpty) {
+              _stateController.text = place.administrativeArea!;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error in reverse geocoding: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Could not fetch address for selected location')),
+        );
+      }
+    }
+  }
+
+  Future<void> _getLatLngFromPincode(String pincode) async {
+    try {
+      List<geocoding.Location> locations =
+          await geocoding.Geocoding().locationFromAddress(pincode);
+      if (locations.isNotEmpty) {
+        LatLng position =
+            LatLng(locations.first.latitude, locations.first.longitude);
+        _updateMarkerAndCamera(position);
+        await _getAddressFromLatLng(position, updatePincode: false);
+      }
+    } catch (e) {
+      debugPrint("Could not find location for pincode: $pincode. Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Invalid pincode or location not found')),
+        );
+      }
+    }
   }
 
   Future<void> _fetchDeliveryPincodes() async {
@@ -120,7 +291,6 @@ class _AddBranchViewState extends State<_AddBranchView> {
     _passwordController.dispose();
     _addressController.dispose();
     _editableAddressController.dispose();
-    _cityController.dispose();
     _stateController.dispose();
     _pincodeController.dispose();
     super.dispose();
@@ -151,12 +321,23 @@ class _AddBranchViewState extends State<_AddBranchView> {
     }
   }
 
-  void _onAddressSelected(Map<String, dynamic> prediction) {
+  void _onAddressSelected(Map<String, dynamic> prediction) async {
     setState(() {
       _editableAddressController.text = prediction['description'];
       _addressController.text = prediction['description'];
       _predictions = [];
     });
+
+    try {
+      List<geocoding.Location> locations = await geocoding.Geocoding()
+          .locationFromAddress(prediction['description']);
+      if (locations.isNotEmpty) {
+        LatLng position =
+            LatLng(locations.first.latitude, locations.first.longitude);
+        _updateMarkerAndCamera(position);
+        await _getAddressFromLatLng(position);
+      }
+    } catch (_) {}
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -298,7 +479,6 @@ class _AddBranchViewState extends State<_AddBranchView> {
       "address": _addressController.text.trim().isNotEmpty
           ? _addressController.text.trim()
           : _editableAddressController.text.trim(),
-      "city": _cityController.text.trim(),
       "state": _stateController.text.trim(),
       "pincode": _pincodeController.text.trim(),
       "status": _selectedStatus,
@@ -359,7 +539,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(state.message,
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                          style:
+                              GoogleFonts.inter(fontWeight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -380,7 +561,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(state.message,
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                          style:
+                              GoogleFonts.inter(fontWeight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -433,7 +615,7 @@ class _AddBranchViewState extends State<_AddBranchView> {
                     subtitle: "Login credentials and communication channel",
                     icon: Icons.lock_outline_rounded,
                     children: [
-                      _buildLabel("Branch Email", isRequired: true),
+                      _buildLabel("Branch Email"),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _emailController,
@@ -453,7 +635,7 @@ class _AddBranchViewState extends State<_AddBranchView> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      _buildLabel("Branch Password", isRequired: true),
+                      _buildLabel("Password", isRequired: true),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _passwordController,
@@ -478,7 +660,7 @@ class _AddBranchViewState extends State<_AddBranchView> {
                             : null,
                       ),
                       const SizedBox(height: 16),
-                      _buildLabel("Mobile Number", isRequired: true),
+                      _buildLabel("Contact Number", isRequired: true),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _mobileController,
@@ -519,7 +701,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                             : null,
                       ),
                       const SizedBox(height: 16),
-                      _buildLabel("Search Address with Maps (Auto-fill)"),
+                      _buildLabel("Branch Address (Editable)",
+                          isRequired: true),
                       const SizedBox(height: 8),
                       Stack(
                         children: [
@@ -563,8 +746,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                                 shrinkWrap: true,
                                 padding: EdgeInsets.zero,
                                 itemCount: _predictions.length,
-                                separatorBuilder: (_, __) =>
-                                    Divider(height: 1, color: Colors.grey.shade100),
+                                separatorBuilder: (_, __) => Divider(
+                                    height: 1, color: Colors.grey.shade100),
                                 itemBuilder: (context, index) {
                                   final p = _predictions[index];
                                   return ListTile(
@@ -590,23 +773,6 @@ class _AddBranchViewState extends State<_AddBranchView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("City"),
-                                const SizedBox(height: 8),
-                                TextFormField(
-                                  controller: _cityController,
-                                  decoration: _inputDecoration(
-                                    hint: "e.g., Hyderabad",
-                                    prefixIcon: Icons.location_city_rounded,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
                                 _buildLabel("State", isRequired: true),
                                 const SizedBox(height: 8),
                                 TextFormField(
@@ -623,34 +789,12 @@ class _AddBranchViewState extends State<_AddBranchView> {
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel("Pincode"),
-                                const SizedBox(height: 8),
-                                TextFormField(
-                                  controller: _pincodeController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: _inputDecoration(
-                                    hint: "e.g., 500081",
-                                    prefixIcon: Icons.pin_drop_outlined,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("Delivery Pincode"),
+                                _buildLabel("Deliverable Pincode"),
                                 const SizedBox(height: 8),
                                 _isLoadingPincodes
                                     ? const SizedBox(
@@ -708,6 +852,53 @@ class _AddBranchViewState extends State<_AddBranchView> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel(
+                                    "PIN Code Location & Geographical Boundary Map"),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _pincodeController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _inputDecoration(
+                                    hint: "e.g., 500081",
+                                    prefixIcon: Icons.pin_drop_outlined,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                              target: _currentPosition, zoom: 15),
+                          onMapCreated: (GoogleMapController controller) {
+                            _mapController = controller;
+                          },
+                          onTap: (LatLng position) async {
+                            _updateMarkerAndCamera(position);
+                            await _getAddressFromLatLng(position);
+                          },
+                          markers: _markers,
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                          zoomControlsEnabled: false,
+                        ),
+                      ),
                     ],
                   ),
 
@@ -723,7 +914,7 @@ class _AddBranchViewState extends State<_AddBranchView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel("Role (roleId)"),
+                                _buildLabel("Role (roleId)", isRequired: true),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
                                   value: _selectedRoleId,
@@ -768,8 +959,7 @@ class _AddBranchViewState extends State<_AddBranchView> {
                                   isExpanded: true,
                                   items: const [
                                     DropdownMenuItem(
-                                        value: 'active',
-                                        child: Text("Active")),
+                                        value: 'active', child: Text("Active")),
                                     DropdownMenuItem(
                                         value: 'inactive',
                                         child: Text("Inactive")),
@@ -798,7 +988,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: isLoading ? null : () => Navigator.pop(context),
+                            onPressed:
+                                isLoading ? null : () => Navigator.pop(context),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
@@ -828,7 +1019,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF6B48FF).withOpacity(0.3),
+                                  color:
+                                      const Color(0xFF6B48FF).withOpacity(0.3),
                                   blurRadius: 14,
                                   offset: const Offset(0, 4),
                                 ),
@@ -854,7 +1046,8 @@ class _AddBranchViewState extends State<_AddBranchView> {
                                       ),
                                     )
                                   : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         const Icon(Icons.add_business_rounded,
                                             color: Colors.white, size: 20),
@@ -948,7 +1141,9 @@ class _AddBranchViewState extends State<_AddBranchView> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          _selectedImage != null ? "Change Image" : "Select Image",
+                          _selectedImage != null
+                              ? "Change Image"
+                              : "Select Image",
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -1061,13 +1256,16 @@ class _AddBranchViewState extends State<_AddBranchView> {
   Widget _buildLabel(String text, {bool isRequired = false}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          text,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF374151),
+        Flexible(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF374151),
+            ),
           ),
         ),
         if (isRequired)

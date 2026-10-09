@@ -64,6 +64,7 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
 
   // Step 2: Work Details
   String _selectedVehicleType = 'Bike';
+  String _selectedServiceCategory = 'select service category';
   final _vehicleNumberController = TextEditingController();
   final _licenseNumberController = TextEditingController();
   final _shiftStartController = TextEditingController(text: '09:00 AM');
@@ -98,6 +99,12 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
   final _emergencyNameController = TextEditingController();
   final _emergencyPhoneController = TextEditingController();
   final _notesController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final ValueNotifier<bool> _obscurePasswordNotifier =
+      ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _obscureConfirmPasswordNotifier =
+      ValueNotifier<bool>(true);
 
   final ImagePicker _picker = ImagePicker();
 
@@ -140,9 +147,8 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
     _phoneController.text =
         data.phone.replaceAll('+91', '').replaceAll(' ', '').trim();
     if (data.dob.isNotEmpty) {
-      _dobController.text = data.dob.contains('T')
-          ? data.dob.split('T').first
-          : data.dob;
+      _dobController.text =
+          data.dob.contains('T') ? data.dob.split('T').first : data.dob;
     }
 
     if (data.gender.isNotEmpty) {
@@ -174,6 +180,9 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
       } else {
         _selectedVehicleType = 'Bike';
       }
+    }
+    if (data.deliveryType.isNotEmpty) {
+      _selectedServiceCategory = data.deliveryType;
     }
     _vehicleNumberController.text = data.vehicleNumber;
     _licenseNumberController.text = data.drivingLicenseNumber;
@@ -356,6 +365,9 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
       state: _stateController.text.trim(),
       pincode: _pincodeController.text.trim(),
       vehicleType: _selectedVehicleType,
+      deliveryType: _selectedServiceCategory == 'select service category'
+          ? 'medicine'
+          : _selectedServiceCategory,
       vehicleNumber: _vehicleNumberController.text.trim(),
       drivingLicenseNumber: _licenseNumberController.text.trim(),
       shiftStartTime: _shiftStartController.text.trim(),
@@ -378,6 +390,8 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
       emergencyContactName: _emergencyNameController.text.trim(),
       emergencyContactPhone: _emergencyPhoneController.text.trim(),
       notes: _notesController.text.trim(),
+      password: _passwordController.text.trim(),
+      confirmPassword: _confirmPasswordController.text.trim(),
     );
 
     if (isEditMode) {
@@ -895,7 +909,7 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
           ),
           const SizedBox(height: 20),
 
-          // Vehicle Type & Vehicle Number
+          // Vehicle Type & Service Category
           _buildResponsiveRow([
             _buildDropdownField(
               label: "Vehicle Type *",
@@ -905,6 +919,21 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
               onChanged: (val) =>
                   setState(() => _selectedVehicleType = val ?? 'Bike'),
             ),
+            _buildDropdownField(
+              label: "Service Category *",
+              hint: "Select Service Category",
+              value: _selectedServiceCategory,
+              items: const [
+                "select service category",
+                "Rx Medicine",
+                "Ambulance"
+              ],
+              onChanged: (val) => setState(() =>
+                  _selectedServiceCategory = val ?? 'select service category'),
+            ),
+          ]),
+          const SizedBox(height: 16),
+          _buildResponsiveRow([
             _buildTextField(
               label: "Vehicle Number *",
               hint: "E.G. TS21F2987",
@@ -1126,125 +1155,91 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
   Widget _buildStep5Settings() {
     return Form(
       key: _formKey5,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Settings & Permissions",
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1E1B4B),
-            ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          "Account Settings & Preferences",
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E1B4B),
           ),
-          const SizedBox(height: 2),
-          Text(
-            "Configure operational settings and account preferences",
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: const Color(0xFF64748B),
-            ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          "Set account login password and operational preferences",
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: const Color(0xFF64748B),
           ),
-          const SizedBox(height: 20),
-
-          // Status & Max Orders
-          _buildResponsiveRow([
-            _buildDropdownField(
-              label: "Account Status *",
-              hint: "Select Status",
-              value: _selectedStatus,
-              items: const ['active', 'inactive'],
-              onChanged: (val) =>
-                  setState(() => _selectedStatus = val ?? 'active'),
-            ),
-            _buildTextField(
-              label: "Max Daily Deliveries",
-              hint: "e.g. 20",
-              controller: _maxOrdersController,
-              keyboardType: TextInputType.number,
-            ),
-          ]),
-          const SizedBox(height: 16),
-
-          // Auto-assignment Switch
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Allow Auto-Assignment",
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1E1B4B),
-                      ),
-                    ),
-                    Switch(
-                      value: _autoAssign,
-                      activeThumbColor: const Color(0xFF1E1B4B),
-                      onChanged: (val) => setState(() => _autoAssign = val),
-                    ),
-                  ],
+        ),
+        const SizedBox(height: 20),
+        ValueListenableBuilder<bool>(
+          valueListenable: _obscurePasswordNotifier,
+          builder: (context, isObscure, child) {
+            return _buildTextField(
+              label: "Password *",
+              hint: "Enter password",
+              controller: _passwordController,
+              obscureText: isObscure,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isObscure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 20,
+                  color: const Color(0xFF94A3B8),
                 ),
-                Text(
-                  "Automatically allocate nearby orders to this personnel",
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Emergency Contact
-          _buildResponsiveRow([
-            _buildTextField(
-              label: "Emergency Contact Name",
-              hint: "e.g. Family Member Name",
-              controller: _emergencyNameController,
-            ),
-            _buildTextField(
-              label: "Emergency Contact Phone",
-              hint: "10-digit mobile number",
-              controller: _emergencyPhoneController,
-              keyboardType: TextInputType.phone,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(10),
-              ],
+                onPressed: () {
+                  _obscurePasswordNotifier.value =
+                      !_obscurePasswordNotifier.value;
+                },
+              ),
               validator: (val) {
-                if (val != null &&
-                    val.trim().isNotEmpty &&
-                    val.trim().length != 10) {
-                  return "Emergency phone must be 10 digits";
+                if (val == null || val.trim().isEmpty) {
+                  return "Password is required";
+                }
+                if (val.trim().length < 6) {
+                  return "Password must be at least 6 characters";
                 }
                 return null;
               },
-            ),
-          ]),
-          const SizedBox(height: 16),
-
-          // Notes
-          _buildTextField(
-            label: "Special Instructions / Notes",
-            hint:
-                "Any additional notes regarding shift or location preferences...",
-            controller: _notesController,
-            maxLines: 2,
-          ),
-        ],
-      ),
+            );
+          },
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _obscureConfirmPasswordNotifier,
+          builder: (context, isObscure, child) {
+            return _buildTextField(
+              label: "Confirm Password *",
+              hint: "Confirm password",
+              controller: _confirmPasswordController,
+              obscureText: isObscure,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isObscure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 20,
+                  color: const Color(0xFF94A3B8),
+                ),
+                onPressed: () {
+                  _obscureConfirmPasswordNotifier.value =
+                      !_obscureConfirmPasswordNotifier.value;
+                },
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return "Confirm Password is required";
+                }
+                if (val.trim() != _passwordController.text.trim()) {
+                  return "Passwords do not match";
+                }
+                return null;
+              },
+            );
+          },
+        ),
+      ]),
     );
   }
 
@@ -1531,6 +1526,7 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
     TextCapitalization textCapitalization = TextCapitalization.none,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
+    bool obscureText = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1542,6 +1538,7 @@ class _AddDeliverymanViewState extends State<AddDeliverymanView> {
           keyboardType: keyboardType,
           maxLines: maxLines,
           readOnly: readOnly,
+          obscureText: obscureText,
           onTap: onTap,
           textCapitalization: textCapitalization,
           inputFormatters: inputFormatters,

@@ -21,46 +21,52 @@ class DeliveryAnalyticsModel extends DeliveryAnalyticsEntity {
               ? json['data']
               : (json['data'] is Map ? Map<String, dynamic>.from(json['data']) : json);
 
-      final totalOrders = _parseInt(data['totalOrders'] ??
-          data['total_orders'] ??
-          data['total'] ??
-          data['totalOrdersCount'] ??
-          data['ordersCount']);
+      final Map<String, dynamic> summary = data['summary'] is Map
+          ? Map<String, dynamic>.from(data['summary'])
+          : data;
 
-      final deliveredOrders = _parseInt(data['deliveredOrders'] ??
-          data['delivered_orders'] ??
-          data['delivered'] ??
-          data['deliveredCount'] ??
-          data['delivered_count']);
+      final totalOrders = _parseInt(summary['totalOrders'] ??
+          summary['total_orders'] ??
+          summary['total'] ??
+          summary['totalOrdersCount'] ??
+          summary['ordersCount']);
 
-      final inTransitOrders = _parseInt(data['inTransitOrders'] ??
-          data['in_transit_orders'] ??
-          data['inTransit'] ??
-          data['in_transit'] ??
-          data['inTransitCount'] ??
-          data['in_transit_count']);
+      final deliveredOrders = _parseInt(summary['totalCompleted'] ??
+          summary['deliveredOrders'] ??
+          summary['delivered_orders'] ??
+          summary['delivered'] ??
+          summary['deliveredCount'] ??
+          summary['delivered_count']);
 
-      final activeDeliverymen = _parseInt(data['activeDeliverymen'] ??
-          data['active_deliverymen'] ??
-          data['active'] ??
-          data['activeDeliveryman'] ??
-          data['active_count'] ??
-          data['activePartners']);
+      final inTransitOrders = _parseInt(summary['totalInTransit'] ??
+          summary['inTransitOrders'] ??
+          summary['in_transit_orders'] ??
+          summary['inTransit'] ??
+          summary['in_transit'] ??
+          summary['inTransitCount'] ??
+          summary['in_transit_count']);
 
-      final totalDeliverymen = _parseInt(data['totalDeliverymen'] ??
-          data['total_deliverymen'] ??
-          data['totalPersonnel'] ??
-          data['total_personnel'] ??
-          data['deliverymenCount'] ??
-          data['totalDeliveryPartners'] ??
-          data['total_delivery_partners']);
+      final activeDeliverymen = _parseInt(summary['activeDeliverymen'] ??
+          summary['active_deliverymen'] ??
+          summary['active'] ??
+          summary['activeDeliveryman'] ??
+          summary['active_count'] ??
+          summary['activePartners']);
 
-      double deliveredRate = _parseDouble(data['deliveredRate'] ??
-          data['delivered_rate'] ??
-          data['deliveryRate'] ??
-          data['delivery_rate'] ??
-          data['successRate'] ??
-          data['success_rate']);
+      final totalDeliverymen = _parseInt(summary['totalDeliveryMen'] ??
+          summary['totalDeliverymen'] ??
+          summary['total_deliverymen'] ??
+          summary['totalPersonnel'] ??
+          summary['total_personnel'] ??
+          summary['deliverymenCount'] ??
+          summary['totalDeliveryPartners']);
+
+      double deliveredRate = _parseDouble(summary['deliveredRate'] ??
+          summary['delivered_rate'] ??
+          summary['deliveryRate'] ??
+          summary['delivery_rate'] ??
+          summary['successRate'] ??
+          summary['success_rate']);
 
       if (deliveredRate == 0.0 && totalOrders > 0) {
         deliveredRate = ((deliveredOrders / totalOrders) * 100);
@@ -103,16 +109,14 @@ class DeliveryAnalyticsModel extends DeliveryAnalyticsEntity {
       }
 
       List<TopDeliveryPersonnelEntity> topPersonnel = [];
-      final rawList = data['topDeliveryPersonnel'] ??
+      final rawList = data['deliveryMen'] ??
+          data['deliverymen'] ??
+          data['topDeliveryPersonnel'] ??
           data['top_delivery_personnel'] ??
           data['topPersonnel'] ??
           data['top_personnel'] ??
-          data['topDeliverymen'] ??
-          data['top_deliverymen'] ??
-          data['deliverymen'] ??
           data['partners'] ??
           data['deliveryPartners'] ??
-          data['delivery_partners'] ??
           data['directory'] ??
           data['list'];
 
@@ -179,20 +183,24 @@ class OrderStatusDistributionModel extends OrderStatusDistributionEntity {
 
   factory OrderStatusDistributionModel.fromJson(
       Map<String, dynamic> json, int totalOrders) {
-    final delVal = json['delivered'] ??
-        json['delivered_orders'] ??
+    // Helper to safely extract count or percentage from either direct value or nested map
+    dynamic extractValue(String key, String field) {
+      if (json[key] is Map) {
+        return json[key][field];
+      }
+      return null;
+    }
+
+    final delVal = extractValue('delivered', 'percentage') ??
         json['deliveredPercentage'] ??
         json['delivered_percentage'];
-    final inTransVal = json['inTransit'] ??
-        json['in_transit'] ??
+    final inTransVal = extractValue('inTransit', 'percentage') ??
         json['inTransitPercentage'] ??
         json['in_transit_percentage'];
-    final assignedVal = json['assigned'] ??
-        json['assigned_orders'] ??
+    final assignedVal = extractValue('assigned', 'percentage') ??
         json['assignedPercentage'] ??
         json['assigned_percentage'];
-    final cancelledVal = json['cancelled'] ??
-        json['canceled'] ??
+    final cancelledVal = extractValue('cancelled', 'percentage') ??
         json['cancelledPercentage'] ??
         json['cancelled_percentage'];
 
@@ -201,15 +209,22 @@ class OrderStatusDistributionModel extends OrderStatusDistributionEntity {
     double assignedPerc = DeliveryAnalyticsModel._parseDouble(assignedVal);
     double cancelledPerc = DeliveryAnalyticsModel._parseDouble(cancelledVal);
 
-    int delCount = DeliveryAnalyticsModel._parseInt(json['deliveredCount'] ??
+    int delCount = DeliveryAnalyticsModel._parseInt(extractValue('delivered', 'count') ??
+        json['deliveredCount'] ??
         json['delivered_count'] ??
-        json['delivered']);
-    int inTransCount = DeliveryAnalyticsModel._parseInt(
-        json['inTransitCount'] ?? json['in_transit_count'] ?? json['inTransit']);
-    int assignedCount = DeliveryAnalyticsModel._parseInt(
-        json['assignedCount'] ?? json['assigned_count'] ?? json['assigned']);
-    int cancelledCount = DeliveryAnalyticsModel._parseInt(
-        json['cancelledCount'] ?? json['cancelled_count'] ?? json['cancelled']);
+        (json['delivered'] is num ? json['delivered'] : null));
+    int inTransCount = DeliveryAnalyticsModel._parseInt(extractValue('inTransit', 'count') ??
+        json['inTransitCount'] ??
+        json['in_transit_count'] ??
+        (json['inTransit'] is num ? json['inTransit'] : null));
+    int assignedCount = DeliveryAnalyticsModel._parseInt(extractValue('assigned', 'count') ??
+        json['assignedCount'] ??
+        json['assigned_count'] ??
+        (json['assigned'] is num ? json['assigned'] : null));
+    int cancelledCount = DeliveryAnalyticsModel._parseInt(extractValue('cancelled', 'count') ??
+        json['cancelledCount'] ??
+        json['cancelled_count'] ??
+        (json['cancelled'] is num ? json['cancelled'] : null));
 
     if (totalOrders > 0) {
       if (delPerc == 0.0 && delCount > 0) {
@@ -271,7 +286,8 @@ class TopDeliveryPersonnelModel extends TopDeliveryPersonnelEntity {
           json['full_name']?.toString() ??
           json['partner_name']?.toString() ??
           'Personnel',
-      deliveries: DeliveryAnalyticsModel._parseInt(json['deliveries'] ??
+      deliveries: DeliveryAnalyticsModel._parseInt(json['totalOrders'] ??
+          json['deliveries'] ??
           json['total_deliveries'] ??
           json['ordersCount'] ??
           json['deliveredCount'] ??

@@ -247,7 +247,8 @@ class _ProfilePageState extends State<MainprofileScreen> {
                           radius: 39,
                           backgroundImage: _buildProfileImage(),
                           onBackgroundImageError: (exception, stackTrace) {
-                            debugPrint('Error loading profile image: $exception');
+                            debugPrint(
+                                'Error loading profile image: $exception');
                           },
                           child: _isLoading || _isUploading
                               ? Container(
@@ -334,7 +335,6 @@ class _ProfilePageState extends State<MainprofileScreen> {
                         color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-
                       child: const Icon(
                         Icons.edit_outlined,
                         color: AppColors.primary,
@@ -571,19 +571,19 @@ class _ProfilePageState extends State<MainprofileScreen> {
                   _menuTile("All Deliverymen", Icons.group_outlined, () {
                     context.push('/deliveryman');
                   }, isSubTile: true),
-                  _menuTile("Add Deliveryman", Icons.person_add_alt_1_outlined, () {
+                  _menuTile("Add Deliveryman", Icons.person_add_alt_1_outlined,
+                      () {
                     context.push('/add-deliveryman');
                   }, isSubTile: true),
-                  _menuTile("Delivery Orders", Icons.shopping_bag_outlined, () {
-                    context.push('/delivery-orders');
-                  }, isSubTile: true),
+                  // _menuTile("Delivery Orders", Icons.shopping_bag_outlined, () {
+                  //   context.push('/delivery-orders');
+                  // }, isSubTile: true),
                   _menuTile("Delivery Analytics", Icons.analytics_outlined, () {
                     context.push('/delivery-analytics');
                   }, isSubTile: true),
                 ],
               ),
             ),
-
 
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');

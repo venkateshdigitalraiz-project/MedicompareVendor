@@ -318,7 +318,8 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
 
         bool isAccepting = false;
         bool isCanceling = false;
-        if (state is AppointmentStatusUpdatingState && !state.isOtpVerification) {
+        if (state is AppointmentStatusUpdatingState &&
+            !state.isOtpVerification) {
           if (state.updatingStatus == 'confirmed') {
             isAccepting = true;
           } else if (state.updatingStatus == 'cancelled') {
@@ -670,6 +671,22 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             final normalized =
                 _normalizeStatus(state.appointmentDetails.orderStatus);
             _selectedStatus = normalized;
+
+            // Trigger Delivery Partners API if the card should be displayed and hasn't been loaded yet
+            final isConfirmed = normalized == 'confirmed';
+            final billing = state.appointmentDetails.billingSummary;
+            final showDeliveryCard =
+                billing.collectionType.toLowerCase() == 'home' &&
+                    billing.sampleCollection > 0;
+
+            if (isConfirmed && showDeliveryCard && !state.hasLoadedPartners) {
+              context.read<AppointmentDetailsBloc>().add(
+                    GetDeliveryPartnersEvent(
+                        deliveryManType:
+                            _selectedDeliveryTab == 0 ? 'admin' : 'vendor',
+                        forceRefresh: true),
+                  );
+            }
           } else if (state is AppointmentStatusUpdatedState) {
             setState(() {
               _cachedDetails = null;
@@ -746,8 +763,13 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                       if (_isPendingStatus(activeStatus)) ...[
                         // Pending status: no delivery cards displayed
                       ] else if (_isConfirmedStatus(activeStatus)) ...[
-                        _buildDeliveryAssignmentSection(state, details),
-                        const SizedBox(height: 24),
+                        if (details.billingSummary.collectionType
+                                    .toLowerCase() ==
+                                'home' &&
+                            details.billingSummary.sampleCollection > 0) ...[
+                          _buildDeliveryAssignmentSection(state, details),
+                          const SizedBox(height: 24),
+                        ],
                       ] else if (_isAssignedStatus(activeStatus)) ...[
                         if (details.otpEnable.trim().toLowerCase() == 'no') ...[
                           _buildAssignedDeliveryPartnerSection(
@@ -758,9 +780,13 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                           const SizedBox(height: 24),
                         ],
                       ],
-                      if (details.otpEnable.trim().toLowerCase() == 'yes' &&
-                          details.otpStatus.trim().toLowerCase() ==
-                              'pending') ...[
+                      if ((details.billingSummary.collectionType
+                                      .toLowerCase() ==
+                                  'lab' &&
+                              details.billingSummary.homeVisitFee == 0) ||
+                          (details.otpEnable.trim().toLowerCase() == 'yes' &&
+                              details.otpStatus.trim().toLowerCase() ==
+                                  'pending')) ...[
                         _buildOtpVerificationSection(details),
                         const SizedBox(height: 24),
                       ],
@@ -1076,8 +1102,10 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                   ],
                 );
               } else {
-                final serviceType = details.serviceFixedTypes.trim().toLowerCase();
-                final canUploadReport = serviceType == 'labtests' || serviceType == 'diagnostics';
+                final serviceType =
+                    details.serviceFixedTypes.trim().toLowerCase();
+                final canUploadReport =
+                    serviceType == 'labtests' || serviceType == 'diagnostics';
 
                 if (canUploadReport) {
                   content = BlocBuilder<AppointmentDetailsBloc,
@@ -1496,37 +1524,42 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                 const SizedBox(width: 12),
                 SizedBox(
                   height: 48, // matching textfield height roughly
-                  child: BlocBuilder<AppointmentDetailsBloc, AppointmentDetailsState>(
+                  child: BlocBuilder<AppointmentDetailsBloc,
+                      AppointmentDetailsState>(
                     builder: (context, state) {
                       bool isOtpLoading = false;
-                      if (state is AppointmentStatusUpdatingState && state.isOtpVerification) {
+                      if (state is AppointmentStatusUpdatingState &&
+                          state.isOtpVerification) {
                         isOtpLoading = true;
                       }
 
                       return ElevatedButton.icon(
-                        onPressed: isOtpLoading ? null : () {
-                          final otp = _otpController.text.trim();
-                          if (otp.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please enter OTP')),
-                            );
-                            return;
-                          }
-                          final orderId = details.id.isNotEmpty
-                              ? details.id
-                              : (details.orderId.isNotEmpty
-                                  ? details.orderId
-                                  : widget.appointmentId);
+                        onPressed: isOtpLoading
+                            ? null
+                            : () {
+                                final otp = _otpController.text.trim();
+                                if (otp.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('Please enter OTP')),
+                                  );
+                                  return;
+                                }
+                                final orderId = details.id.isNotEmpty
+                                    ? details.id
+                                    : (details.orderId.isNotEmpty
+                                        ? details.orderId
+                                        : widget.appointmentId);
 
-                          context.read<AppointmentDetailsBloc>().add(
-                                UpdateAppointmentOrderStatusEvent(
-                                  orderId: orderId,
-                                  orderStatus: details.orderStatus,
-                                  otp: otp,
-                                  deliveryOtp: otp,
-                                ),
-                              );
-                        },
+                                context.read<AppointmentDetailsBloc>().add(
+                                      UpdateAppointmentOrderStatusEvent(
+                                        orderId: orderId,
+                                        orderStatus: details.orderStatus,
+                                        otp: otp,
+                                        deliveryOtp: otp,
+                                      ),
+                                    );
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(
                               0xFFEAB308), // Yellowish/Amber color like the image
@@ -1548,7 +1581,7 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                               )
                             : const Icon(Icons.check_circle_outline, size: 18),
                         label: Text(
-                          "Submit / Verify OTP",
+                          "Verify OTP",
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,

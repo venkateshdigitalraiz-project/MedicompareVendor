@@ -17,6 +17,7 @@ class BranchBloc extends Bloc<BranchEvent, BranchState> {
     this.branchRepository,
   }) : super(BranchInitial()) {
     on<CreateBranchEvent>(_onCreateBranchEvent);
+    on<UpdateBranchEvent>(_onUpdateBranchEvent);
     on<FetchBranchListEvent>(_onFetchBranchListEvent);
     on<DeleteBranchEvent>(_onDeleteBranchEvent);
   }
@@ -31,6 +32,22 @@ class BranchBloc extends Bloc<BranchEvent, BranchState> {
       emit(const BranchCreateSuccess());
     } catch (e) {
       emit(BranchCreateFailure(
+        message: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
+      ));
+    }
+  }
+
+  Future<void> _onUpdateBranchEvent(
+    UpdateBranchEvent event,
+    Emitter<BranchState> emit,
+  ) async {
+    if (branchRepository == null) return;
+    emit(BranchLoading());
+    try {
+      await branchRepository!.updateBranch(event.branchId, event.data, image: event.image);
+      emit(const BranchUpdateSuccess());
+    } catch (e) {
+      emit(BranchUpdateFailure(
         message: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       ));
     }

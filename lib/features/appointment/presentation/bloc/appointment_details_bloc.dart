@@ -45,18 +45,8 @@ class AppointmentDetailsBloc
       String? partnersError;
 
       if (result.orderStatus.trim().toLowerCase() == 'confirmed') {
-        try {
-          final results = await Future.wait([
-            getDeliveryPartnersUseCase.call(deliveryManType: 'admin'),
-            getDeliveryPartnersUseCase.call(deliveryManType: 'vendor'),
-          ]);
-          adminResult = results[0];
-          vendorResult = results[1];
-          hasLoaded = true;
-        } catch (e) {
-          hasLoaded = true;
-          partnersError = e.toString().replaceAll('Exception: ', '');
-        }
+        // Delivery partners API calls removed here. They will be triggered from UI
+        // on separate taps or when the Delivery Assignment card is shown.
       }
 
       emit(AppointmentDetailsLoaded(

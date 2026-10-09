@@ -17,6 +17,7 @@ class CreateDeliverymanEntity extends Equatable {
 
   // 2. Work Details
   final String vehicleType;
+  final String deliveryType;
   final String vehicleNumber;
   final String drivingLicenseNumber;
   final String shiftStartTime;
@@ -44,6 +45,8 @@ class CreateDeliverymanEntity extends Equatable {
   final String? emergencyContactName;
   final String? emergencyContactPhone;
   final String? notes;
+  final String? password;
+  final String? confirmPassword;
 
   const CreateDeliverymanEntity({
     this.id,
@@ -58,6 +61,7 @@ class CreateDeliverymanEntity extends Equatable {
     required this.pincode,
     this.profileImage,
     required this.vehicleType,
+    required this.deliveryType,
     required this.vehicleNumber,
     required this.drivingLicenseNumber,
     this.shiftStartTime = '09:00 AM',
@@ -79,6 +83,8 @@ class CreateDeliverymanEntity extends Equatable {
     this.emergencyContactName,
     this.emergencyContactPhone,
     this.notes,
+    this.password,
+    this.confirmPassword,
   });
 
   factory CreateDeliverymanEntity.fromJson(Map<String, dynamic> rawJson) {
@@ -331,6 +337,13 @@ class CreateDeliverymanEntity extends Equatable {
         workMap?['vehicleType']?.toString() ??
         'Bike';
 
+    final deliveryType = json['deliveryType']?.toString() ??
+        json['delivery_type']?.toString() ??
+        vehicleMap?['deliveryType']?.toString() ??
+        vehicleMap?['delivery_type']?.toString() ??
+        workMap?['deliveryType']?.toString() ??
+        'select service category';
+
     final vehicleNumber = json['vehicleNumber']?.toString() ??
         json['vehicle_number']?.toString() ??
         json['vehicleNo']?.toString() ??
@@ -564,6 +577,7 @@ class CreateDeliverymanEntity extends Equatable {
       pincode: pincode,
       profileImage: profileImage,
       vehicleType: vehicleType,
+      deliveryType: deliveryType,
       vehicleNumber: vehicleNumber,
       drivingLicenseNumber: drivingLicenseNumber,
       shiftStartTime: shiftStartTime,
@@ -585,6 +599,8 @@ class CreateDeliverymanEntity extends Equatable {
       emergencyContactName: emergencyContactName,
       emergencyContactPhone: emergencyContactPhone,
       notes: notes,
+      password: json['password']?.toString(),
+      confirmPassword: json['confirmPassword']?.toString(),
     );
   }
 
@@ -604,6 +620,7 @@ class CreateDeliverymanEntity extends Equatable {
       'state': state,
       'pincode': pincode,
       'vehicleType': vehicleType.toLowerCase(),
+      'deliveryType': deliveryType,
       'vehicleNumber': vehicleNumber,
       'vehicleNo': vehicleNumber,
       'drivingLicense': drivingLicenseNumber,
@@ -664,6 +681,8 @@ class CreateDeliverymanEntity extends Equatable {
       if (emergencyContactPhone != null && emergencyContactPhone!.isNotEmpty)
         'emergencyContactPhone': emergencyContactPhone,
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
+      if (password != null && password!.isNotEmpty) 'password': password,
+      if (confirmPassword != null && confirmPassword!.isNotEmpty) 'confirmPassword': confirmPassword,
     };
   }
 
@@ -681,6 +700,7 @@ class CreateDeliverymanEntity extends Equatable {
         pincode,
         profileImage,
         vehicleType,
+        deliveryType,
         vehicleNumber,
         drivingLicenseNumber,
         shiftStartTime,
@@ -702,5 +722,7 @@ class CreateDeliverymanEntity extends Equatable {
         emergencyContactName,
         emergencyContactPhone,
         notes,
+        password,
+        confirmPassword,
       ];
 }

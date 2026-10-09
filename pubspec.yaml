@@ -40,6 +40,9 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^33.2.13
   path_provider: ^2.1.6
   open_filex: ^4.7.0
+  google_maps_flutter: ^2.18.1
+  geolocator: ^14.0.2
+  geocoding: ^5.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

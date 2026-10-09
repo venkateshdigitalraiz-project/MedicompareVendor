@@ -112,6 +112,8 @@ class AppointmentDetailsBillingSummaryEntity extends Equatable {
   final double sampleCollection;
   final double tax;
   final double adminCommission;
+  final String collectionType;
+  final double homeVisitFee;
 
   const AppointmentDetailsBillingSummaryEntity({
     required this.subtotal,
@@ -124,6 +126,8 @@ class AppointmentDetailsBillingSummaryEntity extends Equatable {
     required this.sampleCollection,
     required this.tax,
     required this.adminCommission,
+    this.collectionType = '',
+    this.homeVisitFee = 0.0,
   });
 
   @override
@@ -138,6 +142,8 @@ class AppointmentDetailsBillingSummaryEntity extends Equatable {
         sampleCollection,
         tax,
         adminCommission,
+        collectionType,
+        homeVisitFee,
       ];
 }
 

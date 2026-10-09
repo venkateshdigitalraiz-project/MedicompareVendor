@@ -49,11 +49,15 @@ class Branch {
   final String roleId;
   final String status;
   final String deliveryPinCodes;
+  final String deliveryPincodeName;
+  final String pincode;
   final List<String> images;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String managerName;
   final String roleName;
+  final double lat;
+  final double lng;
 
   Branch({
     required this.id,
@@ -70,8 +74,12 @@ class Branch {
     required this.createdAt,
     required this.updatedAt,
     required this.deliveryPinCodes,
+    required this.deliveryPincodeName,
+    required this.pincode,
     this.managerName = '',
     this.roleName = 'Standard Access',
+    this.lat = 0.0,
+    this.lng = 0.0,
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {
@@ -106,6 +114,33 @@ class Branch {
       extractedManagerName = json['name'] ?? '';
     }
 
+    double lat = 0.0;
+    double lng = 0.0;
+    if (json['location'] != null && json['location']['coordinates'] != null) {
+      final coords = json['location']['coordinates'] as List;
+      if (coords.length >= 2) {
+        lng = (coords[0] as num).toDouble();
+        lat = (coords[1] as num).toDouble();
+      }
+    }
+
+    String extractedDeliveryPincodeId = '';
+    String extractedDeliveryPincodeName = '';
+
+    if (json['deliveryPincode'] is Map) {
+      extractedDeliveryPincodeId = json['deliveryPincode']['_id']?.toString() ?? '';
+      extractedDeliveryPincodeName = json['deliveryPincode']['name']?.toString() ?? '';
+    } else if (json['deliveryPincode'] != null) {
+      extractedDeliveryPincodeId = json['deliveryPincode'].toString();
+    } else if (json['deliveryPinCodes'] != null) {
+      extractedDeliveryPincodeId = json['deliveryPinCodes'].toString();
+    }
+
+    if (extractedDeliveryPincodeName.isEmpty && extractedDeliveryPincodeId.isNotEmpty) {
+       // Fallback to ID if name is not available
+       extractedDeliveryPincodeName = extractedDeliveryPincodeId;
+    }
+
     return Branch(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -122,9 +157,13 @@ class Branch {
           DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       updatedAt:
           DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
-      deliveryPinCodes: json['deliveryPinCodes'] ?? '',
+      deliveryPinCodes: extractedDeliveryPincodeId,
+      deliveryPincodeName: extractedDeliveryPincodeName,
+      pincode: json['pincode'] ?? '',
       managerName: extractedManagerName,
       roleName: json['roleName'] ?? 'Standard Access',
+      lat: lat,
+      lng: lng,
     );
   }
 }

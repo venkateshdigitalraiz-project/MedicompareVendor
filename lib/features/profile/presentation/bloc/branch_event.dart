@@ -30,6 +30,21 @@ class CreateBranchEvent extends BranchEvent {
   List<Object?> get props => [data, image];
 }
 
+class UpdateBranchEvent extends BranchEvent {
+  final String branchId;
+  final Map<String, dynamic> data;
+  final File? image;
+
+  const UpdateBranchEvent({
+    required this.branchId,
+    required this.data,
+    this.image,
+  });
+
+  @override
+  List<Object?> get props => [branchId, data, image];
+}
+
 class FetchBranchListEvent extends BranchEvent {
   final String search;
 

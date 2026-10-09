@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/api_service_repository.dart';
@@ -152,15 +153,74 @@ class DeliverymanRemoteDataSourceImpl implements DeliverymanRemoteDataSource {
     }
   }
 
+  void _extractFieldsAndFiles(
+      Map<String, dynamic> data, Map<String, String> fields, Map<String, File> files) {
+    
+    // Add required missing fields that are in Postman but not in the UI payload
+    if (!data.containsKey('password')) fields['password'] = '12345678';
+    if (!data.containsKey('confirmPassword')) fields['confirmPassword'] = '12345678';
+    if (!data.containsKey('deliveryType')) fields['deliveryType'] = 'medicine';
+    if (!data.containsKey('notificationsEnabled')) fields['notificationsEnabled'] = 'true';
+
+    // Helper to format time (e.g. "09:00 AM" to "09:00")
+    String formatTime(String time) {
+      if (time.isEmpty) return time;
+      try {
+        final isPM = time.toLowerCase().contains('pm');
+        final isAM = time.toLowerCase().contains('am');
+        if (!isPM && !isAM) return time.trim();
+
+        final parts = time.replaceAll(RegExp(r'[a-zA-Z]'), '').trim().split(':');
+        if (parts.length != 2) return time;
+
+        int hour = int.parse(parts[0]);
+        final minute = parts[1];
+
+        if (isPM && hour < 12) hour += 12;
+        if (isAM && hour == 12) hour = 0;
+
+        return '${hour.toString().padLeft(2, '0')}:$minute';
+      } catch (e) {
+        return time;
+      }
+    }
+
+    final allowedFileKeys = ['aadhaarFile', 'panFile', 'bikeRcFile', 'drivingLicenseFile'];
+    final duplicateKeysToIgnore = ['aadhaarDoc', 'panDoc', 'bikeRcDoc', 'drivingLicenseDoc', 'proof', 'workDetails', 'bankDetails', 'workingHours'];
+
+    data.forEach((key, value) {
+      if (value == null || duplicateKeysToIgnore.contains(key)) return;
+      
+      if (allowedFileKeys.contains(key)) {
+        if (value is String && value.isNotEmpty && File(value).existsSync()) {
+          files[key] = File(value);
+        }
+      } else {
+        if (key == 'shiftStartTime' || key == 'shiftEndTime') {
+          fields[key] = formatTime(value.toString());
+        } else {
+          fields[key] = value.toString();
+        }
+      }
+    });
+  }
+
   @override
   Future<bool> createDeliveryman(Map<String, dynamic> data) async {
+    final Map<String, String> fields = {};
+    final Map<String, File> files = {};
+    _extractFieldsAndFiles(data, fields, files);
+
     if (kDebugMode) {
-      print('[DeliverymanRemoteDataSource] POST: ${ApiEndpoints.createDeliveryman} body: $data');
+      print('[DeliverymanRemoteDataSource] POST: ${ApiEndpoints.createDeliveryman}');
+      print('Fields: $fields');
+      print('Files: ${files.keys.toList()}');
     }
 
     final response = await apiService.post(
       ApiEndpoints.createDeliveryman,
-      body: data,
+      fields: fields,
+      files: files,
     );
 
     if (kDebugMode) {
@@ -188,13 +248,20 @@ class DeliverymanRemoteDataSourceImpl implements DeliverymanRemoteDataSource {
   @override
   Future<bool> updateDeliveryman(String id, Map<String, dynamic> data) async {
     final endpoint = ApiEndpoints.updateDeliveryman(id);
+    final Map<String, String> fields = {};
+    final Map<String, File> files = {};
+    _extractFieldsAndFiles(data, fields, files);
+
     if (kDebugMode) {
-      print('[DeliverymanRemoteDataSource] POST: $endpoint body: $data');
+      print('[DeliverymanRemoteDataSource] POST: $endpoint');
+      print('Fields: $fields');
+      print('Files: ${files.keys.toList()}');
     }
 
     final response = await apiService.post(
       endpoint,
-      body: data,
+      fields: fields,
+      files: files,
     );
 
     if (kDebugMode) {

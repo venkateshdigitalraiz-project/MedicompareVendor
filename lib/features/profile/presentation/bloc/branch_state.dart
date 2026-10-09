@@ -30,6 +30,24 @@ class BranchCreateFailure extends BranchState {
   List<Object?> get props => [message];
 }
 
+class BranchUpdateSuccess extends BranchState {
+  final String message;
+
+  const BranchUpdateSuccess({this.message = 'Branch updated successfully!'});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class BranchUpdateFailure extends BranchState {
+  final String message;
+
+  const BranchUpdateFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class BranchListLoaded extends BranchState {
   final List<Branch> branches;
 

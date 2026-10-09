@@ -15,9 +15,6 @@ import 'branches_list_page.dart';
 import 'package:MediCompare/features/service_fee/service_fee_injection.dart';
 import 'package:MediCompare/features/service_fee/presentation/bloc/service_fee_bloc.dart';
 import 'package:MediCompare/features/service_fee/presentation/bloc/service_fee_event.dart';
-import 'package:MediCompare/features/service_fee/presentation/bloc/service_fee_state.dart';
-import 'package:MediCompare/features/service_fee/domain/entities/service_fee.dart';
-import 'package:MediCompare/core/utils/price_formatter.dart';
 
 class BranchDetailsPage extends StatefulWidget {
   final String branchId;
@@ -265,10 +262,12 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
                   padding: EdgeInsets.symmetric(vertical: 12.0),
                   child: Divider(height: 1),
                 ),
-                // _infoField(
-                //     "Delivery Pin Code",
-                //     branch.deliveryPinCodes,
-                //     Icons.location_city_outlined),
+                _infoField(
+                    "Delivery Pin Code",
+                    branch.deliveryPincodeName.isNotEmpty
+                        ? branch.deliveryPincodeName
+                        : "N/A",
+                    Icons.location_city_outlined),
               ],
             ),
           ),

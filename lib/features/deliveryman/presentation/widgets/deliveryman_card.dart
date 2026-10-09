@@ -246,11 +246,14 @@ class DeliverymanCard extends StatelessWidget {
                           color: const Color(0xFF64748B),
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          "${item.vehicleType} ${item.vehicleNumber}".trim(),
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: const Color(0xFF64748B),
+                        Expanded(
+                          child: Text(
+                            "${item.vehicleType} ${item.vehicleNumber}".trim(),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: const Color(0xFF64748B),
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
