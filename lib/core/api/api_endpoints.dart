@@ -249,6 +249,17 @@ class ApiEndpoints {
   static const String ambulanceNames = '/common/tablets';
   static const String facilitiesList = '/vendor/facilities/list';
 
+  // Employees / Staff / Roles
+  static const String employeeList = '/vendor/employee/list';
+  static const String createEmployee = '/vendor/employee/create';
+  static String employeeDetails(String id) => '/vendor/employee/details/$id';
+  static String updateEmployee(String id) => '/vendor/employee/update/$id';
+  static const String rolesList = '/vendor/roles/list';
+  static const String createRole = '/vendor/roles/create';
+  static String updateRole(String id) => '/vendor/roles/update/$id';
+  static String deleteRole(String id) => '/vendor/roles/delete/$id';
+  static const String medicalCategories = '/common/medicalcategories';
+
   // Ambulance Orders (Bookings)
   static const String ambulanceBookingList = '/vendor/ambulance-booking/list';
   static String ambulanceBookingSingle(String id) =>

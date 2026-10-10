@@ -676,8 +676,9 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
             final isConfirmed = normalized == 'confirmed';
             final billing = state.appointmentDetails.billingSummary;
             final showDeliveryCard =
-                billing.collectionType.toLowerCase() == 'home' &&
-                    billing.sampleCollection > 0;
+                (billing.collectionType.toLowerCase() == 'home' &&
+                    billing.sampleCollection > 0) ||
+                state.appointmentDetails.serviceFixedTypes.toLowerCase() == 'homecare';
 
             if (isConfirmed && showDeliveryCard && !state.hasLoadedPartners) {
               context.read<AppointmentDetailsBloc>().add(
@@ -763,10 +764,11 @@ class _AppointmentDetailsPageState extends State<AppointmentDetailsPage> {
                       if (_isPendingStatus(activeStatus)) ...[
                         // Pending status: no delivery cards displayed
                       ] else if (_isConfirmedStatus(activeStatus)) ...[
-                        if (details.billingSummary.collectionType
-                                    .toLowerCase() ==
-                                'home' &&
-                            details.billingSummary.sampleCollection > 0) ...[
+                        if ((details.billingSummary.collectionType
+                                        .toLowerCase() ==
+                                    'home' &&
+                                details.billingSummary.sampleCollection > 0) ||
+                            details.serviceFixedTypes.toLowerCase() == 'homecare') ...[
                           _buildDeliveryAssignmentSection(state, details),
                           const SizedBox(height: 24),
                         ],

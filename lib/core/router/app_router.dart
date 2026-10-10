@@ -84,6 +84,11 @@ import 'package:MediCompare/features/deliveryman/presentation/pages/deliveryman_
 import 'package:MediCompare/features/deliveryman/presentation/pages/delivery_orders_page.dart';
 import 'package:MediCompare/features/deliveryman/presentation/pages/add_deliveryman_page.dart';
 import 'package:MediCompare/features/deliveryman/presentation/pages/delivery_analytics_page.dart';
+import 'package:MediCompare/features/role/presentation/pages/employee_list_page.dart';
+import 'package:MediCompare/features/role/presentation/pages/role_manage_page.dart';
+import 'package:MediCompare/features/role/presentation/pages/add_staff_page.dart';
+import 'package:MediCompare/features/role/presentation/pages/add_new_role_page.dart';
+import 'package:MediCompare/features/role/domain/entities/role_entity.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -470,6 +475,28 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/delivery-analytics',
           builder: (context, state) => const DeliveryAnalyticsPage(),
+        ),
+        GoRoute(
+          path: '/employee-list',
+          builder: (context, state) => const EmployeeListPage(),
+        ),
+        GoRoute(
+          path: '/role-manage',
+          builder: (context, state) => const RoleManagePage(),
+        ),
+        GoRoute(
+          path: '/add-staff',
+          builder: (context, state) {
+            final employeeId = (state.extra is String) ? state.extra as String : null;
+            return AddStaffPage(employeeId: employeeId);
+          },
+        ),
+        GoRoute(
+          path: '/add-new-role',
+          builder: (context, state) {
+            final role = (state.extra is RoleEntity) ? state.extra as RoleEntity : null;
+            return AddNewRolePage(role: role);
+          },
         ),
       ],
     );

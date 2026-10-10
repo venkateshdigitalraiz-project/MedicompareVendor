@@ -8,7 +8,7 @@ import '../bloc/deliveryman_event.dart';
 import '../bloc/deliveryman_state.dart';
 import '../widgets/deliveryman_stat_cards.dart';
 import '../widgets/deliveryman_search_filter_bar.dart';
-import '../widgets/deliveryman_list_row.dart';
+import '../widgets/deliveryman_card.dart';
 import '../widgets/deliveryman_pagination_bar.dart';
 import '../../deliveryman_injection.dart';
 
@@ -345,7 +345,7 @@ class DeliverymanListView extends StatelessWidget {
                                     itemCount: state.items.length,
                                     itemBuilder: (context, index) {
                                       final item = state.items[index];
-                                      return DeliverymanListRow(
+                                      return DeliverymanCard(
                                         item: item,
                                         onEdit: () =>
                                             _showEditPlaceholder(context, item),

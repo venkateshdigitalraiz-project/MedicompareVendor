@@ -88,8 +88,6 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 .map((p) => p.module)
                 .toList();
 
-            // debugPrint('VENDOR_PERMISSIONS_MODULES: $_activeModules');
-
             _isLoading = false;
           });
         }
@@ -188,17 +186,6 @@ class _ProfilePageState extends State<MainprofileScreen> {
     if (_isLoading) return true;
     return PermissionHandler().hasPermission(module, action);
   }
-
-  // Future<void> _launchURL(String url) async {
-  //   final Uri uri = Uri.parse(url);
-  //   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Could not launch $url')),
-  //       );
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -584,7 +571,36 @@ class _ProfilePageState extends State<MainprofileScreen> {
                 ],
               ),
             ),
-
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ExpansionTile(
+                leading: const Icon(Icons.store, color: AppColors.primaryDark),
+                title: Text("Staff", style: GoogleFonts.inter(fontSize: 14)),
+                shape: const Border(),
+                childrenPadding: const EdgeInsets.only(left: 32),
+                trailing: Icon(
+                    _isDeliverymanExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.primaryDark),
+                onExpansionChanged: (expanded) {
+                  setState(() {
+                    _isDeliverymanExpanded = expanded;
+                  });
+                },
+                children: [
+                  _menuTile("All Staff", Icons.group_outlined, () {
+                    context.push('/employee-list');
+                  }, isSubTile: true),
+                  _menuTile("Add Staff", Icons.person_add_alt_1_outlined, () {
+                    context.push('/add-staff');
+                  }, isSubTile: true),
+                  _menuTile("Role", Icons.settings_outlined, () {
+                    context.push('/role-manage');
+                  }, isSubTile: true),
+                ],
+              ),
+            ),
             _menuTile("Support & Help Center", Icons.support_agent, () {
               context.push('/support-ticket');
             }),
