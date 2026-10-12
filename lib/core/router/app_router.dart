@@ -17,8 +17,7 @@ import 'package:MediCompare/features/profile/presentation/pages/main_profile_pag
 import 'package:MediCompare/features/appointment/presentation/pages/appointment_bookings_page.dart';
 import 'package:MediCompare/features/appointment/presentation/bloc/appointment_booking_event.dart';
 import 'package:MediCompare/features/appointment/appointment_injection.dart';
-import 'package:MediCompare/features/appointment/presentation/pages/appointment_details_page.dart'
-    hide PdfViewerPage;
+import 'package:MediCompare/features/appointment/presentation/pages/appointment_details_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branches_list_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/branch_details_page.dart';
 import 'package:MediCompare/features/profile/presentation/pages/add_branch_page.dart';
@@ -487,14 +486,16 @@ GoRouter createAppRouter(String initialLocation) => GoRouter(
         GoRoute(
           path: '/add-staff',
           builder: (context, state) {
-            final employeeId = (state.extra is String) ? state.extra as String : null;
+            final employeeId =
+                (state.extra is String) ? state.extra as String : null;
             return AddStaffPage(employeeId: employeeId);
           },
         ),
         GoRoute(
           path: '/add-new-role',
           builder: (context, state) {
-            final role = (state.extra is RoleEntity) ? state.extra as RoleEntity : null;
+            final role =
+                (state.extra is RoleEntity) ? state.extra as RoleEntity : null;
             return AddNewRolePage(role: role);
           },
         ),

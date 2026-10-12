@@ -31,10 +31,16 @@ class MedicalTreatmentItem {
   });
 
   factory MedicalTreatmentItem.fromJson(Map<String, dynamic> json) {
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      return double.tryParse(value.toString()) ?? 0.0;
+    }
+
     return MedicalTreatmentItem(
       id: json['_id'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
-      discountPrice: (json['discountprice'] ?? 0).toDouble(),
+      price: parseDouble(json['price']),
+      discountPrice: parseDouble(json['discountprice'] ?? json['discount']),
       status: json['status'] ?? 'inactive',
       details: MedicalTreatmentDetails.fromJson(json['tablets'] ?? {}),
     );

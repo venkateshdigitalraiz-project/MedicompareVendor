@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:MediCompare/core/constants/app_colors.dart';
 import '../../domain/entities/service_fee_user.dart';
-import '../../domain/entities/service_fee.dart';
+// import '../../domain/entities/service_fee.dart';
 import '../bloc/service_fee_bloc.dart';
 import '../bloc/service_fee_event.dart';
 import '../bloc/service_fee_state.dart';
@@ -344,41 +344,41 @@ class _ServiceFeePageState extends State<ServiceFeePage> {
     );
   }
 
-  void _showResetDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            "vendor medicompare.com says",
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-          ),
-          content: Text(
-            "Are you sure you want to reset all service fee parameters to defaults?",
-            style: GoogleFonts.inter(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                "Cancel",
-                style: GoogleFonts.inter(color: AppColors.greyText),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.read<ServiceFeeBloc>().add(ResetServiceFee());
-              },
-              child: Text(
-                "OK",
-                style: GoogleFonts.inter(
-                    color: AppColors.primaryDark, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showResetDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: Text(
+  //           "vendor medicompare.com says",
+  //           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+  //         ),
+  //         content: Text(
+  //           "Are you sure you want to reset all service fee parameters to defaults?",
+  //           style: GoogleFonts.inter(),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child: Text(
+  //               "Cancel",
+  //               style: GoogleFonts.inter(color: AppColors.greyText),
+  //             ),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //               context.read<ServiceFeeBloc>().add(ResetServiceFee());
+  //             },
+  //             child: Text(
+  //               "OK",
+  //               style: GoogleFonts.inter(
+  //                   color: AppColors.primaryDark, fontWeight: FontWeight.bold),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }

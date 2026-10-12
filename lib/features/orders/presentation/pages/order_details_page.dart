@@ -1576,7 +1576,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       OrderDetailsState state, OrderDetailsResponseEntity order) {
     final loadedState = state is OrderDetailsLoaded ? state : null;
     final partners = loadedState?.deliveryPartners ?? [];
-    final ownPartner = loadedState?.ownDeliveryPartner;
+    // final ownPartner = loadedState?.ownDeliveryPartner;
     final isLoadingPartners = loadedState?.isLoadingPartners ?? false;
     final isLoadingMorePartners = loadedState?.isLoadingMorePartners ?? false;
     final partnersError = loadedState?.partnersError;

@@ -33,10 +33,12 @@ class CouponModel extends Coupon {
     String parseRenewalCycle(String? val) {
       if (val == null || val.isEmpty) return 'Never (One-time)';
       final v = val.toLowerCase();
-      if (v == 'never' || v == '1' || v.contains('one-time')) return 'Never (One-time)';
+      if (v == 'never' || v == '1' || v.contains('one-time'))
+        return 'Never (One-time)';
       if (v == 'daily') return 'Daily';
       if (v == 'weekly' || v == '7' || v.contains('week')) return 'Every Week';
-      if (v == 'monthly' || v == '28' || v.contains('month')) return 'Every Month';
+      if (v == 'monthly' || v == '28' || v.contains('month'))
+        return 'Every Month';
       if (v == '10' || v.contains('10')) return 'Every 10 days';
       if (v == 'yearly' || v.contains('year')) return 'Yearly';
       return val;
@@ -119,10 +121,10 @@ class CouponModel extends Coupon {
       }
     }
 
-    String mapRenewalCycle(String val) {
-      // Just pass the exact dropdown value to the API
-      return val;
-    }
+    // String mapRenewalCycle(String val) {
+    //   // Just pass the exact dropdown value to the API
+    //   return val;
+    // }
 
     String mapDiscountType(String val) {
       if (val.contains('Percentage') || val.contains('Percent')) {
@@ -141,7 +143,7 @@ class CouponModel extends Coupon {
     return {
       'code': couponCode,
       'name': couponName,
-      'description': description ?? '',
+      'description': description,
       'discountType': mapDiscountType(discountType),
       'discount': discountValue,
       'minimumPurchase': minimumPurchaseAmount ?? 0.0,

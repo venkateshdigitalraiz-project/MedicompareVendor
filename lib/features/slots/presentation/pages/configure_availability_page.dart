@@ -78,7 +78,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
         return DayAvailabilityEntity(
           day: dayName,
           isOpen: true,
-          startTime: existing.startTime.isNotEmpty ? existing.startTime : '09:00',
+          startTime:
+              existing.startTime.isNotEmpty ? existing.startTime : '09:00',
           endTime: existing.endTime.isNotEmpty ? existing.endTime : '17:00',
           id: existing.id,
           shifts: finalShifts,
@@ -111,7 +112,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
         id: '',
       );
     }
-    final day = _tempAvailability[_selectedDayIndex.clamp(0, _tempAvailability.length - 1)];
+    final day = _tempAvailability[
+        _selectedDayIndex.clamp(0, _tempAvailability.length - 1)];
     if (day.shifts.isEmpty || day.shifts.length < 4) {
       return day.copyWith(
         shifts: DayAvailabilityEntity.defaultShiftsForDay(
@@ -254,7 +256,8 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
       BuildContext context, int shiftIndex, bool isStartTime) async {
     final shift = _currentDay.shifts[shiftIndex];
     final timeStr = isStartTime ? shift.startTime : shift.endTime;
-    final initialTime = _parseTimeToTimeOfDay(timeStr ?? (isStartTime ? '09:00' : '17:00'));
+    final initialTime =
+        _parseTimeToTimeOfDay(timeStr ?? (isStartTime ? '09:00' : '17:00'));
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -286,78 +289,78 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
     }
   }
 
-  Future<void> _editShiftCapacity(BuildContext context, int shiftIndex) async {
-    final shift = _currentDay.shifts[shiftIndex];
-    final controller = TextEditingController(text: shift.capacity.toString());
+  // Future<void> _editShiftCapacity(BuildContext context, int shiftIndex) async {
+  //   final shift = _currentDay.shifts[shiftIndex];
+  //   final controller = TextEditingController(text: shift.capacity.toString());
 
-    final newCap = await showDialog<int>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            "Capacity per Slot",
-            style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1F2937)),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Enter max customers allowed for each divided slot:",
-                style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  hintText: "e.g. 5",
-                  suffixText: "per slot",
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child:
-                  Text("Cancel", style: GoogleFonts.inter(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF241442),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () {
-                final val = int.tryParse(controller.text.trim());
-                if (val != null && val > 0) {
-                  Navigator.pop(context, val);
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-              child: Text("Save",
-                  style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold, color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
+  //   final newCap = await showDialog<int>(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         shape:
+  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //         title: Text(
+  //           "Capacity per Slot",
+  //           style: GoogleFonts.inter(
+  //               fontSize: 16,
+  //               fontWeight: FontWeight.bold,
+  //               color: const Color(0xFF1F2937)),
+  //         ),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               "Enter max customers allowed for each divided slot:",
+  //               style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
+  //             ),
+  //             const SizedBox(height: 12),
+  //             TextField(
+  //               controller: controller,
+  //               keyboardType: TextInputType.number,
+  //               autofocus: true,
+  //               decoration: InputDecoration(
+  //                 border: OutlineInputBorder(
+  //                     borderRadius: BorderRadius.circular(10)),
+  //                 hintText: "e.g. 5",
+  //                 suffixText: "per slot",
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child:
+  //                 Text("Cancel", style: GoogleFonts.inter(color: Colors.grey)),
+  //           ),
+  //           ElevatedButton(
+  //             style: ElevatedButton.styleFrom(
+  //               backgroundColor: const Color(0xFF241442),
+  //               shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(8)),
+  //             ),
+  //             onPressed: () {
+  //               final val = int.tryParse(controller.text.trim());
+  //               if (val != null && val > 0) {
+  //                 Navigator.pop(context, val);
+  //               } else {
+  //                 Navigator.pop(context);
+  //               }
+  //             },
+  //             child: Text("Save",
+  //                 style: GoogleFonts.inter(
+  //                     fontWeight: FontWeight.bold, color: Colors.white)),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
 
-    if (newCap != null && newCap != shift.capacity) {
-      _updateShift(shiftIndex, shift.copyWith(capacity: newCap));
-    }
-  }
+  //   if (newCap != null && newCap != shift.capacity) {
+  //     _updateShift(shiftIndex, shift.copyWith(capacity: newCap));
+  //   }
+  // }
 
   TimeOfDay _parseTimeToTimeOfDay(String timeStr) {
     try {
@@ -922,7 +925,9 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      shift.title.isNotEmpty ? shift.title : _defaultTitleForType(shift.type),
+                      shift.title.isNotEmpty
+                          ? shift.title
+                          : _defaultTitleForType(shift.type),
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -1005,13 +1010,13 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                     child: _buildIntervalDropdown(shiftIndex, shift),
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildCapacityInputBox(
-                      shiftIndex: shiftIndex,
-                      capacity: shift.capacity,
-                      onTap: () => _editShiftCapacity(context, shiftIndex),
-                    ),
-                  ),
+                  Expanded(child: Container()
+                      //  _buildCapacityInputBox(
+                      //   shiftIndex: shiftIndex,
+                      //   capacity: shift.capacity,
+                      //   onTap: () => _editShiftCapacity(context, shiftIndex),
+                      // ),
+                      ),
                 ],
               ),
             ],
@@ -1040,13 +1045,13 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
               child: _buildIntervalDropdown(shiftIndex, shift),
             ),
             const SizedBox(width: 8),
-            Expanded(
-              child: _buildCapacityInputBox(
-                shiftIndex: shiftIndex,
-                capacity: shift.capacity,
-                onTap: () => _editShiftCapacity(context, shiftIndex),
-              ),
-            ),
+            Expanded(child: Container()
+                // _buildCapacityInputBox(
+                //   shiftIndex: shiftIndex,
+                //   capacity: shift.capacity,
+                //   onTap: () => _editShiftCapacity(context, shiftIndex),
+                // ),
+                ),
           ],
         );
       },
@@ -1171,58 +1176,58 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
     );
   }
 
-  Widget _buildCapacityInputBox({
-    required int shiftIndex,
-    required int capacity,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "CAPACITY / SLOT",
-          style: GoogleFonts.inter(
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF9CA3AF),
-            letterSpacing: 0.4,
-          ),
-        ),
-        const SizedBox(height: 4),
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            height: 38,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "$capacity",
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1F2937),
-                  ),
-                ),
-                const Icon(
-                  Icons.edit_outlined,
-                  size: 13,
-                  color: Color(0xFF9CA3AF),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildCapacityInputBox({
+  //   required int shiftIndex,
+  //   required int capacity,
+  //   required VoidCallback onTap,
+  // }) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         "CAPACITY / SLOT",
+  //         style: GoogleFonts.inter(
+  //           fontSize: 9,
+  //           fontWeight: FontWeight.w700,
+  //           color: const Color(0xFF9CA3AF),
+  //           letterSpacing: 0.4,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 4),
+  //       InkWell(
+  //         onTap: onTap,
+  //         borderRadius: BorderRadius.circular(8),
+  //         child: Container(
+  //           height: 38,
+  //           padding: const EdgeInsets.symmetric(horizontal: 10),
+  //           decoration: BoxDecoration(
+  //             color: const Color(0xFFF9FAFB),
+  //             border: Border.all(color: const Color(0xFFE5E7EB)),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //           child: Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               Text(
+  //                 "$capacity",
+  //                 style: GoogleFonts.inter(
+  //                   fontSize: 12,
+  //                   fontWeight: FontWeight.w700,
+  //                   color: const Color(0xFF1F2937),
+  //                 ),
+  //               ),
+  //               const Icon(
+  //                 Icons.edit_outlined,
+  //                 size: 13,
+  //                 color: Color(0xFF9CA3AF),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildDividedSlotsBox(DayShiftEntity shift) {
     final slotsList = shift.slots.isNotEmpty
@@ -1310,7 +1315,7 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                           color: const Color(0xFF1F2937),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
@@ -1319,7 +1324,7 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          "${slotItem.allottedSlots} cap",
+                          "(${slotItem.allottedSlots})",
                           style: GoogleFonts.inter(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -1337,7 +1342,6 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
       ),
     );
   }
-
 
   Widget _buildFooter() {
     return Container(

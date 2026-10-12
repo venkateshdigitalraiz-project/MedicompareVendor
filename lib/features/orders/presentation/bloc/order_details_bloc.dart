@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_return_type_for_catch_error
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../appointment/domain/entities/delivery_partner_entity.dart';
 import '../../domain/usecases/assign_order_delivery_partner_usecase.dart';
@@ -80,30 +82,35 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     final currentState = state;
     emit(OrderActionLoading());
     try {
-      final targetStatusLower = event.payload['orderStatus']?.toString().toLowerCase() ?? 
-                                event.payload['status']?.toString().toLowerCase() ?? '';
-      
+      final targetStatusLower =
+          event.payload['orderStatus']?.toString().toLowerCase() ??
+              event.payload['status']?.toString().toLowerCase() ??
+              '';
+
       final isAccepting = targetStatusLower == 'confirmed' ||
-                          targetStatusLower == 'order_confirmed' ||
-                          targetStatusLower == 'accepted' ||
-                          targetStatusLower == 'order_accepted' ||
-                          targetStatusLower == 'processing';
+          targetStatusLower == 'order_confirmed' ||
+          targetStatusLower == 'accepted' ||
+          targetStatusLower == 'order_accepted' ||
+          targetStatusLower == 'processing';
 
       DeliveryPartnersResultEntity? partnersResult;
       bool hasLoaded = false;
       String? partnersError;
 
       // Start the update process
-      Future<void> updateFuture = updateOrderStatusUseCase.call(event.orderItemId, event.payload);
-      
+      Future<void> updateFuture =
+          updateOrderStatusUseCase.call(event.orderItemId, event.payload);
+
       // Concurrently start the partners fetch if we are accepting the order
       Future<DeliveryPartnersResultEntity?> partnersFuture = Future.value(null);
       if (isAccepting) {
-        partnersFuture = getOrderDeliveryPartnersUseCase.call(
+        partnersFuture = getOrderDeliveryPartnersUseCase
+            .call(
           search: '',
           page: 1,
           limit: 10,
-        ).catchError((e) {
+        )
+            .catchError((e) {
           partnersError = e.toString().replaceAll('Exception: ', '');
           return null;
         });
@@ -115,14 +122,17 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
       if (partnersResult != null) hasLoaded = true;
 
       // Fetch fresh details seamlessly after update
-      final updatedDetails = await getOrderDetailsUseCase.call(event.orderItemId);
-      
+      final updatedDetails =
+          await getOrderDetailsUseCase.call(event.orderItemId);
+
       emit(const OrderStatusUpdated());
-      
+
       if (currentState is OrderDetailsLoaded) {
-        final initialPartners = partnersResult?.deliveryMans ?? currentState.deliveryPartners;
-        final ownPartner = partnersResult?.ownDeliveryUser ?? currentState.ownDeliveryPartner;
-        
+        final initialPartners =
+            partnersResult?.deliveryMans ?? currentState.deliveryPartners;
+        final ownPartner =
+            partnersResult?.ownDeliveryUser ?? currentState.ownDeliveryPartner;
+
         emit(currentState.copyWith(
           orderDetails: updatedDetails,
           deliveryPartners: initialPartners,
@@ -146,7 +156,8 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     final currentState = state;
     if (currentState is! OrderDetailsLoaded) return;
 
-    final isTabSwitch = currentState.currentDeliveryManType != event.deliveryManType;
+    final isTabSwitch =
+        currentState.currentDeliveryManType != event.deliveryManType;
 
     if (event.isLoadMore) {
       if (currentState.isLoadingMorePartners ||
@@ -263,13 +274,13 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
       };
 
       await updateOrderStatusUseCase.call(event.orderId, payload);
-      
+
       // Immediately refresh the order details after assignment
       final updatedDetails = await getOrderDetailsUseCase.call(event.orderId);
-      
+
       emit(const OrderStatusUpdated(
           message: 'Delivery partner assigned successfully'));
-          
+
       if (currentState is OrderDetailsLoaded) {
         emit(currentState.copyWith(
           isAssigningPartner: false,
@@ -277,8 +288,7 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
         ));
       }
     } catch (e) {
-      emit(OrderDetailsError(
-          e.toString().replaceAll('Exception: ', '')));
+      emit(OrderDetailsError(e.toString().replaceAll('Exception: ', '')));
       if (currentState is OrderDetailsLoaded) {
         emit(currentState.copyWith(isAssigningPartner: false));
       }
@@ -291,7 +301,7 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
   ) async {
     final currentState = state;
     if (currentState is! OrderDetailsLoaded) return;
-    
+
     final orderDetails = currentState.orderDetails;
     final otpEnable = orderDetails.otpEnable?.toLowerCase() ?? 'no';
     final otpStatus = orderDetails.otpStatus?.toLowerCase() ?? '';
@@ -301,9 +311,8 @@ class OrderDetailsBloc extends Bloc<OrderDetailsEvent, OrderDetailsState> {
     } else {
       emit(const OrderAcceptOtpPending('Please submit OTP'));
     }
-    
+
     // Restore UI state immediately
     emit(currentState);
   }
 }
-

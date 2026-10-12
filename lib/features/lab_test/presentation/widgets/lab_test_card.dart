@@ -1,7 +1,7 @@
 import 'package:MediCompare/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:MediCompare/core/utils/permission_handler.dart';
+// import 'package:MediCompare/core/utils/permission_handler.dart';
 
 import '../../data/models/lab_test_model.dart';
 

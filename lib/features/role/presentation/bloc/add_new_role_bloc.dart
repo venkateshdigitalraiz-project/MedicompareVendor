@@ -68,7 +68,7 @@ class AddNewRoleBloc extends Bloc<AddNewRoleEvent, AddNewRoleState> {
     try {
       // Create permissions payload
       final List<Map<String, dynamic>> permissionList = [];
-      final allCategories = state.permissions.keys.toList();
+      //  final allCategories = state.permissions.keys.toList();
 
       // If a category was not interacted with, it might not be in state.permissions.
       // But we should send all categories. The UI has a fixed list of categories.

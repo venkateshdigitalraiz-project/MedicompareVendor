@@ -134,8 +134,21 @@ class MedicalTreatmentCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  if (item.price > item.discountPrice &&
+                      item.discountPrice > 0) ...[
+                    Text(
+                      "₹${item.price.toInt()}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[500],
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
                   Text(
-                    "₹${item.discountPrice.toInt()}",
+                    "₹${(item.discountPrice > 0 ? item.discountPrice : item.price).toInt()}",
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

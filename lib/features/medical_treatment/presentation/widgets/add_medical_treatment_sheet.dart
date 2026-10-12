@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:MediCompare/core/constants/app_colors.dart';
-import 'package:MediCompare/features/medical_treatment/data/data_sources/medical_treatment_service.dart';
 import 'package:MediCompare/features/medical_treatment/data/models/medical_treatment_model.dart';
-import 'package:MediCompare/features/medical_treatment/medical_treatment_injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -60,8 +58,6 @@ class AddMedicalTreatmentSheet extends StatefulWidget {
 
 class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
   final _formKey = GlobalKey<FormState>();
-  final MedicalTreatmentService _service =
-      MedicalTreatmentInjection.provideMedicalTreatmentService();
 
   final _priceController = TextEditingController();
   final _discountController = TextEditingController();
@@ -149,11 +145,19 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
 
   void _onSearchChanged(String query) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () async {
-      try {
-        final results = await _service.searchTablets(query);
-        if (mounted) setState(() => _searchResults = results);
-      } catch (_) {}
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+      context.read<MedicalTreatmentBloc>().add(
+            SearchTreatmentDropdownTabletsEvent(
+              query,
+              onSuccess: (results) {
+                if (mounted) setState(() => _searchResults = results);
+              },
+              onError: (_) {
+                if (mounted) setState(() => _searchResults = []);
+              },
+            ),
+          );
     });
   }
 
@@ -691,14 +695,24 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
               fontSize: 13,
               color: isEditMode ? Colors.grey[600] : Colors.black87),
           onTap: () {
-            if (!isEditMode && _searchController.text.isEmpty) {
-              _onSearchChanged('');
+            if (!isEditMode && _searchResults.isEmpty) {
+              _onSearchChanged(_searchController.text);
             }
           },
           decoration: _inputDecoration(hint: "Select Treatment...").copyWith(
             suffixIcon: isEditMode
                 ? null
-                : const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                : InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      if (_searchResults.isEmpty) {
+                        _onSearchChanged(_searchController.text);
+                      } else {
+                        setState(() => _searchResults = []);
+                      }
+                    },
+                    child: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                  ),
             fillColor: isEditMode ? Colors.grey[50] : Colors.white,
           ),
           onChanged: (q) {
@@ -737,8 +751,9 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                 final item = _searchResults[i];
                 return InkWell(
                   onTap: () {
+                    final selectedId = item.id;
                     setState(() {
-                      _selectedTabletId = item.id;
+                      _selectedTabletId = selectedId;
                       _searchController.text = item.name;
                       _selectedCategory = item.subcategory?.name;
                       _searchResults = [];
@@ -747,12 +762,14 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
 
                     context.read<MedicalTreatmentBloc>().add(
                           FetchTreatmentTabletDetailsEvent(
-                            item.id,
+                            selectedId,
                             onSuccess: (tabletData) {
                               if (!mounted) return;
                               final List rawVariants =
                                   tabletData['tabletvariants'] as List? ??
                                       tabletData['tabletvariant'] as List? ??
+                                      tabletData['variants'] as List? ??
+                                      tabletData['variant'] as List? ??
                                       [];
                               setState(() {
                                 for (var v in _variants) {
@@ -760,12 +777,21 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                                 }
                                 _variants = rawVariants.map((tv) {
                                   return MedicalTreatmentVariantFormData(
-                                    variantId: tv['_id'] ?? '',
-                                    name: tv['name'] ?? 'Unknown Variant',
+                                    variantId: (tv['_id'] ?? tv['variantId'] ?? tv['varantId'] ?? '').toString(),
+                                    name: (tv['name'] ?? 'Unknown Variant').toString(),
                                     defaultPrice:
                                         (tv['price'] ?? 0).toString(),
+                                    defaultDiscount:
+                                        (tv['discountprice'] ?? tv['discount'] ?? '').toString(),
+                                    defaultStock:
+                                        (tv['stock'] ?? 0).toString(),
+                                    defaultIsInStock: tv['isStock'] ?? true,
+                                    defaultIsActive: tv['status'] == 'active' || tv['status'] == null,
                                   );
                                 }).toList();
+                                if (rawVariants.isEmpty && tabletData['price'] != null) {
+                                  _priceController.text = (tabletData['price'] ?? 0).toString();
+                                }
                                 _isFetchingVariants = false;
                               });
                             },

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../data/models/medical_treatment_model.dart';
 
 abstract class MedicalTreatmentEvent extends Equatable {
   const MedicalTreatmentEvent();
@@ -106,4 +107,19 @@ class FetchTreatmentFullDetailsEvent extends MedicalTreatmentEvent {
 
   @override
   List<Object?> get props => [id];
+}
+
+class SearchTreatmentDropdownTabletsEvent extends MedicalTreatmentEvent {
+  final String query;
+  final Function(List<MedicalTreatmentDropdownItem> results) onSuccess;
+  final Function(String)? onError;
+
+  const SearchTreatmentDropdownTabletsEvent(
+    this.query, {
+    required this.onSuccess,
+    this.onError,
+  });
+
+  @override
+  List<Object?> get props => [query];
 }

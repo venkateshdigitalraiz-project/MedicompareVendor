@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:MediCompare/features/dashboard/domain/entities/dashboard_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -231,19 +233,73 @@ class DashboardPage extends StatelessWidget {
                       "Top Selling Orders" // () => context.push('/orders')
                       ),
                   const SizedBox(height: 12),
-                  ...dashboard.topProducts
-                      .take(5)
-                      .map((product) => _buildTopProductItem(product)),
-                  // if (dashboard.user.serviceType?.toLowerCase() ==
-                  //     'surgeries') ...[
-                  const SizedBox(height: 32),
-                  _buildSectionHeader(
-                      "Recent Leads" // () => context.push('/leads')
+                  if (dashboard.topProducts.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: Text(
+                        "No top selling orders yet",
+                        style: GoogleFonts.inter(color: Colors.grey[500]),
+                      ),
+                    )
+                  else
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 280),
+                      child: Scrollbar(
+                        thumbVisibility: false,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          padding: EdgeInsets.zero,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: dashboard.topProducts.length,
+                          itemBuilder: (context, index) {
+                            return _buildTopProductItem(
+                                dashboard.topProducts[index]);
+                          },
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader("Recent Leads"),
                   const SizedBox(height: 12),
-                  ...dashboard.recentLeads
-                      .take(5)
-                      .map((lead) => _buildRecentLeadItem(lead)),
+                  if (dashboard.recentLeads.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "No recent leads yet",
+                        style: GoogleFonts.inter(color: Colors.grey[500]),
+                      ),
+                    )
+                  else
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 280),
+                      child: Scrollbar(
+                        thumbVisibility: false,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          padding: EdgeInsets.zero,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: dashboard.recentLeads.length,
+                          itemBuilder: (context, index) {
+                            return _buildRecentLeadItem(
+                                dashboard.recentLeads[index]);
+                          },
+                        ),
+                      ),
+                    ),
                 ],
                 //   ],
               );
@@ -601,7 +657,7 @@ class DashboardPage extends StatelessWidget {
   String _formatLargeAmount(double amount) {
     if (amount >= 100000) {
       double lakhs = amount / 100000;
-      return "₹${lakhs.toStringAsFixed(1)}L";
+      return "₹${lakhs.toStringAsFixed(2)}L";
     }
     return "₹${amount.toStringAsFixed(2)}";
   }

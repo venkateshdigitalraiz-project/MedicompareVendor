@@ -34,8 +34,7 @@ class _EditBranchSheetView extends StatefulWidget {
   final Branch branch;
   final VoidCallback onSuccess;
 
-  const _EditBranchSheetView(
-      {super.key, required this.branch, required this.onSuccess});
+  const _EditBranchSheetView({required this.branch, required this.onSuccess});
 
   @override
   State<_EditBranchSheetView> createState() => _EditBranchSheetViewState();

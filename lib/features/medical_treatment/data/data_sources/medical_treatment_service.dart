@@ -92,7 +92,17 @@ class MedicalTreatmentService {
       final response = await apiService.get(ApiEndpoints.getTabletDetails(id));
       final body = jsonDecode(response.body);
       if (body['success'] == true) {
-        return body['data']['tablets'] ?? {};
+        if (body['data'] is Map<String, dynamic>) {
+          final data = body['data'] as Map<String, dynamic>;
+          if (data['tablets'] is Map<String, dynamic>) {
+            return data['tablets'] as Map<String, dynamic>;
+          }
+          if (data['tablet'] is Map<String, dynamic>) {
+            return data['tablet'] as Map<String, dynamic>;
+          }
+          return data;
+        }
+        return {};
       }
       throw ServerException(
           body['message'] ?? 'Failed to fetch tablet details');

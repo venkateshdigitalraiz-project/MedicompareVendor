@@ -22,13 +22,10 @@ class OrdersPage extends StatefulWidget {
 class _OrdersPageState extends State<OrdersPage> {
   String _searchQuery = '';
   String _selectedStatus = '';
-  // String _selectedDuration = 'No delivery Time';
   final ScrollController _scrollController = ScrollController();
 
-  // final List<String> _durations = ['No delivery Time', '2 hours', '4 hours'];
   final List<Map<String, String>> _statuses = [
     {'label': 'All Status', 'value': ''},
-    // {'label': 'New', 'value': 'new'},
     {'label': 'Pending', 'value': 'pending'},
     {'label': 'Confirmed', 'value': 'confirmed'},
     {'label': 'Processing', 'value': 'processing'},
@@ -300,7 +297,9 @@ class _OrdersPageState extends State<OrdersPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.orderDetails.orderRef.isNotEmpty ? item.orderDetails.orderRef : item.orderItemId,
+                          item.orderDetails.orderRef.isNotEmpty
+                              ? item.orderDetails.orderRef
+                              : item.orderItemId,
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,

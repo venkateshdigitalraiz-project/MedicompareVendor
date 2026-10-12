@@ -668,102 +668,102 @@ class _BranchDetailsPageState extends State<BranchDetailsPage> {
     );
   }
 
-  Widget _buildServiceFeeCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required List<_ServiceFeeRow> rows,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryDark.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 20, color: AppColors.primaryDark),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E1B4B),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            child: Divider(height: 1),
-          ),
-          ...rows.map((row) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      row.label,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    Text(
-                      row.value,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1E1B4B),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-        ],
-      ),
-    );
-  }
+  // Widget _buildServiceFeeCard({
+  //   required IconData icon,
+  //   required String title,
+  //   required String subtitle,
+  //   required List<_ServiceFeeRow> rows,
+  // }) {
+  //   return Container(
+  //     width: double.infinity,
+  //     margin: const EdgeInsets.only(bottom: 12),
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.04),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 4),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Container(
+  //               padding: const EdgeInsets.all(8),
+  //               decoration: BoxDecoration(
+  //                 color: AppColors.primaryDark.withOpacity(0.08),
+  //                 borderRadius: BorderRadius.circular(10),
+  //               ),
+  //               child: Icon(icon, size: 20, color: AppColors.primaryDark),
+  //             ),
+  //             const SizedBox(width: 12),
+  //             Expanded(
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Text(
+  //                     title,
+  //                     style: GoogleFonts.inter(
+  //                       fontSize: 15,
+  //                       fontWeight: FontWeight.bold,
+  //                       color: const Color(0xFF1E1B4B),
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 2),
+  //                   Text(
+  //                     subtitle,
+  //                     style: GoogleFonts.inter(
+  //                       fontSize: 12,
+  //                       color: Colors.grey[500],
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const Padding(
+  //           padding: EdgeInsets.symmetric(vertical: 12.0),
+  //           child: Divider(height: 1),
+  //         ),
+  //         ...rows.map((row) => Padding(
+  //               padding: const EdgeInsets.symmetric(vertical: 5),
+  //               child: Row(
+  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                 children: [
+  //                   Text(
+  //                     row.label,
+  //                     style: GoogleFonts.inter(
+  //                       fontSize: 13,
+  //                       color: Colors.grey[600],
+  //                     ),
+  //                   ),
+  //                   Text(
+  //                     row.value,
+  //                     style: GoogleFonts.inter(
+  //                       fontSize: 13,
+  //                       fontWeight: FontWeight.w600,
+  //                       color: const Color(0xFF1E1B4B),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             )),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
 
-class _ServiceFeeRow {
-  final String label;
-  final String value;
+// class _ServiceFeeRow {
+//   final String label;
+//   final String value;
 
-  const _ServiceFeeRow(this.label, this.value);
-}
+//   const _ServiceFeeRow(this.label, this.value);
+// }

@@ -17,6 +17,7 @@ class MedicalTreatmentBloc
     on<UpdateMedicalTreatmentEvent>(_onUpdate);
     on<FetchTreatmentTabletDetailsEvent>(_onFetchTabletDetails);
     on<FetchTreatmentFullDetailsEvent>(_onFetchFullDetails);
+    on<SearchTreatmentDropdownTabletsEvent>(_onSearchDropdownTablets);
   }
 
   Future<void> _onLoadCategories(LoadMedicalTreatmentCategoriesEvent event,
@@ -153,6 +154,21 @@ class MedicalTreatmentBloc
     } catch (e) {
       if (event.onError != null) {
         event.onError!(e.toString());
+      }
+    }
+  }
+
+  Future<void> _onSearchDropdownTablets(
+      SearchTreatmentDropdownTabletsEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
+    try {
+      final results = await service.searchTablets(event.query);
+      event.onSuccess(results);
+    } catch (e) {
+      if (event.onError != null) {
+        event.onError!(e.toString());
+      } else {
+        event.onSuccess([]);
       }
     }
   }
