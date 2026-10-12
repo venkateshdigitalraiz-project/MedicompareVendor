@@ -4,7 +4,42 @@ import 'package:MediCompare/features/medical_treatment/data/data_sources/medical
 import 'package:MediCompare/features/medical_treatment/data/models/medical_treatment_model.dart';
 import 'package:MediCompare/features/medical_treatment/medical_treatment_injection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../bloc/medical_treatment_bloc.dart';
+import '../bloc/medical_treatment_event.dart';
+
+class MedicalTreatmentVariantFormData {
+  final String? id;
+  final String variantId;
+  final String name;
+  final TextEditingController price;
+  final TextEditingController discount;
+  final TextEditingController quantity;
+  bool isInStock;
+  bool isActive;
+
+  MedicalTreatmentVariantFormData({
+    this.id,
+    required this.variantId,
+    required this.name,
+    required String defaultPrice,
+    String defaultDiscount = '',
+    String defaultStock = '0',
+    bool defaultIsInStock = true,
+    bool defaultIsActive = true,
+  })  : price = TextEditingController(text: defaultPrice),
+        discount = TextEditingController(text: defaultDiscount),
+        quantity = TextEditingController(text: defaultStock),
+        isInStock = defaultIsInStock,
+        isActive = defaultIsActive;
+
+  void dispose() {
+    price.dispose();
+    discount.dispose();
+    quantity.dispose();
+  }
+}
 
 class AddMedicalTreatmentSheet extends StatefulWidget {
   final MedicalTreatmentItem? editItem;
@@ -36,6 +71,8 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
   String? _selectedTabletId;
   String? _selectedCategory;
   bool _isSubmitting = false;
+  bool _isFetchingVariants = false;
+  List<MedicalTreatmentVariantFormData> _variants = [];
 
   List<MedicalTreatmentDropdownItem> _searchResults = [];
   Timer? _debounce;
@@ -53,7 +90,61 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
       _selectedTabletId = item.details.id;
       _searchController.text = item.details.name;
       _selectedCategory = item.details.subcategory?.name;
+      _loadEditData();
     }
+  }
+
+  void _loadEditData() {
+    setState(() => _isFetchingVariants = true);
+    context.read<MedicalTreatmentBloc>().add(
+          FetchTreatmentFullDetailsEvent(
+            widget.editItem!.id,
+            onSuccess: (data) {
+              if (!mounted) return;
+              final tabletData = data['tablets'] ?? {};
+              final List variantDetailsJson = data['variantdetails'] ?? [];
+              final List tabletVariantsJson = tabletData['tabletvariant'] ??
+                  tabletData['tabletvariants'] ??
+                  [];
+
+              setState(() {
+                _priceController.text = (data['price'] ?? 0).toString();
+                _discountController.text =
+                    (data['discountprice'] ?? data['discount'] ?? 0).toString();
+                _selectedStatus = data['status'] ?? 'active';
+
+                if (variantDetailsJson.isNotEmpty) {
+                  for (var v in _variants) {
+                    v.dispose();
+                  }
+                  _variants = variantDetailsJson.map((vd) {
+                    final tvMatch = tabletVariantsJson.firstWhere(
+                      (tv) =>
+                          tv['_id'] == vd['variantId'] ||
+                          tv['_id'] == vd['varantId'],
+                      orElse: () => null,
+                    );
+                    return MedicalTreatmentVariantFormData(
+                      id: vd['_id'],
+                      variantId: vd['variantId'] ?? vd['varantId'] ?? '',
+                      name: tvMatch != null ? tvMatch['name'] : 'Unknown Variant',
+                      defaultPrice: (vd['price'] ?? 0).toString(),
+                      defaultDiscount:
+                          (vd['discountprice'] ?? vd['discount'] ?? 0).toString(),
+                      defaultStock: (vd['stock'] ?? 0).toString(),
+                      defaultIsInStock: vd['isStock'] ?? true,
+                      defaultIsActive: vd['status'] == 'active',
+                    );
+                  }).toList();
+                }
+                _isFetchingVariants = false;
+              });
+            },
+            onError: (_) {
+              if (mounted) setState(() => _isFetchingVariants = false);
+            },
+          ),
+        );
   }
 
   void _onSearchChanged(String query) {
@@ -87,47 +178,104 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
       return;
     }
 
-    setState(() => _isSubmitting = true);
-    try {
-      final payload = {
-        'name': _selectedTabletId,
-        'category': _selectedCategory ?? 'General',
-        'price': double.tryParse(_priceController.text) ?? 0,
-        'discount': double.tryParse(_discountController.text) ?? 0,
-        'status': _selectedStatus,
-        'description': '', // Optional fields
-        'duration': '',
-        'procedureType': '',
-        'complexityLevel': '',
-        'recoveryTime': '',
-        'requirements': [],
-        'sideEffects': [],
-      };
+    final firstVariant = _variants.isNotEmpty ? _variants.first : null;
+    final double topPrice = double.tryParse(_priceController.text) ??
+        (firstVariant != null
+            ? (double.tryParse(firstVariant.price.text) ?? 0)
+            : 0);
+    final double topDiscount = double.tryParse(_discountController.text) ??
+        (firstVariant != null
+            ? (double.tryParse(firstVariant.discount.text) ?? 0)
+            : 0);
 
-      if (isEditMode) {
-        await _service.update(widget.editItem!.id, payload);
-      } else {
-        await _service.create(payload);
-      }
-      widget.onSuccess();
-      if (mounted) {
-        final messenger = ScaffoldMessenger.of(context);
-        Navigator.pop(context);
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(isEditMode
-                ? 'Updated successfully'
-                : 'Product added successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+    setState(() => _isSubmitting = true);
+
+    final payload = {
+      'name': isEditMode ? widget.editItem!.id : _selectedTabletId,
+      'category': _selectedCategory ?? 'General',
+      'price': topPrice,
+      'discount': topDiscount,
+      'discountprice': topDiscount,
+      'status': _selectedStatus,
+      'type': 'general',
+      'description': '',
+      'duration': '',
+      'procedureType': '',
+      'complexityLevel': '',
+      'recoveryTime': '',
+      'requirements': [],
+      'sideEffects': [],
+      if (_variants.isNotEmpty)
+        'variants': _variants.map((v) => {
+              if (v.id != null) '_id': v.id,
+              'variantId': v.variantId,
+              'varantId': v.variantId,
+              'name': v.name,
+              'price': double.tryParse(v.price.text) ?? 0,
+              'discount': double.tryParse(v.discount.text) ?? 0,
+              'discountprice': double.tryParse(v.discount.text) ??
+                  double.tryParse(v.price.text) ??
+                  0,
+              'discountType': 'price',
+              'stock': int.tryParse(v.quantity.text) ?? 0,
+              'isStock': v.isInStock,
+              'status': v.isActive ? 'active' : 'inactive',
+            }).toList(),
+    };
+
+    if (isEditMode) {
+      context.read<MedicalTreatmentBloc>().add(
+            UpdateMedicalTreatmentEvent(
+              widget.editItem!.id,
+              payload,
+              onSuccess: () {
+                widget.onSuccess();
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Updated successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              onError: (msg) {
+                if (mounted) {
+                  setState(() => _isSubmitting = false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(msg), backgroundColor: Colors.red),
+                  );
+                }
+              },
+            ),
+          );
+    } else {
+      context.read<MedicalTreatmentBloc>().add(
+            CreateMedicalTreatmentEvent(
+              payload,
+              onSuccess: () {
+                widget.onSuccess();
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Product added successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              onError: (msg) {
+                if (mounted) {
+                  setState(() => _isSubmitting = false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(msg), backgroundColor: Colors.red),
+                  );
+                }
+              },
+            ),
+          );
     }
   }
 
@@ -136,6 +284,9 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
     _priceController.dispose();
     _discountController.dispose();
     _searchController.dispose();
+    for (var v in _variants) {
+      v.dispose();
+    }
     _debounce?.cancel();
     super.dispose();
   }
@@ -235,64 +386,91 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Price & Discount
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel("Price (₹)",
-                                  isRequired: true, icon: Icons.currency_rupee),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                controller: _priceController,
-                                keyboardType: TextInputType.number,
-                                style: GoogleFonts.inter(fontSize: 13),
-                                decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) => (val == null || val.isEmpty)
-                                    ? "Required"
-                                    : null,
-                              ),
-                            ],
-                          ),
+                    // Dynamic Variants or Fallback Price/Discount
+                    if (_isFetchingVariants) ...[
+                      const SizedBox(height: 16),
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel("Discount Price (₹)",
-                                  isRequired: true,
-                                  icon: Icons.local_offer_outlined),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                controller: _discountController,
-                                keyboardType: TextInputType.number,
-                                style: GoogleFonts.inter(fontSize: 13),
-                                decoration: _inputDecoration(hint: "0.00"),
-                                validator: (val) {
-                                  if (val == null || val.isEmpty)
-                                    return "Required";
-                                  final discount = double.tryParse(val);
-                                  final price =
-                                      double.tryParse(_priceController.text);
-                                  if (discount != null &&
-                                      price != null &&
-                                      discount > price) {
-                                    return "Over price";
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ),
+                      ),
+                    ] else if (_variants.isNotEmpty) ...[
+                      Text(
+                        "Treatment Variants",
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1E1B4B),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                      ),
+                      const SizedBox(height: 12),
+                      ..._variants.asMap().entries.map(
+                            (e) => _buildVariantSection(e.value, e.key),
+                          ),
+                    ] else ...[
+                      // Single Price & Discount fields if no variants
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Price (₹)",
+                                    isRequired: true,
+                                    icon: Icons.currency_rupee),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _priceController,
+                                  keyboardType: TextInputType.number,
+                                  style: GoogleFonts.inter(fontSize: 13),
+                                  decoration: _inputDecoration(hint: "0.00"),
+                                  validator: (val) =>
+                                      (val == null || val.isEmpty)
+                                          ? "Required"
+                                          : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel("Discount Price (₹)",
+                                    isRequired: true,
+                                    icon: Icons.local_offer_outlined),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _discountController,
+                                  keyboardType: TextInputType.number,
+                                  style: GoogleFonts.inter(fontSize: 13),
+                                  decoration: _inputDecoration(hint: "0.00"),
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty) {
+                                      return "Required";
+                                    }
+                                    final discount = double.tryParse(val);
+                                    final price =
+                                        double.tryParse(_priceController.text);
+                                    if (discount != null &&
+                                        price != null &&
+                                        discount > price) {
+                                      return "Over price";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
 
-                    if (isEditMode)
+                    if (isEditMode) ...[
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
@@ -304,7 +482,7 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                                     icon: Icons.check_circle_outline),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  value: _selectedStatus,
+                                  initialValue: _selectedStatus,
                                   isExpanded: true,
                                   decoration:
                                       _inputDecoration(hint: "Select Status"),
@@ -330,6 +508,7 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                           ),
                         ],
                       ),
+                    ],
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -387,6 +566,121 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
     );
   }
 
+  Widget _buildVariantSection(
+      MedicalTreatmentVariantFormData v, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Variant ${index + 1}",
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildStaticField("Variant Name", v.name, Icons.link_outlined),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  "Price (₹)",
+                  v.price,
+                  hint: "0.00",
+                  icon: Icons.currency_rupee,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTextField(
+                  "Discount Price (₹)",
+                  v.discount,
+                  hint: "0.00",
+                  icon: Icons.local_offer_outlined,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return "Required";
+                    final discount = double.tryParse(val);
+                    final price = double.tryParse(v.price.text) ?? 0;
+                    if (discount != null && discount > price) {
+                      return "> price (₹${price.toStringAsFixed(0)})";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStaticField(String label, String value, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label, isRequired: true, icon: icon),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: const Color(0xFF1E1B4B),
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    required String hint,
+    required IconData icon,
+    bool isRequired = true,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label, isRequired: isRequired, icon: icon),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          style: GoogleFonts.inter(fontSize: 13),
+          decoration: _inputDecoration(hint: hint),
+          validator: validator ??
+              (val) => (isRequired && (val == null || val.isEmpty))
+                  ? "Required"
+                  : null,
+        ),
+      ],
+    );
+  }
+
   Widget _buildSearchField() {
     return Column(
       children: [
@@ -397,8 +691,9 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
               fontSize: 13,
               color: isEditMode ? Colors.grey[600] : Colors.black87),
           onTap: () {
-            if (!isEditMode && _searchController.text.isEmpty)
+            if (!isEditMode && _searchController.text.isEmpty) {
               _onSearchChanged('');
+            }
           },
           decoration: _inputDecoration(hint: "Select Treatment...").copyWith(
             suffixIcon: isEditMode
@@ -409,6 +704,10 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
           onChanged: (q) {
             setState(() {
               _selectedTabletId = null;
+              for (var v in _variants) {
+                v.dispose();
+              }
+              _variants = [];
             });
             _onSearchChanged(q);
           },
@@ -425,7 +724,10 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey[200]!),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                )
               ],
             ),
             child: ListView.builder(
@@ -440,7 +742,40 @@ class _AddMedicalTreatmentSheetState extends State<AddMedicalTreatmentSheet> {
                       _searchController.text = item.name;
                       _selectedCategory = item.subcategory?.name;
                       _searchResults = [];
+                      _isFetchingVariants = true;
                     });
+
+                    context.read<MedicalTreatmentBloc>().add(
+                          FetchTreatmentTabletDetailsEvent(
+                            item.id,
+                            onSuccess: (tabletData) {
+                              if (!mounted) return;
+                              final List rawVariants =
+                                  tabletData['tabletvariants'] as List? ??
+                                      tabletData['tabletvariant'] as List? ??
+                                      [];
+                              setState(() {
+                                for (var v in _variants) {
+                                  v.dispose();
+                                }
+                                _variants = rawVariants.map((tv) {
+                                  return MedicalTreatmentVariantFormData(
+                                    variantId: tv['_id'] ?? '',
+                                    name: tv['name'] ?? 'Unknown Variant',
+                                    defaultPrice:
+                                        (tv['price'] ?? 0).toString(),
+                                  );
+                                }).toList();
+                                _isFetchingVariants = false;
+                              });
+                            },
+                            onError: (_) {
+                              if (mounted) {
+                                setState(() => _isFetchingVariants = false);
+                              }
+                            },
+                          ),
+                        );
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

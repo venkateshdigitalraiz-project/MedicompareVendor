@@ -45,3 +45,65 @@ class SearchMedicalTreatmentEvent extends MedicalTreatmentEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class CreateMedicalTreatmentEvent extends MedicalTreatmentEvent {
+  final Map<String, dynamic> payload;
+  final Function onSuccess;
+  final Function(String) onError;
+
+  const CreateMedicalTreatmentEvent(
+    this.payload, {
+    required this.onSuccess,
+    required this.onError,
+  });
+
+  @override
+  List<Object?> get props => [payload];
+}
+
+class UpdateMedicalTreatmentEvent extends MedicalTreatmentEvent {
+  final String id;
+  final Map<String, dynamic> payload;
+  final Function onSuccess;
+  final Function(String) onError;
+
+  const UpdateMedicalTreatmentEvent(
+    this.id,
+    this.payload, {
+    required this.onSuccess,
+    required this.onError,
+  });
+
+  @override
+  List<Object?> get props => [id, payload];
+}
+
+class FetchTreatmentTabletDetailsEvent extends MedicalTreatmentEvent {
+  final String id;
+  final Function(Map<String, dynamic> tabletData) onSuccess;
+  final Function(String)? onError;
+
+  const FetchTreatmentTabletDetailsEvent(
+    this.id, {
+    required this.onSuccess,
+    this.onError,
+  });
+
+  @override
+  List<Object?> get props => [id];
+}
+
+class FetchTreatmentFullDetailsEvent extends MedicalTreatmentEvent {
+  final String id;
+  final Function(Map<String, dynamic> fullData) onSuccess;
+  final Function(String)? onError;
+
+  const FetchTreatmentFullDetailsEvent(
+    this.id, {
+    required this.onSuccess,
+    this.onError,
+  });
+
+  @override
+  List<Object?> get props => [id];
+}

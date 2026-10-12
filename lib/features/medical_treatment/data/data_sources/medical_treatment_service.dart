@@ -87,6 +87,36 @@ class MedicalTreatmentService {
     }
   }
 
+  Future<Map<String, dynamic>> getTabletDetails(String id) async {
+    try {
+      final response = await apiService.get(ApiEndpoints.getTabletDetails(id));
+      final body = jsonDecode(response.body);
+      if (body['success'] == true) {
+        return body['data']['tablets'] ?? {};
+      }
+      throw ServerException(
+          body['message'] ?? 'Failed to fetch tablet details');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> getFullDetails(String id) async {
+    try {
+      final response =
+          await apiService.get(ApiEndpoints.medicalTreatmentDetails(id));
+      final body = jsonDecode(response.body);
+      if (body['success'] == true) {
+        return body['data']['product'] ?? {};
+      }
+      throw ServerException(body['message'] ?? 'Failed to fetch details');
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<void> create(Map<String, dynamic> payload) async {
     try {
       final response = await apiService

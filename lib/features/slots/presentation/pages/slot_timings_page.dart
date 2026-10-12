@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/token_storage.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../bloc/slots_bloc.dart';
@@ -70,7 +69,6 @@ class SlotTimingsPage extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, List<SlotTimingEntity> timings) {
-    // Usually there's only one timing document for a vendor
     final availability = timings.isNotEmpty ? timings.first.availability : [];
 
     return Column(
@@ -87,47 +85,58 @@ class SlotTimingsPage extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: const Color(0xFF1F2937),
                 ),
               ),
               TextButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   if (timings.isNotEmpty) {
-                    Navigator.push(
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
                             ConfigureAvailabilityPage(timing: timings.first),
                       ),
                     );
+                    if (context.mounted) {
+                      context.read<SlotsBloc>().add(GetSlotTimingsEvent());
+                    }
                   }
                 },
                 icon: const Icon(Icons.settings_outlined, size: 16),
                 label: const Text("Configure"),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
+                  foregroundColor: const Color(0xFF241442),
                   textStyle: GoogleFonts.inter(
-                      fontSize: 13, fontWeight: FontWeight.w600),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
         ),
 
-        /// GRID OF CARDS
+        /// RESPONSIVE GRID OF CARDS
         Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.2,
-            ),
-            itemCount: availability.length,
-            itemBuilder: (context, index) {
-              return _buildTimingCard(
-                  context, availability[index], timings.first);
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return GridView.builder(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                physics: const AlwaysScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 440,
+                  mainAxisExtent: 244,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                ),
+                itemCount: availability.length,
+                itemBuilder: (context, index) {
+                  return _buildTimingCard(
+                      context, availability[index], timings.first);
+                },
+              );
             },
           ),
         ),
@@ -137,137 +146,272 @@ class SlotTimingsPage extends StatelessWidget {
 
   Widget _buildTimingCard(BuildContext context, DayAvailabilityEntity item,
       SlotTimingEntity parentTiming) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    final shifts = _normalizeShifts(item);
+    final openShifts = shifts.where((s) => s.isOpen).toList();
+    final isOpen = item.isOpen && openShifts.isNotEmpty;
+    final openCount = openShifts.length;
+
+    // Calculate total slots and total capacity
+    int totalSlots = 0;
+    int totalCapacity = 0;
+    for (final s in openShifts) {
+      final slotsList = s.slots.isNotEmpty
+          ? s.slots
+          : (s.startTime != null && s.endTime != null
+              ? DayShiftEntity.generateSlots(
+                  s.startTime!, s.endTime!, s.slotInterval, s.capacity)
+              : <DayShiftSlotEntity>[]);
+      totalSlots += slotsList.length;
+      totalCapacity +=
+          slotsList.fold<int>(0, (sum, slot) => sum + slot.allottedSlots);
+    }
+
+    return InkWell(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                ConfigureAvailabilityPage(timing: parentTiming),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.access_time_filled,
-                      color: AppColors.primary, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    item.day,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              // GestureDetector(
-              //   onTap: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (context) =>
-              //             ConfigureAvailabilityPage(timing: parentTiming),
-              //       ),
-              //     );
-              //   },
-              //   child: const Icon(Icons.edit_outlined,
-              //       size: 18, color: Colors.grey),
-              // ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 6.0),
-                child: Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: item.isOpen ? Colors.green : Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                item.isOpen ? "OPEN" : "CLOSED",
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: item.isOpen ? Colors.green : Colors.red,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F9FF),
-              borderRadius: BorderRadius.circular(12),
+        );
+        if (context.mounted) {
+          context.read<SlotsBloc>().add(GetSlotTimingsEvent());
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            child: Row(
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row: Clock Icon + Day Name
+            Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "AVAILABILITY",
-                        style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        "${_formatTo12Hour(item.startTime)} - ${_formatTo12Hour(item.endTime)}",
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
+                const Icon(
+                  Icons.access_time_rounded,
+                  size: 16,
+                  color: Color(0xFF241442),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  item.day,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1F2937),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 3),
+
+            // Status: • OPEN (X SHIFTS) or • CLOSED
+            Text(
+              isOpen
+                  ? "• OPEN ($openCount SHIFTS)"
+                  : "• CLOSED",
+              style: GoogleFonts.inter(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                color:
+                    isOpen ? const Color(0xFF059669) : const Color(0xFF9CA3AF),
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Shifts list (Morning, Afternoon, Evening, Night)
+            ...shifts.map((s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: _buildShiftRow(s),
+                )),
+
+            const Spacer(),
+
+            // Footer: TOTAL: X SLOTS (Y CAPACITY)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                "TOTAL: $totalSlots SLOTS ($totalCapacity CAPACITY)",
+                style: GoogleFonts.inter(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF9CA3AF),
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  String _formatTo12Hour(String time) {
-    if (time.isEmpty) return time;
-    try {
-      final parts = time.split(':');
-      if (parts.length >= 2) {
-        int hour = int.parse(parts[0]);
-        final minute = parts[1];
-        final period = hour >= 12 ? 'PM' : 'AM';
-        if (hour == 0) {
-          hour = 12;
-        } else if (hour > 12) {
-          hour -= 12;
-        }
-        return '$hour:$minute $period';
-      }
-    } catch (_) {}
-    return time;
+  Widget _buildShiftRow(DayShiftEntity shift) {
+    final isShiftOpen = shift.isOpen;
+    IconData iconData;
+    Color iconColor;
+
+    switch (shift.shiftType.toLowerCase()) {
+      case 'afternoon':
+        iconData = Icons.wb_sunny_rounded;
+        iconColor = const Color(0xFFEA580C);
+        break;
+      case 'evening':
+        iconData = Icons.cloud_outlined;
+        iconColor = const Color(0xFF6366F1);
+        break;
+      case 'night':
+        iconData = Icons.nightlight_round;
+        iconColor = const Color(0xFF0284C7);
+        break;
+      case 'morning':
+      default:
+        iconData = Icons.wb_twilight_rounded;
+        iconColor = const Color(0xFFF59E0B);
+        break;
+    }
+
+    final shiftTitle = shift.shiftName.isNotEmpty
+        ? shift.shiftName
+        : _defaultShiftTitle(shift.shiftType);
+
+    if (isShiftOpen) {
+      final slotsList = shift.slots.isNotEmpty
+          ? shift.slots
+          : (shift.startTime != null && shift.endTime != null
+              ? DayShiftEntity.generateSlots(shift.startTime!, shift.endTime!,
+                  shift.slotInterval, shift.capacity)
+              : <DayShiftSlotEntity>[]);
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(iconData, size: 14, color: iconColor),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                shiftTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF374151),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              "${shift.startTime ?? ''} - ${shift.endTime ?? ''}",
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF4B5563),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F0F9),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                "${slotsList.length} slots",
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF4A2B82),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Row(
+          children: [
+            Icon(iconData, size: 14, color: const Color(0xFF9CA3AF)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                shiftTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF9CA3AF),
+                ),
+              ),
+            ),
+            Text(
+              "Closed",
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF9CA3AF),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  List<DayShiftEntity> _normalizeShifts(DayAvailabilityEntity item) {
+    List<DayShiftEntity> shifts = item.shifts;
+    if (shifts.isEmpty) {
+      shifts = DayAvailabilityEntity.defaultShiftsForDay(
+        item.day,
+        item.startTime,
+        item.endTime,
+        item.isOpen,
+      );
+    }
+
+    const order = ['morning', 'afternoon', 'evening', 'night'];
+    final sorted = List<DayShiftEntity>.from(shifts);
+    sorted.sort((a, b) {
+      final aIdx = order.indexOf(a.shiftType.toLowerCase());
+      final bIdx = order.indexOf(b.shiftType.toLowerCase());
+      return (aIdx == -1 ? 99 : aIdx).compareTo(bIdx == -1 ? 99 : bIdx);
+    });
+    return sorted;
+  }
+
+  String _defaultShiftTitle(String type) {
+    switch (type.toLowerCase()) {
+      case 'afternoon':
+        return 'Afternoon Shift';
+      case 'evening':
+        return 'Evening Shift';
+      case 'night':
+        return 'Night Shift';
+      case 'morning':
+      default:
+        return 'Morning Shift';
+    }
   }
 }

@@ -13,6 +13,10 @@ class MedicalTreatmentBloc
     on<LoadMedicalTreatmentListEvent>(_onLoadList);
     on<SelectMedicalTreatmentCategoryEvent>(_onSelectCategory);
     on<SearchMedicalTreatmentEvent>(_onSearch);
+    on<CreateMedicalTreatmentEvent>(_onCreate);
+    on<UpdateMedicalTreatmentEvent>(_onUpdate);
+    on<FetchTreatmentTabletDetailsEvent>(_onFetchTabletDetails);
+    on<FetchTreatmentFullDetailsEvent>(_onFetchFullDetails);
   }
 
   Future<void> _onLoadCategories(LoadMedicalTreatmentCategoriesEvent event,
@@ -103,6 +107,52 @@ class MedicalTreatmentBloc
         ));
       } catch (e) {
         emit(MedicalTreatmentError(e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onCreate(CreateMedicalTreatmentEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
+    try {
+      await service.create(event.payload);
+      event.onSuccess();
+      add(const LoadMedicalTreatmentCategoriesEvent());
+    } catch (e) {
+      event.onError(e.toString());
+    }
+  }
+
+  Future<void> _onUpdate(UpdateMedicalTreatmentEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
+    try {
+      await service.update(event.id, event.payload);
+      event.onSuccess();
+      add(const LoadMedicalTreatmentCategoriesEvent());
+    } catch (e) {
+      event.onError(e.toString());
+    }
+  }
+
+  Future<void> _onFetchTabletDetails(FetchTreatmentTabletDetailsEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
+    try {
+      final data = await service.getTabletDetails(event.id);
+      event.onSuccess(data);
+    } catch (e) {
+      if (event.onError != null) {
+        event.onError!(e.toString());
+      }
+    }
+  }
+
+  Future<void> _onFetchFullDetails(FetchTreatmentFullDetailsEvent event,
+      Emitter<MedicalTreatmentState> emit) async {
+    try {
+      final data = await service.getFullDetails(event.id);
+      event.onSuccess(data);
+    } catch (e) {
+      if (event.onError != null) {
+        event.onError!(e.toString());
       }
     }
   }
