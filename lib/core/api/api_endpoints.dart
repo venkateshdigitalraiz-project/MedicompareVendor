@@ -47,10 +47,16 @@ class ApiEndpoints {
   static const String markAllNotificationsRead =
       '/vendor/notifications/mark-all-read';
 
-  // Slot Timings
+  // Slot Timings & Vacations
   static const String slotTimings = '/vendor/vendor-timings/list';
   static String updateSlotTimings(String id) =>
       '/vendor/vendor-timings/update/$id';
+  static const String vendorVacationsCalendar =
+      '/vendor/vendor-vacations/calendar';
+  static const String vendorVacationsCreate =
+      '/vendor/vendor-vacations/create';
+  static String vendorVacationsDelete(String id) =>
+      '/vendor/vendor-vacations/delete/$id';
 
   // Coupons
   static const String couponList = '/vendor/coupon/list';

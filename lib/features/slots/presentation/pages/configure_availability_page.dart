@@ -570,7 +570,7 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                             ? [
                                 BoxShadow(
                                   color:
-                                      const Color(0xFF241442).withOpacity(0.16),
+                                      const Color(0xFF241442).withValues(alpha: 0.16),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -622,7 +622,7 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
-                                    ? Colors.white.withOpacity(0.95)
+                                    ? Colors.white.withValues(alpha: 0.95)
                                     : const Color(0xFF6B7280),
                               ),
                             ),
@@ -894,7 +894,7 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1351,7 +1351,7 @@ class _ConfigureAvailabilityPageState extends State<ConfigureAvailabilityPage> {
         border: const Border(top: BorderSide(color: Color(0xFFE5E7EB))),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),

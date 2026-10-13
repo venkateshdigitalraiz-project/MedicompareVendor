@@ -4,6 +4,10 @@ import 'data/repositories/slots_repository_impl.dart';
 import 'domain/repositories/slots_repository.dart';
 import 'domain/usecases/get_slot_timings_usecase.dart';
 import 'domain/usecases/update_slot_timings_usecase.dart';
+import 'domain/usecases/get_vacation_calendar_usecase.dart';
+import 'domain/usecases/save_vacation_usecase.dart';
+import 'domain/usecases/delete_vacation_usecase.dart';
+import 'presentation/bloc/slot_calendar_bloc.dart';
 import 'presentation/bloc/slots_bloc.dart';
 
 class SlotsInjection {
@@ -25,10 +29,30 @@ class SlotsInjection {
     return UpdateSlotTimingsUseCase(repository: provideRepository());
   }
 
+  static GetVacationCalendarUseCase provideGetVacationCalendarUseCase() {
+    return GetVacationCalendarUseCase(provideRepository());
+  }
+
+  static SaveVacationUseCase provideSaveVacationUseCase() {
+    return SaveVacationUseCase(provideRepository());
+  }
+
+  static DeleteVacationUseCase provideDeleteVacationUseCase() {
+    return DeleteVacationUseCase(provideRepository());
+  }
+
   static SlotsBloc provideSlotsBloc() {
     return SlotsBloc(
       getSlotTimingsUseCase: provideGetSlotTimingsUseCase(),
       updateSlotTimingsUseCase: provideUpdateSlotTimingsUseCase(),
+    );
+  }
+
+  static SlotCalendarBloc provideSlotCalendarBloc() {
+    return SlotCalendarBloc(
+      getVacationCalendarUseCase: provideGetVacationCalendarUseCase(),
+      saveVacationUseCase: provideSaveVacationUseCase(),
+      deleteVacationUseCase: provideDeleteVacationUseCase(),
     );
   }
 }

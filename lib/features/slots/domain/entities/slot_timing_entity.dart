@@ -24,6 +24,33 @@ class SlotTimingEntity {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  DayAvailabilityEntity? getAvailabilityForDate(DateTime date) {
+    const dayNames = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday'
+    ];
+    final target = dayNames[date.weekday - 1];
+    for (final a in availability) {
+      final dayLower = a.day.trim().toLowerCase();
+      if (dayLower == target || dayLower.startsWith(target.substring(0, 3))) {
+        return a;
+      }
+    }
+    return DayAvailabilityEntity(
+      day: target[0].toUpperCase() + target.substring(1),
+      isOpen: false,
+      startTime: '',
+      endTime: '',
+      id: '',
+      shifts: const [],
+    );
+  }
 }
 
 class DayShiftSlotEntity {
@@ -223,6 +250,35 @@ class DayAvailabilityEntity {
   }) : shifts = shifts ?? defaultShiftsForDay(day, startTime, endTime, isOpen);
 
   int get activeShiftsCount => shifts.where((s) => s.isOpen).length;
+
+  int get totalSlots {
+    int total = 0;
+    for (final s in shifts.where((s) => s.isOpen)) {
+      final slotsList = s.slots.isNotEmpty
+          ? s.slots
+          : (s.startTime != null && s.endTime != null
+              ? DayShiftEntity.generateSlots(
+                  s.startTime!, s.endTime!, s.slotInterval, s.capacity)
+              : <DayShiftSlotEntity>[]);
+      total += slotsList.length;
+    }
+    return total;
+  }
+
+  int get totalCapacity {
+    int capacity = 0;
+    for (final s in shifts.where((s) => s.isOpen)) {
+      final slotsList = s.slots.isNotEmpty
+          ? s.slots
+          : (s.startTime != null && s.endTime != null
+              ? DayShiftEntity.generateSlots(
+                  s.startTime!, s.endTime!, s.slotInterval, s.capacity)
+              : <DayShiftSlotEntity>[]);
+      capacity +=
+          slotsList.fold<int>(0, (sum, slot) => sum + slot.allottedSlots);
+    }
+    return capacity;
+  }
 
   DayAvailabilityEntity copyWith({
     String? day,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../api/api_endpoints.dart';
 import '../constants/app_colors.dart';
 
 class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -23,6 +24,10 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedImageUrl = (userImageUrl != null && userImageUrl!.trim().isNotEmpty)
+        ? ApiEndpoints.getImageUrl(userImageUrl!.trim())
+        : null;
+    final hasValidImage = resolvedImageUrl != null && resolvedImageUrl.isNotEmpty;
     return AppBar(
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
@@ -45,7 +50,7 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               subtitle!,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.85),
+                color: Colors.white.withValues(alpha: 0.85),
               ),
             ),
         ],
@@ -104,13 +109,13 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             },
             child: CircleAvatar(
               radius: 18,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               backgroundImage:
-                  userImageUrl != null ? NetworkImage(userImageUrl!) : null,
+                  hasValidImage ? NetworkImage(resolvedImageUrl) : null,
               onBackgroundImageError: (exception, stackTrace) {
                 debugPrint('Error loading app bar image: $exception');
               },
-              child: userImageUrl == null
+              child: !hasValidImage
                   ? Text(
                       userName?.isNotEmpty == true
                           ? userName![0].toUpperCase()

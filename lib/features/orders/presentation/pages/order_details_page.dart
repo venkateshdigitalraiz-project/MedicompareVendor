@@ -78,6 +78,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
         // Clean up the file name to avoid OS errors with invalid characters
         String safeFileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+        if (!safeFileName.contains('.')) {
+          final isPdf = _isPdfDocument(url);
+          safeFileName = '$safeFileName.${isPdf ? "pdf" : "jpg"}';
+        }
         if (safeFileName.isEmpty) safeFileName = 'downloaded_file.pdf';
 
         final filePath = '${directory.path}/$safeFileName';
@@ -292,7 +296,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   ],
                   _buildOrderItemsSection(orderDetails),
                   const SizedBox(height: 16),
-                  if (orderDetails.prescriptionImages.isNotEmpty) ...[
+                  if (orderDetails.prescriptionImages.isNotEmpty ||
+                      (orderDetails.adminprescription != null &&
+                          orderDetails.adminprescription!.trim().isNotEmpty &&
+                          orderDetails.adminprescription != 'null')) ...[
                     _buildPrescriptionDocumentsSection(orderDetails),
                     const SizedBox(height: 16),
                   ],
@@ -343,7 +350,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           const SizedBox(height: 16),
                           _buildCustomerInformationSection(orderDetails),
                           const SizedBox(height: 16),
-                          if (orderDetails.prescriptionImages.isNotEmpty) ...[
+                          if (orderDetails.prescriptionImages.isNotEmpty ||
+                              (orderDetails.adminprescription != null &&
+                                  orderDetails.adminprescription!
+                                      .trim()
+                                      .isNotEmpty &&
+                                  orderDetails.adminprescription != 'null')) ...[
                             _buildPrescriptionDocumentsSection(orderDetails),
                             const SizedBox(height: 16),
                           ],
@@ -958,122 +970,379 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  Widget _buildPrescriptionDocumentsSection(
-      OrderDetailsResponseEntity details) {
-    final urls = details.prescriptionImages;
-    if (urls.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  bool _isPdfDocument(String url) {
+    final cleanUrl = url.toLowerCase().split('?').first.trim();
+    return cleanUrl.endsWith('.pdf');
+  }
 
-    // We display the file name of the first item
-    final firstUrl = ApiEndpoints.getImageUrl(urls.first);
-    final fileName = firstUrl.split('/').last.split('?').first;
+  String _extractFileName(String url, int fallbackIndex) {
+    try {
+      final cleanUrl = url.split('?').first.trim();
+      final name = cleanUrl.split('/').last.trim();
+      if (name.isNotEmpty) return name;
+    } catch (_) {}
+    return "Prescription Document $fallbackIndex";
+  }
 
-    return _buildCard(
-      title: "Prescription Documents",
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(
-                    Icons.picture_as_pdf,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
+  void _viewPrescriptionImage(
+      BuildContext context, String imageUrl, String fileName) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black45,
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                color: const Color(0xFF1E293B),
+                child: Row(
+                  children: [
+                    const Icon(Icons.image_outlined,
+                        color: Colors.white70, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
                         fileName,
                         style: GoogleFonts.inter(
-                          fontSize: 13,
+                          color: Colors.white,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "PDF Document",
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: Colors.grey[600],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.download_outlined,
+                          color: Colors.white70, size: 20),
+                      tooltip: "Download",
+                      onPressed: () {
+                        _downloadPdf(imageUrl, fileName);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 20),
+                      onPressed: () => Navigator.pop(dialogCtx),
+                    ),
+                  ],
+                ),
+              ),
+              // Interactive Image View
+              Flexible(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.75,
+                    minHeight: 250,
+                  ),
+                  color: Colors.black,
+                  child: Center(
+                    child: InteractiveViewer(
+                      panEnabled: true,
+                      minScale: 0.5,
+                      maxScale: 4.0,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40.0),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.broken_image_outlined,
+                                  color: Colors.white54, size: 48),
+                              const SizedBox(height: 12),
+                              Text(
+                                "Failed to load prescription image",
+                                style: GoogleFonts.inter(
+                                    color: Colors.white70, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrescriptionDocumentsSection(
+      OrderDetailsResponseEntity details) {
+    final List<String> urls = [
+      ...details.prescriptionImages,
+      if (details.adminprescription != null &&
+          details.adminprescription!.trim().isNotEmpty &&
+          details.adminprescription != 'null' &&
+          !details.prescriptionImages
+              .contains(details.adminprescription!.trim()))
+        details.adminprescription!.trim(),
+    ];
+    if (urls.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildCard(
+      title: "Prescription Documents",
+      icon: Icons.description_outlined,
+      trailing: urls.length > 1
+          ? TextButton.icon(
+              onPressed: () async {
+                for (int i = 0; i < urls.length; i++) {
+                  final itemUrl = ApiEndpoints.getImageUrl(urls[i]);
+                  final fileName = _extractFileName(itemUrl, i + 1);
+                  await _downloadPdf(itemUrl, fileName);
+                }
+              },
+              icon: const Icon(Icons.download_for_offline_outlined, size: 16),
+              label: Text(
+                "Download All (${urls.length})",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF059669),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              ),
+            )
+          : null,
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: urls.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 10),
+        itemBuilder: (context, index) {
+          final itemUrl = ApiEndpoints.getImageUrl(urls[index]);
+          final fileName = _extractFileName(itemUrl, index + 1);
+          final isPdf = _isPdfDocument(itemUrl);
+
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    if (isPdf) {
+                      context.push('/pdf-viewer', extra: {
+                        'url': itemUrl,
+                        'title': fileName,
+                      });
+                    } else {
+                      _viewPrescriptionImage(context, itemUrl, fileName);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      // Document Icon / Thumbnail
+                      if (isPdf)
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEE2E2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFFECACA)),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.picture_as_pdf_rounded,
+                              color: Color(0xFFDC2626),
+                              size: 24,
+                            ),
+                          ),
+                        )
+                      else
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFDBEAFE)),
+                            ),
+                            child: Image.network(
+                              itemUrl,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Center(
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  color: Color(0xFF2563EB),
+                                  size: 22,
+                                ),
+                              ),
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              fileName,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isPdf
+                                        ? const Color(0xFFFEE2E2)
+                                        : const Color(0xFFEFF6FF),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    isPdf ? "PDF Document" : "Image Document",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: isPdf
+                                          ? const Color(0xFFDC2626)
+                                          : const Color(0xFF2563EB),
+                                    ),
+                                  ),
+                                ),
+                                if (urls.length > 1) ...[
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "${index + 1} of ${urls.length}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 10),
+                const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        if (isPdf) {
+                          context.push('/pdf-viewer', extra: {
+                            'url': itemUrl,
+                            'title': fileName,
+                          });
+                        } else {
+                          _viewPrescriptionImage(context, itemUrl, fileName);
+                        }
+                      },
+                      icon: Icon(
+                        isPdf
+                            ? Icons.visibility_outlined
+                            : Icons.remove_red_eye_outlined,
+                        size: 16,
+                      ),
+                      label: Text(
+                        isPdf ? "View PDF" : "View Image",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton.icon(
+                      onPressed: () => _downloadPdf(itemUrl, fileName),
+                      icon: const Icon(Icons.download_outlined, size: 16),
+                      label: Text(
+                        "Download",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF059669),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    final rawUrl = ApiEndpoints.getImageUrl(urls.first);
-                    final isPdf = rawUrl.toLowerCase().endsWith('.pdf');
-
-                    if (isPdf) {
-                      context.push('/pdf-viewer', extra: {
-                        'url': rawUrl,
-                        'title': 'Prescription Document',
-                      });
-                    } else {
-                      context.push('/webview', extra: {
-                        'url': rawUrl,
-                        'title': 'Prescription Document',
-                      });
-                    }
-                  },
-                  icon: const Icon(Icons.visibility_outlined, size: 16),
-                  label: Text("View",
-                      style: GoogleFonts.inter(
-                          fontSize: 12, fontWeight: FontWeight.bold)),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                TextButton.icon(
-                  onPressed: () async {
-                    for (final u in urls) {
-                      final url = ApiEndpoints.getImageUrl(u);
-                      final fName = url.split('/').last.split('?').first;
-                      await _downloadPdf(url, fName);
-                    }
-                  },
-                  icon: const Icon(Icons.download_outlined, size: 16),
-                  label: Text("Download",
-                      style: GoogleFonts.inter(
-                          fontSize: 12, fontWeight: FontWeight.bold)),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

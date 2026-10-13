@@ -1,4 +1,5 @@
 import 'package:MediCompare/features/slots/domain/entities/slot_timing_entity.dart';
+import 'package:MediCompare/features/slots/presentation/bloc/slot_calendar_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,9 +7,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/token_storage.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../slots_injection.dart';
+import '../bloc/slot_calendar_bloc.dart';
 import '../bloc/slots_bloc.dart';
 import '../bloc/slots_event.dart';
 import '../bloc/slots_state.dart';
+import '../widgets/custom_slot_calendar.dart';
 import 'configure_availability_page.dart';
 
 class SlotTimingsPage extends StatelessWidget {
@@ -16,131 +20,197 @@ class SlotTimingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SlotsBloc, SlotsState>(
-      listener: (context, state) {
-        if (state is SlotsError && state.message.contains('UNAUTHORIZED')) {
-          TokenStorage.clearAll().then((_) {
-            if (context.mounted) {
-              context.go('/login');
-            }
-          });
-        }
-      },
-      child: BlocBuilder<SlotsBloc, SlotsState>(
-        builder: (context, state) {
-          if (state is SlotsLoading) {
-            return const Scaffold(
-              backgroundColor: Color(0xFFF3F6FF),
-              body: Center(child: CircularProgressIndicator()),
-            );
-          } else if (state is SlotsLoaded) {
-            return Scaffold(
-              backgroundColor: const Color(0xFFF3F6FF),
-              appBar: const CustomHomeAppBar(
-                title: "Slot Timings",
-                subtitle: "Manage your weekly availability",
-              ),
-              body: _buildContent(context, state.timings),
-            );
-          } else if (state is SlotsError) {
-            return Scaffold(
-              backgroundColor: const Color(0xFFF3F6FF),
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(state.message,
-                        style: const TextStyle(color: Colors.red)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          context.read<SlotsBloc>().add(GetSlotTimingsEvent()),
-                      child: const Text("Retry"),
-                    ),
-                  ],
-                ),
-              ),
-            );
+    final now = DateTime.now();
+    return BlocProvider<SlotCalendarBloc>(
+      create: (_) => SlotsInjection.provideSlotCalendarBloc()
+        ..add(FetchVacationCalendarEvent(
+          month: now.month,
+          year: now.year,
+        )),
+      child: BlocListener<SlotsBloc, SlotsState>(
+        listener: (context, state) {
+          if (state is SlotsError && state.message.contains('UNAUTHORIZED')) {
+            TokenStorage.clearAll().then((_) {
+              if (context.mounted) {
+                context.go('/login');
+              }
+            });
           }
-          return const SizedBox.shrink();
         },
+        child: BlocBuilder<SlotsBloc, SlotsState>(
+          builder: (context, state) {
+            if (state is SlotsLoading) {
+              return const Scaffold(
+                backgroundColor: Color(0xFFF3F6FF),
+                body: Center(child: CircularProgressIndicator()),
+              );
+            } else if (state is SlotsLoaded) {
+              return Scaffold(
+                backgroundColor: const Color(0xFFF3F6FF),
+                appBar: const CustomHomeAppBar(
+                  title: "Slot Timings",
+                  subtitle: "Manage your weekly availability",
+                ),
+                body: _buildContent(context, state.timings),
+              );
+            } else if (state is SlotsError) {
+              return Scaffold(
+                backgroundColor: const Color(0xFFF3F6FF),
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(state.message,
+                          style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => context
+                            .read<SlotsBloc>()
+                            .add(GetSlotTimingsEvent()),
+                        child: const Text("Retry"),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
 
   Widget _buildContent(BuildContext context, List<SlotTimingEntity> timings) {
-    final availability = timings.isNotEmpty ? timings.first.availability : [];
+    if (timings.isEmpty) {
+      return const Center(child: Text("No slot timings found."));
+    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Availability Grid",
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () async {
-                  if (timings.isNotEmpty) {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ConfigureAvailabilityPage(timing: timings.first),
-                      ),
-                    );
-                    if (context.mounted) {
-                      context.read<SlotsBloc>().add(GetSlotTimingsEvent());
-                    }
-                  }
-                },
-                icon: const Icon(Icons.settings_outlined, size: 16),
-                label: const Text("Configure"),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF241442),
-                  textStyle: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+    final parentTiming = timings.first;
+    final availability = parentTiming.availability;
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<SlotsBloc>().add(GetSlotTimingsEvent());
+        final calendarState = context.read<SlotCalendarBloc>().state;
+        context.read<SlotCalendarBloc>().add(FetchVacationCalendarEvent(
+              month: calendarState.focusedMonth.month,
+              year: calendarState.focusedMonth.year,
+            ));
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+
+            // 1. SECTION HEADER: AVAILABILITY GRID
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Availability Grid",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
                   ),
-                ),
+                  TextButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ConfigureAvailabilityPage(timing: parentTiming),
+                        ),
+                      );
+                      if (context.mounted) {
+                        context.read<SlotsBloc>().add(GetSlotTimingsEvent());
+                      }
+                    },
+                    icon: const Icon(Icons.settings_outlined, size: 16),
+                    label: const Text("Configure"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF241442),
+                      textStyle: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
 
-        /// RESPONSIVE GRID OF CARDS
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return GridView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                physics: const AlwaysScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 440,
-                  mainAxisExtent: 244,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 14,
-                ),
-                itemCount: availability.length,
-                itemBuilder: (context, index) {
-                  return _buildTimingCard(
-                      context, availability[index], timings.first);
-                },
-              );
-            },
-          ),
+            // 2. RESPONSIVE GRID OF CARDS
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 440,
+                    mainAxisExtent: 244,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                  ),
+                  itemCount: availability.length,
+                  itemBuilder: (context, index) {
+                    return _buildTimingCard(
+                        context, availability[index], parentTiming);
+                  },
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // 3. SECTION HEADER: AVAILABILITY CALENDAR (DISPLAYED AFTER AVAILABILITY GRID)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Availability Calendar",
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "Select any date to view scheduled shifts and slot capacity",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // 4. CUSTOMIZED CALENDAR COMPONENT
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: CustomSlotCalendar(parentTiming: parentTiming),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -152,19 +222,8 @@ class SlotTimingsPage extends StatelessWidget {
     final openCount = openShifts.length;
 
     // Calculate total slots and total capacity
-    int totalSlots = 0;
-    int totalCapacity = 0;
-    for (final s in openShifts) {
-      final slotsList = s.slots.isNotEmpty
-          ? s.slots
-          : (s.startTime != null && s.endTime != null
-              ? DayShiftEntity.generateSlots(
-                  s.startTime!, s.endTime!, s.slotInterval, s.capacity)
-              : <DayShiftSlotEntity>[]);
-      totalSlots += slotsList.length;
-      totalCapacity +=
-          slotsList.fold<int>(0, (sum, slot) => sum + slot.allottedSlots);
-    }
+    final totalSlots = item.totalSlots;
+    final totalCapacity = item.totalCapacity;
 
     return InkWell(
       onTap: () async {
@@ -220,9 +279,7 @@ class SlotTimingsPage extends StatelessWidget {
 
             // Status: • OPEN (X SHIFTS) or • CLOSED
             Text(
-              isOpen
-                  ? "• OPEN ($openCount SHIFTS)"
-                  : "• CLOSED",
+              isOpen ? "• OPEN ($openCount SHIFTS)" : "• CLOSED",
               style: GoogleFonts.inter(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
